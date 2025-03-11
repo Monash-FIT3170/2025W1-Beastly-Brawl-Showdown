@@ -5,3 +5,5 @@ Jamie Kaltzis jkal0010@student.monash.edu
 
 Harshil Jigneshbhai Patel
 hpat0037@student.monash.edu
+
+Tan Wei Hom - wtan0125@student.monash.edu
