@@ -2,3 +2,6 @@
 
 Team Members
 Jamie Kaltzis jkal0010@student.monash.edu
+
+Harshil Jigneshbhai Patel
+hpat0037@student.monash.edu
