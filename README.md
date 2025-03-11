@@ -24,3 +24,5 @@ Dean G Park dpar0031@student.monash.edu
 Maddy Hem - mhem0008@student.monash.edu
 
 Sunny Cho - scho0103@student.monash.edu
+
+Jonathan Foo - jfoo0023@student.monash.edu
