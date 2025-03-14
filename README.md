@@ -22,3 +22,5 @@ Sunny Cho - scho0103@student.monash.edu
 Rohan Kannan - rkan0017@student.monash.edu
 
 Jonathan Foo - jfoo0023@student.monash.edu
+
+Ryan Tan - rtan0062@student.monash.edu
