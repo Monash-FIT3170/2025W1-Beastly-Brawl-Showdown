@@ -3,6 +3,9 @@
 
 name: Node.js CI for Monolith
 
+env:
+  PATH_MONOLITH: "./code/beastly-brawl-showdown"
+
 on:
   push:
     branches:
@@ -17,7 +20,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./code/beastly-brawl-showdown
+        working-directory: PATH_MONOLITH # Change default "run" actions to run from this directory (NOT "use")
     
     strategy:
       matrix:
@@ -28,7 +31,6 @@ jobs:
     - name: "Checkout repository"
       uses: actions/checkout@v4
 
-    - run: ls    
     - run: npm install
     
     - name: Use Node.js ${{ matrix.node-version }}
@@ -36,7 +38,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: './code/beastly-brawl-showdown/package-lock.json'
+        cache-dependency-path:  '$PATH_MONOLITH /package-lock.json' # Target the correct lock file
         
     - name: "Install meteor"
       run: |
