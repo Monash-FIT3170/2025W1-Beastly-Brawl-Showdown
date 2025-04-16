@@ -1,5 +1,5 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code, and run tests across different versions of Node.js.
-# For more information, see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
 name: Node.js CI
 
@@ -15,6 +15,9 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
     
     strategy:
       matrix:
@@ -31,23 +34,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         
-    - name: "Install MeteorJS"
+    - name: "Install meteor"
       run: |
           curl https://install.meteor.com/ | sh
           export PATH=$PATH:/home/runner/.meteor
-
-    - name: "Install dependencies"
-      working-directory: ./code/beastly-brawl-showdown
-      run: npm install
-
-    - name: "Clean dependencies"
-      working-directory: ./code/beastly-brawl-showdown
-      run: npm ci
-
-    - name: "Build source code"
-      working-directory: ./code/beastly-brawl-showdown
-      run: npm run build --if-present
-
-    - name: "Run tests"
-      working-directory: ./code/beastly-brawl-showdown
-      run: npm test
+          
+    - run: npm install
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
