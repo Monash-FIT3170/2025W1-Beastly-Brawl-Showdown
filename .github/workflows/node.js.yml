@@ -17,7 +17,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: code/beastly-brawl-showdown
+        working-directory: ./code/beastly-brawl-showdown
     
     strategy:
       matrix:
@@ -27,6 +27,8 @@ jobs:
     steps:
     - name: "Checkout repository"
       uses: actions/checkout@v4
+    
+    - run: npm install
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -39,7 +41,6 @@ jobs:
           curl https://install.meteor.com/ | sh
           export PATH=$PATH:/home/runner/.meteor
           
-    - run: npm install
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
