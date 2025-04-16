@@ -20,7 +20,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: PATH_MONOLITH # Change default "run" actions to run from this directory (NOT "use")
+        working-directory: "$PATH_MONOLITH" # Change default "run" actions to run from this directory (NOT "use")
     
     strategy:
       matrix:
