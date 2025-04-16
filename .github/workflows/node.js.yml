@@ -22,12 +22,11 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - name: "Navigate to monolith directory"
-      run: cd ./code/beastly-brawl-showdown
-
-      
-    - name: "checkout repository"
+    - name: "Checkout repository"
       uses: actions/checkout@v4
+
+    - name: "Navigate to project directory"
+      run: cd ./code/beastly-brawl-showdown
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -39,9 +38,6 @@ jobs:
       run: |
           curl https://install.meteor.com/ | sh
           export PATH=$PATH:/home/runner/.meteor
-
-    - name: "Navigate to project directory"
-      run: cd ./code/beastly-brawl-showdown
 
     - name: "Install dependencies"
       run: npm install
