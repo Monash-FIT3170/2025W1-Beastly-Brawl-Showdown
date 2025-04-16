@@ -31,12 +31,23 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         
-    - name: "install meteor"
+    - name: "Install MeteorJS"
       run: |
           curl https://install.meteor.com/ | sh
           export PATH=$PATH:/home/runner/.meteor
-          
-    - run: npm install
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    
+
+    - name: "Navigate to project directory"
+      run: cd ./code/beastly-brawl-showdown
+
+    - name: "Install dependencies"
+      run: npm install
+
+    - name: "Clean dependencies"
+      run: npm ci
+
+    - name: "Build source code"
+      run: npm run build --if-present
+
+    - name: "Run tests"
+      run: npm test
