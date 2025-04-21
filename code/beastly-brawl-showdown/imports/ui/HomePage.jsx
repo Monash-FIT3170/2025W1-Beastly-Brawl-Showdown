@@ -19,3 +19,11 @@ export default function HomePage() {
     </div>
   );
 }
+<>
+<h1>Home</h1>
+
+<div>
+  <button onClick={() => navigate("/host")}>Host Room</button>
+  <button onClick={() => navigate("/join")}>Join Room</button>
+</div>
+</>
