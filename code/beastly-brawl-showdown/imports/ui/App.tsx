@@ -1,11 +1,16 @@
-import React from 'react';
-import { Hello } from './Hello';
-import { Info } from './Info';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 
-export const App = () => (
-  <div>
-    <h1>Welcome to Meteor!</h1>
-    <Hello />
-    <Info />
-  </div>
-);
+import HomePage from "./HomePage";
+import HostPage from "./HostPage";
+import JoinPage from "./JoinPage";
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/host" element={<HostPage />} />
+      <Route path="/join" element={<JoinPage />} />
+    </Routes>
+  );
+}
