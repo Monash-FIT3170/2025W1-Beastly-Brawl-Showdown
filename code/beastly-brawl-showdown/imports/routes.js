@@ -1,23 +1,23 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { NotFound } from "./ui/Error/NotFound";
-import { Home } from "./ui/Home";
-import { Player } from "./ui/Player";
+import { HomePage } from "./ui/HomePage";
+import { Player } from "./ui/PlayerPage";
 import { Room } from "./ui/Room/Room";
-import { HostRoom } from "./ui/Room/HostRoom";
-import { JoinRoom } from "./ui/Room/JoinRoom";
+import { HostRoomPage } from "./ui/Room/HostRoomPage";
+import { JoinRoomPage } from "./ui/Room/JoinRoomPage";
 
 export const renderRoutes = () => (
   <>
     <BrowserRouter>
       <Routes>
-        <Route path="/host" element={<HostRoom />} />
-        <Route path="/join" element={<JoinRoom />} />
+        <Route path="/host" element={<HostRoomPage />} />
+        <Route path="/join" element={<JoinRoomPage />} />
         {/*  */}
         <Route path="/h/:id" element={<Room />} />
         <Route path="/:id" element={<Player />} />
         {/* DEFAULTS */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

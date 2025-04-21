@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Meteor } from "meteor/meteor";
 
 export const HostRoomPage = () => {
