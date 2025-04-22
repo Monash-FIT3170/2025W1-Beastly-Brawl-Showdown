@@ -1,10 +1,8 @@
 import React from 'react';
-import { CodeLink } from './CodeLink.jsx';
-import { QRBox } from './QRBox.jsx';
+import { WaitingRoomInfoBox } from './WaitingRoomInfoBox\'';
 
 export const App = () => (
-  <div>
-    <CodeLink />
-    <QRBox />
+  <div className='screen'>
+    <WaitingRoomInfoBox />
   </div>
 );
