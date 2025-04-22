@@ -1,5 +1,5 @@
 import React from "react";
-import "./JoinPage.css";
+import "/imports/ui/global.css";
 
 export default function JoinPage() {
   return (

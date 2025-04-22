@@ -1,5 +1,5 @@
 import React from "react";
-import "./HostPage.css";
+import "/imports/ui/global.css";
 
 export default function HostPage() {
   return (
