@@ -5,9 +5,23 @@ body {
 
 .code-link {
   width: 300px;
-  padding: 20px;
+  height: 75px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: #f0f0f0;
   border: 2px solid #333;
   border-radius: 15px; /* This creates the curved corners */
   font-family: Arial, sans-serif;
+}
+
+.qr-box {
+  width: 75px;
+  height: 75px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+  border: 2px solid #333;
+  border-radius: 15px; /* This creates the curved corners */
 }
