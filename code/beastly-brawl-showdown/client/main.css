@@ -3,16 +3,25 @@ body {
   font-family: sans-serif;
 }
 
-.code-link {
-  width: 300px;
-  height: 75px;
+.screen {
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.code-link {
+  width: 990px;
+  height: 75px;
+  padding-left: 10px;
+  padding-right: 10px;
+  display: flex;
+  justify-content: left;
   align-items: center;
   background-color: #f0f0f0;
   border: 2px solid #333;
   border-radius: 15px; /* This creates the curved corners */
   font-family: Arial, sans-serif;
+  overflow: auto;
 }
 
 .qr-box {
@@ -24,4 +33,9 @@ body {
   background-color: #f0f0f0;
   border: 2px solid #333;
   border-radius: 15px; /* This creates the curved corners */
+}
+
+.waiting-room-info-box {
+  display:flex;
+  gap: 20px;
 }
