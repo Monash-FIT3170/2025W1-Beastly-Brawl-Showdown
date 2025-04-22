@@ -2,3 +2,12 @@ body {
   padding: 10px;
   font-family: sans-serif;
 }
+
+.code-link {
+  width: 300px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border: 2px solid #333;
+  border-radius: 15px; /* This creates the curved corners */
+  font-family: Arial, sans-serif;
+}
