@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Meteor } from "meteor/meteor";
-
+import { useNavigate } from "react-router-dom";
 export const JoinRoomPage = () => {
   return (
     <>
@@ -13,7 +13,7 @@ export const JoinRoomPage = () => {
 
 export const JoinForm = () => {
   const [text, setText] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -22,6 +22,7 @@ export const JoinForm = () => {
     Meteor.call("joinRoom", { roomId: text }, (error, result) => {
       if (!error) {
         console.log("Successfully joined room:", result);
+        navigate(`/${result}`);
       }
     });
   };
