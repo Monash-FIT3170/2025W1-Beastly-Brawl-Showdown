@@ -1,5 +1,5 @@
 class StoneHideGuardian extends Monsters {
-    constructor(health, AC, attackBonus, special, type) {
+    constructor() {
         super(30, 16, 1, "None","Defender");
     }
 

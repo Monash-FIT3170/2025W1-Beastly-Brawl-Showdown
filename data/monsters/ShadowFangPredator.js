@@ -1,5 +1,5 @@
 class ShadowFangPredator extends Monsters {
-    constructor(health, AC, attackBonus, special, type) {
+    constructor() {
         super(20, 12, 4, "None","Attacker");
     }
 
