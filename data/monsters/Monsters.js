@@ -46,5 +46,3 @@ class Monsters {
 
     }
 }
-
-module.exports = Monsters;

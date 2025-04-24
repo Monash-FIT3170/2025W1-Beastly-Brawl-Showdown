@@ -1,5 +1,3 @@
-const Monsters = require('./Monsters');
-
 class StoneHideGuardian extends Monsters {
     constructor() {
         super(30, 16, 1, "None","Defender");
@@ -14,5 +12,3 @@ class StoneHideGuardian extends Monsters {
 
     }
 }
-
-module.exports = StoneHideGuardian;
