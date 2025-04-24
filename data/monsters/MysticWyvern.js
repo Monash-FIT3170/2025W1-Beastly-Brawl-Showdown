@@ -1,3 +1,5 @@
+const Monsters = require('./Monsters');
+
 class MysticWyvern extends Monsters {
     constructor() {
         super(25, 14, 2, "None","Balanced");
@@ -12,3 +14,5 @@ class MysticWyvern extends Monsters {
 
     }
 }
+
+module.exports = MysticWyvern;
