@@ -1,10 +1,10 @@
 import React from 'react';
 import { WaitingRoomInfoBox } from './WaitingRoomInfoBox';
-import { ParticipantBox } from './ParticipantsBox';
+import { ParticipantDisplayBox } from './ParticipantDisplayBox';
 
 export const WaitingRoom = () => (
     <div className='waiting-room-box'>
         <WaitingRoomInfoBox />
-        <ParticipantBox />
+        <ParticipantDisplayBox />
     </div>
 )
