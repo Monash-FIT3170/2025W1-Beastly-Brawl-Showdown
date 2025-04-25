@@ -24,7 +24,7 @@ export const JoinForm = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <button type="submit">Submit Room Code</button>
+      <button type="submit">Continue</button>
     </form>
   );
 };
