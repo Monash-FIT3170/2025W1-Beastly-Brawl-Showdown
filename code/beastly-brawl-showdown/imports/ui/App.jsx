@@ -1,8 +1,8 @@
 import React from 'react';
-import { WaitingRoomInfoBox } from './WaitingRoomInfoBox\'';
+import { WaitingRoom } from './WaitingRoom';
 
 export const App = () => (
   <div className='screen'>
-    <WaitingRoomInfoBox />
+    <WaitingRoom />
   </div>
-);
+)
