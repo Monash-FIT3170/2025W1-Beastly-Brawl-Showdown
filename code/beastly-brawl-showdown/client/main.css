@@ -3,12 +3,14 @@ body {
   font-family: sans-serif;
 }
 
+/*For the main screen*/
 .screen {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/*The box to display the link to join the room*/
 .code-link {
   width: 990px;
   height: 75px;
@@ -24,6 +26,7 @@ body {
   overflow: auto;
 }
 
+/*The box to show the qr code*/
 .qr-box {
   width: 75px;
   height: 75px;
@@ -35,23 +38,39 @@ body {
   border-radius: 15px; /* This creates the curved corners */
 }
 
+/*This shows and arranges the link and qr code components*/
 .waiting-room-info-box {
   display:flex;
   gap: 20px;
 }
 
+/*This shows everything related to the waiting room*/
 .waiting-room-box {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+/*Component that displays the participants names dynamically*/
 .participants-display-box {
-  width: 1085px;
-  height: 500px;
+  max-width: 1085px;
+  max-height: 500px;
   padding: 10px;
-  display: flex;
+  display: grid;
   gap: 20px;
+  background-color: #f0f0f0;
+  border: 2px solid #333;
+  border-radius: 15px; /* This creates the curved corners */
+}
+
+/*For the participants name*/
+.participants-box {
+  width: 90px;
+  height: 40px;
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 40px;
   background-color: #f0f0f0;
   border: 2px solid #333;
   border-radius: 15px; /* This creates the curved corners */
