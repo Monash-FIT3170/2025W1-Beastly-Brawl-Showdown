@@ -1,3 +1,5 @@
+const Monsters = require('./Monsters');
+
 class ShadowFangPredator extends Monsters {
     constructor() {
         super(20, 12, 4, "None","Attacker");
@@ -12,3 +14,5 @@ class ShadowFangPredator extends Monsters {
 
     }
 }
+
+module.exports = ShadowFangPredator;
