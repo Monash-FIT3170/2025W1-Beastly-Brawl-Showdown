@@ -1,4 +1,4 @@
-import React, {useref} from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import "/imports/ui/global.css";
 import { JoinForm } from "./JoinForm";
