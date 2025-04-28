@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Meteor } from 'meteor/meteor';
+import "/imports/ui/global.css";
 
 export const JoinForm = ({onSuccess}) => {
   const [text, setText] = useState("");
@@ -31,7 +32,7 @@ export const JoinForm = ({onSuccess}) => {
         onChange={(e) => setText(e.target.value)}
       />
       <div className="buttons-container">
-        <button type="submit">Continue</button>
+        <button className = "btn" type="submit">Continue</button>
       </div>
       
     </form>
