@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Meteor } from 'meteor/meteor';
 
-export const JoinForm = () => {
+export const JoinForm = ({onSuccess}) => {
   const [text, setText] = useState("");
 
   const handleSubmit = async (e) => {
@@ -9,9 +9,15 @@ export const JoinForm = () => {
 
     if (!text) return;
 
+    onSuccess();
+
     Meteor.call("joinRoom", { roomId: text }, (error, result) => {
       if (!error) {
         console.log("Successfully joined room:", result);
+        onSuccess();
+      }
+      else {
+        alert("Please enter a valid room code! DEBUG: REMOVE onSuccess() @ Line 12 JoinForm.jsx")
       }
     });
   };
@@ -24,7 +30,10 @@ export const JoinForm = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <button type="submit">Continue</button>
+      <div className="buttons-container">
+        <button type="submit">Continue</button>
+      </div>
+      
     </form>
   );
 };
