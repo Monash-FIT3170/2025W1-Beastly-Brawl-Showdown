@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Meteor } from "meteor/meteor";
 import { useNavigate } from "react-router-dom";
+
 export const JoinRoomPage = () => {
   return (
     <>
@@ -11,31 +12,52 @@ export const JoinRoomPage = () => {
   );
 };
 
+export const InvalidCodeWarning = ({ enabled }) => {
+  if (enabled) {
+    return <b>Invalid room code.</b>;
+  } else {
+    return <b></b>;
+  }
+};
+
 export const JoinForm = () => {
   const [text, setText] = useState("");
+  const [isInvalidCodeSubmitted, setInvalidCodeSubmitted] = useState(false);
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!text) return;
 
-    Meteor.call("joinRoom", { roomId: text }, (error, result) => {
-      if (!error) {
-        console.log("Successfully joined room:", result);
-        navigate(`/${result}`);
+    Meteor.call("joinRoom", { roomCode: text }, (error, result) => {
+      console.log(result);
+      if (error) {
+        console.log(error);
+        // change state - show invalid code text
+        return;
       }
+
+      if (!result.isValidCode) {
+        setInvalidCodeSubmitted(true);
+        return;
+      }
+      console.log("Successfully joined room:", result.submittedRoomCode);
+      navigate(`/${result.submittedRoomCode}`);
     });
   };
 
   return (
-    <form className="task-form" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="e.g. 123456"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-      <button type="submit">Submit Room Code</button>
-    </form>
+    <>
+      <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
+      <form className="task-form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="e.g. 123456"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <button type="submit">Submit Room Code</button>
+      </form>
+    </>
   );
 };
