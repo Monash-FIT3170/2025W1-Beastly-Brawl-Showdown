@@ -4,7 +4,7 @@ const DiceRoller = require('../utils/DiceRoller');
 
 class ShadowFangPredator extends Monsters {
     constructor() {
-        super(20, 12, 4, "None","Attacker");
+        super(20, 12, 4, "Critical hit on natural 18-20","Attacker");
         this.critRoll = 18;
     }
 

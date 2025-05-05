@@ -2,11 +2,11 @@ const DiceRoller = require('../utils/DiceRoller');
 
 class Monsters {
     constructor(health, AC, attackBonus, special, type) {
-        this._health = health; 
+        this._health = health;
         this._AC = AC;
         this._attackBonus = attackBonus;
         this.special = special;
-        this._type = type; 
+        this._type = type;
         this._defenseCharges = 3;
         this._defending = false;
     }
@@ -15,6 +15,7 @@ class Monsters {
     get health() {
         return this._health;
     }
+
     set health(value) {
         this._health = value;
     }
@@ -23,6 +24,7 @@ class Monsters {
     get AC() {
         return this._AC;
     }
+
     set AC(value) {
         this._AC = value;
     }
@@ -31,6 +33,7 @@ class Monsters {
     get attackBonus() {
         return this._attackBonus;
     }
+
     set attackBonus(value) {
         this._attackBonus = value;
     }
@@ -41,11 +44,12 @@ class Monsters {
     }
 
     // Method to activate special
-    activateSpecial() {}
+    activateSpecial() { }
 
     // Method for abilities
-    activateAbility() {}
+    activateAbility() { }
 
+    // Method for Activiting Defending
     activateDefense() {
         if (this._defenseCharges > 0) {
             this._defending = true;
@@ -56,18 +60,20 @@ class Monsters {
             console.log(`${this.type} has no defense charges remaining!`)
         }
     }
-    
+
+    // Method for Monster to Attack
     attack(defender) {
         const roll = DiceRoller.d20();
         const totalAttack = roll + this._attackBonus;
         console.log(`${this.type} rolls ${roll}... Attack = ${totalAttack}.`)
-        
+
         defender.defend(totalAttack)
     }
 
+    // Method for Monster to Defend
     defend(totalAttack) {
         if (this._defending = true) {
-            
+
             if (totalAttack >= this._AC) {
                 console.log(`${this.type}' defense fails! ${this.type} takes 5 damage.`)
                 this._health -= 5
@@ -77,7 +83,7 @@ class Monsters {
                 console.log(`${this.type}' the attack misses!`)
             }
 
-            this._AC -=2
+            this._AC -= 2
             this._defending = false;
             return;
         }
