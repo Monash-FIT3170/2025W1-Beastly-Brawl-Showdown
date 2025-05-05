@@ -47,7 +47,9 @@ class Monsters {
     activateSpecial() { }
 
     // Method for abilities
-    activateAbility() { }
+    activateAbility_1() { }
+
+    activateAbility_2() { }
 
     // Method for Activiting Defending
     activateDefense() {
@@ -100,3 +102,5 @@ class Monsters {
         }
     }
 }
+
+module.exports = Monsters;

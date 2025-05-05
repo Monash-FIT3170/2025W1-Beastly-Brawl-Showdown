@@ -10,7 +10,7 @@ class ShadowFangPredator extends Monsters {
 
     activateSpecial() {}
 
-    activateAbility() {}
+    activateAbility_1() {}
 
     attack(defender) {
         var roll = DiceRoller.d20();
