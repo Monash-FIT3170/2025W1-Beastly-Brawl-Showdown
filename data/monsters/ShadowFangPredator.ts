@@ -6,7 +6,6 @@ class ShadowFangPredator extends Monsters {
     constructor() {
         super(20, 12, 4, "Critical hit on natural 18-20","Attacker");
         this._critRoll = 18;
-        this._invulnerable = false;
     }
 
     activateSpecial() {}
@@ -29,29 +28,9 @@ class ShadowFangPredator extends Monsters {
         defender.defend(totalAttack)
     }
 
-    defend(totalAttack) {
-        if (this._invulnerable) {
-            console.log(`${this.type} evades the attack!`);
-        } else {
-            super.defend(totalAttack)
-        }
-    }
-
-    // Shadow Leap: Evades an attack.
-    ability(defender) {
-        this._invulnerable = true;
-        this._abilityCharge -= 1;
-    }
-
     revertDefense() {
-        if (defending) {
-            this._defending = false;
-            this._currentAC = this._baseAC;
-        }
-
-        if (invulnerable) {
-            this._invulnerable = false;
-        }
+        this._defending = false;
+        this._currentAC = this._baseAC;
     }
 }
 
