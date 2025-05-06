@@ -3,8 +3,8 @@ const DiceRoller = require('../utils/DiceRoller');
 
 
 class MysticWyvern extends Monsters {
-    constructor() {
-        super(25, 14, 2, "None","Balanced");
+    constructor(rerollCharge) {
+        super(25, 14, 2, "Reroll once per battle","Balanced");
         rerollCharge = true;
     }
     

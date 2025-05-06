@@ -2,19 +2,56 @@ const DiceRoller = require('../utils/DiceRoller');
 
 class Monsters {
     constructor(health, AC, attackBonus, special, type) {
-        this._baseHealth = health; 
-        this._currentHealth = health;
-        this._baseAC = AC;
-        this._currentAC = AC;
+        this._health = health;
+        this._AC = AC;
         this._attackBonus = attackBonus;
         this.special = special;
-        this._type = type; 
+        this._type = type;
         this._defenseCharges = 3;
         this._defending = false;
     }
 
-    ability(name, defender) {}
+    // Getter and Setter for health
+    get health() {
+        return this._health;
+    }
 
+    set health(value) {
+        this._health = value;
+    }
+
+    // Getter and Setter for AC
+    get AC() {
+        return this._AC;
+    }
+
+    set AC(value) {
+        this._AC = value;
+    }
+
+    // Getter and Setter for attackBonus
+    get attackBonus() {
+        return this._attackBonus;
+    }
+
+    set attackBonus(value) {
+        this._attackBonus = value;
+    }
+
+    // Getter for type
+    get type() {
+        return this._type;
+    }
+
+    // Method to activate special
+    activateSpecial() { }
+
+    // Method for abilities
+    activateAbility_1() { }
+
+    activateAbility_2() { }
+
+    // Method for Activiting Defending
     activateDefense() {
         this._defending = true;
         this._currentAC = this._baseAC + 2
@@ -28,22 +65,28 @@ class Monsters {
         }
     }
 
-    attack() {
+    // Method for Monster to Attack
+    attack(defender) {
         const roll = DiceRoller.d20();
         const totalAttack = roll + this._attackBonus;
         console.log(`${this.type} rolls ${roll}... Attack = ${totalAttack}.`);   
         return totalAttack;
     }
 
+    // Method for Monster to Defend
     defend(totalAttack) {
-        if (this._defending = true) {         
-            if (totalAttack >= this._currentAC) {
-                console.log(`${this.type}' defense fails! ${this.type} takes 5 damage.`);
-                this._currentHealth -= 5;
+        if (this._defending = true) {
+
+            if (totalAttack >= this._AC) {
+                console.log(`${this.type}' defense fails! ${this.type} takes 5 damage.`)
+                this._health -= 5
             }
             else {
                 console.log(`${this.type}' the attack misses!`);
             }
+
+            this._AC -= 2
+            this._defending = false;
             return;
         }
         else {
@@ -57,3 +100,5 @@ class Monsters {
         }
     }
 }
+
+module.exports = Monsters;
