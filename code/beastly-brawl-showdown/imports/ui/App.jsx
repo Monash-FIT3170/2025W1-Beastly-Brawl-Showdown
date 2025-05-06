@@ -1,8 +1,8 @@
-import React from 'react';
-import { WaitingRoom } from './WaitingRoom';
+// import React from 'react';
+// import { WaitingRoom } from './WaitingRoom';
 
-export const App = () => (
-  <div className='screen'>
-    <WaitingRoom />
-  </div>
-)
+// export const App = () => (
+//   <div className='screen'>
+//     <WaitingRoom />
+//   </div>
+// )
