@@ -15,7 +15,7 @@ class Server {
         this.useArray = new Array(capacity).fill(0);
     }
   
-    createRoom() {
+    async createRoom() {
         if (this.isFull()) {
             throw new Error("Server is full");
         }
@@ -35,7 +35,7 @@ class Server {
         return roomId;
     }
   
-    deleteRoom(roomId) {
+    async deleteRoom(roomId) {
         if (this.isEmpty()) {
             throw new Error("Server is empty");
         }
