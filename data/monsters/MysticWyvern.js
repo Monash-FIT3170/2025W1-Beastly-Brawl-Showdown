@@ -7,11 +7,7 @@ class MysticWyvern extends Monsters {
         super(25, 14, 2, "None","Balanced");
         rerollCharge = true;
     }
-
-    activateSpecial() {}
-
-    activateAbility() {}
-
+    
     attack(defender) {
         let roll = DiceRoller.d20();
         console.log(`${this._type} rolls ${roll}.`);
@@ -22,6 +18,7 @@ class MysticWyvern extends Monsters {
         }
         
         if (reroll) {
+            rerollCharge = false;
             roll = DiceRoller.d20();
             console.log(`${this._type} rerolls and gets ${roll}.`);
         }
