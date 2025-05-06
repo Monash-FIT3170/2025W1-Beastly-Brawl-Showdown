@@ -2,7 +2,7 @@ const DiceRoller = require('../utils/DiceRoller');
 
 class Action {
     static attack(attacker, defender) {
-        return Attack.perform(attacker, defender);
+        Attack.perform(attacker, defender);
     }
 
     static defend(monster) {
@@ -30,5 +30,4 @@ class Defend {
         monster.revertDefense();
     }
 }
-
 module.exports = Action;
