@@ -3,21 +3,34 @@
 import { RoomServer } from "./RoomServer";
 
 export class RoomServerManager {
-	static isntance = null;
+	static instance = null;
+	foo = null;
 
 	constructor() {
 		if (!RoomServerManager.instance) {
 			RoomServerManager.instance = this;
-			this.test_single_instance = new RoomServer(0, 5); // TODO move to array
+			this.foo = new RoomServer(0, 5); // TODO move to array
 		}
+		return RoomServerManager.get();
+	}
+
+	static get() {
 		return RoomServerManager.instance;
 	}
 
-	static async requestRoomToHost() {
+	static async requestNewRoomAllocation() {
 		let response = { roomCode: null };
 
-		const assignedCode = await RoomServerManager.instance.test_single_instance.createRoom();
+		const assignedCode = await RoomServerManager.get().foo.createRoom();
 		response.roomCode = assignedCode;
+
+		return response;
+	}
+
+	static async requestPlayerJoinRoom({ roomCode }) {
+		let response = { isValidCode: false };
+
+		if (await RoomServerManager.get().foo.hasInstanceWithCode(roomCode)) { response.isValidCode = true; } // this should check against all instances but this is fine for now
 
 		return response;
 	}

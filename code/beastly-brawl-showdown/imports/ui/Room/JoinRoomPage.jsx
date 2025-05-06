@@ -22,14 +22,14 @@ export const InvalidCodeWarning = ({ enabled }) => {
 
 export const JoinForm = () => {
   const [text, setText] = useState("");
-  const [isInvalidCodeSubmitted, setInvalidCodeSubmitted] = useState(false);
+  const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] = useState(false);
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!text) return;
 
-    Meteor.call("joinRoom", { roomCode: text }, (error, result) => {
+    Meteor.call("requestJoinRoom", { roomCode: text }, (error, result) => {
       console.log(result);
       if (error) {
         console.log(error);
@@ -38,7 +38,7 @@ export const JoinForm = () => {
       }
 
       if (!result.isValidCode) {
-        setInvalidCodeSubmitted(true);
+        setInvalidCodeSubmittedPopupState(true);
         return;
       }
       console.log("Successfully joined room:", result.submittedRoomCode);

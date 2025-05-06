@@ -30,8 +30,8 @@ export class RoomServer {
     // Encode by [server number, room number, room no. of use]
     const roomId = sqids.encode([this.server_no, slotIndex, roomUses]);
     this.roomArray[slotIndex] = roomId;
-    this.rooms += 1;
-    this.useArray[slotIndex] += 1;
+    this.rooms++;
+    this.useArray[slotIndex]++;
 
     this.updateCurrentMax();
     this.updateAvailableSlot(slotIndex + 1);
@@ -105,5 +105,12 @@ export class RoomServer {
 
   get length() {
     return this.rooms;
+  }
+
+  async hasInstanceWithCode(code) {
+    for (let i = 0; i < this.roomArray.length; i++) {
+      if (this.roomArray[i] == code) { return true; }
+    }
+    return false;
   }
 }

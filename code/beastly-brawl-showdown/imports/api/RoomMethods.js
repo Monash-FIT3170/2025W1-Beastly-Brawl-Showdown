@@ -5,21 +5,21 @@ import { RoomServerManager } from "../../server/room/RoomServerManager";
 
 Meteor.methods({
   async requestNewRoom() {
-    if (RoomServerManager.instance.test_single_instance.isFull()) { throw new Meteor.Error("No free slots remaining"); }
-    
-    const response = await RoomServerManager.requestRoomToHost();
+    // if (RoomServerManager.instance.test_single_instance.isFull()) { throw new Meteor.Error("No free slots remaining"); } 
+    // TODO move this warning to be an error that is returned from the request below, the request should then the altered to handle and errors it gets passed
+    const response = await RoomServerManager.requestNewRoomAllocation();
     console.log(`Room assigned: ${response.roomCode}`);
     return response;
   },
 
-  joinRoom({ playerID, roomCode }) {
+  async requestJoinRoom({ playerID, roomCode }) { // player ID currently unused - maybe used later?
     var response = {
       submittedRoomCode: roomCode,
       isValidCode: false
     }
     console.log(`Player <${playerID}> attempted to join using code ${response.submittedRoomCode}`)
 
-    if (!isValidRoomCode(roomCode)) { return response } else { response.isValidCode = true; }
+    response.isValidCode = await RoomServerManager.requestPlayerJoinRoom({ roomCode: roomCode })
 
     return response;
   }
