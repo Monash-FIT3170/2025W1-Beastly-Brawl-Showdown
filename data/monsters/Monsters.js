@@ -7,11 +7,12 @@ class Monsters {
         this._currentAC = AC;
         this._attackBonus = attackBonus;
         this._special = special;
+        this._abilityCharge = 1;
         this._type = type;
         this._defenseCharges = 3;
         this._defending = false;
     }
-
+    
     // Method for Activiting Defending
     activateDefense() {
         this._defending = true;
@@ -61,7 +62,7 @@ class Monsters {
         }
     }
 
-    ability(attacker, defender) {}
+    ability(defender) { }
 
     // Getter and Setter for health
     get health() {
