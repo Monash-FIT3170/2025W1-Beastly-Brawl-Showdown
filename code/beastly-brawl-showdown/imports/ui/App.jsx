@@ -1,3 +1,12 @@
+// import React from 'react';
+// import { WaitingRoom } from './WaitingRoom';
+
+// export const App = () => (
+//   <div className='screen'>
+//     <WaitingRoom />
+//   </div>
+// )
+
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -17,3 +26,4 @@ export default function App() {
     </Routes>
   );
 }
+
