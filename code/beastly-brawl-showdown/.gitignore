@@ -2,4 +2,7 @@ node_modules/
 
 .DS_Store 
 
-jsconfig.json
+.vscode/
+.idea/
+
+# jsconfig.json
