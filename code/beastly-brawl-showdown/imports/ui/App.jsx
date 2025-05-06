@@ -5,6 +5,7 @@ import HomePage from "./HomePage";
 import HostPage from "./HostPage";
 import JoinPage from "./JoinPage";
 import NamePage from "./NamePage";
+import { WaitingRoom } from './WaitingRoom';
 
 export default function App() {
   return (
