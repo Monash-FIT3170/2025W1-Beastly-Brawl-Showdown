@@ -2,8 +2,10 @@ const DiceRoller = require('../utils/DiceRoller');
 
 class Monsters {
     constructor(health, AC, attackBonus, special, type) {
-        this._health = health; 
-        this._AC = AC;
+        this._baseHealth = health; 
+        this._currentHealth = health;
+        this._baseAC = AC;
+        this._currentAC = AC;
         this._attackBonus = attackBonus;
         this.special = special;
         this._type = type; 
@@ -11,85 +13,46 @@ class Monsters {
         this._defending = false;
     }
 
-    // Getter and Setter for health
-    get health() {
-        return this._health;
-    }
-    set health(value) {
-        this._health = value;
-    }
-
-    // Getter and Setter for AC
-    get AC() {
-        return this._AC;
-    }
-    set AC(value) {
-        this._AC = value;
-    }
-
-    // Getter and Setter for attackBonus
-    get attackBonus() {
-        return this._attackBonus;
-    }
-    set attackBonus(value) {
-        this._attackBonus = value;
-    }
-
-    // Getter for type
-    get type() {
-        return this._type;
-    }
-
-    // Method to activate special
-    activateSpecial() {}
-
-    // Method for abilities
-    activateAbility() {}
+    ability(name, defender) {}
 
     activateDefense() {
-        if (this._defenseCharges > 0) {
-            this._defending = true;
-            this._AC += 2
-            this._defenseCharges -= 1
-        }
-        else {
-            console.log(`${this.type} has no defense charges remaining!`)
+        this._defending = true;
+        this._currentAC = this._baseAC + 2
+        this._defenseCharges -= 1;
+    }
+
+    revertDefense() {
+        if (defending) {
+            this._defending = false;
+            this._currentAC = this._baseAC;
         }
     }
-    
-    attack(defender) {
+
+    attack() {
         const roll = DiceRoller.d20();
         const totalAttack = roll + this._attackBonus;
-        console.log(`${this.type} rolls ${roll}... Attack = ${totalAttack}.`)
-        
-        defender.defend(totalAttack)
+        console.log(`${this.type} rolls ${roll}... Attack = ${totalAttack}.`);   
+        return totalAttack;
     }
 
     defend(totalAttack) {
-        if (this._defending = true) {
-            
-            if (totalAttack >= this._AC) {
-                console.log(`${this.type}' defense fails! ${this.type} takes 5 damage.`)
-                this._health -= 5
+        if (this._defending = true) {         
+            if (totalAttack >= this._currentAC) {
+                console.log(`${this.type}' defense fails! ${this.type} takes 5 damage.`);
+                this._currentHealth -= 5;
             }
-
             else {
-                console.log(`${this.type}' the attack misses!`)
+                console.log(`${this.type}' the attack misses!`);
             }
-
-            this._AC -=2
-            this._defending = false;
             return;
         }
-
         else {
-            if (totalAttack >= this._AC) {
-                console.log(`${this.type}' takes ${totalAttack} damage!`)
-                this._health -= totalAttack
+            if (totalAttack >= this._currentAC) {
+                console.log(`${this.type}' takes ${totalAttack} damage!`);
+                this._currentHealth -= totalAttack;
             }
-
             else {
-                console.log(`${this.type}' the attack misses!`)
+                console.log(`${this.type}' the attack misses!`);
             }
         }
     }
