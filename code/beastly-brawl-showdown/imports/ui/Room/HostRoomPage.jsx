@@ -6,7 +6,7 @@ export const HostRoomPage = () => {
   const navigate = useNavigate();
   const onRequestRoom = () => {
     console.log("Requesting room...");
-    Meteor.call("createRoom", (error, result) => {
+    Meteor.call("requestNewRoom", (error, result) => {
       if (error) {
         console.error("Error creating room:", error);
         return;

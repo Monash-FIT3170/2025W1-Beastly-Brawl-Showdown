@@ -1,13 +1,19 @@
+"use strict";
+
 import { Meteor } from 'meteor/meteor';
 import { LinksCollection } from '/imports/api/links';
 /* Import all methods here */
-import "../imports/api/rooms";
+import "../imports/api/RoomMethods";
+import { RoomServerManager } from './room/RoomServerManager';
+import { RoomServer } from './room/RoomServer';
 
 async function insertLink({ title, url }) {
   await LinksCollection.insertAsync({ title, url, createdAt: new Date() });
 }
 
 Meteor.startup(async () => {
+  new RoomServerManager()
+
   // If the Links collection is empty, add some data.
   if (await LinksCollection.find().countAsync() === 0) {
     await insertLink({
