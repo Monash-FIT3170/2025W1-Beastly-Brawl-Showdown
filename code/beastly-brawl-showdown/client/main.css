@@ -71,7 +71,6 @@ body {
 .participants-box {
   width: 90px;
   height: 40px;
-  padding: 10px;
   text-align: center;
   vertical-align: middle;
   line-height: 40px;
@@ -122,8 +121,126 @@ body {
   border-radius: 0.5rem;
   cursor: pointer;
   transition: transform 0.1s ease;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
 }
-.btn:active {
+
+.battleScreen{
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.battleScreenTop{
+  position: relative;
+  display: block;
+  background-color: red;
+  width: 100%;
+  height: 8%;
+  top : 0px;
+}
+
+.battleMiddle {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: lightgreen;
+  padding: 2rem;
+  height: auto;
+}
+
+.battleScreenBottom{
+  display: flex;
+  justify-content: center; 
+  align-items: center;     
+  gap: 2rem;               
+  background-color: red;
+  width: 100%;
+  height: 30%;
+  position: relative;
+}
+
+.battleMonsterImg {
+  width: 15rem;
+  height: 15rem;
+  object-fit: fill;
+}
+
+.battleScreenBottomButton{
+  width: 40%;
+  height: 8rem;
+  margin: 1rem;
+  padding: 1rem;
+}
+
+.battleScreenTopButton{
+  display: inline-flex;
+  justify-content: space-between;
+  background-color: pink;
+  border-radius: 10px;
+  margin: 1rem;
+  padding: 1rem;
+  border: none;
+  font-size: 1rem;
+  color: black;
+}
+
+.monster1{
+  margin: 2rem;
+  position: absolute;
+  right: 10rem;
+
+}
+
+.monster2{
+  margin: 2rem;
+  position: absolute;
+  bottom: 1rem;
+  left: 10rem;
+}
+
+.progressContainer {
+  position: relative;
+  width: 100%;
+  max-width: 15rem;
+  height: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hpBar {
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  border-radius: 10px;
+  overflow: hidden; 
+}
+
+progress::-moz-progress-bar {
+  background-color: green;
+  border-radius: 10px;
+}
+
+.hpLabel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: black;
+  font-weight: bold;
+  font-size: 0.9rem;
+  line-height: 1.5rem;
+  pointer-events: none;
+}
+
+.battleScreenBottomButtonImage{
+  width: 5rem;
+  height: 5rem;
+  object-fit: fill;
+}.btn:active {
   transform: scale(0.97);
 }
 
