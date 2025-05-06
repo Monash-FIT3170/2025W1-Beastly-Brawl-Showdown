@@ -5,4 +5,4 @@ node_modules/
 .vscode/
 .idea/
 
-# jsconfig.json
+jsconfig.json
