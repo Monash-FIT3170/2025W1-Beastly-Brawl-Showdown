@@ -1,20 +1,11 @@
 const DiceRoller = require('../utils/DiceRoller');
 
-class Action {
-    static attack(attacker, defender) {
-        Attack.perform(attacker, defender);
-    }
-
-    static defend(monster) {
-        Defend.perform(monster);
-    }
-
-    static endDefend(monster) {
-        Defend.revert(monster);
-    }
-}
-
 class Attack {
+    constructor(attacker, defender) {
+        this._attacker = attacker;
+        this._defender = defender;
+    }
+
     static perform(attacker, defender) {
         const totalAttack = attacker.attack();
         defender.defend(totalAttack);
@@ -22,6 +13,10 @@ class Attack {
 }
 
 class Defend {
+    constructor(monster) {
+        this._monster = monster;
+    }
+
     static perform(monster) {
         monster.activateDefense();
     }
@@ -30,4 +25,21 @@ class Defend {
         monster.revertDefense();
     }
 }
+
+class Ability {
+    constructor(attacker, defender) {
+        this._attacker = attacker;
+        this._defender = defender;
+    }
+
+    static perform(attacker, defender) {
+        if (attacker._abilityCharges > 0) {
+            attacker.ability(defend);
+        } else {
+            console.log('No remaining ability charges.');
+        }
+    }   
+}
+
+
 module.exports = Action;
