@@ -1,0 +1,10 @@
+.monster {
+    width: 50%;
+    border-radius: 15px;
+}
+
+.monsterContainer {
+    margin: 30px 30px 30px 30px;
+    display: flex;
+    justify-content: center;
+}

@@ -2,8 +2,8 @@ import React from "react";
 
 export const MonsterContainer = ({image, name}) => {
     return (
-        <div className="monsterContainer">
-            <img src={image} className={name}/>
+        <div class="monsterContainer">
+            <img src={image} id={name} class="monster"/>
         </div>
     )
 }   
