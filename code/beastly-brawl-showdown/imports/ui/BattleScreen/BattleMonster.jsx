@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+// A BattleMonster class? basically just returns a battlemonster spritte with its hp bar, should make a funciton in future to make the hp depend on the specific monster
 export const BattleMonster = ({ image, alt, position }) => {
   const [hp, setHp] = useState(100);
 

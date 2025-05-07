@@ -1,5 +1,7 @@
 import React from 'react';
 
+
+// The top of the battlescreen, should just contain a back button
 export const BattleTop = () => (
     <div className = "battleScreenTop">
         <img className="topBackIcon" src="/img/back_line.png" alt="back" />
