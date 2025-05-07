@@ -8,13 +8,10 @@ class StoneHideGuardian extends Monsters {
         this.defenseCharges = 4;
     }
 
-    activateSpecial() {}
-
-    activateAbility_1() {
-        
+    useAbility(defender) {
+        this._currentAbilityCharges -= 1;
+        defender.stun();
     }
-
-    activateAbility_2() {}
 }
 
 module.exports = StoneHideGuardian;
