@@ -25,7 +25,7 @@ export const BattleMiddle = ({showAnimation}) => {
           clearInterval(interval); //
           setDisplayedNumber(finalResult);
           timeout = setTimeout(() => {
-            console.log("Final result displayed for 4 second");
+            console.log("Final result displayed for 3 second");
           }, 3000);
         }
       }, intervalSpeed);
