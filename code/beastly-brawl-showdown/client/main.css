@@ -30,6 +30,7 @@ body {
   background-color: lightgreen;
   padding: 2rem;
   height: auto;
+  z-index: 800;
 }
 
 .battleScreenBottom{
@@ -57,9 +58,11 @@ body {
 }
 
 .battleScreenTopButton{
+  position: relative;
+  left: 0.5rem;
   display: inline-flex;
   justify-content: space-between;
-  background-color: pink;
+  background-color: transparent;
   border-radius: 10px;
   margin: 1rem;
   padding: 1rem;
@@ -119,4 +122,28 @@ progress::-moz-progress-bar {
   width: 5rem;
   height: 5rem;
   object-fit: fill;
+}
+
+
+.topBackIcon{
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: fill;
+  top: 1.8rem;
+  left: 1rem;
+}
+
+.diceResult{
+  position: absolute;
+  font-size: 3rem;
+  z-index: 1000;
+  left: 35rem;
+  top: 14rem;
+}
+
+.diceAnimation{
+  z-index: 900;
+  position: absolute;
+  left: 20rem;
 }
