@@ -2,3 +2,20 @@ body {
   padding: 10px;
   font-family: sans-serif;
 }
+
+.design-system-page {
+  gap: 20px;
+}
+
+.display-panel {
+  display: flex;
+  width: 128px;
+  height: 92px;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Panel_no_beams.png');
+  background-size: 100% 100%;
+  background-repeat: repeat-x;
+  background-position: center;
+  image-rendering: pixelated;
+}
