@@ -1,41 +1,56 @@
 const DiceRoller = require('../utils/DiceRoller');
 
+/**
+ * Base class for the different monsters in the game.
+ * Includes all universal attributes with some default values.
+ * Includes default methods such as attack and defend for monster subclasses which share functionality.
+ */
 class Monsters {
     constructor(health, AC, attackBonus, special, type) {
-        this._health = health;
+        this._baseHealth = health;
+        this._currentHealth = health;
         this._baseAC = AC;
         this._currentAC = AC;
         this._attackBonus = attackBonus;
         this._special = special;
-        this._abilityCharge = 1;
+        this._baseAbilityCharges = 1;
+        this._currentAbilityCharges = 1;
         this._type = type;
-        this._defenseCharges = 3;
+        this._baseDefenseCharges = 3;
+        this._currentDefenseCharges = 3;
         this._defending = false;
+        this._isStunned = false;
     }
     
-    // Method for Activiting Defending
+    /**
+     * Activates this monsters defense, raising the AC and consuming a defense charge.
+     */
     activateDefense() {
         this._defending = true;
         this._currentAC = this._baseAC + 2
-        this._defenseCharges -= 1;
+        this._currentDefenseCharges -= 1;
     }
 
-    revertDefense() {
-        if (defending) {
-            this._defending = false;
-            this._currentAC = this._baseAC;
-        }
-    }
-
-    // Method for Monster to Attack
-    attack(defender) {
+    /**
+     * Initiates an attack against an opponent.
+     * Rolls the d20 and calculates the totalAttack delivered using the roll and this monster's attack bonus.
+     * 
+     * @returns totalAttack: The power of this attack.
+     */
+    attack() {
         const roll = DiceRoller.d20();
         const totalAttack = roll + this._attackBonus;
         console.log(`${this.type} rolls ${roll}... Attack = ${totalAttack}.`);   
         return totalAttack;
     }
 
-    // Method for Monster to Defend
+    /**
+     * Computes an incoming attack from another monster.
+     * Checks whether this monster's defense is activated.
+     * Compares totalAttack to AC and decrements this monster's health appropriately.
+     * 
+     * @param {*} totalAttack The power of the incoming attack.
+     */
     defend(totalAttack) {
         if (this._defending = true) {
 
@@ -62,7 +77,47 @@ class Monsters {
         }
     }
 
-    ability(defender) { }
+    /**
+     * Generates the possible actions a monster can take given its status, defense charges and ability charges.
+     * 
+     * @param {*} opponent The monster which this monster is fighting.
+     */
+    generateActions(opponent) {
+        actions = []
+        if (!this._isStunned) {
+            actions.append(new AttackAction(this, opponent));
+            if (this._currentDefenseCharges > 0) {
+                actions.append(new DefendAction(this));
+            }
+            if (this._currentAbilityCharges > 0) {
+                actions.append(new AbilityAction(this, opponent));
+            }
+            return actions
+        } 
+    }
+
+    /**
+     * Resets this monster's AC to base.
+     * Used to wipe status effects and revert a defense action after each turn in a battle.
+     */
+    revert() {
+        this._currentAC = this._baseAC;
+        this._isStunned = false;
+    }
+    
+    /**
+     * Resets this monster to its initial state.
+     * Used at the end of a battle to ready this monster for the next fight.
+     */
+    reset() {
+        this._currentHealth = this._baseHealth;
+        this._currentAC = this._baseAC;
+        this._currentDefenseCharges = this._baseDefenseCharges;
+        this._isStunned = false;
+        this._currentAbilityCharges = this._baseAbilityCharges;
+    }
+
+    useAbility(defender) { }
 
     // Getter and Setter for health
     get health() {
