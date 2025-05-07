@@ -19,7 +19,7 @@ class Monsters {
         this._baseDefenseCharges = 3;
         this._currentDefenseCharges = 3;
         this._defending = false;
-        this._isStunned = false;
+        this._stunRemaining = 0;
     }
     
     /**
@@ -84,7 +84,7 @@ class Monsters {
      */
     generateActions(opponent) {
         actions = []
-        if (!this._isStunned) {
+        if (this._stunRemaining == 0) {
             actions.append(new AttackAction(this, opponent));
             if (this._currentDefenseCharges > 0) {
                 actions.append(new DefendAction(this));
@@ -102,7 +102,9 @@ class Monsters {
      */
     revert() {
         this._currentAC = this._baseAC;
-        this._isStunned = false;
+        if(this._stunRemaining > 0) {
+            this._stunRemaining -= 1;
+        }
     }
     
     /**
@@ -113,20 +115,15 @@ class Monsters {
         this._currentHealth = this._baseHealth;
         this._currentAC = this._baseAC;
         this._currentDefenseCharges = this._baseDefenseCharges;
-        this._isStunned = false;
+        this._stunRemaining = 0;
         this._currentAbilityCharges = this._baseAbilityCharges;
     }
 
+    stun() {
+        this._stunRemaining += 2;
+    }
+
     useAbility(defender) { }
-
-    // Getter and Setter for health
-    get health() {
-        return this._health;
-    }
-
-    set health(value) {
-        this._health = value;
-    }
 
     // Getter and Setter for AC
     get AC() {
@@ -136,7 +133,7 @@ class Monsters {
     set AC(value) {
         this._AC = value;
     }
-
+    
     // Getter and Setter for attackBonus
     get attackBonus() {
         return this._attackBonus;
@@ -144,6 +141,15 @@ class Monsters {
 
     set attackBonus(value) {
         this._attackBonus = value;
+    }
+
+    // Getter and Setter for health
+    get health() {
+        return this._health;
+    }
+
+    set health(value) {
+        this._health = value;
     }
 
     // Getter for type
