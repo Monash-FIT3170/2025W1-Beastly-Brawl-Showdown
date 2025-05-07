@@ -34,7 +34,7 @@ class MysticWyvern extends Monsters {
     }
 
     // Elemental breath: Deals 15 + d10 damage.
-    ability(defender) { 
+    useAbility(defender) { 
         console.log(`${this.type} uses elemental breath...`)
         const roll = DiceRoller.d10();
         const totalAttack = 15 + roll;
