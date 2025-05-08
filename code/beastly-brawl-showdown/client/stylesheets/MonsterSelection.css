@@ -1,10 +1,17 @@
-.monster {
+/* Round corners and set width to be consistent */
+.monsterImage {
     width: 50%;
     border-radius: 15px;
 }
 
+/* Centre monsters in page div */
 .monsterContainer {
     margin: 30px 30px 30px 30px;
     display: flex;
     justify-content: center;
+}
+
+/* Show user which monster they are hovering over */
+.monsterContainer :hover {
+    opacity: 0.5;
 }
