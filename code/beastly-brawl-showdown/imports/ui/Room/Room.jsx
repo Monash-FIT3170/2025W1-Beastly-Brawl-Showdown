@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from "react-router-dom";
 import { generateQRCode } from '../../qrcode';
 
@@ -8,6 +8,7 @@ export const Room = () => {
   
   //qrcode code
   const qrRef = useRef(null);
+  const [revealURL, setURL] = useState(null);
 
   useEffect(() => {
     //check if id exists and qrRef is attached to the DOM
@@ -18,14 +19,25 @@ export const Room = () => {
       //sets up the base url with room id
       // Meteor.absoluteUrl - used to set up base url (i.e http://project_domain_name)
       const joinURL = Meteor.absoluteUrl(`h/${id}`);
+      setURL(joinURL);
       generateQRCode(qrRef.current, joinURL);
     }
   }, [id]);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(revealURL)
+      .then(() => console.log("Copied to clipboard!!"))
+      .catch((error) => console.error("Copy failed:", error));
+  };
+
   return (
     <div>
       <h1>ROOM VIEW</h1>
       <p>Room ID: {id}</p>
+
       <div ref={qrRef}></div>
+      <p>Room JOin Link: {revealURL}</p>
+      <button onClick={copyToClipboard}>Copy Link</button>
     </div>
   );
 };
