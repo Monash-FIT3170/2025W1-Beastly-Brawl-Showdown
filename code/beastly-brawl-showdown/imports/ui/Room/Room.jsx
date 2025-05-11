@@ -1,11 +1,11 @@
-import { Meteor } from 'meteor/meteor';
-import React, { useEffect, useRef, useState } from 'react';
+import { Meteor } from "meteor/meteor";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { generateQRCode } from '../../qrcode';
+import { generateQRCode } from "../../qrcode";
 
 export const Room = () => {
   const { id } = useParams();
-  
+
   //qrcode code
   const qrRef = useRef(null);
   const [revealURL, setURL] = useState(null);
@@ -13,7 +13,7 @@ export const Room = () => {
   useEffect(() => {
     //check if id exists and qrRef is attached to the DOM
     if (qrRef.current && id) {
-      //test 
+      //test
       //const joinURL = 'https://www.youtube.com/watch?v=IzoXcgG9X2k';
 
       //sets up the base url with room id
@@ -25,7 +25,8 @@ export const Room = () => {
   }, [id]);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(revealURL)
+    navigator.clipboard
+      .writeText(revealURL)
       .then(() => console.log("Copied to clipboard!!"))
       .catch((error) => console.error("Copy failed:", error));
   };
@@ -36,7 +37,7 @@ export const Room = () => {
       <p>Room ID: {id}</p>
 
       <div ref={qrRef}></div>
-      <p>Room JOin Link: {revealURL}</p>
+      <p>Room Join Link: {revealURL}</p>
       <button onClick={copyToClipboard}>Copy Link</button>
     </div>
   );
