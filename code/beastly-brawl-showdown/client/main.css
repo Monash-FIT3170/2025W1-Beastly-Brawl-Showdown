@@ -4,10 +4,11 @@ body {
 }
 
 .design-system-page {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  gap: 20px;
-
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 200px;       /* Width of each column */
+  grid-template-rows: repeat(auto-fill, 150px); /* Rows stack vertically */
+  gap: 10px;
 }
 
 .panels {
@@ -97,6 +98,33 @@ body {
   justify-content: center;
   align-items: center;
   background-image: url('/Tall Panel 3.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+/* Buttons */
+@keyframes playButton {
+  0% {
+    background-image: url('/Play Button F1.png');
+  }
+
+  50% {
+    background-image: url('/Play Button F2.png');
+  }
+
+  100% {
+    background-image: url('/Play Button F1.png');
+  }
+}
+
+.play-button {
+  display: flex;  
+  width: 180px;
+  height: 54px;
+  justify-content: center;
+  align-items: center;
+  animation: playButton 1s infinite;
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
