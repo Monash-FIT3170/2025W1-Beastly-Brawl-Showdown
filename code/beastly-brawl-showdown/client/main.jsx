@@ -9,19 +9,17 @@
 //   root.render(<App />);
 // });
 
-import { Meteor } from "meteor/meteor";
 import React from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-
 import App from "/imports/ui/App";
 
 Meteor.startup(() => {
-  render(
+  const container = document.getElementById("react-target");
+  const root = createRoot(container);
+  root.render(
     <BrowserRouter>
       <App />
-    </BrowserRouter>,
-    document.getElementById("react-target")
+    </BrowserRouter>
   );
 });
-

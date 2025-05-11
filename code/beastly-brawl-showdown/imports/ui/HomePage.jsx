@@ -15,6 +15,12 @@ export default function HomePage() {
         <button className="btn join-btn" onClick={() => navigate("/join")}>
           JOIN
         </button>
+        <button
+          className="btn settings-btn"
+          onClick={() => navigate("/settings")}
+        >
+          SETTINGS
+        </button>
       </div>
     </div>
   );
