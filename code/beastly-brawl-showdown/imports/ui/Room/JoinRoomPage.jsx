@@ -22,7 +22,8 @@ export const InvalidCodeWarning = ({ enabled }) => {
 
 export const JoinForm = () => {
   const [text, setText] = useState("");
-  const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] = useState(false);
+  const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] =
+    useState(false);
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
