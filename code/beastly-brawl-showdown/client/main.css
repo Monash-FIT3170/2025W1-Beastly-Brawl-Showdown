@@ -4,18 +4,100 @@ body {
 }
 
 .design-system-page {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 20px;
+
+}
+
+.panels {
+  width: 1000px;
+  display: grid;
   gap: 20px;
 }
 
-.display-panel {
-  display: flex;
-  width: 128px;
-  height: 92px;
+/* Horizontal Panels */
+.panel-1 {
+  display: flex;  
+  width: 136px;
+  height: 108px;
   justify-content: center;
   align-items: center;
-  background-image: url('/Panel_no_beams.png');
+  background-image: url('/Panel 1.png');
   background-size: 100% 100%;
-  background-repeat: repeat-x;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.panel-2 {
+  display: flex;  
+  width: 136px;
+  height: 86px;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Panel 2.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.panel-3 {
+  display: flex;  
+  width: 92px;
+  height: 78px;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Panel 3.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.panel-4 {
+  display: flex;  
+  width: 136px;
+  height: 70px;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Panel 4.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+/* Tall Panels */
+.tall-panel-1 {
+  display: flex;  
+  width: 138px;
+  height: 192px;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Tall Panel 1.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.tall-panel-2 {
+  display: flex;  
+  width: 96px;
+  height: 170px;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Tall Panel 2.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.tall-panel-3 {
+  display: flex;  
+  width: 96px;
+  height: 136px;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Tall Panel 3.png');
+  background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
