@@ -4,14 +4,34 @@
     border-radius: 15px;
 }
 
-/* Centre monsters in page div */
+/* Align text and confirm button to center */
+.monsterSelectionScreen {
+   text-align: center;
+}
+
+/* Centre monsters in selection box div */
 .monsterContainer {
     margin: 30px 30px 30px 30px;
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 /* Show user which monster they are hovering over */
 .monsterContainer :hover {
     opacity: 0.5;
+}
+
+/* Styling for the confirm button */
+#confirmMonsterButton {
+    text-align: center;
+    padding: 15px 32px;
+    font-size: x-large;
+    cursor: not-allowed;
+}
+
+/* TODO: Hover effects for button when its enabled */
+#confirmMonsterButton:hover :enabled {
+    color: black;
+    background-color: white;
 }
