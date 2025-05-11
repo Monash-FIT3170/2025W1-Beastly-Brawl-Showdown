@@ -1,131 +1,140 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Press Start 2P' !important;
+}
+
 body {
-  padding: 10px;
-  font-family: sans-serif;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .design-system-page {
-  display: inline-grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 200px;       /* Width of each column */
-  grid-template-rows: repeat(auto-fill, 150px); /* Rows stack vertically */
-  gap: 10px;
-}
-
-.panels {
-  width: 1000px;
   display: grid;
-  gap: 20px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: 100vh;
 }
 
-/* Horizontal Panels */
-.panel-1 {
-  display: flex;  
-  width: 136px;
-  height: 108px;
-  justify-content: center;
-  align-items: center;
-  background-image: url('/Panel 1.png');
+/* Top Row */
+/* Top Right */
+.branding {
+  background-image: url('/design-systems/brandingBackground.png');
   background-size: 100% 100%;
   background-position: center;
-  image-rendering: pixelated;
-}
-
-.panel-2 {
-  display: flex;  
-  width: 136px;
-  height: 86px;
+  color: white;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: center;
-  background-image: url('/Panel 2.png');
-  background-size: 100% 100%;
-  background-position: center;
-  image-rendering: pixelated;
 }
 
-.panel-3 {
-  display: flex;  
-  width: 92px;
-  height: 78px;
-  justify-content: center;
-  align-items: center;
-  background-image: url('/Panel 3.png');
-  background-size: 100% 100%;
-  background-position: center;
-  image-rendering: pixelated;
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
 }
 
-.panel-4 {
-  display: flex;  
-  width: 136px;
-  height: 70px;
-  justify-content: center;
-  align-items: center;
-  background-image: url('/Panel 4.png');
-  background-size: 100% 100%;
-  background-position: center;
-  image-rendering: pixelated;
+.subtitle {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
 }
 
-/* Tall Panels */
-.tall-panel-1 {
-  display: flex;  
-  width: 138px;
-  height: 192px;
-  justify-content: center;
-  align-items: center;
-  background-image: url('/Tall Panel 1.png');
-  background-size: 100% 100%;
-  background-position: center;
-  image-rendering: pixelated;
+.team-name {
+  font-weight: bold;
+  margin-bottom: 1.2rem;
 }
 
-.tall-panel-2 {
-  display: flex;  
-  width: 96px;
-  height: 170px;
-  justify-content: center;
+/* Top Middle */
+.icons {
+  background-color: #000;
+  color: white;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  background-image: url('/Tall Panel 2.png');
-  background-size: 100% 100%;
-  background-position: center;
-  image-rendering: pixelated;
 }
 
-.tall-panel-3 {
-  display: flex;  
-  width: 96px;
-  height: 136px;
-  justify-content: center;
-  align-items: center;
-  background-image: url('/Tall Panel 3.png');
-  background-size: 100% 100%;
-  background-position: center;
-  image-rendering: pixelated;
+.icons-header {
+  align-self: flex-start;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* Buttons */
-@keyframes playButton {
-  0% {
-    background-image: url('/Play Button F1.png');
-  }
-
-  50% {
-    background-image: url('/Play Button F2.png');
-  }
-
-  100% {
-    background-image: url('/Play Button F1.png');
-  }
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 1rem;
+  width: 80%;
 }
 
-.play-button {
-  display: flex;  
-  width: 180px;
-  height: 54px;
-  justify-content: center;
+/* Top Right */
+.patterns-top {
+  background-color: #b667f0;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.patterns-header {
+  color: white;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Bottom Left */
+.typography {
+  background-color: white;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.typography-header {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.typography-sample {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.sample-box {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  margin-right: 1rem;
   align-items: center;
-  animation: playButton 1s infinite;
-  background-size: 100% 100%;
-  background-position: center;
-  image-rendering: pixelated;
+  align-content: center;
+}
+
+.type-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.type-large {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.type-medium {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.type-small {
+  font-size: 0.9rem;
+  font-weight: bold;
 }
