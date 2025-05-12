@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const UserForm = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassWord] = useState("");
+  const navigate = useNavigate();
 
   // todo: make this login the user or smth
   const handleSubmit = (e) => {
@@ -15,6 +17,12 @@ export const UserForm = () => {
 
     setUserName("");
     setPassWord("");
+  };
+
+  const handleGuestLogin = () => {
+    // Replace this with guest login logic
+    console.log("Logging in as guest");
+    navigate("/homePage");
   };
 
   return (
@@ -33,8 +41,8 @@ export const UserForm = () => {
       />
       
       <button type="submit">Login</button>
-      <button>Sign Up</button>
-      <button>Login As Guest</button>
+      <button type="button">Sign Up</button>
+      <button type="button" onClick = {handleGuestLogin}>Login As Guest</button>
     </form>
   );
 };
