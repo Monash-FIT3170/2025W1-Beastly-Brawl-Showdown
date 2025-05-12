@@ -1,14 +1,17 @@
 import { Meteor } from "meteor/meteor";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { generateQRCode } from "../../qrcode";
 
 export const Room = () => {
-  const { id } = useParams();
+  const { id, name } = useParams();
 
   //qrcode code
   const qrRef = useRef(null);
   const [revealURL, setURL] = useState(null);
+
+  //get name from url
+  const playerName = decodeURIComponent(name); 
 
   useEffect(() => {
     //check if id exists and qrRef is attached to the DOM
@@ -18,7 +21,7 @@ export const Room = () => {
 
       //sets up the base url with room id
       // Meteor.absoluteUrl - used to set up base url (i.e http://project_domain_name)
-      const joinURL = Meteor.absoluteUrl(`h/${id}`);
+      const joinURL = Meteor.absoluteUrl(`/join/${id}`);
       setURL(joinURL);
       generateQRCode(qrRef.current, joinURL);
     }
@@ -33,6 +36,7 @@ export const Room = () => {
 
   return (
     <div>
+      <h1>Welcome {playerName}!</h1>
       <h1>ROOM VIEW</h1>
       <p>Room ID: {id}</p>
 
