@@ -43,7 +43,8 @@ export const JoinForm = () => {
         return;
       }
       console.log("Successfully joined room:", result.submittedRoomCode);
-      navigate(`/${result.submittedRoomCode}`);
+      navigate(`/join/${result.submittedRoomCode}`);
+
     });
   };
 
