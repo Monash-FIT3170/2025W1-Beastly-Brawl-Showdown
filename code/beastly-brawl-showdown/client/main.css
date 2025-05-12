@@ -238,3 +238,13 @@ body {
 }
 
 /* Bottom Right */
+.patterns-bottom {
+  background-color: white;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+#patterns-header-bottom {
+  color: black;
+}

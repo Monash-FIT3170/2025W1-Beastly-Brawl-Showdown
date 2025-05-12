@@ -75,9 +75,9 @@ export const DesignSystem = () => {
             </div>
 
             <div className='patterns-bottom'>
-                <div className='patterns-header'>Patterns</div>
+                <div className='patterns-header' id='patterns-header-bottom'>Patterns</div>
 
-                
+
             </div>
         </div>
     )
