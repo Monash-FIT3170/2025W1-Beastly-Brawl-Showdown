@@ -19,8 +19,12 @@ export class Player {
 }
 
 export class Room {
+  // Preferences and Settings
+  preferences = {};
   // List of players
   players = []; // Temporarily have no limit to the number of players
+  // Game state / History
+  gameState = {};
 
   constructor(roomId) {
     this.roomId = roomId;
