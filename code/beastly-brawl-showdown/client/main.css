@@ -226,26 +226,92 @@ body {
 }
 
 .btn {
+  width: 168px;
+  height: 50.4px;
   padding: 0.75rem 1.5rem;
-  border-radius: 50px;
   text-align: center;
+  align-items: center;
+  align-content: center;
   font-weight: bold;
+  border: none;
 }
 
-.btn-white {
-  background-color: white;
-  color: #4169E1;
+.btn-dark-brown {
+  background-image: url('/buttons/darkBrownBtn.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white;
+}
+
+.btn-dark-brown:hover {
+  background-image: url('/buttons/darkBrownBtnClicked.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white
+}
+
+.btn-brown {
+  background-image: url('/buttons/brownBtn.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white;
+}
+
+.btn-brown:hover {
+  background-image: url('/buttons/brownBtnClicked.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white;
+}
+
+.btn-light-brown {
+  background-image: url('/buttons/lightBrownBtn.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white;
+}
+
+.btn-light-brown:hover {
+  background-image: url('/buttons/lightBrownBtnClicked.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white;
+}
+
+.btn-default {
+  background-image: url('/buttons/Btn.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white;
+}
+
+.btn-default:hover {
+  background-image: url('/buttons/BtnClicked.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+  background-color: transparent;
+  color: white;
 }
 
 .btn-outline {
   background-color: transparent;
   color: white;
   border: 1px solid white;
-}
-
-.btn-light {
-  background-color: rgba(255, 255, 255, 0.3);
-  color: white;
 }
 
 /* Bottom Right */

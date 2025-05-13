@@ -59,10 +59,10 @@ export const DesignSystem = () => {
                 <div className="components-header">Components</div>
                 <div className="components-container">
                     <div className="button-column">
-                        <div className="btn btn-white">Button</div>
-                        <div className="btn btn-light">Button</div>
-                        <div className="btn btn-white">Button</div>
-                        <div className="btn btn-light">Button</div>
+                        <button className="btn btn-dark-brown">Button</button>
+                        <button className="btn btn-brown">Button</button>
+                        <button className="btn btn-light-brown">Button</button>
+                        <button className="btn btn-default">Button</button>
                     </div>
                     
                     <div className="button-column">
