@@ -26,8 +26,8 @@ export class Room {
   // Game state / History
   gameState = {};
 
-  constructor(roomId) {
-    this.roomId = roomId;
+  constructor(roomCode) {
+    this.roomCode = roomCode;
   }
 
   // Method to add player to the list of players
@@ -36,8 +36,8 @@ export class Room {
   }
 
   // Method to get the id of this room
-  getRoomId() {
-    return this.roomId;
+  getRoomCode() {
+    return this.roomCode;
   }
 }
 
@@ -76,9 +76,9 @@ export class RoomServer {
     // Get the number of uses for this room
     const roomUses = this.uses[slotIndex];
     // Encode by [server number, room number, room no. of use]
-    const roomId = sqids.encode([this.server_no, slotIndex, roomUses]);
+    const roomCode = sqids.encode([this.server_no, slotIndex, roomUses]);
     // Create temporary room object with this room id
-    const room = new Room(roomId); // Temporary implementation of room object
+    const room = new Room(roomCode); // Temporary implementation of room object
     // Assign room to slot
     this.rooms[slotIndex] = room;
     // Increment the number of currently active rooms
@@ -91,26 +91,43 @@ export class RoomServer {
     // Update the next available slot
     this.updateAvailableSlot(slotIndex + 1);
 
-    return room.getRoomId();
+    return room.getRoomCode();
   }
 
   // Delete room
-  async deleteRoom(roomId) {
+  async deleteRoom(roomCode) {
+    // Check if the room is empty
     if (this.isEmpty()) {
       throw new Error("Server is empty");
     }
 
-    if (this.rooms[roomId] === null) {
-      throw new Error("Slot is already empty");
+    // Check if there is a room with this code
+    if (!this.hasInstanceWithCode(roomCode)) {
+      throw new Error("Room not found");
     }
 
-    // Clear the room
-    this.rooms[roomId] = null;
+    // Variable for the deleted index
+    let deletedIndex = null;
+    // Find the room with this roomId
+    for (let i = 0; i < this.length; i++) {
+      if (roomCode == this.rooms[i].getRoomId()) {
+        // Clear the room with the requested id
+        this.rooms[i] = null;
+        // Save the index of the deleted room
+        deletedIndex = i;
+      }
+    }
+
+    // Safety check
+    if (deletedIndex === null) {
+      throw new Error("Somehow bypassed the first error check");
+    }
+
     // Decrement the number of rooms
     this.numberOfRooms -= 1;
 
     // Update the next available slot
-    this.updateAvailableSlot(roomId);
+    this.updateAvailableSlot(deletedIndex);
   }
 
   // Update the current highest number of times a room has been used
@@ -173,9 +190,9 @@ export class RoomServer {
     return this.numberOfRooms;
   }
 
-  async hasInstanceWithCode(code) {
+  async hasInstanceWithCode(roomCode) {
     for (let i = 0; i < this.rooms.length; i++) {
-      if (this.rooms[i] == code) { return true; }
+      if (this.rooms[i] == roomCode) { return true; }
     }
     return false;
   }
