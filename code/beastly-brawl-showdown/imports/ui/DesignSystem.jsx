@@ -34,23 +34,23 @@ export const DesignSystem = () => {
                 <div className="color-section">
                     <div className="color-header">Color</div>
                     <div className="color-grid">
-                        <div className="color-circle circle-black"></div>
                         <div className="color-circle circle-blue"></div>
-                        <div className="color-text circle-blue">Aa</div>
-                        <div className="color-text circle-blue">Aa</div>
-                        <div className="color-text circle-blue">Aa</div>
+                        <div className="color-circle circle-mid-blue"></div>
+                        <div className="color-text circle-light-blue">Aa</div>
+                        <div className="color-text circle-white">Aa</div>
+                        <div className="color-text circle-black">Aa</div>
 
-                        <div className="color-text circle-blue">Aa</div>
-                        <div className="color-circle circle-purple"></div>
-                        <div className="color-circle circle-grey"></div>
-                        <div className="color-text circle-purple">Aa</div>
-                        <div className="color-text circle-purple">Aa</div>
+                        <div className="color-text circle-green">Aa</div>
+                        <div className="color-circle circle-mid-green"></div>
+                        <div className="color-circle circle-light-green"></div>
+                        <div className="color-text circle-light-brown">Aa</div>
+                        <div className="color-text circle-dark-brown">Aa</div>
 
-                        <div className="color-text circle-purple">Aa</div>
-                        <div className="color-text circle-purple">Aa</div>
-                        <div className="color-circle circle-purple"></div>
-                        <div className="color-circle circle-grey"></div>
-                        <div className="color-text circle-purple">Aa</div>
+                        <div className="color-text circle-redish-brown">Aa</div>
+                        <div className="color-text circle-dark-orange">Aa</div>
+                        <div className="color-circle circle-orange"></div>
+                        <div className="color-circle circle-mid-orange"></div>
+                        <div className="color-text circle-light-orange">Aa</div>
                     </div>
                 </div>
             </div>
