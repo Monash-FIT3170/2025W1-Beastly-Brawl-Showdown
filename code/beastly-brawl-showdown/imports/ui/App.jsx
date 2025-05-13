@@ -14,6 +14,7 @@ import JoinPage from "./JoinPage";
 import NamePage from "./NamePage";
 import WaitingRoom from "./WaitingRoom";
 import SettingsPage from "./SettingsPage";
+import MonsterPage from "./MonsterPage";
 
 export default function App() {
   const [bgmEnabled, setBgmEnabled] = useState(false);
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/join" element={<JoinPage />} />
         <Route path="/name" element={<NamePage />} />
+      <Route path="/choose" element={<MonsterPage/>}/>
         <Route path="/host" element={<WaitingRoom />} />
         <Route
           path="/settings"
