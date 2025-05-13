@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { DarkBrownBtn } from './buttonComponents/DarkBrownBtn';
+import { LightBrownBtn } from './buttonComponents/LightBrownBtn';
+import { BrownBtn } from './buttonComponents/BrownBtn';
+import { BtnDefault } from './buttonComponents/BtnDefault';
 
 export const DesignSystem = () => {
     return (
@@ -59,10 +63,10 @@ export const DesignSystem = () => {
                 <div className="components-header">Components</div>
                 <div className="components-container">
                     <div className="button-column">
-                        <button className="btn btn-dark-brown">Button</button>
-                        <button className="btn btn-brown">Button</button>
-                        <button className="btn btn-light-brown">Button</button>
-                        <button className="btn btn-default">Button</button>
+                        <DarkBrownBtn />
+                        <BrownBtn />
+                        <LightBrownBtn />
+                        <BtnDefault />
                     </div>
                     
                     <div className="button-column">
