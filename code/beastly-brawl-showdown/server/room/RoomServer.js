@@ -78,7 +78,7 @@ export class RoomServer {
     // Encode by [server number, room number, room no. of use]
     const roomId = sqids.encode([this.server_no, slotIndex, roomUses]);
     // Create temporary room object with this room id
-    const room = {Id: roomId}; // Temporary implementation of room object
+    const room = new Room(roomId); // Temporary implementation of room object
     // Assign room to slot
     this.rooms[slotIndex] = room;
     // Increment the number of currently active rooms
@@ -91,7 +91,7 @@ export class RoomServer {
     // Update the next available slot
     this.updateAvailableSlot(slotIndex + 1);
 
-    return room.Id;
+    return room.getRoomId();
   }
 
   // Delete room
