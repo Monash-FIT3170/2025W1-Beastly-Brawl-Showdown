@@ -2,6 +2,41 @@
 
 import Sqids from "sqids";
 
+export class Player {
+  constructor(displayName) {
+    this.displayName = displayName;
+  }
+
+  // Method to get the name of this player
+  getName() {
+    return this.displayName;
+  }
+
+  // Method to display player name when player object is printed
+  toString() {
+    return this.displayName;
+  }
+}
+
+export class Room {
+  // List of players
+  players = []; // Temporarily have no limit to the number of players
+
+  constructor(roomId) {
+    this.roomId = roomId;
+  }
+
+  // Method to add player to the list of players
+  addPlayer(player) {
+    this.players.push(player);
+  }
+
+  // Method to get the id of this room
+  getRoomId() {
+    return this.roomId;
+  }
+}
+
 export class RoomServer {
   static MIN_CAPACITY = 1;
   static CODE_MIN_LENGTH = 6;
