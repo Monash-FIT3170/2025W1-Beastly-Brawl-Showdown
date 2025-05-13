@@ -174,10 +174,21 @@ body {
   color: white;
 }
 
-.circle-black { background-color: #000; }
-.circle-blue { background-color: #4169E1; }
-.circle-purple { background-color: #b667f0; }
-.circle-grey { background-color: #ddd; }
+.circle-blue { background-color: #6c8a90; }
+.circle-mid-blue { background-color: #a8b7ba; }
+.circle-light-blue { background-color: #bbd9de; }
+.circle-green { background-color: #b4c2a3; }
+.circle-mid-green { background-color: #cfdebb; }
+.circle-light-green { background-color: #d1d8c9; }
+.circle-orange { background-color: #cd833a; }
+.circle-mid-orange { background-color: #daa677; }
+.circle-light-orange { background-color: #dbc2a0; }
+.circle-white { background-color: #f0f2f0; }
+.circle-redish-brown { background-color: #7e311e; }
+.circle-dark-orange { background-color: #b25034; }
+.circle-dark-brown { background-color: #462c23; }
+.circle-light-brown { background-color: #945b3a; }
+.circle-black { background-color: #312421; }
 
 /* Bottom Middle */
 .components {
