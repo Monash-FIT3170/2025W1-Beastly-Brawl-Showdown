@@ -1,10 +1,13 @@
-class Ability {
+class AbilityAction {
     constructor(attacker, defender) {
-        this._attacker = attacker;
-        this._defender = defender;
+        this.attacker = attacker;
+        this.defender = defender;
     }
 
     static perform(attacker, defender) {
-        attacker.useAbility(defend);
+        this.attacker.useAbility(defend);
     }   
 }
+
+
+module.exports = AbilityAction;
