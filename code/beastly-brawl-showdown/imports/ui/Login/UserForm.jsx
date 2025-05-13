@@ -20,10 +20,13 @@ export const UserForm = () => {
   };
 
   const handleGuestLogin = () => {
-    // Replace this with guest login logic
     console.log("Logging in as guest");
-    navigate("/homePage");
+    // Storing guest login status and name, then navigate to home page
+    sessionStorage.setItem("guestLoggedIn", "true");
+    sessionStorage.setItem("guestName", userName);
+    navigate("/guest-name?target=home");
   };
+
 
   return (
     <form className="userForm" onSubmit={handleSubmit}>
