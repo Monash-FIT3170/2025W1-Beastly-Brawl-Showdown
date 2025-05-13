@@ -22,7 +22,7 @@ class ShadowFangPredator extends Monsters {
             console.log(`${this._type} rolls ${roll}... Attack = ${totalAttack}.`)
         }
         
-        defender.defend(totalAttack)
+        return totalAttack;
     }
 
     defend(totalAttack) {

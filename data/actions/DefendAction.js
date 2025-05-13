@@ -1,9 +1,11 @@
-class Defend {
+class DefendAction {
     constructor(monster) {
-        this._monster = monster;
+        this.monster = monster;
     }
 
-    execute(monster) {
-        monster.activateDefense();
+    execute() {
+        this.monster.activateDefense();
     }
 }
+
+module.exports = DefendAction;
