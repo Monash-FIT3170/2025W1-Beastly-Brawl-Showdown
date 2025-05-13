@@ -14,6 +14,7 @@ import HomePage from "./HomePage";
 import JoinPage from "./JoinPage";
 import NamePage from "./NamePage";
 import { WaitingRoom } from "./WaitingRoom";
+import MonsterPage from "./MonsterPage";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
       <Route path="/host" element={<WaitingRoom />} />
       <Route path="/join" element={<JoinPage />} />
       <Route path="/name" element={<NamePage />} />
+      <Route path="/choose" element={<MonsterPage/>}/>
     </Routes>
   );
 }
