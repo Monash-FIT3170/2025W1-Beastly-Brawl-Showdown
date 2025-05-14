@@ -72,21 +72,96 @@ body {
   grid-template-rows: repeat(3, 1fr);
   gap: 1rem;
   width: 80%;
+  border: 2px dashed white;
+  border-radius: 5%;
+  padding: 1rem;
 }
 
 .icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 40px;
-  height: 40px;
-  border: 1px solid #fff;
-  border-radius: 50%;
+  height: 36px;
+}
+
+.volume-icon {
+  background-image: url('/icons/volumeIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.volume-muted {
+  background-image: url('/icons/volumeMuted.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.sfx-icon {
+  background-image: url('/icons/sfxIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.sfx-muted {
+  background-image: url('/icons/sfxMuted.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.up-icon {
+  background-image: url('/icons/upArrowIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.down-icon {
+  background-image: url('/icons/downArrowIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.left-icon {
+  background-image: url('/icons/leftArrowIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.right-icon {
+  background-image: url('/icons/rightArrowIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.settings-icon {
+  background-image: url('/icons/settingsIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.home-icon {
+  background-image: url('/icons/homeIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.money-icon {
+  background-image: url('/icons/moneyIcon.png');
+  background-size: 100% 100%;
+  background-position: center;
+  image-rendering: pixelated;
 }
 
 /* Top Right */
 .patterns-top {
-  background-color: #b667f0;
+  background-color: #462c23;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -162,10 +237,13 @@ body {
 }
 
 .color-grid {
+  padding: 2rem;
+  background-color: #FFC5D3;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: 0.5rem;
+  border-radius: 1rem;
 }
 
 .color-circle {
@@ -183,6 +261,17 @@ body {
   align-items: center;
   font-size: 0.8rem;
   color: white;
+}
+
+.color-text-black {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  color: black;
 }
 
 .circle-blue { background-color: #6c8a90; }
@@ -404,7 +493,7 @@ body {
 
 /* Bottom Right */
 .patterns-bottom {
-  background-color: white;
+  background-color: #b4c2a3;
   padding: 2rem;
   display: flex;
   flex-direction: column;

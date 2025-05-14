@@ -7,6 +7,17 @@ import { BrownCheck } from './buttonComponents/BrownCheck';
 import { BrownCross } from './buttonComponents/BrownCross';
 import { AtkBtn } from './buttonComponents/AtkBtn';
 import { ShieldBtn } from './buttonComponents/shieldBtn';
+import { VolumeIcon } from './icons/VolumeIcon';
+import { VolumeMuted } from './icons/VolumeMuted';
+import { SfxIcon } from './icons/SfxIcon';
+import { SfxMuted } from './icons/SfxMuted';
+import { UpArrow } from './icons/UpArrow';
+import { DownArrow } from './icons/DownArrow';
+import { LeftArrow } from './icons/LeftArrow';
+import { RightArrow } from './icons/RightArrow';
+import { SettingsIcon } from './icons/SettingsIcon';
+import { HomeIcon } from './icons/HomeIcon';
+import { MoneyIcon } from './icons/MoneyIcon';
 
 export const DesignSystem = () => {
     return (
@@ -19,7 +30,22 @@ export const DesignSystem = () => {
 
             <div className="icons">
                 <div className="icons-header">Icons</div>
-                <div className="icon-grid"></div>
+                <div className="icon-grid">
+                    <VolumeIcon />
+                    <VolumeMuted />
+                    <SfxIcon />
+                    <SfxMuted />
+
+                    <UpArrow />
+                    <DownArrow />
+                    <LeftArrow />
+                    <RightArrow />
+
+                    <SettingsIcon />
+                    <HomeIcon />
+                    <MoneyIcon />
+                    
+                </div>
             </div>
 
             <div className="patterns-top">
@@ -45,7 +71,7 @@ export const DesignSystem = () => {
                         <div className="color-circle circle-blue"></div>
                         <div className="color-circle circle-mid-blue"></div>
                         <div className="color-circle circle-light-blue"></div>
-                        <div className="color-text circle-white">Aa</div>
+                        <div className="color-text-black circle-white">Aa</div>
                         <div className="color-text circle-black">Aa</div>
 
                         <div className="color-circle circle-green"></div>
