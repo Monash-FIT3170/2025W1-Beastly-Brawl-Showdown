@@ -3,6 +3,10 @@ import { DarkBrownBtn } from './buttonComponents/DarkBrownBtn';
 import { LightBrownBtn } from './buttonComponents/LightBrownBtn';
 import { BrownBtn } from './buttonComponents/BrownBtn';
 import { BtnDefault } from './buttonComponents/BtnDefault';
+import { BrownCheck } from './buttonComponents/BrownCheck';
+import { BrownCross } from './buttonComponents/BrownCross';
+import { AtkBtn } from './buttonComponents/AtkBtn';
+import { ShieldBtn } from './buttonComponents/shieldBtn';
 
 export const DesignSystem = () => {
     return (
@@ -69,11 +73,11 @@ export const DesignSystem = () => {
                         <BtnDefault />
                     </div>
                     
-                    <div className="button-column">
-                        <div className="btn btn-outline">Button</div>
-                        <div className="btn btn-outline">Button</div>
-                        <div className="btn btn-outline">Button</div>
-                        <div className="btn btn-outline">Button</div>
+                    <div className="button-column" id='small-btns'>
+                        <BrownCheck />
+                        <BrownCross />
+                        <AtkBtn />
+                        <ShieldBtn />
                     </div>
                 </div>
             </div>
