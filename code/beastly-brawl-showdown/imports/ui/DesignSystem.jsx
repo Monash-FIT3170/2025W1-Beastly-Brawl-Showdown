@@ -98,21 +98,12 @@ export const DesignSystem = () => {
                         <LightBrownBtn />
                         <BtnDefault />
                     </div>
-<<<<<<< HEAD
                     
                     <div className="button-column" id='small-btns'>
                         <BrownCheck />
                         <BrownCross />
                         <AtkBtn />
                         <ShieldBtn />
-=======
-
-                    <div className="button-column">
-                        <div className="btn btn-outline">Button</div>
-                        <div className="btn btn-outline">Button</div>
-                        <div className="btn btn-outline">Button</div>
-                        <div className="btn btn-outline">Button</div>
->>>>>>> 86a4387 (top left panel bg changed for readability and name board added)
                     </div>
                 </div>
             </div>
