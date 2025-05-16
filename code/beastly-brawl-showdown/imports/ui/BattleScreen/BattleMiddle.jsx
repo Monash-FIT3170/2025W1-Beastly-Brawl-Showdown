@@ -41,14 +41,15 @@ export const BattleMiddle = ({showAnimation}) => {
   
   return (
     <div className="battleMiddle">
-      <BattleMonster image="/img/miku.jpg" alt="Monster 1"  position={"monster1"}/>
+      <BattleMonster image="/img/dragon.png" alt="Monster 1"  position={"monster1"}/>
         {showAnimation && 
         <div className = "diceAnimation">
         <img src="/img/d20.png" alt="Rolling animation" className="diceAnimation" />
         <span className = "diceResult">{displayedNumber}</span>
         </div>
         } 
-      <BattleMonster image="/img/masterChief.jpg" alt="Monster 2" position={"monster2"}/>
+      <BattleMonster image="/img/wolfman.png" alt="Monster 2" position={"monster2"}/>
     </div>
   );
 };
+//<BattleMonster image="/img/superminion.png" alt="Monster 2" position={"monster2"}/> this is for putting thet superminion, literally just replace the image part of the Battlemonster lmao
