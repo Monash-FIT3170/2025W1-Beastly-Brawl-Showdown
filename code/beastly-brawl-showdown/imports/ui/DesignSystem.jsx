@@ -22,7 +22,7 @@ import { MoneyIcon } from './icons/MoneyIcon';
 export const DesignSystem = () => {
     return (
         <div className='design-system-page'>
-            <div className="branding">
+            <div className='branding'>
                 <div className="title">Design</div>
                 <div className="subtitle">System</div>
                 <div className='team-name'>KahootLite</div>
@@ -98,18 +98,28 @@ export const DesignSystem = () => {
                         <LightBrownBtn />
                         <BtnDefault />
                     </div>
+<<<<<<< HEAD
                     
                     <div className="button-column" id='small-btns'>
                         <BrownCheck />
                         <BrownCross />
                         <AtkBtn />
                         <ShieldBtn />
+=======
+
+                    <div className="button-column">
+                        <div className="btn btn-outline">Button</div>
+                        <div className="btn btn-outline">Button</div>
+                        <div className="btn btn-outline">Button</div>
+                        <div className="btn btn-outline">Button</div>
+>>>>>>> 86a4387 (top left panel bg changed for readability and name board added)
                     </div>
                 </div>
             </div>
 
             <div className='patterns-bottom'>
                 <div className='patterns-header' id='patterns-header-bottom'>Patterns</div>
+                <img src='/Panel 1.png' alt='Panel' className='name-board' />
 
 
             </div>

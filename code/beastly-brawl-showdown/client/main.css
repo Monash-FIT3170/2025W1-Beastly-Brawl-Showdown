@@ -23,12 +23,16 @@ body {
   background-image: url('/design-systems/brandingBackground.png');
   background-size: 100% 100%;
   background-position: center;
+  text-shadow: 0 10px black;
+  opacity: 0.8;
+  background-color: #000;
   color: white;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
+
 
 .title {
   font-size: 3rem;
@@ -502,3 +506,15 @@ body {
 #patterns-header-bottom {
   color: black;
 }
+
+.name-board {
+  width: 500px; /* 544px */
+  height: 300px; /* 432px */
+  background-image: url('/Panel 1.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  margin: 0 auto;
+}
+ 
