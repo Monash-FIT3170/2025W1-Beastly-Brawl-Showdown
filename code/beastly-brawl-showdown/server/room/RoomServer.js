@@ -144,7 +144,7 @@ export class RoomServer {
     this.currMax = current;
   }
 
-  // Looks for the next available slot
+  /** Looks for the next available slot */
   updateAvailableSlot(startIndex) {
     const length = this.rooms.length;
 
