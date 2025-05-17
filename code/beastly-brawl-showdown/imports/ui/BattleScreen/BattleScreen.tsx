@@ -18,6 +18,7 @@ export const BattleScreen: React.FC = () => {
     <div className="battleScreen">
       <BattleTop />
       <BattleMiddle showAnimation={showAnimation} />
+      {/* feeds the trigger animation function to battle bottom */}
       <BattleBottom onRoll={triggerAnimation} />
     </div>
   );

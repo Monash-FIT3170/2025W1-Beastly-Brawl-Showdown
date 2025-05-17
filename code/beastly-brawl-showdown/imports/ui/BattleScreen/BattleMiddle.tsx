@@ -5,10 +5,12 @@ import { BattleMonster } from './BattleMonster';
 type BattleMiddleProps = {
   showAnimation: boolean;
 };
-
+//takes a boolean when initialized
 export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => {
   const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
 
+
+  //if the showwanimation is true then show thtet animation
   useEffect(() => {
     let interval: NodeJS.Timeout;
     let timeout: NodeJS.Timeout;
@@ -19,7 +21,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
       const intervalSpeed = 100; // time between number updates
 
       const finalResult = 20; // eventually will replace with dice roll utility
-      const totalSteps = rollDuration / intervalSpeed;
+      const totalSteps = rollDuration / intervalSpeed; //ge the ammount of times it gets swaped out
 
       interval = setInterval(() => {
         if (i < totalSteps) {
@@ -50,6 +52,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
 
   return (
     <div className="battleMiddle">
+      {/* monster 1 */}
       <BattleMonster image="/img/dragon.png" alt="Monster 1" position="monster1" />
 
       {showAnimation && (
@@ -58,7 +61,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
           <span className="diceResult">{displayedNumber}</span>
         </div>
       )}
-
+      {/* monster 2 */}
       <BattleMonster image="/img/wolfman.png" alt="Monster 2" position="monster2" />
     </div>
   );
