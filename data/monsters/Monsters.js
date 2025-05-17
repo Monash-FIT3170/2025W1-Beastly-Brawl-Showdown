@@ -59,7 +59,7 @@ class Monsters {
                 this._health -= 5
             }
             else {
-                console.log(`${this.type}' the attack misses!`);
+                console.log(`The attack misses!`);
             }
 
             this._AC -= 2

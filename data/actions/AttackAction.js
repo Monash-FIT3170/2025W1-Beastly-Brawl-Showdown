@@ -1,11 +1,14 @@
-class Attack {
+class AttackAction {
     constructor(attacker, defender) {
-        this._attacker = attacker;
-        this._defender = defender;
+        this.attacker = attacker;
+        this.defender = defender;
     }
 
-    execute(attacker, defender) {
-        const totalAttack = attacker.attack();
-        defender.defend(totalAttack);
+    execute() {
+        const totalAttack = this.attacker.attack();
+        this.defender.defend(totalAttack);
     }
 }
+
+
+module.exports = AttackAction;
