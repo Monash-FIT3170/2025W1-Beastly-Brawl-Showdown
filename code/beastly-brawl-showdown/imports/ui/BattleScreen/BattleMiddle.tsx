@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { BattleMonster } from './BattleMonster';
-const numbers: number[] = Array.from({ length: 20 }, (_, i) => i + 1);
 
 // Define the props type
 type BattleMiddleProps = {
@@ -44,10 +43,10 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
     };
   }, [showAnimation]);
 
-  const attackAnimation = () => {
-    // Placeholder for future animation logic
-    console.log("Attack");
-  };
+  // const attackAnimation = () => {
+  //   // Placeholder for future animation logic
+  //   console.log("Attack");
+  // };
 
   return (
     <div className="battleMiddle">
