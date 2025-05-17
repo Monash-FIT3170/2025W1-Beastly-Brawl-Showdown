@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Define the props using a TypeScript type
 type BattleBottomProps = {
   onRoll: () => void;
 };
@@ -8,6 +7,7 @@ type BattleBottomProps = {
 export const BattleBottom: React.FC<BattleBottomProps> = ({ onRoll }) => {
   const handleRoll = () => {
     onRoll();
+    //basically just clals whatever function is given to this as a parameter
   };
 
   return (
