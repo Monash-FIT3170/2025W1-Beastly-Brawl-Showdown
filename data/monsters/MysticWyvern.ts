@@ -1,20 +1,29 @@
-const Monsters = require('./Monsters');
-const DiceRoller = require('../utils/DiceRoller');
+import Monsters from './Monsters';
+import DiceRoller from '../utils/DiceRoller';
 
+/**
+ * MysticWyvern monster subclass.
+ * Has the ability to reroll an attack once per battle.
+ * Uses elemental breath as special ability.
+ */
+export default class MysticWyvern extends Monsters {
+  private rerollCharge: boolean;
 
-class MysticWyvern extends Monsters {
-    constructor(rerollCharge) {
-        super(25, 14, 2, "Reroll once per battle","Balanced");
-        rerollCharge = true;
-    }
+  constructor() {
+    super(25, 14, 2, "Reroll once per battle", "Balanced");
+    this.rerollCharge = true;
+  }
 
-    activateSpecial() {
-        this.rerollCharge = true;
-    }
-
-    attack(defender) {
-        let roll = DiceRoller.d20();
-        console.log(`${this._type} rolls ${roll}.`);
+  /**
+   * Attacks a defender. Rolls d20, optionally allows reroll once per battle.
+   * @param defender The monster being attacked.
+   * @returns totalAttack The total attack value.
+   * defender: Monsters
+   * TODO:FIX IF NEEDED
+   */
+  attack(): number {
+    let roll = DiceRoller.d20();
+    console.log(`${this.type} rolls ${roll}.`);
 
         // Ask the user if they want to reroll
         if (rerollCharge) {
@@ -22,7 +31,6 @@ class MysticWyvern extends Monsters {
         }
         
         if (reroll) {
-            rerollCharge = false;
             roll = DiceRoller.d20();
             console.log(`${this._type} rerolls and gets ${roll}.`);
         }
@@ -30,17 +38,6 @@ class MysticWyvern extends Monsters {
         const totalAttack = roll + this._attackBonus;
         console.log(`${this._type} rolls ${roll}... Attack = ${totalAttack}.`);
 
-        return totalAttack;
-    }
-
-    // Elemental breath: Deals 15 + d10 damage.
-    useAbility(defender) { 
-        console.log(`${this.type} uses elemental breath...`)
-        const roll = DiceRoller.d10();
-        const totalAttack = 15 + roll;
-        console.log(`${this.type} rolls ${roll}... Attack = ${totalAttack}.`);   
         defender.defend(totalAttack);
     }
 }
-
-module.exports = MysticWyvern;
