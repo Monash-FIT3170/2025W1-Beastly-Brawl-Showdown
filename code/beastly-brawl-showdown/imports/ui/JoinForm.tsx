@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import { Meteor } from 'meteor/meteor';
 // import "/imports/ui/global.css";
 
-export const JoinForm = ({onSuccess}) => {
+export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [text, setText] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!text) return;
 
     onSuccess();
 
-    Meteor.call("joinRoom", { roomId: text }, (error, result) => {
+    Meteor.call("joinRoom", { roomId: text }, (error: Meteor.Error | null, result: { roomId: string }) => {
       if (!error) {
         console.log("Successfully joined room:", result);
         onSuccess();
