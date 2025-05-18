@@ -16,6 +16,9 @@ import App from "/imports/ui/App";
 
 Meteor.startup(() => {
   const container = document.getElementById("react-target");
+  if (!container) {
+    throw new Error("React root container element not found.");
+  }
   const root = createRoot(container);
   root.render(
     <BrowserRouter>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { CodeLink } from './CodeLink.jsx';
-import { QRBox } from './QRBox.jsx';
+import { CodeLink } from './CodeLink';
+import { QRBox } from './QRBox';
 
 export const WaitingRoomInfoBox = () => {
     return (
