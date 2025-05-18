@@ -1,5 +1,6 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { Dispatch, SetStateAction, MutableRefObject, useState, useEffect } from "react";
+// From chat since idk what they were ^
 import { useNavigate } from "react-router-dom";
 
 export default function SettingsPage({
@@ -8,7 +9,14 @@ export default function SettingsPage({
   bgmVolume,
   setBgmVolume,
   audioRef,
-}) {
+}: {
+  bgmEnabled: boolean;
+  setBgmEnabled: Dispatch<SetStateAction<boolean>>;
+  bgmVolume: number;
+  setBgmVolume: Dispatch<SetStateAction<number>>;
+  audioRef: MutableRefObject<HTMLAudioElement | null>;
+}
+) {
   const navigate = useNavigate();
   const [tempEnabled, setTempEnabled] = useState(bgmEnabled);
   const [tempVolume, setTempVolume] = useState(bgmVolume);

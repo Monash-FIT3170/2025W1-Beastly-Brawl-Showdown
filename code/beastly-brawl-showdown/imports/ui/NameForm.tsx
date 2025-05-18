@@ -2,10 +2,10 @@ import React, { useState } from "react";
 // import { Meteor } from 'meteor/meteor';
 // import "/imports/ui/global.css";
 
-export const NameForm = ({onSuccess}) => {
+export const NameForm = ({ onSuccess }: { onSuccess: () => void }) => {
     const [text, setText] = useState("");
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
     
         if (!text) return;
