@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 
 export const Host = () => {
   const handleHostClick = () => {
-    Meteor.call('createRoom', (error, result) => {
+    Meteor.call('createRoom', (error: Meteor.Error | null, result: { roomId: string }) => {
       if (error) {
         console.error('Error creating room:', error);
       } else {

@@ -10,7 +10,7 @@ import MonsterPage from "./MonsterPage";
 export default function App() {
   const [bgmEnabled, setBgmEnabled] = useState(false);
   const [bgmVolume, setBgmVolume] = useState(50);
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (audioRef.current) {
