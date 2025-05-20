@@ -50,6 +50,9 @@ export const DesignSystem = () => {
 
             <div className="patterns-top">
                 <div className="patterns-header">Patterns</div>
+                <img src='/Healthbar.png' alt='Panel' className='healthbar' />
+                <img src='/MonsterCardBg.png' alt='Panel' className='monster-card' />
+
             </div>
 
             <div className='typography'>
@@ -111,9 +114,15 @@ export const DesignSystem = () => {
             <div className='patterns-bottom'>
                 <div className='patterns-header' id='patterns-header-bottom'>Patterns</div>
                 <img src='/Panel 1.png' alt='Panel' className='name-board' />
-
+                
+                <input 
+                    type='text' 
+                    className='textbox' 
+                    placeholder='Type here...'
+                />
 
             </div>
+
         </div>
     )
 }
