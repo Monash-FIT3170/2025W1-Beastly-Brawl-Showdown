@@ -1,17 +1,18 @@
 import { Meteor } from "meteor/meteor";
-import { Mongo } from "meteor/mongo";
-
-const Users = new Mongo.Collection("rooms");
-
-Meteor.methods({
-  "rooms.getAll"() {
-    return Users.find().fetch();
-  },
-});
+import { RoomServer, RoomServerCollection } from "./RoomServer";
 
 Meteor.startup(async () => {
-  if ((await Users.find().countAsync()) === 0) {
-    Users.insertAsync({ id: "abc123", hostId: "user1" });
-    Users.insertAsync({ id: "qwerty", hostId: "user2" });
+  /** Get launch args */
+  const serverNo = 7; // may change this to be a string of region & number
+  const serverCapacity = 5;
+  /** Start instance of room server */
+  const rs = new RoomServer(serverNo, serverCapacity);
+  /** Notify database so that it can redirect to this */
+  // TODO
+
+  /// ADD TESTING DATA IF EMPTY
+  if ((await RoomServerCollection.find().countAsync()) === 0) {
+    RoomServerCollection.insertAsync({ serverNo: "0", serverURL: "http://localhost:3100" });
+    RoomServerCollection.insertAsync({ serverNo: "7", serverURL: "http://localhost:3107" });
   }
 });

@@ -23,11 +23,14 @@ export default function HomePage() {
           SETTINGS
         </button>
 
+
+
+        
         <button
           className="btn settings-btn"
-          onClick={() => Meteor.call("TEST_GET_ALL_RPC", {}, () => null)}
+          onClick={() => { console.log("Requesting room to host..."); Meteor.call("room.requestHostRoom", {}, () => null) }}
         >
-          RPC TEST
+          HOST REQUEST
         </button>
       </div>
     </div>

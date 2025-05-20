@@ -1,7 +1,7 @@
 import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
 
-export const Rooms = new Mongo.Collection("rooms");
+export const RoomServerCollection = new Mongo.Collection("room_server");
 
 export class Player {
   displayName: string;

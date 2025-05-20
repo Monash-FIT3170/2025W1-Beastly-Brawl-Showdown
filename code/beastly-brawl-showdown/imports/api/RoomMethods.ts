@@ -1,43 +1,9 @@
 import { Meteor } from "meteor/meteor";
-import { RoomServerManager } from "../../server/room/RoomServerManager";
-
-import { DDP } from "meteor/ddp-client";
-
-const userServiceDDP = DDP.connect("http://localhost:3100");
+import { assignNewRoom } from "../../server/room/RoomServerNegotiator";
 
 Meteor.methods({
-  async requestNewRoom() {
-    // if (RoomServerManager.instance.test_single_instance.isFull()) { throw new Meteor.Error("No free slots remaining"); }
-    // TODO move this warning to be an error that is returned from the request below, the request should then the altered to handle and errors it gets passed
-    const response = await RoomServerManager.requestNewRoomAllocation();
-    console.log(`Room assigned: ${response.roomCode}`);
-    return response;
-  },
-
-  async requestJoinRoom({ playerID, roomCode }) {
-    // player ID currently unused - maybe used later?
-    var response = {
-      submittedRoomCode: roomCode,
-      isValidCode: false,
-    };
-    console.log(
-      `Player <${playerID}> attempted to join using code ${response.submittedRoomCode}`
-    );
-
-    response.isValidCode = await RoomServerManager.requestPlayerJoinRoom({
-      roomCode: roomCode,
-    });
-
-    return response;
-  },
-
-  async TEST_GET_ALL_RPC() {
-    userServiceDDP.call("rooms.getAll", (error, result) => {
-      if (error) {
-        console.error("Error fetching rooms:", error);
-      } else {
-        console.log("Rooms from remote service:", result);
-      }
-    });
+	"room.requestHostRoom"() {
+		console.log("Request to host room reccieved...")
+		assignNewRoom();
   },
 });
