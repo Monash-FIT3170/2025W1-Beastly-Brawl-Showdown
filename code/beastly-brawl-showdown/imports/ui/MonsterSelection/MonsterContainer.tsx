@@ -9,8 +9,8 @@ export const MonsterContainer = ({image, name, func}) => {
     }
 
     return (
-        <div class="monsterContainer">
-            <img src={image} id={name} class="monsterImage" onClick={onClick}/>
+        <div className="monsterContainer">
+            <img src={image} id={name} className="monsterImage" onClick={onClick}/>
         </div>
     )
 }   

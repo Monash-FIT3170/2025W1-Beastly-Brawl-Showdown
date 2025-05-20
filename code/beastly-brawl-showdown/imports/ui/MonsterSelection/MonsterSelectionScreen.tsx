@@ -21,27 +21,35 @@ export const MonsterSelectionScreen = () => {
      * Enable confirm button and border the selected monster
      * @param {string} name 
      */
-    function highlightAndShowConfirm(name) {
+    function highlightAndShowConfirm(name: string) {
         if (currentlySelected) {
             // Deselect currently selected item
-            let deselect = document.getElementById(currentlySelected).style;
-            deselect.border = "none"
+            const deselect = document.getElementById(currentlySelected);
+            if (deselect) {
+                deselect.style.border = "none";
+            }
+            
         }
 
         // Create border around selected mosnter
-        let style = document.getElementById(name).style;
-        style.border = "solid"
-        style.borderWidth = "8px";
+        const selected = document.getElementById(name);
+        if (selected) {
+            selected.style.border = "solid"
+            selected.style.borderWidth = "8px";
+        }
+
         currentlySelected = name;
 
         // Enable confirm button once an option has been selected
-        let confirmButton = document.getElementById("confirmMonsterButton");
-        confirmButton.disabled = false;
-        confirmButton.style.cursor = "default";
+        const confirmButton = document.getElementById("confirmMonsterButton") as HTMLButtonElement;
+        if (confirmButton) {
+            confirmButton.disabled = false;
+            confirmButton.style.cursor = "default";
+        }
     }
 
     return (
-        <div class="monsterSelectionScreen">
+        <div className="monsterSelectionScreen">
             <h1>Choose your Monster:</h1>
             <MonsterContainer image="img/placeholder_monster_1.png" name="monster1" func={highlightAndShowConfirm}/>
             <MonsterContainer image="img/placeholder_monster_2.png" name="monster2" func={highlightAndShowConfirm}/>
