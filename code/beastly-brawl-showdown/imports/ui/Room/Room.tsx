@@ -1,7 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { generateQRCode } from "../../qrcode";
+import { generateQRCode } from "../../api/QRCode";
 
 export const Room = () => {
   const { id, name } = useParams();

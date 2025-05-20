@@ -8,6 +8,7 @@ import { HostRoomPage } from "./ui/Room/HostRoomPage";
 import { JoinRoomPage } from "./ui/Room/JoinRoomPage";
 import { GuestNamePage } from "./ui/GuestNamePage";
 import { LoginPage } from "./ui/Login/LoginPage";
+
 export const renderRoutes = () => (
   <>
     <BrowserRouter>
