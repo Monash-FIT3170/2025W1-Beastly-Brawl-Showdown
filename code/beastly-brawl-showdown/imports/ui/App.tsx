@@ -28,6 +28,7 @@ export default function App() {
         <Route path="/join" element={<JoinPage />} />
         <Route path="/name" element={<NamePage />} />
         <Route path="/host" element={<WaitingRoom />} />
+        <Route path="/choose" element={<MonsterPage />} />
         <Route
           path="/settings"
           element={

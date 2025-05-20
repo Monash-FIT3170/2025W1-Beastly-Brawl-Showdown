@@ -8,20 +8,18 @@ export default function MonsterPage() {
     const navigate = useNavigate();
 
     const handleSuccess = () => {
-        navigate("/")
-      }
-
+        navigate("/");
+    };
 
     return (
         <div className="page-container">
-        <h1>Monster Page</h1>
-        <MonsterList />
-        <div className="buttons-container">
-            <button className="btn name-btn" onClick={() => navigate("/")}>
-            CONTINUE
-            </button>
-
-        </div> 
+            <h1>Monster Page</h1>
+            <MonsterList />
+            <div className="buttons-container">
+                <button className="btn name-btn" onClick={() => navigate("/")}>
+                    CONTINUE
+                </button>
+            </div>
         </div>
     );
 }
