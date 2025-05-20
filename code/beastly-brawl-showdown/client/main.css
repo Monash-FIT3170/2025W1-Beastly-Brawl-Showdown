@@ -517,4 +517,46 @@ body {
   image-rendering: pixelated;
   margin: 0 auto;
 }
+
+.textbox {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px; /* Adjust based on where the text should sit */
+  font-size: 16px;
+  background-image: url('/Textbox.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: transparent;
+  width: 500px;      /* Adjust to match the size of your PNG */
+  height: 100px;      /* Adjust to match the PNG height */
+  border: none;
+  outline: none;
+  color: #000;       /* Change if needed */
+  text-align: center; /* Or left/right as you like */
+  font-family: inherit;
+  image-rendering: pixelated;
+}
+
+.healthbar {
+  width: 276px; /* 544px */
+  height: 88px; /* 432px */
+  background-image: url('/healthbar.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  margin: 10px auto;
+}
+
+.monster-card {
+  width: 300px; /* 544px */
+  height: 300px; /* 432px */
+  background-image: url('/MonsterCardBg.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  margin: 10px auto;
+}
  
