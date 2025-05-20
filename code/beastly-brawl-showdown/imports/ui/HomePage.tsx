@@ -1,3 +1,4 @@
+import { Meteor } from "meteor/meteor";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 // import "/imports/ui/global.css";
@@ -20,6 +21,13 @@ export default function HomePage() {
           onClick={() => navigate("/settings")}
         >
           SETTINGS
+        </button>
+
+        <button
+          className="btn settings-btn"
+          onClick={() => Meteor.call("TEST_GET_ALL_RPC", {}, () => null)}
+        >
+          RPC TEST
         </button>
       </div>
     </div>

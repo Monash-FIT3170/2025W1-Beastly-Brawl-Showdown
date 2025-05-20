@@ -1,5 +1,3 @@
-"use strict";
-
 import { RoomServer } from "./RoomServer";
 
 export class RoomServerManager {

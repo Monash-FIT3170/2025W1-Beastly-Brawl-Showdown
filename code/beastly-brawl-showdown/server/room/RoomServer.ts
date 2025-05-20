@@ -1,8 +1,12 @@
-"use strict";
-
+import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
 
+export const Rooms = new Mongo.Collection("rooms");
+
 export class Player {
+  displayName: string;
+  linkedAcccountId?: string;
+
   constructor(displayName) {
     this.displayName = displayName;
   }
@@ -18,26 +22,22 @@ export class Player {
   }
 }
 
+/** Turn history */
+export class MatchState {}
+/** Preferences and Settings for this lobby */
+export class GameSettings {}
+
 export class Room {
-  /** Preferences and Settings */
-  preferences = {};
-  /** List of players */
-  players = []; // Temporarily have no limit to the number of players
-  /** Game state / History */
-  gameState = {};
+  players: Array<Player>;
+  gameState: Array<MatchState>;
+  settings: GameSettings;
 
-  constructor(roomCode) {
-    this.roomCode = roomCode;
-  }
+  roomCode: string;
 
-  /** Method to add player to the list of players */
-  addPlayer(player) {
-    this.players.push(player);
-  }
-
-  /** Method to get the id of this room */
-  getRoomCode() {
-    return this.roomCode;
+  constructor() {
+    this.settings = {};
+    this.players = []; // Temporarily have no limit to the number of players
+    this.gameState = [];
   }
 }
 
@@ -71,7 +71,10 @@ export class RoomServer {
     }
 
     /** Initialize new sqids object */
-    const sqids = new Sqids({ minLength: RoomServer.CODE_MIN_LENGTH, alphabet: RoomServer.CODE_ALPHABET });
+    const sqids = new Sqids({
+      minLength: RoomServer.CODE_MIN_LENGTH,
+      alphabet: RoomServer.CODE_ALPHABET,
+    });
     /** Get the index of the room to be created */
     const slotIndex = this.availableRoom;
     /** Get the number of uses for this room */
@@ -119,7 +122,7 @@ export class RoomServer {
       }
     }
 
-    // Safety check 
+    // Safety check
     if (deletedIndex === null) {
       throw new Error("Somehow bypassed the first error check");
     }
@@ -178,7 +181,9 @@ export class RoomServer {
 
   /** Returns true if no rooms available */
   isFull() {
-    return this.numberOfRooms === this.rooms.length || this.availableRoom === null;
+    return (
+      this.numberOfRooms === this.rooms.length || this.availableRoom === null
+    );
   }
 
   /** Returns true if there are no rooms being used */
@@ -193,7 +198,9 @@ export class RoomServer {
 
   async hasInstanceWithCode(roomCode) {
     for (let i = 0; i < this.rooms.length; i++) {
-      if (this.rooms[i] == roomCode) { return true; }
+      if (this.rooms[i] == roomCode) {
+        return true;
+      }
     }
     return false;
   }
