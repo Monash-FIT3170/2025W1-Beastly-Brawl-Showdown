@@ -54,7 +54,7 @@ export default class Monsters {
      * 
      * @returns totalAttack: The power of this attack.
      */
-    attack(): number {
+    async attack(): Promise<number> {
         const roll = DiceRoller.d20();
         const totalAttack = roll + this.atkBonus;
         console.log(`${this.monsterType} rolls ${roll}... Attack = ${totalAttack}.`);
@@ -81,9 +81,9 @@ export default class Monsters {
             this.currentAC = this.baseAC;
             this.defending = false;
         } else {
-            if (totalAttack >= this.currentAC) {
-                console.log(`${this.monsterType} takes ${totalAttack} damage!`);
-                this.currentHealth -= totalAttack;
+            if (totalAttack >= this._currentAC) {
+                console.log(`${this.type} takes ${totalAttack} damage!`);
+                this._currentHealth -= 5;
             } else {
                 console.log(`${this.monsterType}: The attack misses!`);
             }
@@ -145,7 +145,7 @@ export default class Monsters {
      * 
      * @param defender The opponent affected by the ability.
      */
-    useAbility(defender: Monsters): void {}
+    useAbility(defender: Monsters): void { }
 
     // Getters and setters
 
@@ -176,4 +176,17 @@ export default class Monsters {
     get type(): string {
         return this.monsterType;
     }
+
+    get abilityCharges(): number {
+        return this._currentAbilityCharges;
+    }
+
+    get defenseCharges(): number {
+        return this._currentDefenseCharges;
+    }
+
+    get defending(): boolean {
+        return this._defending;
+    }
+
 }
