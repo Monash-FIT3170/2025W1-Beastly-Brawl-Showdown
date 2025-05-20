@@ -18,7 +18,7 @@ export default class ShadowFangPredator extends Monsters {
      * defender: Monsters
      * TODO:FIX IF NEEDED
      */
-    attack(): number {
+    override async attack(): Promise<number> {
         const roll: number = DiceRoller.d20();
         let totalAttack: number = 0;
 
