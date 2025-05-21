@@ -34,7 +34,7 @@ export const GuestNamePage = () => {
             } else if (roomCode) {
                 navigate(`/room/${roomCode}/${encodeURIComponent(name)}`);
             } else if (target == "home") {
-                navigate("/homePage");
+                navigate("/home");
             } else {
                 console.log("UNknown route")
             }
