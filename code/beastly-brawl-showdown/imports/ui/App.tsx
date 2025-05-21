@@ -1,11 +1,11 @@
 import React from 'react';
-import { DesignSystem } from './DesignSystem';
+import { Hello } from './Hello';
+import { Info } from './Info';
 
 export const App = () => (
-  // <div>
-  //   <h1>Welcome to Meteor!</h1>
-  //   <Hello/>
-  //   <Info/>
-  // </div>
-  <DesignSystem />
+  <div>
+    <h1>Welcome to Meteor!</h1>
+    <Hello />
+    <Info/>
+  </div>
 );
