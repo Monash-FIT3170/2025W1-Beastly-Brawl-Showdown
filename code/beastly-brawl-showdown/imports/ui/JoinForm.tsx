@@ -1,29 +1,46 @@
 import React, { useState } from "react";
 import { Meteor } from 'meteor/meteor';
+import { useNavigate } from "react-router-dom";
 // import "/imports/ui/global.css";
+
+export const InvalidCodeWarning = ({ enabled }) => {
+  if (enabled) {
+    return <b>Invalid room code.</b>;
+  } else {
+    return <b></b>;
+  }
+};
 
 export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [text, setText] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!text) return;
-
-    onSuccess();
-
-    Meteor.call("joinRoom", { roomId: text }, (error: Meteor.Error | null, result: { roomId: string }) => {
-      if (!error) {
-        console.log("Successfully joined room:", result);
-        onSuccess();
-      }
-      else {
-        alert("Please enter a valid room code! DEBUG: REMOVE onSuccess() @ Line 12 JoinForm.jsx")
-      }
-    });
-  };
+  const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] =
+  useState(false);
+   const navigate = useNavigate();
+   const handleSubmit = async (e) => {
+     e.preventDefault();
+ 
+     if (!text) return;
+ 
+     Meteor.call("requestJoinRoom", { roomCode: text }, (error, result) => {
+       console.log(result);
+       if (error) {
+         console.log(error);
+         // change state - show invalid code text
+         return;
+       }
+ 
+       if (!result.isValidCode) {
+         setInvalidCodeSubmittedPopupState(true);
+         return;
+       }
+       console.log("Successfully joined room:", result.submittedRoomCode);
+       navigate(`/join/${result.submittedRoomCode}`);
+ 
+     });
+   };
 
   return (
+    <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
     <form className="task-form" onSubmit={handleSubmit}>
       <input
         type="text"
