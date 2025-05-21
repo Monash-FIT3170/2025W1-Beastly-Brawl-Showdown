@@ -10,12 +10,13 @@ type BattleMonsterProps = {
 
 //when making, give it an image, an alt for the blind and which monster position it is in, 1 for left, 2 for right
 export const BattleMonster: React.FC<BattleMonsterProps> = ({ image, alt, position }) => {
-  const [hp, setHp] = useState<number>(100);
+  // const [hp, setHp] = useState<number>(100);
+  const [hp] = useState<number>(100);
 
-  //just updates the hp bar, doesn't really work noww but no monsters now anyway
-  const updateHp = (newHp: number): void => {
-    setHp(newHp);
-  };
+  // //just updates the hp bar, doesn't really work noww but no monsters now anyway
+  // const updateHp = (newHp: number): void => {
+  //   setHp(newHp);
+  // };
 
   return (
     <div className={position}>

@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { CodeLink } from './CodeLink';
 import { QRBox } from './QRBox';
 
