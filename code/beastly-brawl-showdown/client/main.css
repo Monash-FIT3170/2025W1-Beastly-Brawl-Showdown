@@ -509,7 +509,7 @@ body {
 
 .name-board {
   width: 500px; /* 544px */
-  height: 300px; /* 432px */
+  height: 200px; /* 432px */
   background-image: url('/Panel 1.png');
   background-size: 100% 100%;
   background-position: center;
@@ -550,8 +550,8 @@ body {
 }
 
 .monster-card {
-  width: 300px; /* 544px */
-  height: 300px; /* 432px */
+  width: 150px; /* 544px */
+  height: 150px; /* 432px */
   background-image: url('/MonsterCardBg.png');
   background-size: 100% 100%;
   background-position: center;
