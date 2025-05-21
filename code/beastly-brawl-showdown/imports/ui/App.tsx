@@ -1,14 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import HomePage from "./HomePage";
-import JoinPage from "./JoinPage";
+import { renderRoutes } from "../Routes";
 import NamePage from "./NamePage";
-import WaitingRoom from "./WaitingRoom";
 import SettingsPage from "./SettingsPage";
-import MonsterPage from "./MonsterPage";
-import { LoginPage } from "./Login/LoginPage";
-import { GuestNamePage } from "./GuestNamePage";
-import { HostRoomPage } from "./Room/HostRoomPage";
+
 
 export default function App() {
   const [bgmEnabled, setBgmEnabled] = useState(false);
@@ -27,14 +22,7 @@ export default function App() {
       <audio ref={audioRef} src="/sounds/background-music.mp3" loop />
 
       <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/join" element={<JoinPage />} />
-        <Route path="/home" element={<HomePage />} />
-        
-        <Route path="/host" element={<WaitingRoom />} />
-        <Route path="/guest-name" element={<GuestNamePage />} />
-        <Route path="/host/:name" element={<HostRoomPage />} />
-        <Route path="/join/:roomCode" element={<GuestNamePage />} />
+
         <Route
           path="/settings"
           element={
@@ -49,6 +37,8 @@ export default function App() {
         />
         {/* unused routes here*/}
         <Route path="/name" element={<NamePage />} />
+        {/* All main app routes */}
+        {renderRoutes()}
       </Routes>
     </>
   );

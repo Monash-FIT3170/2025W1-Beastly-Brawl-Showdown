@@ -8,11 +8,13 @@ import { HostRoomPage } from "./ui/Room/HostRoomPage";
 import { JoinRoomPage } from "./ui/Room/JoinRoomPage";
 import { GuestNamePage } from "./ui/GuestNamePage";
 import { LoginPage } from "./ui/Login/LoginPage";
+import JoinPage from "./ui/JoinPage";
+import WaitingRoom from "./ui/WaitingRoom";
 
 export const renderRoutes = () => (
   <>
-    <BrowserRouter>
-      <Routes>
+    
+      
         {/* HOSTING Routes */}
         <Route path="/host/:name" element={<HostRoomPage />} />
         <Route path="/h/:id/:name" element={<Room />} />
@@ -33,7 +35,13 @@ export const renderRoutes = () => (
         {/* DEFAULTS */}
         <Route path="/" element={<LoginPage/>} />
         <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+
+        {/*Moved from app*/}
+        <Route path="/join" element={<JoinPage />} />
+        <Route path="/home" element={<HomePage />} />
+        
+        <Route path="/host" element={<WaitingRoom />} />
+      
+    
   </>
 );
