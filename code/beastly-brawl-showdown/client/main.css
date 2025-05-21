@@ -243,6 +243,30 @@ progress::-moz-progress-bar {
   width: 5rem;
   height: 5rem;
   object-fit: fill;
+}
+
+
+.topBackIcon{
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: fill;
+  top: 1.8rem;
+  left: 1rem;
+}
+
+.diceResult{
+  position: absolute;
+  font-size: 3rem;
+  z-index: 1000;
+  left: 35rem;
+  top: 14rem;
+}
+
+.diceAnimation{
+  z-index: 900;
+  position: absolute;
+  left: 20rem;
 }.btn:active {
   transform: scale(0.97);
 }

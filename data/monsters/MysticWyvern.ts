@@ -1,5 +1,5 @@
-import Monsters from './Monsters';
-import DiceRoller from '../utils/DiceRoller';
+const Monsters = require('./Monsters');
+const DiceRoller = require('../utils/DiceRoller');
 
 /**
  * MysticWyvern monster subclass.
@@ -56,3 +56,5 @@ export default class MysticWyvern extends Monsters {
     defender.defend(totalAttack);
   }
 }
+
+module.exports = MysticWyvern;

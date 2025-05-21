@@ -1,45 +1,46 @@
 const DiceRoller = require('../utils/DiceRoller');
 
-class Attack {
-    constructor(attacker, defender) {
-        this._attacker = attacker;
-        this._defender = defender;
+class Action {
+    static attack(attacker, defender) {
+        return Attack.perform(attacker, defender);
     }
 
+    static defend(monster) {
+        Defend.perform(monster);
+    }
+
+    static endDefend(monster) {
+        Defend.revert(monster);
+    }
+}
+
+class Attack {
     static perform(attacker, defender) {
-        const totalAttack = attacker.attack();
-        defender.defend(totalAttack);
+        const roll = DiceRoller.d20();
+        const totalAttack = roll + attacker.attackBonus;
+        console.log(`${attacker.type} rolls ${roll} + ${attacker.attackBonus} = ${totalAttack} vs AC ${defender.AC}`);
+        
+        if (totalAttack > defender.AC) {
+            defender.health -= 5;
+            console.log(`${attacker.type} hits ${defender.type} for 5 damage!`);
+            return true;
+        } else {
+            console.log(`${attacker.type} misses!`);
+            return false;
+        }
     }
 }
 
 class Defend {
-    constructor(monster) {
-        this._monster = monster;
-    }
-
     static perform(monster) {
-        monster.activateDefense();
+        monster.AC += 2;
+        console.log(`${monster.type} is defending! AC increased to ${monster.AC} for this turn.`);
     }
 
     static revert(monster) {
-        monster.revertDefense();
+        monster.AC -= 2;
+        console.log(`${monster.type}'s defense fades. AC back to ${monster.AC}.`);
     }
 }
-
-class Ability {
-    constructor(attacker, defender) {
-        this._attacker = attacker;
-        this._defender = defender;
-    }
-
-    static perform(attacker, defender) {
-        if (attacker._abilityCharges > 0) {
-            attacker.ability(defend);
-        } else {
-            console.log('No remaining ability charges.');
-        }
-    }   
-}
-
 
 module.exports = Action;
