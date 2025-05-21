@@ -1,6 +1,6 @@
 import React from 'react'; // React is needed here for JSX
 import { Meteor } from 'meteor/meteor';
-
+//DELETE THIS FILE IF NOT BEING USED IN THE FUTURE- use HOSTROOMPAGE.tsx
 export const Host = () => {
   const handleHostClick = () => {
     Meteor.call('createRoom', (error: Meteor.Error | null, result: { roomId: string }) => {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Meteor } from "meteor/meteor";
 import { useNavigate } from "react-router-dom";
-
+//DELETE THIS FILE IF NOT BEING USED IN THE FUTURE- use JOINFORM.tsx AND JOINPAGE.tsx
 export const JoinRoomPage = () => {
   return (
     <>
