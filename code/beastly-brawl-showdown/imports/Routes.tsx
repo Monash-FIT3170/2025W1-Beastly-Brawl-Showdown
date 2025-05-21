@@ -26,7 +26,7 @@ export const renderRoutes = () => (
         <Route path="/guest-name" element={<GuestNamePage />} />
 
         {/* ROOM VIEW */}
-        <Route path="/room/:id/:name" element={<Room />} />
+        <Route path="/room/:id/:name" element={<WaitingRoom />} />
 
         {/*  */}
         <Route path="/:id" element={<Player />} />
@@ -37,7 +37,6 @@ export const renderRoutes = () => (
         <Route path="*" element={<NotFound />} />
 
         {/*Moved from app*/}
-        <Route path="/join" element={<JoinPage />} />
         <Route path="/home" element={<HomePage />} />
         
         <Route path="/host" element={<WaitingRoom />} />

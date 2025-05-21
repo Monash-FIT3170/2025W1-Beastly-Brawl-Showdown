@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 // import "/imports/ui/global.css";
 
-export default function HomePage() {
+export const HomePage = () => {
   const navigate = useNavigate();
   const guestName = sessionStorage.getItem("guestName")
 
