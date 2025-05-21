@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 // import "/imports/ui/global.css";
 import { NameForm } from "./NameForm";
 
+//not used anymore
 export default function NamePage() {
     const navigate = useNavigate();
 

@@ -30,7 +30,7 @@ export default function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/join" element={<JoinPage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/name" element={<NamePage />} />
+        
         <Route path="/host" element={<WaitingRoom />} />
         <Route path="/guest-name" element={<GuestNamePage />} />
         <Route path="/host/:name" element={<HostRoomPage />} />
@@ -47,6 +47,8 @@ export default function App() {
             />
           }
         />
+        {/* unused routes here*/}
+        <Route path="/name" element={<NamePage />} />
       </Routes>
     </>
   );

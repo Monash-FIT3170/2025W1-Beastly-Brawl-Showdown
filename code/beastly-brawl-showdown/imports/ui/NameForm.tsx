@@ -2,6 +2,7 @@ import React, { useState } from "react";
 // import { Meteor } from 'meteor/meteor';
 // import "/imports/ui/global.css";
 
+//not used anymore
 export const NameForm = ({ onSuccess }: { onSuccess: () => void }) => {
     const [text, setText] = useState("");
 
