@@ -54,12 +54,20 @@ export const GuestNamePage = () => {
     }
     // else, show name entry form
     return (
-        <>
-        <h1>Enter Your Name:</h1>
-        <form onSubmit={handleSubmit}>
-            <input type="text" placeholder="Your name..." value={name} onChange={(e) => setName(e.target.value)}></input>
-            <button type="submit">Enter</button>
-        </form> 
-        </>
+
+        <div className="page-container">
+            <h1>Guest</h1>
+            <form className="task-form" onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="Enter your name"
+                    value={name}    
+                    onChange={(e) => setName(e.target.value)}
+                />
+                    <div className="buttons-container">
+                        <button className = "btn" type="submit">Continue</button>
+                    </div>
+            </form>
+        </div>
     );
 };
