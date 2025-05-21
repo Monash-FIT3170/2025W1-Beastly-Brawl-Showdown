@@ -5,6 +5,8 @@ import Monsters from '../monsters/Monsters';
  * The attacker attempts to strike the defender with a total attack value.
  */
 export default class AttackAction {
+    label = "Attack";
+
     private attacker: Monsters;
     private defender: Monsters;
 
