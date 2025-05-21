@@ -1,7 +1,7 @@
 import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
 
-export const RoomServerCollection = new Mongo.Collection("room_server");
+export const GameServerRecords = new Mongo.Collection("game_server_records");
 
 export class Player {
   displayName: string;
@@ -64,6 +64,10 @@ export class RoomServer {
     this.uses = new Array(capacity).fill(0);
   }
 
+  async registerServer(){
+    /// attempt to write this to the 
+  }
+
   /** Create room */
   async createRoom() {
     if (this.isFull()) {
@@ -95,7 +99,7 @@ export class RoomServer {
     /** Update the next available slot */
     this.updateAvailableSlot(slotIndex + 1);
 
-    return room.getRoomCode();
+    return room.roomCode;
   }
 
   /** Delete room */

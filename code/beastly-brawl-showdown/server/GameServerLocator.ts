@@ -2,7 +2,7 @@ import { Mongo } from "meteor/mongo";
 import { DDP } from "meteor/ddp-client";
 import Sqids from "sqids";
 
-export const RoomServerCollection = new Mongo.Collection("room_server");
+export const GameServerRecords = new Mongo.Collection("game_server_records");
 
 /**
  *  Get the server most suitable for the requester
@@ -16,12 +16,12 @@ export function getBestServer(): number {
 export async function assignNewRoom() {
   /// Get the server info of the best server
   const bestServerNo = getBestServer();
-  const bestServerInfo = await RoomServerCollection.findOneAsync({
+  const bestServerInfo = await GameServerRecords.findOneAsync({
     serverNo: bestServerNo,
   });
 
   if (!bestServerInfo) {
-    throw Error("Could not generate a new server.");
+    throw Error(`Could not generate a new server @ server #${bestServerNo}.`);
   }
 
   const serverConnection = DDP.connect(bestServerInfo.serverURL);

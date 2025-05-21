@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { assignNewRoom } from "../../server/room/RoomServerNegotiator";
+import { assignNewRoom } from "../../server/GameServerLocator";
 
 Meteor.methods({
 	"room.requestHostRoom"() {
