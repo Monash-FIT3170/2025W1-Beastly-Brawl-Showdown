@@ -1,29 +1,16 @@
-import DiceRoller from '../utils/DiceRoller';
-import AttackAction from '../actions/AttackAction';
-import DefendAction from '../actions/DefendAction';
-import AbilityAction from '../actions/AbilityAction';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var DiceRoller_1 = require("../utils/DiceRoller");
+var AttackAction_1 = require("../actions/AttackAction");
+var DefendAction_1 = require("../actions/DefendAction");
+var AbilityAction_1 = require("../actions/AbilityAction");
 /**
  * Base class for the different monsters in the game.
  * Includes all universal attributes with some default values.
  * Includes default methods such as attack and defend for monster subclasses which share functionality.
  */
-export default class Monsters {
-    protected baseHealth: number;
-    protected currentHealth: number;
-    protected baseAC: number;
-    protected currentAC: number;
-    protected atkBonus: number;
-    protected special: string;
-    protected baseAbilityCharges: number;
-    protected currentAbilityCharges: number;
-    protected monsterType: string;
-    protected baseDefenseCharges: number;
-    protected currentDefenseCharges: number;
-    protected defending: boolean;
-    protected stunRemaining: number;
-
-    constructor(health: number, AC: number, attackBonus: number, special: string, type: string) {
+var Monsters = /** @class */ (function () {
+    function Monsters(health, AC, attackBonus, special, type) {
         this.baseHealth = health;
         this.currentHealth = health;
         this.baseAC = AC;
@@ -38,142 +25,146 @@ export default class Monsters {
         this.defending = false;
         this.stunRemaining = 0;
     }
-
     /**
      * Activates this monster's defense, raising the AC and consuming a defense charge.
      */
-    activateDefense(): void {
+    Monsters.prototype.activateDefense = function () {
         this.defending = true;
         this.currentAC = this.baseAC + 2;
         this.currentDefenseCharges -= 1;
-    }
-
+    };
     /**
      * Initiates an attack against an opponent.
      * Rolls the d20 and calculates the totalAttack delivered using the roll and this monster's attack bonus.
-     * 
+     *
      * @returns totalAttack: The power of this attack.
      */
-    attack(): number {
-        const roll = DiceRoller.d20();
-        const totalAttack = roll + this.atkBonus;
-        console.log(`${this.monsterType} rolls ${roll}... Attack = ${totalAttack}.`);
+    Monsters.prototype.attack = function () {
+        var roll = DiceRoller_1.default.d20();
+        var totalAttack = roll + this.atkBonus;
+        console.log("".concat(this.monsterType, " rolls ").concat(roll, "... Attack = ").concat(totalAttack, "."));
         return totalAttack;
-    }
-
+    };
     /**
      * Computes an incoming attack from another monster.
      * Checks whether this monster's defense is activated.
      * Compares totalAttack to AC and decrements this monster's health appropriately.
-     * 
+     *
      * @param totalAttack The power of the incoming attack.
      */
-    defend(totalAttack: number): void {
+    Monsters.prototype.defend = function (totalAttack) {
         if (this.defending === true) {
             if (totalAttack >= this.currentAC) {
-                console.log(`${this.monsterType}'s defense fails! ${this.monsterType} takes 5 damage.`);
+                console.log("".concat(this.monsterType, "'s defense fails! ").concat(this.monsterType, " takes 5 damage."));
                 this.currentHealth -= 5;
-            } else {
-                console.log(`The attack misses!`);
             }
-
+            else {
+                console.log("The attack misses!");
+            }
             // Reset AC and defense flag after defense turn ends
             this.currentAC = this.baseAC;
             this.defending = false;
-        } else {
+        }
+        else {
             if (totalAttack >= this.currentAC) {
-                console.log(`${this.monsterType} takes ${totalAttack} damage!`);
+                console.log("".concat(this.monsterType, " takes ").concat(totalAttack, " damage!"));
                 this.currentHealth -= totalAttack;
-            } else {
-                console.log(`${this.monsterType}: The attack misses!`);
+            }
+            else {
+                console.log("".concat(this.monsterType, ": The attack misses!"));
             }
         }
-    }
-
+    };
     /**
      * Generates the possible actions a monster can take given its status, defense charges and ability charges.
-     * 
+     *
      * @param opponent The monster which this monster is fighting.
      * @returns An array of possible actions.
      */
-    generateActions(opponent: Monsters): any[] {
-        const actions: any[] = [];
+    Monsters.prototype.generateActions = function (opponent) {
+        var actions = [];
         if (this.stunRemaining === 0) {
-            actions.push(new AttackAction(this, opponent));
+            actions.push(new AttackAction_1.default(this, opponent));
             if (this.currentDefenseCharges > 0) {
-                actions.push(new DefendAction(this));
+                actions.push(new DefendAction_1.default(this));
             }
             if (this.currentAbilityCharges > 0) {
-                actions.push(new AbilityAction(this, opponent));
+                actions.push(new AbilityAction_1.default(this, opponent));
             }
         }
         return actions;
-    }
-
+    };
     /**
      * Resets this monster's AC to base.
      * Used to wipe status effects and revert a defense action after each turn in a battle.
      */
-    revert(): void {
+    Monsters.prototype.revert = function () {
         this.currentAC = this.baseAC;
         if (this.stunRemaining > 0) {
             this.stunRemaining -= 1;
         }
-    }
-
+    };
     /**
      * Resets this monster to its initial state.
      * Used at the end of a battle to ready this monster for the next fight.
      */
-    reset(): void {
+    Monsters.prototype.reset = function () {
         this.currentHealth = this.baseHealth;
         this.currentAC = this.baseAC;
         this.currentDefenseCharges = this.baseDefenseCharges;
         this.stunRemaining = 0;
         this.currentAbilityCharges = this.baseAbilityCharges;
-    }
-
+    };
     /**
      * Applies a stun effect to the monster, lasting 2 turns.
      */
-    stun(): void {
+    Monsters.prototype.stun = function () {
         this.stunRemaining += 2;
-    }
-
+    };
     /**
      * Placeholder for a monster's special ability. Should be overridden by subclasses.
-     * 
+     *
      * @param defender The opponent affected by the ability.
      */
-    useAbility(defender: Monsters): void {}
-
-    // Getters and setters
-
-    get AC(): number {
-        return this.currentAC;
-    }
-
-    set AC(value: number) {
-        this.currentAC = value;
-    }
-
-    get attackBonus(): number {
-        return this.atkBonus;
-    }
-
-    set attackBonus(value: number) {
-        this.atkBonus = value;
-    }
-
-    get health(): number {
-        return this.currentHealth;
-    }
-
-    set health(value: number) {
-        this.currentHealth = value;
-    }
-
-    get type(): string {
-        return this.monsterType;
-    }
-}
+    Monsters.prototype.useAbility = function (defender) { };
+    Object.defineProperty(Monsters.prototype, "AC", {
+        // Getters and setters
+        get: function () {
+            return this.currentAC;
+        },
+        set: function (value) {
+            this.currentAC = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Monsters.prototype, "attackBonus", {
+        get: function () {
+            return this.atkBonus;
+        },
+        set: function (value) {
+            this.atkBonus = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Monsters.prototype, "health", {
+        get: function () {
+            return this.currentHealth;
+        },
+        set: function (value) {
+            this.currentHealth = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Monsters.prototype, "type", {
+        get: function () {
+            return this.monsterType;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Monsters;
+}());
+exports.default = Monsters;

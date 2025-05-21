@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-// import "/imports/ui/global.css";
 import { NameForm } from "./NameForm";
 
 export default function NamePage() {

@@ -10,7 +10,7 @@ export default class StoneHideGuardian extends Monsters {
     }
 
     useAbility(defender: { stun: () => void }): void {
-        this._currentAbilityCharges -= 1;
+        this.currentAbilityCharges -= 1;
         defender.stun();
     }
 }

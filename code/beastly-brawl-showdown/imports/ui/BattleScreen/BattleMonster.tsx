@@ -17,7 +17,7 @@ export const BattleMonster: React.FC<BattleMonsterProps> = ({ image, alt, positi
   // const updateHp = (newHp: number): void => {
   //   setHp(newHp);
   // };
-
+//right now the hp is commented out since its not being used yet
   return (
     <div className={position}>
       <div className="progressContainer">
