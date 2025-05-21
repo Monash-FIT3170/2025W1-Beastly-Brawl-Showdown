@@ -1,20 +1,34 @@
-const MysticWyvern = require('./monsters/MysticWyvern');
-const ShadowFangPredator = require('./monsters/ShadowFangPredator');
-const StoneHideGuardian = require('./monsters/StoneHideGuardian');
+import MysticWyvern from './monsters/MysticWyvern';
+import ShadowFangPredator from './monsters/ShadowFangPredator';
+import StoneHideGuardian from './monsters/StoneHideGuardian';
 
-const Action = require('./actions/Actions');
+import AbilityAction from './actions/AbilityAction';
+import AttackAction from './actions/AttackAction';
+import DefendAction from './actions/DefendAction';
 
 const wyvern = new MysticWyvern();
 const shadow = new ShadowFangPredator();
 const stone = new StoneHideGuardian();
 
-console.log("=== Turn 1: Wyvern defends ===");
-Action.defend(wyvern);
+//chnaged the logging lines, not sure if it broke
+console.log(`\nWyvern: HP = ${wyvern.health}, AC = ${wyvern.AC}`);
+console.log(`Shadow HP = ${shadow.health}, AC = ${shadow.AC}`);
 
-console.log("\n=== Turn 2: ShadowFangPredator attacks Wyvern ===");
-Action.attack(shadow, wyvern);
 
-console.log("\n=== End of Turn: Wyvern's defense fades ===");
-Action.endDefend(stone);
+console.log("=== 1: Create defend action for Wyvern ===");
+const defend = new DefendAction(wyvern);
 
-console.log(`\nResult: ${wyvern.type} HP = ${wyvern.health}, AC = ${wyvern.AC}`);
+console.log("\n=== 2: Create attack action for Shadow ===");
+const attack = new AttackAction(shadow, wyvern);
+
+console.log("\n=== 3: Execute actions ===");
+defend.execute();
+attack.execute();
+
+console.log("\n=== Revert monsters ===");
+wyvern.revert();
+shadow.revert();
+
+console.log(`\nWyvern: HP = ${wyvern.health}, AC = ${wyvern.AC}`);
+console.log(`Shadow HP = ${shadow.health}, AC = ${shadow.AC}`);
+
