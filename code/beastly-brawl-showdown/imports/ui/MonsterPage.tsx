@@ -7,9 +7,9 @@ import MonsterList from "./MonsterList";
 export default function MonsterPage() {
     const navigate = useNavigate();
 
-    const handleSuccess = () => {
-        navigate("/")
-      }
+    // const handleSuccess = () => {
+    //     navigate("/")
+    //   }
 
 
     return (
