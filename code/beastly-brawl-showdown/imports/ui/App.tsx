@@ -5,7 +5,6 @@ import JoinPage from "./JoinPage";
 import NamePage from "./NamePage";
 import WaitingRoom from "./WaitingRoom";
 import SettingsPage from "./SettingsPage";
-import MonsterPage from "./MonsterPage";
 
 export default function App() {
   const [bgmEnabled, setBgmEnabled] = useState(false);

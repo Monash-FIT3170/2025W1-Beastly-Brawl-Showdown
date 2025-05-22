@@ -9,43 +9,43 @@ import AbilityAction from '../actions/AbilityAction';
  * Includes default methods such as attack and defend for monster subclasses which share functionality.
  */
 export default class Monsters {
-    protected _baseHealth: number;
-    protected _currentHealth: number;
-    protected _baseAC: number;
-    protected _currentAC: number;
-    protected _attackBonus: number;
-    protected _special: string;
-    protected _baseAbilityCharges: number;
-    protected _currentAbilityCharges: number;
-    protected _type: string;
-    protected _baseDefenseCharges: number;
-    protected _currentDefenseCharges: number;
-    protected _defending: boolean;
-    protected _stunRemaining: number;
+    protected baseHealth: number;
+    protected currentHealth: number;
+    protected baseAC: number;
+    protected currentAC: number;
+    protected atkBonus: number;
+    protected special: string;
+    protected baseAbilityCharges: number;
+    protected currentAbilityCharges: number;
+    protected monsterType: string;
+    protected baseDefenseCharges: number;
+    protected currentDefenseCharges: number;
+    protected defending: boolean;
+    protected stunRemaining: number;
 
     constructor(health: number, AC: number, attackBonus: number, special: string, type: string) {
-        this._baseHealth = health;
-        this._currentHealth = health;
-        this._baseAC = AC;
-        this._currentAC = AC;
-        this._attackBonus = attackBonus;
-        this._special = special;
-        this._baseAbilityCharges = 1;
-        this._currentAbilityCharges = 1;
-        this._type = type;
-        this._baseDefenseCharges = 3;
-        this._currentDefenseCharges = 3;
-        this._defending = false;
-        this._stunRemaining = 0;
+        this.baseHealth = health;
+        this.currentHealth = health;
+        this.baseAC = AC;
+        this.currentAC = AC;
+        this.atkBonus = attackBonus;
+        this.special = special;
+        this.baseAbilityCharges = 1;
+        this.currentAbilityCharges = 1;
+        this.monsterType = type;
+        this.baseDefenseCharges = 3;
+        this.currentDefenseCharges = 3;
+        this.defending = false;
+        this.stunRemaining = 0;
     }
 
     /**
      * Activates this monster's defense, raising the AC and consuming a defense charge.
      */
     activateDefense(): void {
-        this._defending = true;
-        this._currentAC = this._baseAC + 2;
-        this._currentDefenseCharges -= 1;
+        this.defending = true;
+        this.currentAC = this.baseAC + 2;
+        this.currentDefenseCharges -= 1;
     }
 
     /**
@@ -56,8 +56,8 @@ export default class Monsters {
      */
     attack(): number {
         const roll = DiceRoller.d20();
-        const totalAttack = roll + this._attackBonus;
-        console.log(`${this.type} rolls ${roll}... Attack = ${totalAttack}.`);
+        const totalAttack = roll + this.atkBonus;
+        console.log(`${this.monsterType} rolls ${roll}... Attack = ${totalAttack}.`);
         return totalAttack;
     }
 
@@ -69,23 +69,23 @@ export default class Monsters {
      * @param totalAttack The power of the incoming attack.
      */
     defend(totalAttack: number): void {
-        if (this._defending === true) {
-            if (totalAttack >= this._currentAC) {
-                console.log(`${this.type}'s defense fails! ${this.type} takes 5 damage.`);
-                this._currentHealth -= 5;
+        if (this.defending === true) {
+            if (totalAttack >= this.currentAC) {
+                console.log(`${this.monsterType}'s defense fails! ${this.monsterType} takes 5 damage.`);
+                this.currentHealth -= 5;
             } else {
                 console.log(`The attack misses!`);
             }
 
             // Reset AC and defense flag after defense turn ends
-            this._currentAC = this._baseAC;
-            this._defending = false;
+            this.currentAC = this.baseAC;
+            this.defending = false;
         } else {
-            if (totalAttack >= this._currentAC) {
-                console.log(`${this.type} takes ${totalAttack} damage!`);
-                this._currentHealth -= totalAttack;
+            if (totalAttack >= this.currentAC) {
+                console.log(`${this.monsterType} takes ${totalAttack} damage!`);
+                this.currentHealth -= totalAttack;
             } else {
-                console.log(`${this.type}: The attack misses!`);
+                console.log(`${this.monsterType}: The attack misses!`);
             }
         }
     }
@@ -98,12 +98,12 @@ export default class Monsters {
      */
     generateActions(opponent: Monsters): any[] {
         const actions: any[] = [];
-        if (this._stunRemaining === 0) {
+        if (this.stunRemaining === 0) {
             actions.push(new AttackAction(this, opponent));
-            if (this._currentDefenseCharges > 0) {
+            if (this.currentDefenseCharges > 0) {
                 actions.push(new DefendAction(this));
             }
-            if (this._currentAbilityCharges > 0) {
+            if (this.currentAbilityCharges > 0) {
                 actions.push(new AbilityAction(this, opponent));
             }
         }
@@ -115,9 +115,9 @@ export default class Monsters {
      * Used to wipe status effects and revert a defense action after each turn in a battle.
      */
     revert(): void {
-        this._currentAC = this._baseAC;
-        if (this._stunRemaining > 0) {
-            this._stunRemaining -= 1;
+        this.currentAC = this.baseAC;
+        if (this.stunRemaining > 0) {
+            this.stunRemaining -= 1;
         }
     }
 
@@ -126,18 +126,18 @@ export default class Monsters {
      * Used at the end of a battle to ready this monster for the next fight.
      */
     reset(): void {
-        this._currentHealth = this._baseHealth;
-        this._currentAC = this._baseAC;
-        this._currentDefenseCharges = this._baseDefenseCharges;
-        this._stunRemaining = 0;
-        this._currentAbilityCharges = this._baseAbilityCharges;
+        this.currentHealth = this.baseHealth;
+        this.currentAC = this.baseAC;
+        this.currentDefenseCharges = this.baseDefenseCharges;
+        this.stunRemaining = 0;
+        this.currentAbilityCharges = this.baseAbilityCharges;
     }
 
     /**
      * Applies a stun effect to the monster, lasting 2 turns.
      */
     stun(): void {
-        this._stunRemaining += 2;
+        this.stunRemaining += 2;
     }
 
     /**
@@ -150,30 +150,30 @@ export default class Monsters {
     // Getters and setters
 
     get AC(): number {
-        return this._currentAC;
+        return this.currentAC;
     }
 
     set AC(value: number) {
-        this._currentAC = value;
+        this.currentAC = value;
     }
 
     get attackBonus(): number {
-        return this._attackBonus;
+        return this.atkBonus;
     }
 
     set attackBonus(value: number) {
-        this._attackBonus = value;
+        this.atkBonus = value;
     }
 
     get health(): number {
-        return this._currentHealth;
+        return this.currentHealth;
     }
 
     set health(value: number) {
-        this._currentHealth = value;
+        this.currentHealth = value;
     }
 
     get type(): string {
-        return this._type;
+        return this.monsterType;
     }
 }
