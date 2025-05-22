@@ -28,8 +28,8 @@ export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
          // change state - show invalid code text
          return;
        }
- 
-       if (!result.isValidCode) {
+       //the second half is here cuz if not it won't work
+       if (!result.isValidCode || !result.isValidCode.isValidCode) {
          setInvalidCodeSubmittedPopupState(true);
          return;
        }
@@ -40,6 +40,7 @@ export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
    };
 
   return (
+    <>
     <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
     <form className="task-form" onSubmit={handleSubmit}>
       <input
@@ -53,5 +54,6 @@ export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
       </div>
       
     </form>
+    </>
   );
 };
