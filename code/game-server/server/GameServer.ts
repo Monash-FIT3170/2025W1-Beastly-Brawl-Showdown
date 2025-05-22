@@ -32,7 +32,7 @@ export class Room {
   gameState: Array<MatchState>;
   settings: GameSettings;
 
-  roomCode: string;
+  roomCode: string | null = null;
 
   constructor() {
     this.settings = {};
@@ -45,8 +45,15 @@ export class RoomServer {
   static MIN_CAPACITY = 1;
   static CODE_MIN_LENGTH = 6;
   static CODE_ALPHABET = "0123456789";
+  
+  server_no: number;
+  numberOfRooms: number;
+  currMax: number;
+  availableRoom: number;
+  rooms: Room[];
+  uses: number[];
 
-  constructor(server_no, maxCapacity) {
+  constructor(server_no: number, maxCapacity: number) {
     /**  Ensure a minimum capacity */
     const capacity = Math.max(RoomServer.MIN_CAPACITY, maxCapacity);
 
@@ -64,8 +71,8 @@ export class RoomServer {
     this.uses = new Array(capacity).fill(0);
   }
 
-  async registerServer(){
-    /// attempt to write this to the 
+  async registerServer() {
+    /// attempt to write this to the
   }
 
   /** Create room */
@@ -84,9 +91,10 @@ export class RoomServer {
     /** Get the number of uses for this room */
     const roomUses = this.uses[slotIndex];
     /** Encode by [server number, room number, room no. of use] */
-    const roomCode = sqids.encode([this.server_no, slotIndex, roomUses]);
+    const roomCode:string = sqids.encode([this.server_no, slotIndex, roomUses]);
     /** Create temporary room object with this room id */
-    const room = new Room(roomCode); /** Temporary implementation of room object
+    const room = new Room(); /** Temporary implementation of room object */
+    room.roomCode = roomCode
     /** Assign room to slot */
     this.rooms[slotIndex] = room;
     /** Increment the number of currently active rooms */
