@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import { useNavigate } from "react-router-dom";
 // import "/imports/ui/global.css";
 
-export const InvalidCodeWarning = ({ enabled }) => {
+export const InvalidCodeWarning = ({ enabled }:{ enabled:boolean }) => {
   if (enabled) {
     return <b>Invalid room code.</b>;
   } else {
@@ -16,20 +16,20 @@ export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] =
   useState(false);
    const navigate = useNavigate();
-   const handleSubmit = async (e) => {
+   const handleSubmit = async (e: { preventDefault: () => void; }) => {
      e.preventDefault();
  
      if (!text) return;
  
-     Meteor.call("requestJoinRoom", { roomCode: text }, (error, result) => {
+     Meteor.call("requestJoinRoom", { roomCode: text }, (error: any, result: { isValidCode: boolean; submittedRoomCode: string; }) => {
        console.log(result);
        if (error) {
          console.log(error);
          // change state - show invalid code text
          return;
        }
-       //the second half is here cuz if not it won't work
-       if (!result.isValidCode || !result.isValidCode.isValidCode) {
+
+       if (!result.isValidCode) {
          setInvalidCodeSubmittedPopupState(true);
          return;
        }

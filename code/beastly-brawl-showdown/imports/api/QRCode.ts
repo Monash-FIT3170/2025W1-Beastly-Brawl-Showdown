@@ -1,6 +1,6 @@
 import QRCode from 'easyqrcodejs';
 
-export function generateQRCode(container, text) {
+export function generateQRCode(container: HTMLElement, text: string) {
   //html container
   container.innerHTML = '';
   var options = {

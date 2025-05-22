@@ -10,14 +10,16 @@ Meteor.methods({
     return response;
   },
 
-  async requestJoinRoom({ playerID, roomCode }) { // player ID currently unused - maybe used later?
+  async requestJoinRoom({ playerID, roomCode }: { playerID: number, roomCode: string }): Promise<{ submittedRoomCode: string, isValidCode: boolean }>
+  { // player ID currently unused - maybe used later?
     var response = {
       submittedRoomCode: roomCode,
       isValidCode: false
     }
     console.log(`Player <${playerID}> attempted to join using code ${response.submittedRoomCode}`)
 
-    response.isValidCode = await RoomServerManager.requestPlayerJoinRoom({ roomCode: roomCode })
+    const result = await RoomServerManager.requestPlayerJoinRoom({ roomCode: roomCode })
+    response.isValidCode = result.isValidCode
 
     return response;
   }
