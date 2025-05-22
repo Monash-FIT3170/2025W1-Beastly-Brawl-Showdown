@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect,useState } from "react";
 import { useParams } from "react-router-dom";
 import { CodeLink } from "../CodeLink";
 import { QRBox } from "../QRBox";

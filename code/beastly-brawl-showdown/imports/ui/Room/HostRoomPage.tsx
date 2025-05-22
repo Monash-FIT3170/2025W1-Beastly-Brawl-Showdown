@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Meteor } from "meteor/meteor";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 
 export const HostRoomPage = () => {
   const navigate = useNavigate();

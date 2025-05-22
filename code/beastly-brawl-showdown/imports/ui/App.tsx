@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { renderRoutes } from "../Routes";
 import SettingsPage from "./SettingsPage";
-import MonsterPage from "./MonsterPage";
 
 export default function App() {
   const [bgmEnabled, setBgmEnabled] = useState(false);
