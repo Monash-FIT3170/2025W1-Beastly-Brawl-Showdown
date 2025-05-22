@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 
-export const CodeLink = ({ link }: { link: string }) => {
-  let displayLink = link;
-
-  if (!link || link == "") {
-    displayLink = "Link will appear here soon!";
-  }
-
-  return (
-    <div className="code-link">
-      {displayLink}
-    </div>
-  );
-};
+export const CodeLink = () => {
+    return (
+        <div className="code-link">
+            BeastlyBrawlShowdown.com/69420testtest
+        </div>
+    )
+}
