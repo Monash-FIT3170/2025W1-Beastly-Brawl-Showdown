@@ -4,11 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const guestName = sessionStorage.getItem("guestName")
 
   const handleGuestHostName = () =>{
-    const safeGuestName = guestName ?? ""; // If null, use empty string, this gets rid of a red line on my ide
-    navigate(`/host/${encodeURIComponent(safeGuestName)}`)
+    navigate(`/host/`)
   };
 
   return (

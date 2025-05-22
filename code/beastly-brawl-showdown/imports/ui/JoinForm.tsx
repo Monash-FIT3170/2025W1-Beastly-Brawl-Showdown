@@ -34,7 +34,7 @@ export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
          return;
        }
        console.log("Successfully joined room:", result.submittedRoomCode);
-       navigate(`/join/${result.submittedRoomCode}`);
+       navigate(`/room/${result.submittedRoomCode}`);
  
      });
    };

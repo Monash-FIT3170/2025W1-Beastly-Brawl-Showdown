@@ -30,9 +30,9 @@ export const GuestNamePage = () => {
             sessionStorage.setItem("guestName", name);
 
             if (target == "host") {
-                navigate(`/host/${encodeURIComponent(name)}`);
+                navigate(`/host/`);
             } else if (roomCode) {
-                navigate(`/room/${roomCode}/${encodeURIComponent(name)}`);
+                navigate(`/room/${roomCode}/`);
             } else if (target == "home") {
                 navigate("/home");
             } else {

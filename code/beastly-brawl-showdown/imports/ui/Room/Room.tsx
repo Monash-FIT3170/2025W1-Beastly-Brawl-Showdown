@@ -5,9 +5,9 @@ import { CodeLink } from "../CodeLink";
 import { QRBox } from "../QRBox";
 
 export const Room = () => {
-  const { id, name } = useParams();
-  //get name from url
-  const playerName = decodeURIComponent(name); 
+  const { id} = useParams();
+  //get name from session storage
+  const playerName = sessionStorage.getItem("guestName"); 
   const [revealURL, setURL] = useState(String);
 
   useEffect(() => {

@@ -15,17 +15,17 @@ export const renderRoutes = () => (
     
       
         {/* HOSTING Routes */}
-        <Route path="/host/:name" element={<HostRoomPage />} />
-        <Route path="/h/:id/:name" element={<Room />} />
+        <Route path="/host/" element={<HostRoomPage />} />
+        <Route path="/h/:id/" element={<Room />} />
 
 
         {/* JOINING Routes */}
         <Route path="/join" element={<JoinPage />} />
-        <Route path="/join/:roomCode" element={<GuestNamePage />} />
+        <Route path="/join/:roomCode" element={<GuestNamePage/>} />
         <Route path="/guest-name" element={<GuestNamePage />} />
 
         {/* ROOM VIEW */}
-        <Route path="/room/:id/:name" element={<WaitingRoom />} />
+        <Route path="/room/:id/" element={<WaitingRoom />} />
 
         {/*  */}
         <Route path="/:id" element={<Player />} />

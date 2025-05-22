@@ -23,7 +23,6 @@ export const UserForm = () => {
     console.log("Logging in as guest");
     // Storing guest login status and name, then navigate to home page
     sessionStorage.setItem("guestLoggedIn", "true");
-    sessionStorage.setItem("guestName", userName);
     navigate("/guest-name?target=home");
   };
 
