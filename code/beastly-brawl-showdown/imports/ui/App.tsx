@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { renderRoutes } from "../Routes";
-import NamePage from "./NamePage";
 import SettingsPage from "./SettingsPage";
 
 
@@ -35,8 +34,6 @@ export default function App() {
             />
           }
         />
-        {/* unused routes here*/}
-        <Route path="/name" element={<NamePage />} />
         {/* All main app routes */}
         {renderRoutes()}
       </Routes>
