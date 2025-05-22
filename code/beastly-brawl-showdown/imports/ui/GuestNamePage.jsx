@@ -36,7 +36,7 @@ export const GuestNamePage = () => {
             } else if (target == "home") {
                 navigate("/home");
             } else {
-                console.log("UNknown route")
+                console.log("Unknown route")
             }
     };
 

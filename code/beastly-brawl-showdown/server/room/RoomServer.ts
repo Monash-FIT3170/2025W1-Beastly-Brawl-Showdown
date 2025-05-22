@@ -1,5 +1,3 @@
-"use strict";
-
 import Sqids from "sqids";
 import { Room } from "./Room";
 

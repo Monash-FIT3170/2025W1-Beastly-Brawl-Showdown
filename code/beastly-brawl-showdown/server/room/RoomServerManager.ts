@@ -1,5 +1,3 @@
-"use strict";
-
 import { Room } from "./Room";
 import { RoomServer } from "./RoomServer";
 

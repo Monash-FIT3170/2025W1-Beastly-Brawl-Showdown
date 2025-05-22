@@ -1,5 +1,3 @@
-"use strict";
-
 import { Meteor } from "meteor/meteor";
 import { RoomServerManager } from "../../server/room/RoomServerManager";
 
