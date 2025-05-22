@@ -9,7 +9,7 @@ export default function WaitingRoom() {
   const { id, name } = useParams();
   //get name from url
   const playerName = decodeURIComponent(name); 
-  const [revealURL, setURL] = useState(null);
+  const [revealURL, setURL] = useState(String);
 
   useEffect(() => {
     if (id) {
