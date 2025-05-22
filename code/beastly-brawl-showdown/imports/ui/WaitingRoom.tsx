@@ -8,6 +8,14 @@ export default function WaitingRoom() {
   const { id } = useParams();
   const playerName = sessionStorage.getItem("guestName")
   const [revealURL, setURL] = useState("");
+  let safePlayerName: string;
+
+  if (playerName == null) {
+    throw new Error("Player name is not set in sessionStorage.");
+  }
+  else{
+    safePlayerName = playerName
+  }
 
   useEffect(() => {
     if (id) {
@@ -24,7 +32,7 @@ export default function WaitingRoom() {
       <h1>Room ID: {id}</h1>
       <h2>Waiting Room</h2>
       <WaitingRoomInfoBox joinURL={revealURL}/>
-      <ParticipantDisplayBox name={playerName}/>
+      <ParticipantDisplayBox name={safePlayerName}/>
     </div>
   );
 }

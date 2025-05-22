@@ -11,7 +11,7 @@ export const InvalidCodeWarning = ({ enabled }:{ enabled:boolean }) => {
   }
 };
 
-export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
+export const JoinForm = () => {
   const [text, setText] = useState("");
   const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] =
   useState(false);

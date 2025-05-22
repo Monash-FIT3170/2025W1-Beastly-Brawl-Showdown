@@ -11,7 +11,7 @@ export const HostRoomPage = () => {
   const onRequestRoom = () => {
     console.log(playerName)
     console.log("Requesting room...");
-    Meteor.call("requestNewRoom", (error, result) => {
+    Meteor.call("requestNewRoom", (error: any, result: { roomCode: string; }) => {
       if (error) {
         console.error("Error creating room:", error);
         return;
