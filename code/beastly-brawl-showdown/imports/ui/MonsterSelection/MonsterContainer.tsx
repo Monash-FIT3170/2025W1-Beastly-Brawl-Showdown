@@ -1,6 +1,6 @@
 import React from "react";
 
-export const MonsterContainer = ({image, name, func}) => {
+export const MonsterContainer = ({image, name, func}: {image: string, name: string, func: (name: string) => void}) => {
     /**
      * Onclick handler
      */

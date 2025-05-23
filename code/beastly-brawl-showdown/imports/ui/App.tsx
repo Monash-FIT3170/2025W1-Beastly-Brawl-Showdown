@@ -1,9 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import HomePage from "./HomePage";
-import JoinPage from "./JoinPage";
-import NamePage from "./NamePage";
-import WaitingRoom from "./WaitingRoom";
+import { renderRoutes } from "../Routes";
 import SettingsPage from "./SettingsPage";
 
 export default function App() {
@@ -23,10 +20,7 @@ export default function App() {
       <audio ref={audioRef} src="/sounds/background-music.mp3" loop />
 
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/join" element={<JoinPage />} />
-        <Route path="/name" element={<NamePage />} />
-        <Route path="/host" element={<WaitingRoom />} />
+
         <Route
           path="/settings"
           element={
@@ -39,6 +33,8 @@ export default function App() {
             />
           }
         />
+        {/* All main app routes */}
+        {renderRoutes()}
       </Routes>
     </>
   );

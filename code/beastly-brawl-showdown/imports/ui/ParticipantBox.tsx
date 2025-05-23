@@ -1,9 +1,9 @@
 import React from 'react';
 
-export const ParticipantBox = () => {
-    return (
-        <div className="participants-box">
-            name
-        </div>
-    )
-}
+export const ParticipantBox = ({ name }: { name: string }) => {
+  return (
+    <div className="participants-box">
+      {name}
+    </div>
+  );
+};

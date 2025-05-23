@@ -1,7 +1,15 @@
-export const CodeLink = () => {
-    return (
-        <div className="code-link">
-            BeastlyBrawlShowdown.com/69420testtest
-        </div>
-    )
-}
+import React from 'react';
+
+export const CodeLink = (link: string ) => {
+  let displayLink = link;
+  if (!link || link == "") {
+    displayLink = "Link will appear here soon!";
+  }
+
+  return (
+    <div className="code-link">
+      {displayLink}
+    </div>
+  );
+
+};
