@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const CodeLink = ({ link }: { link: string }) => {
+export const CodeLink = (link: string ) => {
   let displayLink = link;
   if (!link || link == "") {
     displayLink = "Link will appear here soon!";

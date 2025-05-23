@@ -1,5 +1,5 @@
 import React from "react";
-import { Route,} from "react-router-dom";
+import { Route } from "react-router-dom";
 import { NotFound } from "./ui/Error/NotFound";
 import { HomePage } from "./ui/HomePage";
 import { Player } from "./ui/PlayerPage";
