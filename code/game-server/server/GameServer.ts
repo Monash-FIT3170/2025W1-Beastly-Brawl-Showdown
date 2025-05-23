@@ -1,25 +1,12 @@
+import { assert } from "console";
 import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
 
 export const GameServerRecords = new Mongo.Collection("game_server_records");
 
 export class Player {
-  displayName: string;
-  linkedAcccountId?: string;
-
-  constructor(displayName) {
-    this.displayName = displayName;
-  }
-
-  /** Method to get the name of this player */
-  getName() {
-    return this.displayName;
-  }
-
-  /** Method to display player name when player object is printed */
-  toString() {
-    return this.displayName;
-  }
+  displayName: string | null = null;
+  linkedAcccountId: string | null = null;
 }
 
 /** Turn history */
@@ -42,37 +29,66 @@ export class Room {
 }
 
 export class RoomServer {
-  static MIN_CAPACITY = 1;
-  static CODE_MIN_LENGTH = 6;
-  static CODE_ALPHABET = "0123456789";
-  
-  server_no: number;
+  static readonly CODE_MIN_LENGTH = 6;
+  static readonly CODE_ALPHABET = "0123456789";
+
+  /** The assigned server number */
+  readonly serverNo: number;
+  /** Max number of slots */
+  readonly capacity: number;
+
+  /**  Number of currently active rooms */
   numberOfRooms: number;
+  /**  Current highest number of times a room has been used */
   currMax: number;
+  /**  Index of the available room to be used next */
   availableRoom: number;
+  /**  The array to store rooms */
   rooms: Room[];
+  /**  The array to store the number of times each room has been used */
   uses: number[];
 
-  constructor(server_no: number, maxCapacity: number) {
-    /**  Ensure a minimum capacity */
-    const capacity = Math.max(RoomServer.MIN_CAPACITY, maxCapacity);
+  constructor(serverNo: number, maxCapacity: number) {
+    this.serverNo = serverNo;
+    assert(maxCapacity > 0, "Ensure a minimum capacity");
+    this.capacity = maxCapacity;
 
-    /** Server instance number */
-    this.server_no = server_no;
-    /**  Number of currently active rooms */
     this.numberOfRooms = 0;
-    /**  Current highest number of times a room has been used */
     this.currMax = 0;
-    /**  Index of the available room to be used next */
     this.availableRoom = 0;
-    /**  The array to store rooms */
-    this.rooms = new Array(capacity).fill(null);
-    /**  The array to store the number of times each room has been used */
-    this.uses = new Array(capacity).fill(0);
+    this.rooms = new Array(this.capacity).fill(null);
+    this.uses = new Array(this.capacity).fill(0);
   }
 
-  async registerServer() {
-    /// attempt to write this to the
+  /** Attempt to write this to the database */
+  async registerServer(overrideExisting: boolean) {
+    /// Does this already exist in the records
+    const existingRecord = await GameServerRecords.findOneAsync({
+      serverNo: this.serverNo,
+    });
+
+    if (existingRecord) {
+      console.log("There is a server registered with the same number.");
+      if (!overrideExisting) {
+        throw Error(
+          "Server registration failed. Cannot override existing record."
+        );
+      }
+      console.log(
+        `Overriding existing record: ${JSON.stringify(existingRecord)}`
+      );
+    }
+
+    const noOfUpdatedRecords = await GameServerRecords.updateAsync(
+      { serverNo: this.serverNo },
+      { $set: { url: process.env.ROOT_URL } },
+      { upsert: true } /// Update or insert (if does not exist)
+    );
+
+    assert(
+      noOfUpdatedRecords <= 1,
+      "Unexpected behaviour. Multiple records overrited when there should be one."
+    );
   }
 
   /** Create room */
@@ -91,10 +107,10 @@ export class RoomServer {
     /** Get the number of uses for this room */
     const roomUses = this.uses[slotIndex];
     /** Encode by [server number, room number, room no. of use] */
-    const roomCode:string = sqids.encode([this.server_no, slotIndex, roomUses]);
+    const roomCode: string = sqids.encode([this.serverNo, slotIndex, roomUses]);
     /** Create temporary room object with this room id */
     const room = new Room(); /** Temporary implementation of room object */
-    room.roomCode = roomCode
+    room.roomCode = roomCode;
     /** Assign room to slot */
     this.rooms[slotIndex] = room;
     /** Increment the number of currently active rooms */
@@ -111,7 +127,7 @@ export class RoomServer {
   }
 
   /** Delete room */
-  async deleteRoom(roomCode) {
+  deleteRoom(roomCode) {
     /** Check if the room is empty */
     if (this.isEmpty()) {
       throw new Error("Server is empty");
@@ -126,7 +142,7 @@ export class RoomServer {
     let deletedIndex = null;
     // Find the room with this roomId
     for (let i = 0; i < this.length; i++) {
-      if (roomCode == this.rooms[i].getRoomId()) {
+      if (roomCode == this.rooms[i].roomCode) {
         // Clear the room with the requested id
         this.rooms[i] = null;
         // Save the index of the deleted room
@@ -208,7 +224,7 @@ export class RoomServer {
     return this.numberOfRooms;
   }
 
-  async hasInstanceWithCode(roomCode) {
+  hasInstanceWithCode(roomCode) {
     for (let i = 0; i < this.rooms.length; i++) {
       if (this.rooms[i] == roomCode) {
         return true;

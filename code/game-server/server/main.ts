@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { RoomServer, GameServerRecords } from "./GameServer";
+import { RoomServer } from "./GameServer";
 
 export let roomServer: RoomServer | null = null;
 
@@ -10,17 +10,5 @@ Meteor.startup(async () => {
   /** Start instance of room server */
   roomServer = new RoomServer(serverNo, serverCapacity);
   /** Notify database so that it can redirect to this */
-  // TODO
-
-  /// ADD TESTING DATA IF EMPTY
-  if ((await GameServerRecords.find().countAsync()) === 0) {
-    GameServerRecords.insertAsync({
-      serverNo: "0",
-      serverURL: "http://localhost:3100",
-    });
-    GameServerRecords.insertAsync({
-      serverNo: "7",
-      serverURL: "http://localhost:3107",
-    });
-  }
+  roomServer.registerServer(true);
 });
