@@ -19,6 +19,7 @@ export const HostRoomPage = () => {
 
       console.log("Room created with result:", result);
       console.log(`Moving host to room #${result.roomCode}`);
+      sessionStorage.setItem("roomId", result.roomCode);
       navigate(`/h/${result.roomCode}/`);
 
     });

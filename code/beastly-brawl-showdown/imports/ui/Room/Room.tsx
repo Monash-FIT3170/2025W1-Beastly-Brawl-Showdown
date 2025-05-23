@@ -1,14 +1,13 @@
 import { Meteor } from "meteor/meteor";
 import React, { useEffect,useState } from "react";
-import { useParams } from "react-router-dom";
 import { CodeLink } from "../CodeLink";
 import { QRBox } from "../QRBox";
 
 export const Room = () => {
-  const { id} = useParams();
+  const id = sessionStorage.getItem("roomId");
   //get name from session storage
   const playerName = sessionStorage.getItem("guestName"); 
-  const [revealURL, setURL] = useState(String);
+  const [revealURL, setURL] = useState('');
 
   useEffect(() => {
     if (id) {
