@@ -1,77 +1,93 @@
-import { assert } from "console";
-import { styleText } from 'node:util';
+import { assert, error } from "console";
 import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
+import { log, log_warning } from "./utils";
+
+export type ServerId = number;
+export type RoomId = number;
+export type JoinCode = string;
 
 export const GameServerRecords = new Mongo.Collection("game_server_records");
 
-export function log_warning(val:any){ // TODO move to general utils
-  console.log("\x1b[33m[Warning]\x1b[0m", val);
-}
-
 export class Player {
-  displayName?: string = undefined;
-  linkedAcccountId?: string = undefined;
+  displayName?: string;
+  linkedAcccountId?: string;
 }
 
-/** Turn history */
-export class MatchState {}
 /** Preferences and Settings for this lobby */
 export class GameSettings {}
 
 export class Room {
-  players: Array<Player>;
-  gameState: Array<MatchState>;
-  settings: GameSettings;
+  readonly roomId: RoomId;
+  /**
+   * The code which players can join the room with.
+   *
+   * Generated from {@link roomId} using {@link Sqids}
+   */
+  readonly joinCode: JoinCode;
 
-  roomCode?: string = undefined;
+  players: Array<Player> = new Array<Player>();
+  gameState: any = undefined;
+  settings: GameSettings = new GameSettings();
 
-  constructor() {
-    this.settings = {};
-    this.players = []; // Temporarily have no limit to the number of players
-    this.gameState = [];
+  constructor(roomId: RoomId, joinCode: JoinCode) {
+    this.roomId = roomId;
+    this.joinCode = joinCode;
   }
 }
 
 export class GamerServer {
-  static readonly CODE_MIN_LENGTH = 6;
-  static readonly CODE_ALPHABET = "0123456789";
+  readonly CODE_MIN_LENGTH = 6; // TODO move to argv
+  readonly CODE_ALPHABET = "0123456789"; // TODO move to argv
 
   /** The assigned server number */
-  readonly serverNo: number;
+  readonly serverId: ServerId;
   /** Max number of slots */
-  readonly capacity: number;
+  readonly maxCapacity: number;
 
-  /**  Number of currently active rooms */
-  activeRoomCount: number;
-  /**  Current highest number of times a room has been used */
-  currMax: number;
-  /**  Index of the available room to be used next */
-  availableRoom: number;
+  /** Initialize new sqids object */
+  readonly sqids = new Sqids({
+    minLength: this.CODE_MIN_LENGTH,
+    alphabet: this.CODE_ALPHABET,
+  });
+
+  /**  The last room id that was given out */
+  private lastAssignedRoomId: RoomId = 0;
+
   /**  The array to store rooms */
-  rooms: Room[];
-  /**  The array to store the number of times each room has been used */
-  uses: number[];
+  private rooms = new Map<RoomId, Room>();
 
-  constructor(serverNo: number, maxCapacity: number) {
-    this.serverNo = serverNo;
-    assert(maxCapacity > 0, "Ensure a minimum capacity");
-    this.capacity = maxCapacity;
+  private constructor(serverId: ServerId, maxCapacity: number) {
+    if (serverId < 0) {
+      throw Error("Invalid server id.");
+    }
+    this.serverId = serverId;
 
-    this.activeRoomCount = 0;
-    this.currMax = 0;
-    this.availableRoom = 0;
-    this.rooms = new Array(this.capacity).fill(null);
-    this.uses = new Array(this.capacity).fill(0);
+    if (maxCapacity <= 0) {
+      throw Error("Invalid server capacity.");
+    }
+    this.maxCapacity = maxCapacity;
+  }
+
+  static async start(
+    serverId: ServerId,
+    maxCapacity: number
+  ): Promise<GamerServer> {
+    log("Starting server instance...");
+    const gameServer: GamerServer = new GamerServer(serverId, maxCapacity);
+    log("Register with global records...");
+    await gameServer.registerServer(true);
+
+    log("Server startup complete.");
+    return gameServer;
   }
 
   /** Attempt to write this to the database */
-  async registerServer(overrideExisting: boolean) {
+  private async registerServer(overrideExisting: boolean) {
     /// Does this already exist in the records
     const existingRecord = await GameServerRecords.findOneAsync({
-      serverNo: this.serverNo,
+      serverNo: this.serverId,
     });
-
     if (existingRecord) {
       log_warning("There is a server registered with the same number.");
       if (!overrideExisting) {
@@ -85,7 +101,7 @@ export class GamerServer {
     }
 
     const noOfUpdatedRecords = await GameServerRecords.updateAsync(
-      { serverNo: this.serverNo },
+      { serverNo: this.serverId },
       { $set: { url: process.env.ROOT_URL } },
       { upsert: true } /// Update or insert (if does not exist)
     );
@@ -96,130 +112,53 @@ export class GamerServer {
     );
   }
 
-  /** Create room */
-  async createRoom() {
-    // if (this.isFull()) {
-    //   throw new Error("Server is full");
-    // }
-
-    // /** Initialize new sqids object */
-    // const sqids = new Sqids({
-    //   minLength: GamerServer.CODE_MIN_LENGTH,
-    //   alphabet: GamerServer.CODE_ALPHABET,
-    // });
-    // /** Get the index of the room to be created */
-    // const slotIndex = this.availableRoom;
-    // /** Get the number of uses for this room */
-    // const roomUses = this.uses[slotIndex];
-    // /** Encode by [server number, room number, room no. of use] */
-    // const roomCode: string = sqids.encode([this.serverNo, slotIndex, roomUses]);
-    // /** Create temporary room object with this room id */
-    // const room = new Room(); /** Temporary implementation of room object */
-    // room.roomCode = roomCode;
-    // /** Assign room to slot */
-    // this.rooms[slotIndex] = room;
-    // /** Increment the number of currently active rooms */
-    // this.activeRoomCount++;
-    // /** Increment the number of uses of this room */
-    // this.uses[slotIndex]++;
-
-    // /** Update the currMax */
-    // this.updateCurrentMax();
-    // /** Update the next available slot */
-    // this.updateAvailableSlot(slotIndex + 1);
-
-    // return room.roomCode;
+  private peekNextRoomId(): RoomId {
+    return this.lastAssignedRoomId + 1;
+  }
+  private popNextRoomId(): RoomId {
+    this.lastAssignedRoomId = this.peekNextRoomId();
+    return this.lastAssignedRoomId;
   }
 
-  /** Delete room */
-  deleteRoom(roomCode: string) {
-    // /** Check if there is a room with this code */
-    // if (!this.hasInstanceWithCode(roomCode)) {
-    //   throw new Error("Room not found");
-    // }
-
-    // /** Variable for the deleted index */
-    // let deletedIndex = null;
-    // // Find the room with this roomId
-    // for (let i = 0; i < this.length; i++) {
-    //   if (roomCode == this.rooms[i].roomCode) {
-    //     // Clear the room with the requested id
-    //     this.rooms[i] = null;
-    //     // Save the index of the deleted room
-    //     deletedIndex = i;
-    //   }
-    // }
-
-    // // Safety check
-    // if (deletedIndex === null) {
-    //   throw new Error("Somehow bypassed the first error check");
-    // }
-
-    // // Decrement the number of rooms
-    // this.activeRoomCount -= 1;
-
-    // // Update the next available slot
-    // this.updateAvailableSlot(deletedIndex);
+  countActiveRooms(): number {
+    return this.rooms.size;
   }
 
-  // /** Update the current highest number of times a room has been used  */
-  // updateCurrentMax() {
-  //   let current = this.currMax;
-  //   // Look for max
-  //   for (let count of this.uses) {
-  //     if (count > current) {
-  //       current = count;
-  //     }
-  //   }
-  //   // Update variable to max
-  //   this.currMax = current;
-  // }
+  isFull(): boolean {
+    if (this.countActiveRooms() > this.maxCapacity) {
+      log_warning("Server over capacity.");
+    }
+    return this.countActiveRooms() >= this.maxCapacity;
+  }
 
-  // /** Looks for the next available slot */
-  // updateAvailableSlot(startIndex) {
-  //   const length = this.rooms.length;
+  // TODO AUTH
+  createRoom() {
+    if (this.isFull()) {
+      throw new Error("Server is full.");
+    }
 
-  //   // Case 1: Find a slot that is free and used less than currMax
-  //   for (let i = 0; i < length; i++) {
-  //     const index = (startIndex + i) % length;
-  //     if (this.uses[index] < this.currMax && this.rooms[index] === null) {
-  //       this.availableRoom = index;
-  //       return;
-  //     }
-  //   }
+    const newRoom: Room = new Room(
+      this.peekNextRoomId(),
+      this.sqids.encode([this.serverId, this.peekNextRoomId()])
+    );
 
-  //   // Case 2: Check if all slots are used equally
-  //   let allEqual = this.uses.every((val) => val === this.currMax);
-  //   if (!allEqual) {
-  //     this.availableRoom = null;
-  //     return;
-  //   }
+    if (this.rooms.has(newRoom.roomId)) {
+      throw Error("Existing room has the same ID.");
+    }
+    this.rooms.set(newRoom.roomId, newRoom);
+    this.popNextRoomId(); /// Increment once the room is saved
+  }
 
-  //   // Case 3: All used equally – find any empty slot
-  //   for (let i = 0; i < length; i++) {
-  //     const index = (startIndex + i) % length;
-  //     if (this.rooms[index] === null) {
-  //       this.availableRoom = index;
-  //       return;
-  //     }
-  //   }
+  // TODO AUTH
+  deleteRoom(roomId: RoomId) {
+    if (this.countActiveRooms() == 0) {
+      throw Error("Deletion failed, there are no rooms in this server");
+    }
 
-  //   this.availableRoom = null; // No available slots
-  // }
+    if (!this.rooms.has(roomId)) {
+      throw Error(`A room with ID = ${roomId} does not exist.`);
+    }
 
-  // /** Returns true if no rooms available */
-  // isFull() {
-  //   return (
-  //     this.activeRoomCount === this.rooms.length || this.availableRoom === null
-  //   );
-  // }
-
-  // hasInstanceWithCode(roomCode: string) {
-  //   for (let i = 0; i < this.rooms.length; i++) {
-  //     if (this.rooms[i].roomCode == roomCode) {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
+    this.rooms.delete(roomId);
+  }
 }

@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 
-import {roomServer as rs} from "../../server/main"
+import {gameServer as rs} from "../../server/main"
 
 Meteor.methods({
   async requestNewRoom() {
