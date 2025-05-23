@@ -31,7 +31,8 @@ export const Room = () => {
       <br></br>
 
       <QRBox joinURL={revealURL} />
-      <CodeLink link={revealURL} />
+      {CodeLink(revealURL)}
+
       <button onClick={copyToClipboard}>Copy Link</button>
     </div>
   );

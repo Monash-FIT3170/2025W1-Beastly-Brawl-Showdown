@@ -5,7 +5,8 @@ import React from "react";
 export const WaitingRoomInfoBox = ({ joinURL }: { joinURL: string }) => {
     return (
         <div className="waiting-room-info-box">
-            <CodeLink link={joinURL} />
+            {CodeLink(joinURL)}
+
             <QRBox joinURL={joinURL} />
         </div>
     )
