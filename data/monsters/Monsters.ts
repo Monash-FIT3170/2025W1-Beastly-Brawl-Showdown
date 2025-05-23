@@ -81,9 +81,9 @@ export default class Monsters {
             this.currentAC = this.baseAC;
             this.defending = false;
         } else {
-            if (totalAttack >= this._currentAC) {
+            if (totalAttack >= this.currentAC) {
                 console.log(`${this.type} takes ${totalAttack} damage!`);
-                this._currentHealth -= 5;
+                this.currentHealth -= 5;
             } else {
                 console.log(`${this.monsterType}: The attack misses!`);
             }
@@ -178,15 +178,10 @@ export default class Monsters {
     }
 
     get abilityCharges(): number {
-        return this._currentAbilityCharges;
+        return this.currentAbilityCharges;
     }
 
     get defenseCharges(): number {
-        return this._currentDefenseCharges;
+        return this.currentDefenseCharges;
     }
-
-    get defending(): boolean {
-        return this._defending;
-    }
-
 }

@@ -15,7 +15,7 @@ function ConfirmButton() {
 
 export const MonsterSelectionScreen = () => {
     // Name of currently selected monster
-    let currentlySelected; 
+    let currentlySelected: string; 
 
     /**
      * Enable confirm button and border the selected monster
