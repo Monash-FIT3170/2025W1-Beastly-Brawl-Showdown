@@ -22,16 +22,6 @@ export default function HomePage() {
         >
           SETTINGS
         </button>
-
-
-
-        
-        <button
-          className="btn settings-btn"
-          onClick={() => { console.log("Requesting room to host..."); Meteor.call("room.requestHostRoom", {}, () => null) }}
-        >
-          HOST REQUEST
-        </button>
       </div>
     </div>
   );
