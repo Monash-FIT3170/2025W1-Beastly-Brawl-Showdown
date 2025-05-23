@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { DarkBrownBtn } from './buttonComponents/DarkBrownBtn';
 import { LightBrownBtn } from './buttonComponents/LightBrownBtn';
 import { BrownBtn } from './buttonComponents/BrownBtn';
