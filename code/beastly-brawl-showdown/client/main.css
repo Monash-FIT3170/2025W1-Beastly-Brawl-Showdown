@@ -20,7 +20,7 @@ body {
 .glb-btn {
   background-color: #8B4513;
   color: #d4a574;
-  border: none;
+  border-color: #B3673F;
   padding: 15px 20px;
   font-size: 16px;
   font-weight: bold;
@@ -49,7 +49,7 @@ body {
   background-image: url('logo.png');
   background-size: 100% 100%;
   background-position: center;
-  height: 299px;
+  height: 280px;
   width: 299px;
 }
 
@@ -900,19 +900,9 @@ progress::-moz-progress-bar {
 }
 
 /* Button color variants */
-.host-btn {
-  background-color: #a7ba93;
-  color: white;
-}
 .join-btn {
-  background-color: #b2d9ed;
-  color: white;
-}
-
-
-.settings-btn {
-  background-color: #c4b2a2;
-  color: white;
+  background-color: #694230;
+  border-color: #936049;
 }
 
 /* Settings page styling */
