@@ -13,52 +13,63 @@ export default function WaitingRoom() {
   const playerName = sessionStorage.getItem("guestName");
   if (!playerName) throw new Error("Player name is not set in sessionStorage.");
 
-  const [revealURL, setURL] = useState("");
+  const [revealURL, setRevealURL] = useState("");
 
-  // Subscribe to game state for this room
-  useTracker(() => {
+  // Subscribe and track readiness
+  const subscriptionReady = useTracker(() => {
     if (id) {
-      return Meteor.subscribe("gameStatesByRoom", id);
+      console.log(`[Client] Subscribing to gameStatesByRoom for roomId: ${id}`);
+      const handle = Meteor.subscribe("gameStatesByRoom", id);
+      return handle.ready();
     }
+    return false;
   }, [id]);
 
-  // Reactively track game state for this room
+  // Fetch gameState reactively when subscription is ready
   const gameState = useTracker(() => {
-    return GameStates.findOne({ roomId: id }) || {};
-  }, [id]);
+    if (!subscriptionReady || !id) return null;
+    const gs = GameStates.findOne({ roomId: id }) || null;
+    console.log(`[Client] Fetched gameState for room ${id}:`, gs);
+    return gs;
+  }, [id, subscriptionReady]);
 
-  // Log gameState to console whenever it changes
-  useEffect(() => {
-    console.log("Current gameState:", gameState);
-  }, [gameState]);
-
-  // Build join URL on mount
+  // Build join URL on mount / id change
   useEffect(() => {
     if (id) {
       const joinURL = Meteor.absoluteUrl(`/join/${id}`);
-      setURL(joinURL);
+      setRevealURL(joinURL);
+      console.log(`[Client] Join URL set to: ${joinURL}`);
     }
   }, [id]);
 
-  // Initialize default game state phase on mount
+  // Initialize phase to 'waiting' when component mounts or id changes
   useEffect(() => {
     if (id) {
+      console.log(`[Client] Calling initialize for room: ${id}`);
       Meteor.call("gameStates.initialize", id, (error: any) => {
         if (error) {
-          console.error("Failed to initialize game state:", error);
+          console.error(`[Client] Initialize failed for room ${id}:`, error);
         } else {
-          console.log("Game state initialized to default waiting phase");
+          console.log(`[Client] Initialize succeeded for room ${id}`);
         }
       });
     }
   }, [id]);
 
-  // Navigate to Monster Selection screen when phase changes
+  // React to phase changes: navigate when phase hits "monsterSelection"
   useEffect(() => {
-    if (gameState.phase === "monsterSelection" && id) {
-      navigate(`/monster-selection/${id}`);
+    if (gameState) {
+      console.log(`[Client] Phase changed for room ${id}:`, gameState.phase);
+      if (gameState.phase === "monsterSelection" && id) {
+        console.log(`[Client] Navigating to monster selection screen for room: ${id}`);
+        navigate(`/monster-selection/${id}`);
+      }
     }
-  }, [gameState.phase, id, navigate]);
+  }, [gameState, id, navigate]);
+
+  if (!subscriptionReady) {
+    return <div>Loading game state...</div>;
+  }
 
   return (
     <div className="waiting-room-box">
