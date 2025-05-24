@@ -6,17 +6,17 @@ import readline from 'readline';
  * Prompts the user to answer yes or no.
  */
 function askYesNo(question: string): Promise<boolean> {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-    return new Promise((resolve) => {
-        rl.question(`${question} (y/n): `, (answer) => {
-            rl.close();
-            resolve(answer.trim().toLowerCase() === 'y');
-        });
+  return new Promise((resolve) => {
+    rl.question(`${question} (y/n): `, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'y');
     });
+  });
 }
 
 /**
@@ -28,7 +28,7 @@ export default class MysticWyvern extends Monsters {
   private rerollCharge: boolean;
 
   constructor() {
-    super(25, 14, 2, "Reroll once per battle", "Balanced");
+    super(25, 14, 2, "Reroll once per battle", "Balanced", "/img/monster-selection-images/placeholder_monster_1.png", "/img/monster-image/dragon.png");
     this.rerollCharge = true;
   }
 

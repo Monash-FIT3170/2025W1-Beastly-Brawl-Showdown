@@ -1,9 +1,8 @@
 import Monsters from './Monsters';
-import DiceRoller from '../utils/DiceRoller';
 
 export default class StoneHideGuardian extends Monsters {
     constructor() {
-        super(30, 16, 1, "4 defense actions per battle", "Defender");
+        super(30, 16, 1, "4 defense actions per battle", "Defender", "/img/monster-selection-images/placeholder_monster_3.png", "/img/monster-image/superminion.png");
         this.baseDefenseCharges = 4;
         this.currentDefenseCharges = 4;
     }
