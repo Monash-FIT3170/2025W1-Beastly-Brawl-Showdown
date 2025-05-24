@@ -12,20 +12,19 @@ import WaitingRoom from "./ui/WaitingRoom";
 
 export const renderRoutes = () => (
   <>
-    {/* HOSTING Routes */}
+    {/* HOST Routes */}
     <Route path="/host/" element={<HostRoomPage />} />
     <Route path="/h/:id/" element={<Room />} />
-
-    {/* JOINING Routes */}
-    <Route path="/join" element={<JoinPage />} />
-    <Route path="/join/:joinCode" element={<JoinPage />} />
-    <Route path="/guest-name" element={<GuestNamePage />} />
-
-    {/* ROOM VIEW */}
     <Route path="/room/:id/" element={<WaitingRoom />} />
 
-    {/*  */}
+    {/* PLAYER Routes */}
+    <Route path="/join" element={<JoinPage />} />
+    <Route path="/join/:joinCode" element={<JoinPage />} />
     <Route path="/play" element={<Player />} />
+    <Route path="/guest-name" element={<GuestNamePage />} />
+
+
+    {/* GENERAL ROUTES */}
     <Route path="/home" element={<Navigate to="/" replace />} />
 
     {/* DEFAULTS */}
