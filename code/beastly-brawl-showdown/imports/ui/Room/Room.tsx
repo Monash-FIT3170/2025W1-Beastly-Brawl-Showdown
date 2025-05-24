@@ -29,7 +29,7 @@ export const Room = () => {
       <h1>Room ID: {joinCode}</h1>
       <br></br>
 
-      <QRBox joinURL={revealURL} />
+      <QRBox joinUrl={revealURL} />
       {CodeLink(revealURL)}
 
       <button onClick={copyToClipboard}>Copy Link</button>

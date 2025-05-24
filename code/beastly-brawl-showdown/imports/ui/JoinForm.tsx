@@ -14,8 +14,8 @@ export const InvalidCodeWarning = ({ enabled }: { enabled: boolean }) => {
 
 export const JoinForm = () => {
   const { joinCode: linkParamJoinCode } = useParams();
-  console.log(`Extracted room code from link: <${linkParamJoinCode}>`)
-  const [inputJoinCode, setInputJoinCode] = useState(linkParamJoinCode);
+  console.log(`Extracted room code from link: <${linkParamJoinCode}>`);
+  const [inputJoinCode, setInputJoinCode] = useState(linkParamJoinCode ?? "");
   const [inputDisplayName, setInputDisplayName] = useState(
     sessionStorage.getItem("displayName") ?? ""
   ); /// Load saved display name as default

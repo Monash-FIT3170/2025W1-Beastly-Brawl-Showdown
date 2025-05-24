@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Meteor } from "meteor/meteor";
 import { useNavigate } from "react-router-dom";
 
+/** Sends request to host */
 export const HostRoomPage = () => {
   const navigate = useNavigate();
 
@@ -27,7 +28,7 @@ export const HostRoomPage = () => {
         sessionStorage.setItem("roomId", result.roomId.toString());
         sessionStorage.setItem("joinCode", result.joinCode);
 
-        navigate(`/h/${result.joinCode}/`);
+        navigate(`/room/`);
       }
     );
   };

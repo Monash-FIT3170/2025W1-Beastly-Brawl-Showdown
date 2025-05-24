@@ -9,6 +9,8 @@ import { ServerId, RoomId, JoinCode, AccountId } from "./types";
 export const GameServerRecords = new Mongo.Collection("game_server_records");
 
 export class GamerServer {
+  private wss: WebSocketServer;
+
   readonly CODE_MIN_LENGTH = 6; // TODO move to argv
   readonly CODE_ALPHABET = "0123456789"; // TODO move to argv
 
