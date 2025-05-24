@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { gameServer } from "../../server/main";
-import { AccountId, JoinCode, Room, RoomId } from "/server/GameServer";
+import { AccountId, JoinCode, RoomId } from "../../server/types";
+import { Room } from "/server/Room";
 import { log_notice } from "/server/utils";
 
 Meteor.methods({

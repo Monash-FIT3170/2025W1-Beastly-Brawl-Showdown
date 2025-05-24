@@ -2,47 +2,11 @@ import { assert, error } from "console";
 import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
 import { log_notice, log_warning } from "./utils";
-
-// TODO export to all apps
-export type ServerId = number;
-export type RoomId = number;
-export type JoinCode = string;
-
-export type AccountId = string;
+import { Room } from "./Room";
+import { Player } from "./Player";
+import { ServerId, RoomId, JoinCode, AccountId } from "./types";
 
 export const GameServerRecords = new Mongo.Collection("game_server_records");
-
-export class Player {
-  displayName: string;
-  linkedAcccountId?: AccountId;
-
-  constructor(displayName: string, linkedAcccountId: AccountId | undefined) {
-    this.displayName = displayName;
-    this.linkedAcccountId = linkedAcccountId;
-  }
-}
-
-/** Preferences and Settings for this lobby */
-export class GameSettings {}
-
-export class Room {
-  readonly roomId: RoomId;
-  /**
-   * The code which players can join the room with.
-   *
-   * Generated from {@link roomId} using {@link Sqids}
-   */
-  readonly joinCode: JoinCode;
-
-  players: Map<string, Player> = new Map<string, Player>();
-  gameState: any = undefined;
-  settings: GameSettings = new GameSettings();
-
-  constructor(roomId: RoomId, joinCode: JoinCode) {
-    this.roomId = roomId;
-    this.joinCode = joinCode;
-  }
-}
 
 export class GamerServer {
   readonly CODE_MIN_LENGTH = 6; // TODO move to argv
@@ -198,5 +162,7 @@ export class GamerServer {
 
     const newPlayer = new Player(displayName, linkedAcccountId);
     room.players.set(displayName, newPlayer);
+
+    room.onPlayerListChanged(displayName)
   }
 }
