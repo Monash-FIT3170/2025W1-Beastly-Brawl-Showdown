@@ -45,7 +45,7 @@ export default function SettingsPage({
   const handleConfirm = () => {
     setBgmEnabled(tempEnabled);
     setBgmVolume(tempVolume);
-    navigate("/homePage");
+    navigate("/home");
   };
 
   const handleCancel = () => {
@@ -54,7 +54,7 @@ export default function SettingsPage({
       audio.volume = bgmVolume / 100;
       bgmEnabled ? audio.play().catch(() => {}) : audio.pause();
     }
-    navigate("/homePage");
+    navigate("/home");
   };
 
   return (
