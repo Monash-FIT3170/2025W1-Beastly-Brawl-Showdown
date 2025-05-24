@@ -1,5 +1,5 @@
 import React from "react";
-import { Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 import { NotFound } from "./ui/Error/NotFound";
 import { HomePage } from "./ui/HomePage";
 import { Player } from "./ui/PlayerPage";
@@ -12,34 +12,24 @@ import WaitingRoom from "./ui/WaitingRoom";
 
 export const renderRoutes = () => (
   <>
-    
-      
-        {/* HOSTING Routes */}
-        <Route path="/host/" element={<HostRoomPage />} />
-        <Route path="/h/:id/" element={<Room />} />
+    {/* HOSTING Routes */}
+    <Route path="/host/" element={<HostRoomPage />} />
+    <Route path="/h/:id/" element={<Room />} />
 
+    {/* JOINING Routes */}
+    <Route path="/join" element={<JoinPage />} />
+    <Route path="/join/:roomCode" element={<GuestNamePage />} />
+    <Route path="/guest-name" element={<GuestNamePage />} />
 
-        {/* JOINING Routes */}
-        <Route path="/join" element={<JoinPage />} />
-        <Route path="/join/:roomCode" element={<GuestNamePage/>} />
-        <Route path="/guest-name" element={<GuestNamePage />} />
+    {/* ROOM VIEW */}
+    <Route path="/room/:id/" element={<WaitingRoom />} />
 
-        {/* ROOM VIEW */}
-        <Route path="/room/:id/" element={<WaitingRoom />} />
+    {/*  */}
+    <Route path="/play" element={<Player />} />
+    <Route path="/home" element={<Navigate to="/" replace />} />
 
-        {/*  */}
-        <Route path="/:id" element={<Player />} />
-        <Route path="/homePage" element={<HomePage />} />
-
-        {/* DEFAULTS */}
-        <Route path="/" element={<LoginPage/>} />
-        <Route path="*" element={<NotFound />} />
-
-        {/*Moved from app*/}
-        <Route path="/home" element={<HomePage />} />
-        
-        <Route path="/host" element={<WaitingRoom />} />
-      
-    
+    {/* DEFAULTS */}
+    <Route path="/" element={<HomePage />} />
+    <Route path="*" element={<NotFound />} />
   </>
 );

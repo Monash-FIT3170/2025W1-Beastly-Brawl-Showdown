@@ -1,32 +1,48 @@
 import { Meteor } from "meteor/meteor";
-
-import {gameServer as rs} from "../../server/main"
+import { gameServer } from "../../server/main";
+import { AccountId, JoinCode, Room, RoomId } from "/server/GameServer";
+import { log_notice } from "/server/utils";
 
 Meteor.methods({
-  async requestNewRoom() {
-    if(!rs) {throw Error("Server not started");}
-
-    // if (RoomServerManager.instance.test_single_instance.isFull()) { throw new Meteor.Error("No free slots remaining"); }
-    // TODO move this warning to be an error that is returned from the request below, the request should then the altered to handle and errors it gets passed
-    const response = rs.createRoom().then();
-    console.log(`Room assigned: ${response}`);
-    return response;
+  ping() {
+    return "pong!";
   },
 
-  async requestJoinRoom({ playerID, roomCode }) {
-    // player ID currently unused - maybe used later?
-    var response = {
-      submittedRoomCode: roomCode,
-      isValidCode: false,
-    };
+  requestNewRoom() {
+    if (!gameServer) {
+      throw new Error("Server not started.");
+    }
+
+    if (gameServer.isFull()) {
+      throw new Error("Server is full.");
+    }
+
+    const newRoomInfo = gameServer.createRoom();
     console.log(
-      `Player <${playerID}> attempted to join using code ${response.submittedRoomCode}`
+      `Room assigned: Slot #${newRoomInfo.roomId} - Code: ${newRoomInfo.joinCode}`
+    );
+    return newRoomInfo;
+  },
+
+  checkHasJoinableRoom(joinCode: JoinCode): boolean {
+    const roomId: RoomId = gameServer.translateJoinCodeToRoomId(joinCode);
+    return gameServer.hasRoom(roomId);
+  },
+
+  requestJoinRoom(
+    joinCode: JoinCode,
+    displayName: string,
+    acccountId?: AccountId
+  ) {
+    const roomId = gameServer.translateJoinCodeToRoomId(joinCode);
+
+    console.log(
+      `Player <${displayName}> attempted to join using code <${joinCode}> (room id <${roomId}>) with account id <${acccountId}>`
     );
 
-    response.isValidCode = await rs.join({
-      roomCode: roomCode,
-    });
-
-    return response;
-  }
+    gameServer.joinRoom(roomId, displayName, acccountId);
+    log_notice(
+      `Player <${displayName}> joined room <${roomId}> with account id <${acccountId}>`
+    );
+  },
 });

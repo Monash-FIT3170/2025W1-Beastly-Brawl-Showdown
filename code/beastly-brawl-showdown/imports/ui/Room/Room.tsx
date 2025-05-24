@@ -4,17 +4,17 @@ import { CodeLink } from "../CodeLink";
 import { QRBox } from "../QRBox";
 
 export const Room = () => {
-  const id = sessionStorage.getItem("roomId");
+  const joinCode = sessionStorage.getItem("joinCode");
   //get name from session storage
   const playerName = sessionStorage.getItem("guestName"); 
   const [revealURL, setURL] = useState('');
 
   useEffect(() => {
-    if (id) {
-      const joinURL = Meteor.absoluteUrl(`/join/${id}`);
+    if (joinCode) {
+      const joinURL = Meteor.absoluteUrl(`/join/${joinCode}`);
       setURL(joinURL);
     }
-  }, [id]);
+  }, [joinCode]);
   const copyToClipboard = () => {
     navigator.clipboard
       .writeText(revealURL)
@@ -26,7 +26,7 @@ export const Room = () => {
     <div>
       <h1>Welcome {playerName}!</h1>
       <h1>ROOM VIEW</h1>
-      <h1>Room ID: {id}</h1>
+      <h1>Room ID: {joinCode}</h1>
       <br></br>
 
       <QRBox joinURL={revealURL} />

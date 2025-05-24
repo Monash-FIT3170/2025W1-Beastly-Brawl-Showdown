@@ -1,17 +1,25 @@
 import { assert, error } from "console";
 import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
-import { log, log_warning } from "./utils";
+import { log_notice, log_warning } from "./utils";
 
+// TODO export to all apps
 export type ServerId = number;
 export type RoomId = number;
 export type JoinCode = string;
 
+export type AccountId = string;
+
 export const GameServerRecords = new Mongo.Collection("game_server_records");
 
 export class Player {
-  displayName?: string;
-  linkedAcccountId?: string;
+  displayName: string;
+  linkedAcccountId?: AccountId;
+
+  constructor(displayName: string, linkedAcccountId: AccountId | undefined) {
+    this.displayName = displayName;
+    this.linkedAcccountId = linkedAcccountId;
+  }
 }
 
 /** Preferences and Settings for this lobby */
@@ -26,7 +34,7 @@ export class Room {
    */
   readonly joinCode: JoinCode;
 
-  players: Array<Player> = new Array<Player>();
+  players: Map<string, Player> = new Map<string, Player>();
   gameState: any = undefined;
   settings: GameSettings = new GameSettings();
 
@@ -73,12 +81,12 @@ export class GamerServer {
     serverId: ServerId,
     maxCapacity: number
   ): Promise<GamerServer> {
-    log("Starting server instance...");
+    log_notice("Starting server instance...");
     const gameServer: GamerServer = new GamerServer(serverId, maxCapacity);
-    log("Register with global records...");
+    log_notice("Register with global records...");
     await gameServer.registerServer(true);
 
-    log("Server startup complete.");
+    log_notice("Server startup complete.");
     return gameServer;
   }
 
@@ -102,7 +110,7 @@ export class GamerServer {
 
     const noOfUpdatedRecords = await GameServerRecords.updateAsync(
       { serverNo: this.serverId },
-      { $set: { url: process.env.ROOT_URL } },
+      { $set: { serverUrl: process.env.ROOT_URL } },
       { upsert: true } /// Update or insert (if does not exist)
     );
 
@@ -132,7 +140,7 @@ export class GamerServer {
   }
 
   // TODO AUTH
-  createRoom() {
+  createRoom(): { roomId: RoomId; joinCode: JoinCode } {
     if (this.isFull()) {
       throw new Error("Server is full.");
     }
@@ -142,11 +150,13 @@ export class GamerServer {
       this.sqids.encode([this.serverId, this.peekNextRoomId()])
     );
 
-    if (this.rooms.has(newRoom.roomId)) {
+    if (this.hasRoom(newRoom.roomId)) {
       throw Error("Existing room has the same ID.");
     }
     this.rooms.set(newRoom.roomId, newRoom);
     this.popNextRoomId(); /// Increment once the room is saved
+
+    return { roomId: newRoom.roomId, joinCode: newRoom.joinCode };
   }
 
   // TODO AUTH
@@ -155,10 +165,38 @@ export class GamerServer {
       throw Error("Deletion failed, there are no rooms in this server");
     }
 
-    if (!this.rooms.has(roomId)) {
+    if (!this.hasRoom(roomId)) {
       throw Error(`A room with ID = ${roomId} does not exist.`);
     }
 
     this.rooms.delete(roomId);
+  }
+
+  translateJoinCodeToRoomId(joinCode: JoinCode) {
+    return this.sqids.decode(joinCode)[1]; /// We already know the server id (of this)
+  }
+
+  hasRoom(roomId: RoomId): boolean {
+    return this.rooms.has(roomId);
+  }
+
+  joinRoom(
+    roomId: RoomId,
+    displayName: string,
+    linkedAcccountId: AccountId | undefined
+  ) {
+    //TODO validate input
+
+    const room: Room = this.rooms.get(roomId)!;
+    if (!room) {
+      throw new Error("Invalid room id.");
+    }
+
+    if (room.players.has(displayName)) {
+      throw new Error("Display name already taken.");
+    }
+
+    const newPlayer = new Player(displayName, linkedAcccountId);
+    room.players.set(displayName, newPlayer);
   }
 }
