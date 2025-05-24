@@ -20,7 +20,6 @@ export default function App() {
       <audio ref={audioRef} src="/sounds/background-music.mp3" loop />
 
       <Routes>
-
         <Route
           path="/settings"
           element={

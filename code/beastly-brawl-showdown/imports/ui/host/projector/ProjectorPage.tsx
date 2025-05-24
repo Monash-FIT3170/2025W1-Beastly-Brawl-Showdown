@@ -1,8 +1,8 @@
 import { Meteor } from "meteor/meteor";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { WaitingRoomInfoBox } from "./projector/WaitingRoomInfoBox";
-import { ParticipantDisplayBox } from "./projector/ParticipantDisplayBox";
+import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
+import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 
 export default function ProjectorPage() {
   const { id } = useParams();
