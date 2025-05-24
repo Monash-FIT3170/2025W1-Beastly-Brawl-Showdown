@@ -1,14 +1,14 @@
 import React from "react";
 import { Navigate, Route } from "react-router-dom";
-import { NotFound } from "./ui/Error/NotFound";
-import { HomePage } from "./ui/HomePage";
-import { Player } from "./ui/PlayerPage";
-import { Room } from "./ui/Room/Room";
-import { HostRoomPage } from "./ui/Room/HostRoomPage";
-import { GuestNamePage } from "./ui/GuestNamePage";
-import { LoginPage } from "./ui/Login/LoginPage";
-import JoinPage from "./ui/JoinPage";
-import WaitingRoom from "./ui/WaitingRoom";
+import { NotFound } from "./Error/NotFound";
+import { HomePage } from "./HomePage";
+import { Player } from "./PlayerPage";
+import { Room } from "./Room/Room";
+import { HostRoomPage } from "./Room/HostRoomPage";
+import { GuestNamePage } from "./GuestNamePage";
+import { LoginPage } from "./Login/LoginPage";
+import JoinPage from "./JoinPage";
+import WaitingRoom from "./WaitingRoom";
 
 export const renderRoutes = () => (
   <>
