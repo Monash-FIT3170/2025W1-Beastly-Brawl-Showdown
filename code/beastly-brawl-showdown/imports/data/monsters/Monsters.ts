@@ -22,8 +22,10 @@ export default class Monsters {
     protected currentDefenseCharges: number;
     protected defending: boolean;
     protected stunRemaining: number;
+    protected imageSelectionURL: string;
+    protected imageUrl: string;
 
-    constructor(health: number, AC: number, attackBonus: number, special: string, type: string) {
+    constructor(health: number, AC: number, attackBonus: number, special: string, type: string, imageSelectionURL: string, imageUrl: string) {
         this.baseHealth = health;
         this.currentHealth = health;
         this.baseAC = AC;
@@ -37,6 +39,8 @@ export default class Monsters {
         this.currentDefenseCharges = 3;
         this.defending = false;
         this.stunRemaining = 0;
+        this.imageSelectionURL = imageSelectionURL;
+        this.imageUrl = imageUrl;
     }
 
     /**
@@ -143,12 +147,11 @@ export default class Monsters {
     /**
      * Placeholder for a monster's special ability. Should be overridden by subclasses.
      * 
-     * @param defender The opponent affected by the ability.
+     * @param _defender The opponent affected by the ability.
      */
-    useAbility(defender: Monsters): void { }
+    useAbility(_defender: Monsters): void { }
 
     // Getters and setters
-
     get AC(): number {
         return this.currentAC;
     }
@@ -184,4 +187,13 @@ export default class Monsters {
     get defenseCharges(): number {
         return this.currentDefenseCharges;
     }
+
+    get image(): string {
+        return this.imageUrl;
+    }
+
+    get imageSelection(): string {
+        return this.imageSelectionURL;
+    }
+
 }

@@ -6,7 +6,7 @@ export default class ShadowFangPredator extends Monsters {
     private isInvulnerable: boolean;
 
     constructor() {
-        super(20, 12, 4, "Critical hit on natural 18-20", "Attacker");
+        super(20, 12, 4, "Critical hit on natural 18-20", "Attacker", "/img/monster-selection-images/placeholder_monster_2.png", "/img/monster-image/wolfman.png");
         this.critRoll = 18;
         this.isInvulnerable = false;
     }
