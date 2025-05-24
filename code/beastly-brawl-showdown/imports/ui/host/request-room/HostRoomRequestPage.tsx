@@ -3,7 +3,7 @@ import { Meteor } from "meteor/meteor";
 import { useNavigate } from "react-router-dom";
 
 /** Sends request to host */
-export const HostRoomPage = () => {
+export const HostRoomRequestPage = () => {
   const navigate = useNavigate();
 
   //get name for the person whos hosting it
