@@ -17,6 +17,59 @@
   height: 100vh;
 }
 
+/* For log in page */
+.logo {
+  background-image: url('logo.png');
+  background-size: 100% 100%;
+  background-position: center;
+  height: 299px;
+  width: 299px;
+}
+
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.userForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-textbox {
+  background-color: #8B4513;
+  color: #d4a574;
+  border: none;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  border: 2px solid #654321;
+  text-transform: capitalize;
+}
+
+.form-button {
+  background-color: #8B4513;
+  color: #d4a574;
+  border: none;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  border: 2px solid #654321;
+  text-transform: capitalize;
+}
+
 /* Top Row */
 /* Top Right */
 .branding {
@@ -561,6 +614,8 @@
 }
 
 body {
+  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+  min-height: 100vh;
   display: flex;
   padding-top: 10px;
   font-family: 'Segoe UI', sans-serif;
