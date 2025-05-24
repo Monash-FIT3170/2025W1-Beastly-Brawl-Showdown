@@ -12,23 +12,20 @@ import WaitingRoom from "./WaitingRoom";
 
 export const renderRoutes = () => (
   <>
-    {/* HOST Routes */}
+    {/* Home */}
+    <Route path="/home/" element={<HomePage />} />
+    
+    {/* Host */}
     <Route path="/host/" element={<HostRoomPage />} />
     <Route path="/room/" element={<WaitingRoom />} />
 
-    {/* PLAYER Routes */}
+    {/* Player */}
     <Route path="/join/:joinCode" element={<JoinPage />} />
     <Route path="/join" element={<JoinPage />} />
-    {/* vvvvvvvvvvvvvvvv currently unused vvvvvvvvvvvvvvvvv  */}
-    {/* <Route path="/h/:id" element={<Room />} /> */}
     <Route path="/play" element={<Player />} />
-    <Route path="/guest-name" element={<GuestNamePage />} />
-
-    {/* GENERAL ROUTES */}
-    <Route path="/home" element={<Navigate to="/" replace />} />
 
     {/* DEFAULTS */}
-    <Route path="/" element={<HomePage />} />
+    <Route path="/" element={<Navigate to="/home/" replace />} />
     <Route path="*" element={<NotFound />} />
   </>
 );
