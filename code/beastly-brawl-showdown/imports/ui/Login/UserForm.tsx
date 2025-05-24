@@ -29,22 +29,22 @@ export const UserForm = () => {
 
   return (
     <form className="userForm" onSubmit={handleSubmit}>
-      <input
+      <input className="form-textbox"
         type="text"
         placeholder="username"
         value={userName}
         onChange={(e) => setUserName(e.target.value)}
       />
-      <input
+      <input className="form-textbox"
         type="text"
         placeholder="password"
         value={password}
         onChange={(e) => setPassWord(e.target.value)}
       />
       
-      <button type="submit">Login</button>
-      <button type="button">Sign Up</button>
-      <button type="button" onClick = {handleGuestLogin}>Login As Guest</button>
+      <button className="glb-btn" type="submit">Login</button>
+      <button className="glb-btn" type="button">Sign Up</button>
+      <button className="glb-btn" type="button" onClick = {handleGuestLogin}>Login As Guest</button>
     </form>
   );
 };
