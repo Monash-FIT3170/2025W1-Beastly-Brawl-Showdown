@@ -42,9 +42,9 @@ export const UserForm = () => {
         onChange={(e) => setPassWord(e.target.value)}
       />
       
-      <button className="form-button" type="submit">Login</button>
-      <button className="form-button" type="button">Sign Up</button>
-      <button className="form-button" type="button" onClick = {handleGuestLogin}>Login As Guest</button>
+      <button className="glb-btn" type="submit">Login</button>
+      <button className="glb-btn" type="button">Sign Up</button>
+      <button className="glb-btn" type="button" onClick = {handleGuestLogin}>Login As Guest</button>
     </form>
   );
 };
