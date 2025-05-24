@@ -18,7 +18,7 @@ export const renderRoutes = () => (
 
     {/* JOINING Routes */}
     <Route path="/join" element={<JoinPage />} />
-    <Route path="/join/:roomCode" element={<GuestNamePage />} />
+    <Route path="/join/:joinCode" element={<JoinPage />} />
     <Route path="/guest-name" element={<GuestNamePage />} />
 
     {/* ROOM VIEW */}

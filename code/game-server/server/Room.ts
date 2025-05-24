@@ -1,9 +1,12 @@
-import { RoomId, JoinCode } from "./types";
+import { RoomId, JoinCode, AccountId } from "./types";
 import { Player } from "./Player";
 import { GameSettings } from "./GameSettings";
 
-
 export class Room {
+  hasPlayer(displayName: string) {
+    return this.players.has(displayName);
+  }
+
   readonly roomId: RoomId;
   /**
    * The code which players can join the room with.

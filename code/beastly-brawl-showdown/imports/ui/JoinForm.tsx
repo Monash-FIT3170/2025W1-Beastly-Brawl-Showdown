@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Meteor } from "meteor/meteor";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DDP } from "meteor/ddp";
 // import "/imports/ui/global.css";
 
@@ -13,7 +13,9 @@ export const InvalidCodeWarning = ({ enabled }: { enabled: boolean }) => {
 };
 
 export const JoinForm = () => {
-  const [inputJoinCode, setInputJoinCode] = useState("");
+  const { joinCode: linkParamJoinCode } = useParams();
+  console.log(`Extracted room code from link: <${linkParamJoinCode}>`)
+  const [inputJoinCode, setInputJoinCode] = useState(linkParamJoinCode);
   const [inputDisplayName, setInputDisplayName] = useState(
     sessionStorage.getItem("displayName") ?? ""
   ); /// Load saved display name as default
@@ -28,24 +30,20 @@ export const JoinForm = () => {
 
     if (!inputJoinCode) return;
 
-    const serverUrl = await new Promise<string>((resolve, reject) => {
-      Meteor.call(
-        "getServerConnection",
-        inputJoinCode.trim(),
-        (error: any, result: string) => {
-          if (error) {
-            console.log(error);
-            // change state - show invalid code text
-            setInvalidCodeSubmittedPopupState(true);
-            reject(error);
-          }
-
-          console.log("Server URL:", result);
-          setTempServerUrl(result);
-          resolve(result);
+    Meteor.call(
+      "getServerConnection",
+      inputJoinCode.trim(),
+      (error: any, result: string) => {
+        if (error) {
+          console.log(error);
+          // change state - show invalid code text
+          setInvalidCodeSubmittedPopupState(true);
         }
-      );
-    });
+
+        console.log("Server URL:", result);
+        setTempServerUrl(result);
+      }
+    );
   };
 
   const handleSubmitName = async (e: { preventDefault: () => void }) => {
@@ -62,7 +60,7 @@ export const JoinForm = () => {
       inputJoinCode,
       inputDisplayName,
       accountId,
-      (error: any, result) => {
+      (error: any, result: null) => {
         if (error) {
           console.log(error);
           // Toggle invalid display name
@@ -70,7 +68,6 @@ export const JoinForm = () => {
         console.log("Join details valid. Response from server:", result);
       }
     );
-    console.log("DONE CHAGNE PAGES");
     navigate(`/play`);
   };
 

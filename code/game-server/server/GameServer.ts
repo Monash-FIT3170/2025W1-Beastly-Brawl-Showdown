@@ -156,13 +156,11 @@ export class GamerServer {
       throw new Error("Invalid room id.");
     }
 
-    if (room.players.has(displayName)) {
+    if (room.hasPlayer(displayName)) {
       throw new Error("Display name already taken.");
     }
 
     const newPlayer = new Player(displayName, linkedAcccountId);
     room.players.set(displayName, newPlayer);
-
-    room.onPlayerListChanged(displayName)
   }
 }
