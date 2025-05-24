@@ -1,12 +1,10 @@
 import Monsters from './Monsters';
-import DiceRoller from '../utils/DiceRoller';
 
 export default class StoneHideGuardian extends Monsters {
-    defenseCharges: number;
-
     constructor() {
-        super(30, 16, 1, "4 defense actions per battle", "Defender");
-        this.defenseCharges = 4;
+        super(30, 16, 1, "4 defense actions per battle", "Defender", "/img/monster-selection-images/placeholder_monster_3.png", "/img/monster-image/superminion.png");
+        this.baseDefenseCharges = 4;
+        this.currentDefenseCharges = 4;
     }
 
     useAbility(defender: { stun: () => void }): void {
@@ -14,3 +12,4 @@ export default class StoneHideGuardian extends Monsters {
         defender.stun();
     }
 }
+

@@ -5,6 +5,8 @@ import Monsters from '../monsters/Monsters';
  * The attacker attempts to strike the defender with a total attack value.
  */
 export default class AttackAction {
+    label = "Attack";
+
     private attacker: Monsters;
     private defender: Monsters;
 
@@ -13,8 +15,8 @@ export default class AttackAction {
         this.defender = defender;
     }
 
-    execute(): void {
+    async execute(): Promise<void> {
         const totalAttack = this.attacker.attack();
-        this.defender.defend(totalAttack);
+        this.defender.defend(await totalAttack);
     }
 }

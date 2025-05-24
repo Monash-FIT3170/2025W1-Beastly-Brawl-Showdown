@@ -1,5 +1,6 @@
 import React from "react";
 import { MonsterContainer } from "./MonsterContainer";
+import { allMonsters } from "/imports/data/monsters/MonsterData";
 
 /**
  * Confirms the monster the player will be using and all function that this button needs
@@ -15,7 +16,7 @@ function ConfirmButton() {
 
 export const MonsterSelectionScreen = () => {
     // Name of currently selected monster
-    let currentlySelected: string; 
+    let currentlySelected: string;
 
     /**
      * Enable confirm button and border the selected monster
@@ -28,7 +29,7 @@ export const MonsterSelectionScreen = () => {
             if (deselect) {
                 deselect.style.border = "none";
             }
-            
+
         }
 
         // Create border around selected mosnter
@@ -51,10 +52,11 @@ export const MonsterSelectionScreen = () => {
     return (
         <div className="monsterSelectionScreen">
             <h1>Choose your Monster:</h1>
-            <MonsterContainer image="img/placeholder_monster_1.png" name="monster1" func={highlightAndShowConfirm}/>
-            <MonsterContainer image="img/placeholder_monster_2.png" name="monster2" func={highlightAndShowConfirm}/>
-            <MonsterContainer image="img/placeholder_monster_3.png" name="monster3" func={highlightAndShowConfirm}/>
-            <ConfirmButton/>
+            {allMonsters.map(monster => (
+
+                <MonsterContainer image={monster.imageSelection} name={monster.type} func={highlightAndShowConfirm} />
+            ))}
+            <ConfirmButton />
         </div>
     )
 }

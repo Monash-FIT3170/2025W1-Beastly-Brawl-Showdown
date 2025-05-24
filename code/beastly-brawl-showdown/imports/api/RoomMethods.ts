@@ -3,10 +3,17 @@ import { RoomServerManager } from "../../server/room/RoomServerManager";
 
 Meteor.methods({
   async requestNewRoom() {
-    // if (RoomServerManager.instance.test_single_instance.isFull()) { throw new Meteor.Error("No free slots remaining"); } 
-    // TODO move this warning to be an error that is returned from the request below, the request should then the altered to handle and errors it gets passed
     const response = await RoomServerManager.requestNewRoomAllocation();
     console.log(`Room assigned: ${response.roomCode}`);
+
+    try {
+      await Meteor.callAsync("gameStates.initialize", response.roomCode);
+      console.log(`Game state initialized for room ${response.roomCode}`);
+    } catch (error) {
+      console.error(`Failed to initialize game state for room ${response.roomCode}:`, error);
+      throw new Meteor.Error("room-init-failed", "Failed to initialize room game state");
+    }
+
     return response;
   },
 

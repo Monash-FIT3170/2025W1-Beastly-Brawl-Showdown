@@ -7,13 +7,12 @@ import { Room } from "./ui/Room/Room";
 import { HostRoomPage } from "./ui/Room/HostRoomPage";
 import { GuestNamePage } from "./ui/GuestNamePage";
 import { LoginPage } from "./ui/Login/LoginPage";
+import { MonsterSelectionScreen } from "./ui/MonsterSelection/MonsterSelectionScreen";
 import JoinPage from "./ui/JoinPage";
 import WaitingRoom from "./ui/WaitingRoom";
 
 export const renderRoutes = () => (
   <>
-    
-      
         {/* HOSTING Routes */}
         <Route path="/host/" element={<HostRoomPage />} />
         <Route path="/h/:id/" element={<Room />} />
@@ -27,6 +26,9 @@ export const renderRoutes = () => (
         {/* ROOM VIEW */}
         <Route path="/room/:id/" element={<WaitingRoom />} />
 
+        {/* MONSTER SELECTION */}
+        <Route path="/monster-selection/:id" element={<MonsterSelectionScreen />} />
+
         {/*  */}
         <Route path="/:id" element={<Player />} />
         <Route path="/homePage" element={<HomePage />} />
@@ -37,7 +39,6 @@ export const renderRoutes = () => (
 
         {/*Moved from app*/}
         <Route path="/home" element={<HomePage />} />
-        
         <Route path="/host" element={<WaitingRoom />} />
       
     
