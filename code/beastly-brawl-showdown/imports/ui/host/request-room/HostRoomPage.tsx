@@ -7,7 +7,7 @@ export const HostRoomPage = () => {
   const navigate = useNavigate();
 
   //get name for the person whos hosting it
-  const playerName = sessionStorage.getItem("guestName");
+  // const playerName = sessionStorage.getItem("guestName");
 
   const onRequestRoom = () => {
     console.log("Requesting room...");

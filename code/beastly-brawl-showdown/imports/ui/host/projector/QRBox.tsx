@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { generateQRCode } from "../api/QRCode";
+import { generateQRCode } from "../../../api/QRCode";
 
 export const QRBox = ({ joinUrl }: { joinUrl: string }) => {
   //qrcode code

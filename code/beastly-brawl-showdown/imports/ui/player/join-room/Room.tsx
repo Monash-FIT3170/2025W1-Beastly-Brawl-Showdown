@@ -1,13 +1,13 @@
 import { Meteor } from "meteor/meteor";
-import React, { useEffect,useState } from "react";
-import { CodeLink } from "../CodeLink";
-import { QRBox } from "../QRBox";
+import React, { useEffect, useState } from "react";
+import { QRBox } from "../../host/projector/QRBox";
+import { CodeLink } from "../../host/projector/CodeLink";
 
 export const Room = () => {
   const joinCode = sessionStorage.getItem("joinCode");
   //get name from session storage
-  const playerName = sessionStorage.getItem("guestName"); 
-  const [revealURL, setURL] = useState('');
+  const playerName = sessionStorage.getItem("guestName");
+  const [revealURL, setURL] = useState("");
 
   useEffect(() => {
     if (joinCode) {
