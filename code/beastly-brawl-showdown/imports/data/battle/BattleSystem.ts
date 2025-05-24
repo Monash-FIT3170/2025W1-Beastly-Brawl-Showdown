@@ -69,3 +69,5 @@ async function battle(mon1: Monsters, mon2: Monsters): Promise<void> {
     rl.close();
 }
 
+void chooseMonster;
+void battle;
