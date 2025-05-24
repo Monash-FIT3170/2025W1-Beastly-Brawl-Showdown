@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "easyqrcodejs": "^4.6.2",
-    "sqids": "^0.3.0"
-  }
-}
