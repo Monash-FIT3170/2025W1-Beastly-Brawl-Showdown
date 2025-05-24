@@ -18,3 +18,35 @@ export const sqids = new Sqids({
 Meteor.startup(async () => {
   // do something
 });
+
+Meteor.methods({
+  async initialize(roomId: string) {
+    check(roomId, String);
+
+    // Upsert a new gameState with default phase 'waiting' only if not exists
+    const result = await GameStates.upsertAsync(
+      { roomId },
+      {
+        $setOnInsert: {
+          phase: "waiting",
+          createdAt: new Date(),
+        }
+      }
+    );
+
+    console.log(`Initialized game state for roomId: ${roomId}`, result);
+  },
+
+  async setPhase(roomId: string, phase: string) {
+    check(roomId, String);
+    check(phase, String);
+
+    const result = await GameStates.updateAsync(
+      { roomId },
+      { $set: { phase } },
+      { upsert: true }
+    );
+
+    console.log(`Updated phase to "${phase}" for roomId: ${roomId}`, result);
+  },
+});
