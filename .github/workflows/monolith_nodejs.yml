@@ -47,3 +47,5 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
+    - name: "Run TypeScript type check"
+      run: npx tsc --noEmit

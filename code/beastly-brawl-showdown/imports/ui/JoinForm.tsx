@@ -1,29 +1,47 @@
 import React, { useState } from "react";
 import { Meteor } from 'meteor/meteor';
+import { useNavigate } from "react-router-dom";
 // import "/imports/ui/global.css";
 
-export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
+export const InvalidCodeWarning = ({ enabled }:{ enabled:boolean }) => {
+  if (enabled) {
+    return <b>Invalid room code.</b>;
+  } else {
+    return <b></b>;
+  }
+};
+
+export const JoinForm = () => {
   const [text, setText] = useState("");
+  const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] =
+  useState(false);
+   const navigate = useNavigate();
+   const handleSubmit = async (e: { preventDefault: () => void; }) => {
+     e.preventDefault();
+ 
+     if (!text) return;
+ 
+     Meteor.call("requestJoinRoom", { roomCode: text }, (error: any, result: { isValidCode: boolean; submittedRoomCode: string; }) => {
+       console.log(result);
+       if (error) {
+         console.log(error);
+         // change state - show invalid code text
+         return;
+       }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!text) return;
-
-    onSuccess();
-
-    Meteor.call("joinRoom", { roomId: text }, (error: Meteor.Error | null, result: { roomId: string }) => {
-      if (!error) {
-        console.log("Successfully joined room:", result);
-        onSuccess();
-      }
-      else {
-        alert("Please enter a valid room code! DEBUG: REMOVE onSuccess() @ Line 12 JoinForm.jsx")
-      }
-    });
-  };
+       if (!result.isValidCode) {
+         setInvalidCodeSubmittedPopupState(true);
+         return;
+       }
+       console.log("Successfully joined room:", result.submittedRoomCode);
+       navigate(`/room/${result.submittedRoomCode}`);
+ 
+     });
+   };
 
   return (
+    <>
+    <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
     <form className="task-form" onSubmit={handleSubmit}>
       <input
         type="text"
@@ -36,5 +54,6 @@ export const JoinForm = ({ onSuccess }: { onSuccess: () => void }) => {
       </div>
       
     </form>
+    </>
   );
 };

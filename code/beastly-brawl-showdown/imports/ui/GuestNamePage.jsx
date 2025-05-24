@@ -30,13 +30,13 @@ export const GuestNamePage = () => {
             sessionStorage.setItem("guestName", name);
 
             if (target == "host") {
-                navigate(`/host/${encodeURIComponent(name)}`);
+                navigate(`/host/`);
             } else if (roomCode) {
-                navigate(`/room/${roomCode}/${encodeURIComponent(name)}`);
+                navigate(`/room/${roomCode}/`);
             } else if (target == "home") {
-                navigate("/homePage");
+                navigate("/home");
             } else {
-                console.log("UNknown route")
+                console.log("Unknown route")
             }
     };
 
@@ -54,12 +54,20 @@ export const GuestNamePage = () => {
     }
     // else, show name entry form
     return (
-        <>
-        <h1>Enter Your Name:</h1>
-        <form onSubmit={handleSubmit}>
-            <input type="text" placeholder="Your name..." value={name} onChange={(e) => setName(e.target.value)}></input>
-            <button type="submit">Enter</button>
-        </form> 
-        </>
+
+        <div className="page-container">
+            <h1>Guest</h1>
+            <form className="task-form" onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="Enter your name"
+                    value={name}    
+                    onChange={(e) => setName(e.target.value)}
+                />
+                    <div className="buttons-container">
+                        <button className = "btn" type="submit">Continue</button>
+                    </div>
+            </form>
+        </div>
     );
 };

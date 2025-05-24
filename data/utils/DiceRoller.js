@@ -1,32 +1,29 @@
-class DiceRoller {
-    static roll(sides) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var DiceRoller = /** @class */ (function () {
+    function DiceRoller() {
+    }
+    DiceRoller.roll = function (sides) {
         return Math.floor(Math.random() * sides) + 1;
-    }
-
-    static d20() {
+    };
+    DiceRoller.d20 = function () {
         return DiceRoller.roll(20);
-    }
-
-    static d12() {
+    };
+    DiceRoller.d12 = function () {
         return DiceRoller.roll(12);
-    }
-
-    static d10() {
+    };
+    DiceRoller.d10 = function () {
         return DiceRoller.roll(10);
-    }
-
-    static d8() {
+    };
+    DiceRoller.d8 = function () {
         return DiceRoller.roll(8);
-    }
-
-    static d6() {
+    };
+    DiceRoller.d6 = function () {
         return DiceRoller.roll(6);
-    }
-
-    static d4() {
+    };
+    DiceRoller.d4 = function () {
         return DiceRoller.roll(4);
-    }
-
-}
-
-module.exports = DiceRoller;
+    };
+    return DiceRoller;
+}());
+exports.default = DiceRoller;

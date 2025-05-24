@@ -1,6 +1,5 @@
 // imports/ui/MonsterList.jsx
 import React from 'react';
-import { useTracker } from 'meteor/react-meteor-data';
 // import { Monsters } from '/imports/api/monsters';
 
 const MonsterList = () => {

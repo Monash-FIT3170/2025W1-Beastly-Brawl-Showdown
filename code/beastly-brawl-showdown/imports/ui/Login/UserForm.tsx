@@ -7,7 +7,7 @@ export const UserForm = () => {
   const navigate = useNavigate();
 
   // todo: make this login the user or smth
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
 
     if (!userName) return;
@@ -23,7 +23,6 @@ export const UserForm = () => {
     console.log("Logging in as guest");
     // Storing guest login status and name, then navigate to home page
     sessionStorage.setItem("guestLoggedIn", "true");
-    sessionStorage.setItem("guestName", userName);
     navigate("/guest-name?target=home");
   };
 
@@ -38,7 +37,7 @@ export const UserForm = () => {
       />
       <input
         type="text"
-        placeholder="password, leave blank for guest"
+        placeholder="password"
         value={password}
         onChange={(e) => setPassWord(e.target.value)}
       />
