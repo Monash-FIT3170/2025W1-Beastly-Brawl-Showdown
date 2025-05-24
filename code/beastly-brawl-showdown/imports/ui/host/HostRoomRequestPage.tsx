@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Meteor } from "meteor/meteor";
 import { useNavigate} from "react-router-dom";
 
-export const HostRoomPage = () => {
+export const HostRoomRequestPage = () => {
   const navigate = useNavigate();
 
   //get name for the person whos hosting it

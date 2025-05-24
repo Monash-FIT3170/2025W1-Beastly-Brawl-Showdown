@@ -1,5 +1,5 @@
-import { CodeLink } from './CodeLink';
-import { QRBox } from './QRBox';
+import { CodeLink } from '../CodeLink';
+import { QRBox } from '../QRBox';
 import React from "react";
 
 export const WaitingRoomInfoBox = ({ joinURL }: { joinURL: string }) => {

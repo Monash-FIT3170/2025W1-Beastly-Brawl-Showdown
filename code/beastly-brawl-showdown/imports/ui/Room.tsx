@@ -1,7 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import React, { useEffect,useState } from "react";
-import { CodeLink } from "../CodeLink";
-import { QRBox } from "../QRBox";
+import { CodeLink } from "./CodeLink";
+import { QRBox } from "./QRBox";
 
 export const Room = () => {
   const id = sessionStorage.getItem("roomId");

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { renderRoutes } from "../Routes";
-import SettingsPage from "./SettingsPage";
+import { renderRoutes } from "./Routes";
+import SettingsPage from "./host/SettingsPage";
 
 export default function App() {
   const [bgmEnabled, setBgmEnabled] = useState(false);
