@@ -4,6 +4,8 @@ import { GameStates } from "./GameStates";
 
 Meteor.methods({
   async "gameStates.initialize"(roomId: string) {
+    console.log("Setting phase:", roomId); // debugging line
+
     check(roomId, String);
     try {
       console.log(`[Server] Initializing phase to 'waiting' for roomId: ${roomId}`);
@@ -22,6 +24,8 @@ Meteor.methods({
   },
 
   async "gameStates.setPhase"(roomId: string, phase: string) {
+    console.log("Setting phase:", roomId, phase); // debugging line
+
     check(roomId, String);
     check(phase, String);
     try {

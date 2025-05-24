@@ -42,21 +42,8 @@ export default function WaitingRoom() {
     }
   }, [id]);
 
-  // Initialize phase to 'waiting' when component mounts or id changes
-  useEffect(() => {
-    if (id) {
-      console.log(`[Client] Calling initialize for room: ${id}`);
-      Meteor.call("gameStates.initialize", id, (error: any) => {
-        if (error) {
-          console.error(`[Client] Initialize failed for room ${id}:`, error);
-        } else {
-          console.log(`[Client] Initialize succeeded for room ${id}`);
-        }
-      });
-    }
-  }, [id]);
 
-  // React to phase changes: navigate when phase hits "monsterSelection"
+  // // React to phase changes: navigate when phase hits "monsterSelection"
   useEffect(() => {
     if (gameState) {
       console.log(`[Client] Phase changed for room ${id}:`, gameState.phase);
