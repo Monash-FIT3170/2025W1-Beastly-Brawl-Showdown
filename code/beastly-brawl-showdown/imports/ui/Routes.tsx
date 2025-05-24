@@ -1,7 +1,7 @@
 import { Navigate, Route } from "react-router-dom";
 import { NotFound } from "./error/NotFound";
 import { HomePage } from "./HomePage";
-import WaitingRoom from "./host/projector/WaitingRoom";
+import ProjectorPage from "./host/projector/ProjectorPage";
 import { HostRoomPage } from "./host/request-room/HostRoomPage";
 import { Player } from "./player/game/PlayerPage";
 import JoinPage from "./player/join-room/JoinPage";
@@ -13,7 +13,7 @@ export const renderRoutes = () => (
 
     {/* Host */}
     <Route path="/host/" element={<HostRoomPage />} />
-    <Route path="/room/" element={<WaitingRoom />} />
+    <Route path="/room/" element={<ProjectorPage />} />
 
     {/* Player */}
     <Route path="/join/:joinCode" element={<JoinPage />} />

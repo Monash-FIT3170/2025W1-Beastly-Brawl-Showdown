@@ -1,36 +1,29 @@
 import { Meteor } from "meteor/meteor";
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
+import { DDP } from "meteor/ddp";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 
 export default function ProjectorPage() {
-  const { id } = useParams();
-  const playerName = sessionStorage.getItem("guestName");
-  const [revealURL, setURL] = useState("");
-  let safePlayerName: string;
+  const joinCode = sessionStorage.getItem("joinCode");
+  const joinUrl = Meteor.absoluteUrl() + "join/" + joinCode;
 
-  if (playerName == null) {
-    throw new Error("Player name is not set in sessionStorage.");
-  } else {
-    safePlayerName = playerName;
+  const serverUrl = sessionStorage.getItem("serverUrl");
+  if (!serverUrl) {
+    throw new Error("No server url provided.");
   }
 
-  useEffect(() => {
-    if (id) {
-      console.log("id is set");
-      const joinURL = Meteor.absoluteUrl(`/join/${id}`);
-      setURL(joinURL);
-      console.log("Setting joinURL:", joinURL);
-    }
-  }, [id]);
+  // Connect to game server
+  const gameServerConnection = DDP.connect(serverUrl);
+  // Subscribe to events
+  gameServerConnection.subscribe("lobby.players.onAddPlayer");
+  gameServerConnection.subscribe("lobby.players.onRemovePlayer");
 
   return (
     <div className="waiting-room-box">
-      <h1>Room ID: {id}</h1>
-      <h2>Waiting Room</h2>
-      <WaitingRoomInfoBox joinUrl={revealURL} />
-      <ParticipantDisplayBox name={safePlayerName} />
+      <h1>Game Lobby</h1>
+      <h2>Room ID: {joinCode}</h2>
+      <WaitingRoomInfoBox joinUrl={joinUrl} />
+      <ParticipantDisplayBox name={"PLACEHOLDER - WIP"} />
     </div>
   );
 }
