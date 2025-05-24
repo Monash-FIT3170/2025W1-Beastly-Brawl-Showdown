@@ -56,7 +56,7 @@ export const GuestNamePage = () => {
     return (
 
         <div className="page-container">
-            <h1>Guest</h1>
+            <h1 className="textbox" id="guest-header">Guest</h1>
             <form className="task-form userForm" onSubmit={handleSubmit}>
                 <input className="form-textbox"
                     type="text"

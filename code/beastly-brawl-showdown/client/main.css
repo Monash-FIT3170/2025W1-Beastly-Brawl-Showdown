@@ -83,20 +83,6 @@ body {
   text-transform: capitalize;
 }
 
-.form-button {
-  background-color: #8B4513;
-  color: #d4a574;
-  border: none;
-  padding: 15px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  border: 2px solid #654321;
-  text-transform: capitalize;
-}
-
 /* Top Row */
 /* Top Right */
 .branding {
@@ -113,7 +99,12 @@ body {
   justify-content: center;
 }
 
+/* Guest page */
+#guest-header {
+  text-shadow: 1px 1px 2px #d4a574;
+}
 
+/* Design page */
 .title {
   font-size: 3rem;
   font-weight: bold;
@@ -614,6 +605,8 @@ body {
   outline: none;
   color: #000;       /* Change if needed */
   text-align: center; /* Or left/right as you like */
+  align-items: center;
+  align-content: center;
   font-family: inherit;
   image-rendering: pixelated;
 }
