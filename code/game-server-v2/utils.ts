@@ -14,5 +14,5 @@ export function log_attention(val: any) {
 }
 
 export function log_event(val: any) {
-  console.log("\x1b[4;36;5;9m[Event]\x1b[0m", val);
+  console.log("\x1b[38;5;6m[Event]\x1b[0m", val);
 }

@@ -1,11 +1,9 @@
 import { io } from "socket.io-client";
 
-// User credentials
-const userId = "user1";
-const joinCode = "123456";
+const socket = io("http://localhost:8080/");
 
-const socket = io("http://localhost:8080", {
-  auth: { userId, joinCode: joinCode },
+socket.on("echo", (msg) => {
+  console.log(`Server says: ${msg}`);
 });
 
 socket.on("connect", () => {
@@ -15,16 +13,16 @@ socket.on("connect", () => {
   socket.emit("message", "Hello from client!");
 });
 
-// socket.on("serverResponse", (msg) => {
-//   console.log(`Server says: ${msg}`);
-// });
-
 socket.on("connect_error", (err) => {
   console.error(`Connection failed: ${err.message}`);
 });
 
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
+});
+
+socket.on("request-room_response", (msg) => {
+  console.log("Room request response", msg);
 });
 
 import * as readline from "readline";
@@ -44,6 +42,16 @@ const requestInput = (question: string): Promise<string> => {
 };
 
 const main = async () => {
+  socket.emit("request-room");
+
+  await requestInput("start host join?");
+  const hostChannel = io("http://localhost:8080/host", {
+    auth: { roomId: 1 },
+  });
+  await requestInput("start player join?");
+  const playerChannel = io("http://localhost:8080/player", {
+    auth: { joinCode: "860932", displayName: "Bobby" },
+  });
   while (1) {
     const msg = await requestInput("Echo to server: ");
     socket.emit("echo", msg);

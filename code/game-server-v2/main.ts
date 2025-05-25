@@ -5,10 +5,7 @@ import express from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
 import connectDb from "./db/db";
-import {
-  GameServerRegisterModel,
-  IGameServerRegisterEntry,
-} from "./db/models";
+import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
 
 type ServerConfig = {
@@ -25,10 +22,11 @@ async function main(config: ServerConfig) {
   const app = express();
   app.use(cors()); // Allow cross-origin requests
 
-  const server = http.createServer(app);
-  const io = new Server(server, { cors: { origin: "*" } });
-  const projectorChannel = io.of("/projector");
-  const playerChannel = io.of("/player");
+  const httpServer = http.createServer(app);
+  const socketServer = new Server(httpServer, { cors: { origin: "*" } });
+
+  const playerChannel = socketServer.of("/player");
+  const hostChannel = socketServer.of("/host");
 
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
@@ -46,9 +44,9 @@ async function main(config: ServerConfig) {
     }
   }
   GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
-    { serverNumber: 1 },
+    { serverNumber: config.serverNumber },
     {
-      serverNumber: 1,
+      serverNumber: config.serverNumber,
       serverUrl: "localhost:4000",
       lastUpdated: new Date(),
     },
@@ -64,25 +62,26 @@ async function main(config: ServerConfig) {
 
   //#region Events
   log_notice("Register events and start listening...");
-  const authenticate = (userId: string, joinCode: string): boolean => {
-    // TODO check if this is a vaid join code from an active room
-    return "123456" == joinCode;
-  };
+  // socketServer.use((socket, next) => {
+  //   const { joinCode } = socket.handshake.auth;
+  //   log_event(
+  //     `User attempted to join with ${JSON.stringify(socket.handshake.auth)}`
+  //   );
+  //   if (isValidCode(joinCode)) {
+  //     log_event(`Code <${socket.handshake.auth}> is valid.`);
+  //     next();
+  //   } else {
+  //     log_event("Authentication failed");
+  //     next(new Error("Invalid credentials"));
+  //   }
+  // });
 
-  io.use((socket, next) => {
-    const { userId, joinCode } = socket.handshake.auth;
-    if (authenticate(userId, joinCode)) {
-      log_event(`User authenticated: ${userId}`);
-      next();
-    } else {
-      log_event("Authentication failed");
-      next(new Error("Invalid credentials"));
-    }
-  });
-
+  // log_notice("Attatching events...");
+  // socketServer.on("connection", async (socket: Socket) => {
+  //   log_event(`User connected: ${socket.handshake.auth.joinCode}`);
   log_notice("Attatching events...");
-  playerChannel.on("connection", async (socket: Socket) => {
-    log_event(`User connected: ${socket.handshake.auth.userId}`);
+  socketServer.on("connection", async (socket: Socket) => {
+    log_event(`User attempted connection with id: ${socket.id}`);
 
     //#region Standard
     socket.on("disconnect", () => {
@@ -93,49 +92,142 @@ async function main(config: ServerConfig) {
       log_event(`pong`);
       socket.emit("pong");
     });
-    //#endregion
 
+    socket.on("echo", async (msg) => {
+      log_event(`Echoing: ${msg}`);
+      socket.emit("echo", msg);
+    });
+
+    //#endregion
+    /*
     socket.on("message", async (msg) => {
       log_event(`Received: ${msg}`);
       socket.emit("serverResponse", `Recieved: ${msg}`);
     });
+    */
+
+    socket.on("request-room", () => {
+      log_event("Room requested.");
+      try {
+        const { roomId: RoomId, joinCode: JoinCode } = gameServer.createRoom();
+
+        socket.emit("request-room_response", {
+          roomId: RoomId,
+          joinCode: JoinCode,
+        });
+      } catch {
+        socket.emit("error", "Could not create room.");
+      }
+    });
   });
 
-  server.listen(8080, () => {
+  hostChannel.use((socket, next) => {
+    log_event(
+      `Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`
+    );
+    const roomId = socket.handshake.auth.roomId;
+    if (gameServer.hasRoom(roomId)) {
+      log_event(`Room id <${roomId}> is valid.`);
+      next();
+    } else {
+      log_event("Authentication failed");
+      next(new Error("Invalid credentials"));
+    }
+  });
+
+  hostChannel.on("connection", async (socket: Socket) => {
+    log_event(`Host connected: ${socket.id}`);
+
+    socket.on("disconnect", () => {
+      log_event("Host disconnected.");
+    });
+
+    socket.on("start-game", async (msg) => {
+      log_event(`Requested to start game: ${msg}`);
+      // TODO do something
+      // socket.emit("serverResponse", `Recieved: ${msg}`);
+    });
+  });
+
+  playerChannel.use((socket, next) => {
+    log_event(
+      `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`
+    );
+    const { joinCode: joinCode, displayName: displayName } =
+      socket.handshake.auth;
+
+    if (!gameServer.hasRoom(gameServer.translateJoinCodeToRoomId(joinCode))) {
+      log_event("Joined with invalid join code");
+      next(new Error("Invalid credentials"));
+      return;
+    }
+
+    try {
+      gameServer.joinRoom(
+        gameServer.translateJoinCodeToRoomId(joinCode),
+        displayName,
+        undefined
+      );
+    } catch {
+      next(new Error("Invalid credentials"));
+    }
+
+    log_event(
+      `Join code <${socket.handshake.auth}> is valid. From <${displayName}>. <${socket.id}>`
+    );
+    next();
+  });
+
+  playerChannel.on("connection", async (socket: Socket) => {
+    log_event(`Player connected: ${socket.id}`);
+    // TODO add player info to room
+    // notify player
+
+    socket.on("disconnect", () => {
+      log_event("Player disconnected.");
+    });
+
+    socket.on("submit-move", async (msg) => {
+      console.log("move submitted: ", JSON.stringify(msg));
+    });
+  });
+
+  httpServer.listen(8080, () => {
     log_notice(
-      "Socket.IO server running on http://localhost:8080. Type 'shutdown' to close."
+      "Socket.IO server running on http://localhost:8080."
+      // "Socket.IO server running on http://localhost:8080. Type 'shutdown' to close."
     );
     //#endregion
 
-    //#region IO
-    // read io for graceful shutdown
-    // Readline setup
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
+    // // //#region IO
+    // // // read io for graceful shutdown
+    // // // Readline setup
+    // // const rl = readline.createInterface({
+    // //   input: process.stdin,
+    // //   output: process.stdout,
+    // // });
 
-    // Listen for "shutdown" command
-    const listenForShutdown = () => {
-      rl.question("> ", (answer) => {
-        /// TODO use tokens
-        if (answer.trim().toLowerCase() === "shutdown") {
-          log_warning("Gracefully shutting down...");
-          rl.close(); // Close input interface
-          io.close(); // Close Socket.IO
-          server.close(() => {
-            log_attention("Server closed.");
-            process.exit(0); // Exit process
-          });
-          return;
-        }
-        listenForShutdown(); // Continue listening for input
-      });
-    };
-    //#endregion
+    // // // Listen for "shutdown" command
+    // // const listenForShutdown = () => {
+    // //   rl.question("> ", (answer) => {
+    // //     /// TODO use tokens
+    // //     if (answer.trim().toLowerCase() === "shutdown") {
+    // //       log_warning("Gracefully shutting down...");
+    // //       rl.close(); // Close input interface
+    // //       io.close(); // Close Socket.IO
+    // //       server.close(() => {
+    // //         log_attention("Server closed.");
+    // //         process.exit(0); // Exit process
+    // //       });
+    // //       return;
+    // //     }
+    // //     listenForShutdown(); // Continue listening for input
+    // //   });
+    // // };
+    // // //#endregion
 
-    // Start listening
-    listenForShutdown();
+    // // Start listening
+    // listenForShutdown();
   });
 }
 
