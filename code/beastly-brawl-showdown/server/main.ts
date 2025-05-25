@@ -1,6 +1,6 @@
 import "../imports/api/RoomMethods";
 import { RoomServerManager } from './room/RoomServerManager';
-import { GameStates } from '/imports/api/GameStates';
+import { GameStates } from '../imports/api/DataBases';
 import { check } from "meteor/check";
 import "../imports/api/GameStateMethods";
 

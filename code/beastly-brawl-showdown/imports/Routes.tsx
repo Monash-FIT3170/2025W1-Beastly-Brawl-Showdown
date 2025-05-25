@@ -10,6 +10,7 @@ import { LoginPage } from "./ui/Login/LoginPage";
 import { MonsterSelectionScreen } from "./ui/MonsterSelection/MonsterSelectionScreen";
 import JoinPage from "./ui/JoinPage";
 import WaitingRoom from "./ui/WaitingRoom";
+import { BattleScreen } from "./ui/BattleScreen/BattleScreen";
 
 export const renderRoutes = () => (
   <>
@@ -28,6 +29,9 @@ export const renderRoutes = () => (
 
         {/* MONSTER SELECTION */}
         <Route path="/monster-selection/:id" element={<MonsterSelectionScreen />} />
+
+        {/* BATTLE PAGE */}
+        <Route path="battle/:id" element = {<BattleScreen/>}/>
 
         {/*  */}
         <Route path="/:id" element={<Player />} />

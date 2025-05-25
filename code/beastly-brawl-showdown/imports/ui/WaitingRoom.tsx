@@ -4,7 +4,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
-import { GameStates } from "../api/GameStates";
+import { GameStates } from "../api/DataBases";
 
 export default function WaitingRoom() {
   const { id } = useParams<{ id: string }>();

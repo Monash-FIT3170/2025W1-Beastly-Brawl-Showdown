@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import { check } from "meteor/check";
-import { GameStates } from "./GameStates";
+import { GameStates } from "./DataBases";
 
 Meteor.methods({
   async "gameStates.initialize"(roomId: string) {
