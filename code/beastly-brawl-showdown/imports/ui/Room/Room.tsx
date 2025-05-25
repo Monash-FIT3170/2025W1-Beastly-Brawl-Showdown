@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { CodeLink } from "../CodeLink";
 import { QRBox } from "../QRBox";
 import { useTracker } from "meteor/react-meteor-data";
-import { GameStates } from "/imports/api/GameStates";
+import { GameStates } from "../../api/DataBases";
 
 export const Room = () => {
   const id = sessionStorage.getItem("roomId");
