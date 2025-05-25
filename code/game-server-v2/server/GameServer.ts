@@ -1,14 +1,10 @@
-import { assert } from "console";
-import { Mongo } from "meteor/mongo";
 import Sqids from "sqids";
-import { log_notice, log_warning } from "./utils";
+import { log_notice, log_warning } from "../utils";
 import { Room } from "./Room";
 import { Player } from "./Player";
-import { ServerId, RoomId, JoinCode, AccountId } from "./types";
+import { ServerId, RoomId, JoinCode, AccountId } from "../types";
 
-export const GameServerRecords = new Mongo.Collection("game_server_records");
-
-export class GamerServer {
+export class GameServer {
   readonly CODE_MIN_LENGTH = 6; // TODO move to argv
   readonly CODE_ALPHABET = "0123456789"; // TODO move to argv
 
@@ -29,60 +25,47 @@ export class GamerServer {
   /**  The array to store rooms */
   private rooms = new Map<RoomId, Room>();
 
-  private constructor(serverId: ServerId, maxCapacity: number) {
+  constructor(serverId: ServerId, maxCapacity: number) {
     if (serverId < 0) {
-      throw Error("Invalid server id.");
+      throw new Error("Invalid server id.");
     }
     this.serverId = serverId;
 
     if (maxCapacity <= 0) {
-      throw Error("Invalid server capacity.");
+      throw new Error("Invalid server capacity.");
     }
     this.maxCapacity = maxCapacity;
   }
 
-  static async start(
-    serverId: ServerId,
-    maxCapacity: number
-  ): Promise<GamerServer> {
-    log_notice("Starting server instance...");
-    const gameServer: GamerServer = new GamerServer(serverId, maxCapacity);
-    log_notice("Register with global records...");
-    await gameServer.registerServer(true);
+  // /** Attempt to write this to the database */
+  // private async registerServer(overrideExisting: boolean) {
+  //   /// Does this already exist in the records
+  //   const existingRecord = await GameServerRecords.findOneAsync({
+  //     serverNo: this.serverId,
+  //   });
+  //   if (existingRecord) {
+  //     log_warning("There is a server registered with the same number.");
+  //     if (!overrideExisting) {
+  //       throw new Error(
+  //         "Server registration failed. Cannot override existing record."
+  //       );
+  //     }
+  //     log_warning(
+  //       `Overriding existing record: ${JSON.stringify(existingRecord)}`
+  //     );
+  //   }
 
-    log_notice("Server startup complete.");
-    return gameServer;
-  }
+  //   const noOfUpdatedRecords = await GameServerRecords.updateAsync(
+  //     { serverNo: this.serverId },
+  //     { $set: { serverUrl: process.env.ROOT_URL } },
+  //     { upsert: true } /// Update or insert (if does not exist)
+  //   );
 
-  /** Attempt to write this to the database */
-  private async registerServer(overrideExisting: boolean) {
-    /// Does this already exist in the records
-    const existingRecord = await GameServerRecords.findOneAsync({
-      serverNo: this.serverId,
-    });
-    if (existingRecord) {
-      log_warning("There is a server registered with the same number.");
-      if (!overrideExisting) {
-        throw Error(
-          "Server registration failed. Cannot override existing record."
-        );
-      }
-      log_warning(
-        `Overriding existing record: ${JSON.stringify(existingRecord)}`
-      );
-    }
-
-    const noOfUpdatedRecords = await GameServerRecords.updateAsync(
-      { serverNo: this.serverId },
-      { $set: { serverUrl: process.env.ROOT_URL } },
-      { upsert: true } /// Update or insert (if does not exist)
-    );
-
-    assert(
-      noOfUpdatedRecords <= 1,
-      "Unexpected behaviour. Multiple records overwritten when there should be one."
-    );
-  }
+  //   assert(
+  //     noOfUpdatedRecords <= 1,
+  //     "Unexpected behaviour. Multiple records overwritten when there should be one."
+  //   );
+  // }
 
   private peekNextRoomId(): RoomId {
     return this.lastAssignedRoomId + 1;
@@ -115,7 +98,7 @@ export class GamerServer {
     );
 
     if (this.hasRoom(newRoom.roomId)) {
-      throw Error("Existing room has the same ID.");
+      throw new Error("Existing room has the same ID.");
     }
     this.rooms.set(newRoom.roomId, newRoom);
     this.popNextRoomId(); /// Increment once the room is saved
@@ -126,11 +109,11 @@ export class GamerServer {
   // TODO AUTH
   deleteRoom(roomId: RoomId) {
     if (this.countActiveRooms() == 0) {
-      throw Error("Deletion failed, there are no rooms in this server");
+      throw new Error("Deletion failed, there are no rooms in this server");
     }
 
     if (!this.hasRoom(roomId)) {
-      throw Error(`A room with ID = ${roomId} does not exist.`);
+      throw new Error(`A room with ID = ${roomId} does not exist.`);
     }
 
     this.rooms.delete(roomId);
