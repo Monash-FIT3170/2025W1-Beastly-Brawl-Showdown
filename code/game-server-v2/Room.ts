@@ -1,4 +1,4 @@
-import { RoomId, JoinCode, AccountId } from "../types";
+import { RoomId, JoinCode, AccountId } from "./types";
 import { Player } from "./Player";
 import { GameSettings } from "./GameSettings";
 

@@ -1,4 +1,4 @@
-import { AccountId } from "../types";
+import { AccountId } from "./types";
 
 
 export class Player {

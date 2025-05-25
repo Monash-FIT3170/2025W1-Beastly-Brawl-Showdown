@@ -1,8 +1,8 @@
 import Sqids from "sqids";
-import { log_notice, log_warning } from "../utils";
+import { log_notice, log_warning } from "./utils";
 import { Room } from "./Room";
 import { Player } from "./Player";
-import { ServerId, RoomId, JoinCode, AccountId } from "../types";
+import { ServerId, RoomId, JoinCode, AccountId } from "./types";
 
 export class GameServer {
   readonly CODE_MIN_LENGTH = 6; // TODO move to argv

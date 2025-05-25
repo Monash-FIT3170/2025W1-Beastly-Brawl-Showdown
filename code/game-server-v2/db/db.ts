@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { log_notice } from "../../utils";
+import { log_notice } from "../utils";
 
 const MONGO_URI = "mongodb://localhost:27017/test";
 

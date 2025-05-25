@@ -1,14 +1,14 @@
-import { GameServer } from "./server/GameServer";
+import { GameServer } from "./GameServer";
 import * as readline from "readline";
 import cors from "cors";
 import express from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import connectDb from "./server/db/db";
+import connectDb from "./db/db";
 import {
   GameServerRegisterModel,
   IGameServerRegisterEntry,
-} from "./server/db/models";
+} from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
 
 type ServerConfig = {
