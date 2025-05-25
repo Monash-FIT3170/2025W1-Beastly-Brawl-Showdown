@@ -6,7 +6,7 @@ export const HomePage = () => {
   const navigate = useNavigate();
 
   const handleGuestHostName = () =>{
-    navigate(`/host/`)
+    navigate(`/temp-request-room/`)
   };
 
   return (

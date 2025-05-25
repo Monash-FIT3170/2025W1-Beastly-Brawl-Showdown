@@ -15,19 +15,19 @@ export class RoomServerManager {
         return RoomServerManager.instance;
     }
 
-    static async requestNewRoomAllocation(): Promise<{ roomCode: string | null }> {
-        let response: { roomCode: string | null } = { roomCode: null };
+    static async requestNewRoomAllocation(): Promise<{ joinCode: string | null }> {
+        let response: { joinCode: string | null } = { joinCode: null };
 
         const assignedCode: string = await RoomServerManager.get().foo.createRoom();
-        response.roomCode = assignedCode;
+        response.joinCode = assignedCode;
 
         return response;
     }
 
-    static async requestPlayerJoinRoom({ roomCode }: { roomCode: string}): Promise<{ isValidCode: boolean }> {
+    static async requestPlayerJoinRoom({ joinCode }: { joinCode: string}): Promise<{ isValidCode: boolean }> {
         let response: { isValidCode: boolean } = { isValidCode: false };
 
-        if (await RoomServerManager.get().foo.hasInstanceWithCode(roomCode)) { response.isValidCode = true; } /** this should check against all instances but this is fine for now */ 
+        if (await RoomServerManager.get().foo.hasInstanceWithCode(joinCode)) { response.isValidCode = true; } /** this should check against all instances but this is fine for now */ 
 
         return response;
     }

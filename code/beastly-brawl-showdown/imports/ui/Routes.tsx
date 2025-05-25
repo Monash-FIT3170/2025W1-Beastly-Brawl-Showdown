@@ -13,8 +13,8 @@ import ProjectorPage from "./host/ProjectorPage";
 export const renderRoutes = () => (
   <>
     {/* HOST */}
-    <Route path="/host/" element={<HostRoomRequestPage />} />
-    <Route path="/room/" element={<ProjectorPage />} />
+    <Route path="/temp-request-room/" element={<HostRoomRequestPage />} />
+    <Route path="/host/" element={<ProjectorPage />} />
 
     {/* PLAYER */}
     <Route path="/join/:joinCode" element={<JoinPage />} />

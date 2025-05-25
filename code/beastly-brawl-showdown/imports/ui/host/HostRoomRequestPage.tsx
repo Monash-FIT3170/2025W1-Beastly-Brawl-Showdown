@@ -11,16 +11,16 @@ export const HostRoomRequestPage = () => {
   const onRequestRoom = () => {
     console.log(playerName)
     console.log("Requesting room...");
-    Meteor.call("requestNewRoom", (error: any, result: { roomCode: string; }) => {
+    Meteor.call("requestNewRoom", (error: any, result: { joinCode: string; }) => {
       if (error) {
         console.error("Error creating room:", error);
         return;
       }
 
       console.log("Room created with result:", result);
-      console.log(`Moving host to room #${result.roomCode}`);
-      sessionStorage.setItem("roomId", result.roomCode);
-      navigate(`/h/${result.roomCode}/`);
+      console.log(`Moving host to room #${result.joinCode}`);
+      sessionStorage.setItem("joinCode", result.joinCode);
+      navigate(`/host/`);
 
     });
   };
