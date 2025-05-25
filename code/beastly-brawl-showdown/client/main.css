@@ -10,7 +10,6 @@ body {
   min-height: 100vh;
   display: flex;
   padding-top: 10px;
-  font-family: 'Segoe UI', sans-serif;
   background-color: #f0f0f0;
   justify-content: center;
   align-items: center;
@@ -637,76 +636,116 @@ body {
 .screen {
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
-/*The box to display the link to join the room*/
-.code-link {
-  width: 990px;
-  height: 75px;
-  padding-left: 10px;
-  padding-right: 10px;
+/*This shows everything related to the waiting room*/
+.waiting-room-box {
+  width: 1000px;
+  margin: 60px auto 0;
+}
+
+/*This shows and arranges the link and qr code components*/
+.waiting-room-info-box {
   display: flex;
-  justify-content: left;
+  justify-content: space-between;
   align-items: center;
-  background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
-  font-family: Arial, sans-serif;
-  overflow: auto;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+/* For the room code */
+.room-code, .code-link {
+  height: 80px;
+  background: #8B4513;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  flex: 1;
 }
 
 /*The box to show the qr code*/
 .qr-box {
-  width: 75px;
-  height: 75px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f0f0f0;
+  width: 80px;
+  height: 80px;
+  background: white;
   border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #333;
 }
 
 .qr-box canvas{
   width: 100%;
   height: 100%;
 }
-/*This shows and arranges the link and qr code components*/
-.waiting-room-info-box {
-  display:flex;
-  gap: 20px;
-}
-
-/*This shows everything related to the waiting room*/
-.waiting-room-box {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
 
 /*Component that displays the participants names dynamically*/
 .participants-display-box {
-  max-width: 1085px;
-  max-height: 500px;
-  padding: 10px;
-  display: grid;
-  gap: 20px;
-  background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
+  background: white;
+  /* border: 4px solid #4A90E2; */
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
 }
 
-/*For the participants name*/
-.participants-box {
-  width: 90px;
-  height: 40px;
+/* Header within the display box */
+.participants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 15px 0;
+  background: #8B4513;
+  padding: 10px 15px;
+  border-radius: 0;
+}
+
+/* Player count */
+.participants-count {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Start game btn */
+.start-game-btn {
+  background: linear-gradient(to bottom, #FF8C42, #E67E22);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.start-btn:hover {
+  background: linear-gradient(to bottom, #E67E22, #D35400);
+}
+
+/* Grid for the players */
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  padding: 0 15px 15px 15px;
+}
+
+/* participants-name-box */
+.participants-name-box {
+  background: linear-gradient(to bottom, #A0522D, #8B4513);
+  color: white;
+  border: 2px solid #654321;
+  padding: 10px 8px;
+  border-radius: 6px;
   text-align: center;
-  vertical-align: middle;
-  line-height: 40px;
-  background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
 }
 
 /* Shared container for full-page layout */

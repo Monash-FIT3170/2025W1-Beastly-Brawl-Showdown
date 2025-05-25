@@ -4,35 +4,36 @@ import { QRBox } from "../../host/projector/QRBox";
 import { CodeLink } from "../../host/projector/CodeLink";
 
 export const Room = () => {
-  const joinCode = sessionStorage.getItem("joinCode");
+  const id = sessionStorage.getItem("roomId");
+
   //get name from session storage
-  const playerName = sessionStorage.getItem("guestName");
-  const [revealURL, setURL] = useState("");
+  const [revealURL, setURL] = useState('');
 
   useEffect(() => {
     if (joinCode) {
       const joinURL = Meteor.absoluteUrl(`/join/${joinCode}`);
       setURL(joinURL);
     }
-  }, [joinCode]);
-  const copyToClipboard = () => {
-    navigator.clipboard
-      .writeText(revealURL)
-      .then(() => console.log("Copied to clipboard!!"))
-      .catch((error) => console.error("Copy failed:", error));
-  };
+  }, [id]);
 
   return (
-    <div>
-      <h1>Welcome {playerName}!</h1>
-      <h1>ROOM VIEW</h1>
-      <h1>Room ID: {joinCode}</h1>
-      <br></br>
+    <div className="waiting-room-box">
+        <div className="waiting-room-info-box">
+            <div className="room-code">
+                {id}
+            </div>
 
-      <QRBox joinUrl={revealURL} />
-      {CodeLink(revealURL)}
+            {CodeLink(revealURL)}
+            
+            <QRBox joinURL={revealURL} />
+        </div>
 
-      <button onClick={copyToClipboard}>Copy Link</button>
+        <div className="participants-display-box">
+            <div className="participants-header">
+                <div className="partcipants-count"></div>
+                <button className="glb-btn start-game-btn">Start Game</button>
+            </div>
+        </div>
     </div>
   );
 };
