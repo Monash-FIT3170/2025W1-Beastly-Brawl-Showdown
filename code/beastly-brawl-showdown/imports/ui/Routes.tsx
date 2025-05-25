@@ -2,7 +2,7 @@ import React from "react";
 import { Route } from "react-router-dom";
 import { NotFound } from "./Error/NotFound";
 import { HomePage } from "./HomePage";
-import { PlayerPage } from "./PlayerPage";
+import { PlayerPage } from "./player/PlayerPage";
 import { Room } from "./Room";
 import { HostRoomRequestPage } from "./host/HostRoomRequestPage";
 import { GuestNamePage } from "./GuestNamePage";
