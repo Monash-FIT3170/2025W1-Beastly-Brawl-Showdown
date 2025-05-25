@@ -22,8 +22,9 @@ export class GameServer {
   /**  The last room id that was given out */
   private lastAssignedRoomId: RoomId = 0;
 
+  hostIdToRoomIdLookup = new Map<string, RoomId>();
   /**  The array to store rooms */
-  private rooms = new Map<RoomId, Room>();
+  rooms = new Map<RoomId, Room>();
 
   constructor(serverId: ServerId, maxCapacity: number) {
     if (serverId < 0) {
@@ -86,13 +87,13 @@ export class GameServer {
     return this.countActiveRooms() >= this.maxCapacity;
   }
 
-  // TODO AUTH
-  createRoom(): { roomId: RoomId; joinCode: JoinCode } {
+  createRoom(hostSocketId: string): { roomId: RoomId; joinCode: JoinCode } {
     if (this.isFull()) {
       throw new Error("Server is full.");
     }
 
     const newRoom: Room = new Room(
+      hostSocketId,
       this.peekNextRoomId(),
       this.sqids.encode([this.serverId, this.peekNextRoomId()])
     );
@@ -101,23 +102,24 @@ export class GameServer {
       throw new Error("Existing room has the same ID.");
     }
     this.rooms.set(newRoom.roomId, newRoom);
+    this.hostIdToRoomIdLookup.set(hostSocketId, newRoom.roomId);
     this.popNextRoomId(); /// Increment once the room is saved
 
     return { roomId: newRoom.roomId, joinCode: newRoom.joinCode };
   }
 
-  // TODO AUTH
-  deleteRoom(roomId: RoomId) {
-    if (this.countActiveRooms() == 0) {
-      throw new Error("Deletion failed, there are no rooms in this server");
-    }
+  // // TODO AUTH
+  // deleteRoom(roomId: RoomId) {
+  //   if (this.countActiveRooms() == 0) {
+  //     throw new Error("Deletion failed, there are no rooms in this server");
+  //   }
 
-    if (!this.hasRoom(roomId)) {
-      throw new Error(`A room with ID = ${roomId} does not exist.`);
-    }
+  //   if (!this.hasRoom(roomId)) {
+  //     throw new Error(`A room with ID = ${roomId} does not exist.`);
+  //   }
 
-    this.rooms.delete(roomId);
-  }
+  //   this.rooms.delete(roomId);
+  // }
 
   translateJoinCodeToRoomId(joinCode: JoinCode) {
     return this.sqids.decode(joinCode)[1]; /// We already know the server id (of this)
@@ -128,6 +130,7 @@ export class GameServer {
   }
 
   joinRoom(
+    socketId: string,
     roomId: RoomId,
     displayName: string,
     linkedAcccountId: AccountId | undefined
@@ -143,7 +146,7 @@ export class GameServer {
       throw new Error("Display name already taken.");
     }
 
-    const newPlayer = new Player(displayName, linkedAcccountId);
+    const newPlayer = new Player(socketId, displayName, linkedAcccountId);
     room.players.set(displayName, newPlayer);
   }
 }

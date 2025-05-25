@@ -3,9 +3,7 @@ import { Player } from "./Player";
 import { GameSettings } from "./GameSettings";
 
 export class Room {
-  hasPlayer(displayName: string) {
-    return this.players.has(displayName);
-  }
+  readonly hostSocketId: string;
 
   readonly roomId: RoomId;
   /**
@@ -19,8 +17,13 @@ export class Room {
   gameState: any = undefined;
   settings: GameSettings = new GameSettings();
 
-  constructor(roomId: RoomId, joinCode: JoinCode) {
+  constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode) {
+    this.hostSocketId = hostSocketId;
     this.roomId = roomId;
     this.joinCode = joinCode;
+  }
+
+  hasPlayer(displayName: string) {
+    return this.players.has(displayName);
   }
 }

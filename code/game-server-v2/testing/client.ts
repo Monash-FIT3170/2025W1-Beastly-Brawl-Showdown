@@ -42,20 +42,32 @@ const requestInput = (question: string): Promise<string> => {
 };
 
 const main = async () => {
-  socket.emit("request-room");
+  const _roomId = 1;
+  const _joinCode = "860932";
+  const _displayName = "Bobby";
+  const _hostName = "Mr Host";
 
   await requestInput("start host join?");
   const hostChannel = io("http://localhost:8080/host", {
-    auth: { roomId: 1 },
+    auth: { hostName: _hostName },
   });
+  hostChannel.emit("request-room");
+
   await requestInput("start player join?");
   const playerChannel = io("http://localhost:8080/player", {
-    auth: { joinCode: "860932", displayName: "Bobby" },
+    auth: { joinCode: _joinCode, displayName: _displayName },
   });
-  while (1) {
-    const msg = await requestInput("Echo to server: ");
-    socket.emit("echo", msg);
-  }
+  playerChannel.on("game-started", () => {
+    console.log("GAME START");
+  });
+
+  await requestInput("start game?");
+  hostChannel.emit("start-game", _roomId);
+
+  // while (1) {
+  //   const msg = await requestInput("Echo to server: ");
+  //   socket.emit("echo", msg);
+  // }
 
   rl.close();
 };

@@ -81,7 +81,7 @@ async function main(config: ServerConfig) {
   //   log_event(`User connected: ${socket.handshake.auth.joinCode}`);
   log_notice("Attatching events...");
   socketServer.on("connection", async (socket: Socket) => {
-    log_event(`User attempted connection with id: ${socket.id}`);
+    log_event(`User connected with id: ${socket.id}`);
 
     //#region Standard
     socket.on("disconnect", () => {
@@ -105,36 +105,26 @@ async function main(config: ServerConfig) {
       socket.emit("serverResponse", `Recieved: ${msg}`);
     });
     */
-
-    socket.on("request-room", () => {
-      log_event("Room requested.");
-      try {
-        const { roomId: RoomId, joinCode: JoinCode } = gameServer.createRoom();
-
-        socket.emit("request-room_response", {
-          roomId: RoomId,
-          joinCode: JoinCode,
-        });
-      } catch {
-        socket.emit("error", "Could not create room.");
-      }
-    });
   });
 
+  type HostChannelAuth = {
+    hostName: string;
+  };
   hostChannel.use((socket, next) => {
     log_event(
       `Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`
     );
-    const roomId = socket.handshake.auth.roomId;
-    if (gameServer.hasRoom(roomId)) {
-      log_event(`Room id <${roomId}> is valid.`);
-      next();
-    } else {
-      log_event("Authentication failed");
-      next(new Error("Invalid credentials"));
+    const auth = socket.handshake.auth as HostChannelAuth;
+    /// for now always accept the host name
+    if (!auth.hostName) {
+      next(new Error("No host name provided."));
+      return;
     }
+
+    next();
   });
 
+  // TODO use a persistent ID rather than socket ID
   hostChannel.on("connection", async (socket: Socket) => {
     log_event(`Host connected: ${socket.id}`);
 
@@ -142,21 +132,50 @@ async function main(config: ServerConfig) {
       log_event("Host disconnected.");
     });
 
+    socket.on("request-room", async () => {
+      log_event("Room requested.");
+      // TODO prevent multiple rooms at the same time
+      try {
+        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
+          socket.id
+        );
+
+        socket.emit("request-room_response", {
+          roomId: roomId,
+          joinCode: joinCode,
+        });
+        log_notice(`Room generated. id = ${roomId}, join code = ${joinCode}`);
+      } catch {
+        socket.emit("error", "Could not create room.");
+      }
+    });
+
     socket.on("start-game", async (msg) => {
       log_event(`Requested to start game: ${msg}`);
-      // TODO do something
-      // socket.emit("serverResponse", `Recieved: ${msg}`);
+
+      // Notify everyone in this room
+      gameServer.rooms
+        .get(gameServer.hostIdToRoomIdLookup.get(socket.id)!)!
+        .players.forEach((player) => {
+          playerChannel.to(player.socketId).emit("game-started"); // TODO modify as needed
+        });
+      log_notice("All players informed of start.");
     });
   });
 
+  type PlayerChannelAuth = {
+    joinCode: string;
+    displayName: string;
+  };
   playerChannel.use((socket, next) => {
     log_event(
       `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`
     );
-    const { joinCode: joinCode, displayName: displayName } =
-      socket.handshake.auth;
+    const auth = socket.handshake.auth as PlayerChannelAuth;
 
-    if (!gameServer.hasRoom(gameServer.translateJoinCodeToRoomId(joinCode))) {
+    if (
+      !gameServer.hasRoom(gameServer.translateJoinCodeToRoomId(auth.joinCode))
+    ) {
       log_event("Joined with invalid join code");
       next(new Error("Invalid credentials"));
       return;
@@ -164,8 +183,9 @@ async function main(config: ServerConfig) {
 
     try {
       gameServer.joinRoom(
-        gameServer.translateJoinCodeToRoomId(joinCode),
-        displayName,
+        socket.id,
+        gameServer.translateJoinCodeToRoomId(auth.joinCode),
+        auth.displayName,
         undefined
       );
     } catch {
@@ -173,61 +193,63 @@ async function main(config: ServerConfig) {
     }
 
     log_event(
-      `Join code <${socket.handshake.auth}> is valid. From <${displayName}>. <${socket.id}>`
+      `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`
     );
     next();
   });
 
   playerChannel.on("connection", async (socket: Socket) => {
     log_event(`Player connected: ${socket.id}`);
-    // TODO add player info to room
-    // notify player
+    // TODO notify host
 
     socket.on("disconnect", () => {
       log_event("Player disconnected.");
     });
 
     socket.on("submit-move", async (msg) => {
-      console.log("move submitted: ", JSON.stringify(msg));
+      console.log("Move submitted: ", JSON.stringify(msg));
+
+      // TODO turn stuff
+
+      // TODO if all users submitted and a turn can be processed
+      if (false) {
+        const TEMP_playerSocketId = "sdfgrdfgrdgfrdfg";
+        playerChannel
+          .to(TEMP_playerSocketId)
+          .emit("turn-result", "PLACEHOLDER RESULT");
+      }
     });
   });
 
   httpServer.listen(8080, () => {
     log_notice(
-      "Socket.IO server running on http://localhost:8080."
-      // "Socket.IO server running on http://localhost:8080. Type 'shutdown' to close."
+      "Socket.IO server running on http://localhost:8080. <CTRL+C> to shutdown."
     );
     //#endregion
 
-    // // //#region IO
-    // // // read io for graceful shutdown
-    // // // Readline setup
-    // // const rl = readline.createInterface({
-    // //   input: process.stdin,
-    // //   output: process.stdout,
-    // // });
+    //#region IO
+    // Readline setup
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
 
-    // // // Listen for "shutdown" command
-    // // const listenForShutdown = () => {
-    // //   rl.question("> ", (answer) => {
-    // //     /// TODO use tokens
-    // //     if (answer.trim().toLowerCase() === "shutdown") {
-    // //       log_warning("Gracefully shutting down...");
-    // //       rl.close(); // Close input interface
-    // //       io.close(); // Close Socket.IO
-    // //       server.close(() => {
-    // //         log_attention("Server closed.");
-    // //         process.exit(0); // Exit process
-    // //       });
-    // //       return;
-    // //     }
-    // //     listenForShutdown(); // Continue listening for input
-    // //   });
-    // // };
-    // // //#endregion
+    // Listen for Ctrl + C (SIGINT)
+    const listenForShutdown = () => {
+      process.on("SIGINT", () => {
+        log_attention("Gracefully shutting down...");
 
-    // // Start listening
-    // listenForShutdown();
+        rl.close(); // Close input interface
+        socketServer.close(); // Close Socket.IO
+        httpServer.close(() => {
+          log_attention("Server closed.");
+          process.exit(0); // Exit process
+        });
+      });
+    };
+
+    // Start listening
+    listenForShutdown();
   });
 }
 
