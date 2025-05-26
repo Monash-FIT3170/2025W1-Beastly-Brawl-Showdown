@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Meteor } from "meteor/meteor";
 import { useNavigate, useParams } from "react-router-dom";
-import { DDP } from "meteor/ddp";
+import { io } from "socket.io-client";
+import { UnderConstruction } from "../../error/UnderConstruction";
 // import "/imports/ui/global.css";
 
 export const InvalidCodeWarning = ({ enabled }: { enabled: boolean }) => {
@@ -16,67 +17,103 @@ export const JoinForm = () => {
   const { joinCode: linkParamJoinCode } = useParams();
   console.log(`Extracted room code from link: <${linkParamJoinCode}>`);
   const [inputJoinCode, setInputJoinCode] = useState(linkParamJoinCode ?? "");
+  const [isJoinCodeValid, setJoinCodeValid] = useState(false);
   const [inputDisplayName, setInputDisplayName] = useState(
     sessionStorage.getItem("displayName") ?? ""
   ); /// Load saved display name as default
-  const [accountId, setAccountId] = useState(); // TODO - always nothing for now
-  const [tempServerUrl, setTempServerUrl] = useState("");
+  const [isDisplayNameValid, setDisplayNameValid] = useState(false);
+
+  const [serverUrl, setServerUrl] = useState<string>();
+  // const [accountId, setAccountId] = useState(); // TODO - always nothing for now
+  // const [roomId, setRoomId] = useState<number>();
+
   const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] =
     useState(false);
   const navigate = useNavigate();
 
-  const handleSubmitCode = async (e: { preventDefault: () => void }) => {
+  //#region Startup
+  if (!serverUrl) {
+    /// Try get best server url
+    Meteor.call("getBestServerUrl", (error: any, result: string) => {
+      if (error) {
+        console.error("Error locating room:", error);
+        return;
+      }
+
+      console.log("Server found at:", result);
+      setServerUrl(result);
+    });
+
+    return (
+      <>
+        <p>Connectng to servers...</p>
+      </>
+    );
+  }
+
+  // // Connect to game server
+  // const socket = io(serverUrl + "/player");
+  // socket.on("connect", () => {
+  //   console.log("Connected to server");
+
+  //   // Send a test message
+  //   socket.emit("message", "Hello from Projector!");
+  // });
+
+  // socket.on("connect_error", (err: Error) => {
+  //   console.error(`Connection failed: ${err.message}`);
+  // });
+
+  // socket.on("disconnect", () => {
+  //   console.log("Disconnected from server");
+  // });
+
+  // socket.on("echo", (msg: string) => {
+  //   console.log(`Server says: ${msg}`);
+  // });
+  // //#endregion
+
+  //#region Try join
+  const handleSubmitAuth = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     if (!inputJoinCode) return;
 
-    Meteor.call(
-      "getServerConnection",
-      inputJoinCode.trim(),
-      (error: any, result: string) => {
-        if (error) {
-          console.log(error);
-          // change state - show invalid code text
-          setInvalidCodeSubmittedPopupState(true);
+    fetch(serverUrl + "/player-auth-precheck", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        joinCode: inputJoinCode,
+        displayName: inputDisplayName,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.isJoinCodeValid === true) {
+          console.log("Join code valid.");
+          setJoinCodeValid(true);
+        } else {
+          console.log("Invalid join code:", data);
+          setJoinCodeValid(false);
         }
 
-        console.log("Server URL:", result);
-        setTempServerUrl(result);
-      }
-    );
-  };
-
-  const handleSubmitName = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-
-    if (!inputJoinCode) return;
-    if (!inputDisplayName) return;
-
-    /// input validation
-
-    const gameServerConnection = DDP.connect(tempServerUrl);
-    gameServerConnection.call(
-      "requestJoinRoom",
-      inputJoinCode,
-      inputDisplayName,
-      accountId,
-      (error: any, result: null) => {
-        if (error) {
-          console.log(error);
-          // Toggle invalid display name
+        if (data.isDisplayNameValid === true) {
+          console.log("Display name valid.");
+          setDisplayNameValid(true);
+        } else {
+          console.log("Invalid display name:", data);
+          setDisplayNameValid(false);
         }
-        console.log("Join details valid. Response from server:", result);
-      }
-    );
-    navigate(`/play`);
+      })
+      .catch((error) => console.error("Error:", error));
   };
 
-  if (tempServerUrl == "") {
+  if (!isJoinCodeValid) {
     /// No code submitted / recieved
     return (
       <>
         <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
-        <form className="task-form" onSubmit={handleSubmitCode}>
+        <form className="task-form" onSubmit={handleSubmitAuth}>
           <input
             type="text"
             placeholder="Add Room Code"
@@ -91,11 +128,12 @@ export const JoinForm = () => {
         </form>
       </>
     );
-  } else {
+  }
+  if (!isDisplayNameValid) {
     return (
       <>
         <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
-        <form className="task-form" onSubmit={handleSubmitName}>
+        <form className="task-form" onSubmit={handleSubmitAuth}>
           <input
             type="text"
             placeholder="Display Name"
@@ -111,4 +149,16 @@ export const JoinForm = () => {
       </>
     );
   }
+
+  if (isJoinCodeValid && isDisplayNameValid) {
+    sessionStorage.setItem("joinCode", inputJoinCode);
+    sessionStorage.setItem("displayName", inputDisplayName);
+    console.log("Go to game...");
+    navigate(`/play`);
+  }
+  return (
+    <>
+      <p>Starting game...</p>
+    </>
+  );
 };

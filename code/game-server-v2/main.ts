@@ -21,10 +21,11 @@ async function main(config: ServerConfig) {
   log_notice("Starting server...");
 
   log_notice("Start websocket server...");
-  const app = express();
-  app.use(cors()); // Allow cross-origin requests
+  const expressApp = express();
+  expressApp.use(cors()); // Allow cross-origin requests
+  expressApp.use(express.json()); // Allow cross-origin requests
 
-  const httpServer = http.createServer(app);
+  const httpServer = http.createServer(expressApp);
   const socketServer = new Server(httpServer, { cors: { origin: "*" } });
 
   const playerChannel = socketServer.of("/player");
@@ -168,15 +169,65 @@ async function main(config: ServerConfig) {
     });
   });
 
+  /// Pre-connection auth check
   type PlayerChannelAuth = {
     joinCode: string;
     displayName: string;
   };
+  expressApp.post("/player-auth-precheck", (req, res) => {
+    log_event("Player is prechecking auth\n" + JSON.stringify(req.body));
+
+    const checkResult: {
+      isJoinCodeValid: boolean | null;
+      isDisplayNameValid: boolean | null;
+    } = {
+      isJoinCodeValid: null,
+      isDisplayNameValid: null,
+    };
+
+    if (!req.body) {
+      log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
+      res.send(checkResult);
+      return;
+    }
+
+    if (!req.body.joinCode) {
+      checkResult.isJoinCodeValid = false;
+      log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
+      res.send(checkResult);
+      return;
+    }
+
+    const roomId = gameServer.translateJoinCodeToRoomId(req.body.joinCode);
+    checkResult.isJoinCodeValid = gameServer.hasRoom(roomId);
+
+    if (!req.body.displayName) {
+      checkResult.isDisplayNameValid = false;
+      log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
+      res.send(checkResult);
+      return;
+    }
+    checkResult.isDisplayNameValid = !gameServer.rooms
+      .get(roomId)
+      ?.hasPlayer(req.body.displayName);
+
+    log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
+    res.send(checkResult);
+  });
   playerChannel.use((socket, next) => {
     log_event(
       `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`
     );
     const auth = socket.handshake.auth as PlayerChannelAuth;
+
+    if (!auth.joinCode) {
+      socket.emit("error", "No join code");
+      return;
+    }
+    if (!auth.displayName) {
+      socket.emit("error", "No display name");
+      return;
+    }
 
     const roomId = gameServer.translateJoinCodeToRoomId(auth.joinCode);
     if (!gameServer.hasRoom(roomId)) {
@@ -194,7 +245,9 @@ async function main(config: ServerConfig) {
     log_event(
       `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`
     );
-    const playerNameList = [...gameServer.rooms.get(roomId)?.players.values()!].map(player => player.displayName)
+    const playerNameList = [
+      ...gameServer.rooms.get(roomId)?.players.values()!,
+    ].map((player) => player.displayName);
     socket
       .to(gameServer.rooms.get(roomId)!.hostSocketId)
       .emit("player-set-changed", playerNameList);
