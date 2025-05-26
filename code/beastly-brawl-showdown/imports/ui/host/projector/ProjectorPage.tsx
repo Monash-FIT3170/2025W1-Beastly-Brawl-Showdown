@@ -26,7 +26,7 @@ export default function ProjectorPage() {
 
     return (
       <>
-        <p>Connectng to servers...</p>
+        <p>Connecting to servers...</p>
       </>
     );
   }
