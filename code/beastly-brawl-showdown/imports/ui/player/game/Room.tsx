@@ -1,30 +1,30 @@
 import { Meteor } from "meteor/meteor";
-import React, { useEffect, useState } from "react";
-import { QRBox } from "../../host/projector/QRBox";
+import React, { useEffect,useState } from "react";
 import { CodeLink } from "../../host/projector/CodeLink";
+import { QRBox } from "../../host/projector/QRBox";
 
 export const Room = () => {
-  const joinCode = sessionStorage.getItem("roomId");
+  const id = sessionStorage.getItem("roomId");
+
   //get name from session storage
-  const playerName = sessionStorage.getItem("guestName");
-  const [revealURL, setURL] = useState("");
+  const [revealURL, setURL] = useState('');
 
   useEffect(() => {
-    if (joinCode) {
-      const joinURL = Meteor.absoluteUrl(`/join/${joinCode}`);
+    if (id) {
+      const joinURL = Meteor.absoluteUrl(`/join/${id}`);
       setURL(joinURL);
     }
-  }, [joinCode]);
+  }, [id]);
 
   return (
     <div className="waiting-room-box">
         <div className="waiting-room-info-box">
             <div className="room-code">
-                {joinCode}
+                {id}
             </div>
 
             {CodeLink(revealURL)}
-            
+
             <QRBox joinUrl={revealURL} />
         </div>
 
