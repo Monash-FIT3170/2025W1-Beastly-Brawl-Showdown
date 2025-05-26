@@ -9,6 +9,8 @@ export default function ProjectorPage() {
   const [roomId, setRoomId] = useState<number>();
   const [joinCode, setJoinCode] = useState<string>();
 
+  const [playerList, setPlayerList] = useState<string[]>([]);
+
   //#region Startup
   if (!serverUrl) {
     /// Try get best server url
@@ -67,8 +69,9 @@ export default function ProjectorPage() {
   //#region Host App events
   socket.on("player-set-changed", (newPlayerList: string[]) => {
     console.log("New set of players:", newPlayerList.toString());
+    setPlayerList(newPlayerList);
   });
-  
+
   if (!roomId) {
     socket.emit("request-room");
     return (
@@ -86,7 +89,7 @@ export default function ProjectorPage() {
       <h1>Game Lobby</h1>
       <h2>Room ID: {joinCode}</h2>
       <WaitingRoomInfoBox joinUrl={getJoinUrl()} />
-      <ParticipantDisplayBox name={"PLACEHOLDER - WIP"} />
+      <ParticipantDisplayBox name={playerList.toString()} />
     </div>
   );
   //#endregion
