@@ -9,6 +9,8 @@ import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
 
 type ServerConfig = {
+  serverIp: string;
+  serverPort: number;
   serverNumber: number;
   maxCapcity: number;
   overrideExistingRecordOnStartup: boolean;
@@ -43,15 +45,18 @@ async function main(config: ServerConfig) {
       throw new Error("A record already exists, room could not be registered.");
     }
   }
-  GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
-    { serverNumber: config.serverNumber },
-    {
-      serverNumber: config.serverNumber,
-      serverUrl: "localhost:4000",
-      lastUpdated: new Date(),
-    },
-    { upsert: true, new: true }
-  );
+  const updatedRecord =
+    await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
+      { serverNumber: config.serverNumber },
+      {
+        serverNumber: config.serverNumber,
+        serverUrl:
+          config.serverIp.toString() + ":" + config.serverPort.toString(),
+        lastUpdated: new Date(),
+      },
+      { upsert: true, new: true }
+    );
+  log_notice("New Record:\n" + JSON.stringify(updatedRecord));
   log_notice("Registered to records.");
 
   log_notice("Starting game service...");
@@ -108,7 +113,7 @@ async function main(config: ServerConfig) {
   });
 
   type HostChannelAuth = {
-    hostName: string;
+    // hostName: string;
   };
   hostChannel.use((socket, next) => {
     log_event(
@@ -116,10 +121,10 @@ async function main(config: ServerConfig) {
     );
     const auth = socket.handshake.auth as HostChannelAuth;
     /// for now always accept the host name
-    if (!auth.hostName) {
-      next(new Error("No host name provided."));
-      return;
-    }
+    // if (!auth.hostName) {
+    //   next(new Error("No host name provided."));
+    //   return;
+    // }
 
     next();
   });
@@ -173,21 +178,15 @@ async function main(config: ServerConfig) {
     );
     const auth = socket.handshake.auth as PlayerChannelAuth;
 
-    if (
-      !gameServer.hasRoom(gameServer.translateJoinCodeToRoomId(auth.joinCode))
-    ) {
+    const roomId = gameServer.translateJoinCodeToRoomId(auth.joinCode);
+    if (!gameServer.hasRoom(roomId)) {
       log_event("Joined with invalid join code");
       next(new Error("Invalid credentials"));
       return;
     }
 
     try {
-      gameServer.joinRoom(
-        socket.id,
-        gameServer.translateJoinCodeToRoomId(auth.joinCode),
-        auth.displayName,
-        undefined
-      );
+      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
     } catch {
       next(new Error("Invalid credentials"));
     }
@@ -195,12 +194,15 @@ async function main(config: ServerConfig) {
     log_event(
       `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`
     );
+    const playerNameList = [...gameServer.rooms.get(roomId)?.players.values()!].map(player => player.displayName)
+    socket
+      .to(gameServer.rooms.get(roomId)!.hostSocketId)
+      .emit("player-set-changed", playerNameList);
     next();
   });
 
   playerChannel.on("connection", async (socket: Socket) => {
     log_event(`Player connected: ${socket.id}`);
-    // TODO notify host
 
     socket.on("disconnect", () => {
       log_event("Player disconnected.");
@@ -221,9 +223,11 @@ async function main(config: ServerConfig) {
     });
   });
 
-  httpServer.listen(8080, () => {
+  httpServer.listen(config.serverPort, () => {
     log_notice(
-      "Socket.IO server running on http://localhost:8080. <CTRL+C> to shutdown."
+      `Socket.IO server running on ${
+        config.serverIp.toString() + ":" + config.serverPort.toString()
+      }. <CTRL+C> to shutdown.`
     );
     //#endregion
 
@@ -255,7 +259,9 @@ async function main(config: ServerConfig) {
 
 log_notice("Loading config...");
 log_attention("Config not implemented yet. Using placeholder.");
-const config = {
+const config: ServerConfig = {
+  serverIp: "http://localhost",
+  serverPort: 8080,
   serverNumber: 7,
   maxCapcity: 12,
   overrideExistingRecordOnStartup: true,

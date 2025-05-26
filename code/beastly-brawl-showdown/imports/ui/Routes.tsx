@@ -1,3 +1,4 @@
+import React from "react";
 import { Navigate, Route } from "react-router-dom";
 import { NotFound } from "./error/NotFound";
 import { HomePage } from "./HomePage";
@@ -12,8 +13,9 @@ export const renderRoutes = () => (
     <Route path="/home/" element={<HomePage />} />
 
     {/* Host */}
-    <Route path="/host/" element={<HostRoomRequestPage />} />
-    <Route path="/room/" element={<ProjectorPage />} />
+    <Route path="/host/" element={<ProjectorPage />} />
+    {/* <Route path="/host/" element={<HostRoomRequestPage />} /> */}
+    {/* <Route path="/room/" element={<ProjectorPage />} /> */}
 
     {/* Player */}
     <Route path="/join/:joinCode" element={<JoinPage />} />
