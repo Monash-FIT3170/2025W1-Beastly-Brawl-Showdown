@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Meteor } from "meteor/meteor";
 import { useNavigate, useParams } from "react-router-dom";
-import { io } from "socket.io-client";
-import { UnderConstruction } from "../../error/UnderConstruction";
 // import "/imports/ui/global.css";
 
 export const InvalidCodeWarning = ({ enabled }: { enabled: boolean }) => {
@@ -51,29 +49,7 @@ export const JoinForm = () => {
     );
   }
 
-  // // Connect to game server
-  // const socket = io(serverUrl + "/player");
-  // socket.on("connect", () => {
-  //   console.log("Connected to server");
-
-  //   // Send a test message
-  //   socket.emit("message", "Hello from Projector!");
-  // });
-
-  // socket.on("connect_error", (err: Error) => {
-  //   console.error(`Connection failed: ${err.message}`);
-  // });
-
-  // socket.on("disconnect", () => {
-  //   console.log("Disconnected from server");
-  // });
-
-  // socket.on("echo", (msg: string) => {
-  //   console.log(`Server says: ${msg}`);
-  // });
-  // //#endregion
-
-  //#region Try join
+  //#region Auth check
   const handleSubmitAuth = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
@@ -153,6 +129,7 @@ export const JoinForm = () => {
   if (isJoinCodeValid && isDisplayNameValid) {
     sessionStorage.setItem("joinCode", inputJoinCode);
     sessionStorage.setItem("displayName", inputDisplayName);
+    sessionStorage.setItem("serverUrl", serverUrl);
     console.log("Go to game...");
     navigate(`/play`);
   }

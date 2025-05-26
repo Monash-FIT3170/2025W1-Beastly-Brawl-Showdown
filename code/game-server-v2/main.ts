@@ -68,23 +68,6 @@ async function main(config: ServerConfig) {
 
   //#region Events
   log_notice("Register events and start listening...");
-  // socketServer.use((socket, next) => {
-  //   const { joinCode } = socket.handshake.auth;
-  //   log_event(
-  //     `User attempted to join with ${JSON.stringify(socket.handshake.auth)}`
-  //   );
-  //   if (isValidCode(joinCode)) {
-  //     log_event(`Code <${socket.handshake.auth}> is valid.`);
-  //     next();
-  //   } else {
-  //     log_event("Authentication failed");
-  //     next(new Error("Invalid credentials"));
-  //   }
-  // });
-
-  // log_notice("Attatching events...");
-  // socketServer.on("connection", async (socket: Socket) => {
-  //   log_event(`User connected: ${socket.handshake.auth.joinCode}`);
   log_notice("Attatching events...");
   socketServer.on("connection", async (socket: Socket) => {
     log_event(`User connected with id: ${socket.id}`);
@@ -228,7 +211,7 @@ async function main(config: ServerConfig) {
       socket.emit("error", "No display name");
       return;
     }
-
+    
     const roomId = gameServer.translateJoinCodeToRoomId(auth.joinCode);
     if (!gameServer.hasRoom(roomId)) {
       log_event("Joined with invalid join code");
@@ -238,7 +221,13 @@ async function main(config: ServerConfig) {
 
     try {
       gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
-    } catch {
+    } catch (err) {
+      if (err instanceof Error) {
+        log_warning("Join room failed unexpectedly.\n" + err.message);
+        log_attention(gameServer.rooms.get(roomId)?.players)
+      } else {
+        log_attention("Unexpected error is not of error type.");
+      }
       next(new Error("Invalid credentials"));
     }
 
@@ -248,7 +237,8 @@ async function main(config: ServerConfig) {
     const playerNameList = [
       ...gameServer.rooms.get(roomId)?.players.values()!,
     ].map((player) => player.displayName);
-    socket
+    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId)
+    hostChannel
       .to(gameServer.rooms.get(roomId)!.hostSocketId)
       .emit("player-set-changed", playerNameList);
     next();

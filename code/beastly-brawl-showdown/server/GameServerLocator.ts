@@ -13,45 +13,6 @@ export function getBestServerNo(): number {
   return 7; // TODO - for now it always gets the server with this
 }
 
-// export async function requestRoomCreation(): Promise<{
-//   serverUrl: string;
-//   roomId: number;
-//   joinCode: string;
-// }> {
-//   /// Get the server info of the best server
-//   const bestServerNo = getBestServerNo();
-//   const bestServerInfo = await GameServerRecords.findOneAsync({
-//     serverNo: bestServerNo,
-//   });
-
-//   if (!bestServerInfo) {
-//     throw new Error(`Server #${bestServerNo} is unavailable.`);
-//   }
-
-//   console.log(`Attempting to connect to server @ ${bestServerInfo.serverUrl}`);
-//   const serverConnection = DDP.connect(bestServerInfo.serverUrl);
-
-//   /// RPC @ ServerNo - request new room
-//   return new Promise((resolve, reject) => {
-//     serverConnection.call(
-//       "requestNewRoom",
-//       (error: Error, result: { roomId: number; joinCode: string }) => {
-//         if (error) {
-//           console.error("RPC Error:", error);
-//           reject(error);
-//         } else {
-//           console.log("Result of new room request:", result);
-//           resolve({
-//             serverUrl: bestServerInfo.serverUrl,
-//             roomId: result.roomId,
-//             joinCode: result.joinCode,
-//           });
-//         }
-//       }
-//     );
-//   });
-// }
-
 export async function locateServerBest(): Promise<string> {
   const bestServerNo = getBestServerNo();
   const serverInfo = await GameServerRecords.findOneAsync({
@@ -59,6 +20,7 @@ export async function locateServerBest(): Promise<string> {
   });
 
   if (!serverInfo) {
+    console.log(serverInfo)
     throw new Error(`Server #${bestServerNo} is unavailable.`);
   }
 

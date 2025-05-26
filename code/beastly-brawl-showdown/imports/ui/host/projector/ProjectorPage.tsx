@@ -62,6 +62,13 @@ export default function ProjectorPage() {
       setJoinCode(roomInfo.joinCode);
     }
   );
+  //#endregion
+
+  //#region Host App events
+  socket.on("player-set-changed", (newPlayerList: string[]) => {
+    console.log("New set of players:", newPlayerList.toString());
+  });
+  
   if (!roomId) {
     socket.emit("request-room");
     return (
@@ -73,9 +80,6 @@ export default function ProjectorPage() {
   //#endregion
 
   //#region Host App
-  socket.on("player-set-changed", (newPLayerList: string[]) => {
-    console.log("New set of players:", newPLayerList.toString());
-  });
 
   return (
     <div className="waiting-room-box">
