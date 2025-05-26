@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { renderRoutes } from "../Routes";
+import { renderRoutes } from "./Routes";
 import SettingsPage from "./SettingsPage";
 
 export default function App() {
@@ -20,7 +20,6 @@ export default function App() {
       <audio ref={audioRef} src="/sounds/background-music.mp3" loop />
 
       <Routes>
-
         <Route
           path="/settings"
           element={
