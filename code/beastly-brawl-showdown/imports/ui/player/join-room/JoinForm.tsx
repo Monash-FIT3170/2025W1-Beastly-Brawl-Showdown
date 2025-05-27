@@ -25,7 +25,7 @@ export const JoinForm = () => {
   // const [accountId, setAccountId] = useState(); // TODO - always nothing for now
   // const [roomId, setRoomId] = useState<number>();
 
-  const [isInvalidCodeSubmitted, setInvalidCodeSubmittedPopupState] =
+  const [isInvalidCodeSubmitted] =
     useState(false);
   const navigate = useNavigate();
 
