@@ -1,23 +1,20 @@
 import React from "react";
 import { Route } from "react-router-dom";
-import { NotFound } from "./ui/Error/NotFound";
+import { NotFound } from "./ui/error/NotFound";
 import { HomePage } from "./ui/HomePage";
-import { Player } from "./ui/PlayerPage";
+import { Player } from "./ui/player/game/PlayerPage";
 import { Room } from "./ui/Room/Room";
-import { HostRoomPage } from "./ui/Room/HostRoomPage";
 import { GuestNamePage } from "./ui/GuestNamePage";
 import { LoginPage } from "./ui/Login/LoginPage";
 import { MonsterSelectionScreen } from "./ui/MonsterSelection/MonsterSelectionScreen";
-import JoinPage from "./ui/JoinPage";
+import JoinPage from "./ui/player/join-room/JoinPage";
 import WaitingRoom from "./ui/WaitingRoom";
 import { BattleScreen } from "./ui/BattleScreen/BattleScreen";
 
 export const renderRoutes = () => (
   <>
         {/* HOSTING Routes */}
-        <Route path="/host/" element={<HostRoomPage />} />
         <Route path="/h/:id/" element={<Room />} />
-
 
         {/* JOINING Routes */}
         <Route path="/join" element={<JoinPage />} />
