@@ -2,6 +2,8 @@ import React from 'react';
 import { ParticipantBox } from './ParticipantBox';
 
 export const ParticipantDisplayBox = ({ name }: { name: string }) => {
+    const names = name.split(',').map(n => n.trim());
+
     return (
         <div className='participants-display-box'>
             <div className="participants-header">
@@ -9,10 +11,11 @@ export const ParticipantDisplayBox = ({ name }: { name: string }) => {
                 <button className="glb-btn start-game-btn">Start Game</button>
             </div>
 
-            <div className="participants-grid">
-                <ParticipantBox name={name}/>
-            </div>
+            {names.map((n) => (
+                <ParticipantBox key={n} name={n} />
+            ))}
             
+
         </div>
     )
 }
