@@ -83,6 +83,14 @@ export default function ProjectorPage() {
   //#endregion
 
   //#region Host App
+  
+  /**
+   * Handle button click to start the game
+   * Sends arguments to main.ts listener
+   */
+    function startGame() {
+      socket.emit("start-game", "The game is starting :D", roomId);
+    }
 
   return (
     <div className="waiting-room-box">
@@ -90,6 +98,7 @@ export default function ProjectorPage() {
       <h2>Room ID: {joinCode}</h2>
       <WaitingRoomInfoBox joinUrl={getJoinUrl()} />
       <ParticipantDisplayBox name={playerList.toString()} />
+      <button className="btn" onClick={startGame}>Start Game</button>
     </div>
   );
   //#endregion

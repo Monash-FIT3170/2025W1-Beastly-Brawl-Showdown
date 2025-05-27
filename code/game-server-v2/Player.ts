@@ -8,7 +8,7 @@ export class Player {
   constructor(
     socketId: string,
     displayName: string,
-    linkedAcccountId: AccountId | undefined
+    linkedAcccountId?: AccountId | undefined
   ) {
     this.socketId = socketId;
     this.displayName = displayName;

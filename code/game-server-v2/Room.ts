@@ -13,7 +13,7 @@ export class Room {
    */
   readonly joinCode: JoinCode;
 
-  players: Map<string, Player> = new Map<string, Player>();
+  players: Map<string, Player> = new Map<string, Player>(); // <displayName, Player> temporarily
   gameState: any = undefined;
   settings: GameSettings = new GameSettings();
 

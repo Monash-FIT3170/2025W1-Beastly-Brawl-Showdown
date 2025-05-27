@@ -7,6 +7,7 @@ import { Server, Socket } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
+import { Player } from "./Player";
 
 type ServerConfig = {
   serverIp: string;
@@ -137,15 +138,16 @@ async function main(config: ServerConfig) {
       } catch {
         socket.emit("error", "Could not create room.");
       }
+      // log_attention(`Socket ID (create room listener): ${socket.id}`);
     });
 
-    socket.on("start-game", async (msg) => {
+    // Listens for start button press (takes roomId from ProjectorPage.tsx)
+    socket.on("start-game", async (msg, room) => {
       log_event(`Requested to start game: ${msg}`);
+      // log_attention(`Socket ID (start game listener): ${socket.id}`);
 
       // Notify everyone in this room
-      gameServer.rooms
-        .get(gameServer.hostIdToRoomIdLookup.get(socket.id)!)!
-        .players.forEach((player) => {
+      gameServer.rooms.get(room)!.players.forEach((player) => {
           playerChannel.to(player.socketId).emit("game-started"); // TODO modify as needed
         });
       log_notice("All players informed of start.");
@@ -211,7 +213,7 @@ async function main(config: ServerConfig) {
       socket.emit("error", "No display name");
       return;
     }
-    
+
     const roomId = gameServer.translateJoinCodeToRoomId(auth.joinCode);
     if (!gameServer.hasRoom(roomId)) {
       log_event("Joined with invalid join code");
@@ -224,7 +226,7 @@ async function main(config: ServerConfig) {
     } catch (err) {
       if (err instanceof Error) {
         log_warning("Join room failed unexpectedly.\n" + err.message);
-        log_attention(gameServer.rooms.get(roomId)?.players)
+        log_attention(gameServer.rooms.get(roomId)?.players);
       } else {
         log_attention("Unexpected error is not of error type.");
       }
@@ -237,11 +239,21 @@ async function main(config: ServerConfig) {
     const playerNameList = [
       ...gameServer.rooms.get(roomId)?.players.values()!,
     ].map((player) => player.displayName);
-    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId)
+    console.log(
+      "Update player list",
+      playerNameList,
+      "to",
+      gameServer.rooms.get(roomId)!.hostSocketId
+    );
     hostChannel
       .to(gameServer.rooms.get(roomId)!.hostSocketId)
       .emit("player-set-changed", playerNameList);
     next();
+
+    // Create new player and add it to the correct gameserver room
+    const newPlayer = new Player(socket.id, auth.displayName);
+    gameServer.rooms.get(roomId)?.players.set(auth.displayName, newPlayer);
+    log_notice(`Player ${auth.displayName} assigned to room ${roomId}`)
   });
 
   playerChannel.on("connection", async (socket: Socket) => {
