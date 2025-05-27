@@ -5,10 +5,6 @@ import { UserForm } from "./UserForm";
 export const LoginPage = () => {
 
   return (
-    <div className="login-page">
-      <div className="logo"></div>
-      <UserForm/>
-    </div>
-    
+    <UserForm/>
   );
 };

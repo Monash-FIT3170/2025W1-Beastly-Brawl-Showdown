@@ -1,39 +1,38 @@
 import { Meteor } from "meteor/meteor";
-import React, { useEffect,useState } from "react";
-import { CodeLink } from "../../host/projector/CodeLink";
+import React, { useEffect, useState } from "react";
 import { QRBox } from "../../host/projector/QRBox";
+import { CodeLink } from "../../host/projector/CodeLink";
 
 export const Room = () => {
-  const id = sessionStorage.getItem("roomId");
-
+  const joinCode = sessionStorage.getItem("joinCode");
   //get name from session storage
-  const [revealURL, setURL] = useState('');
+  const playerName = sessionStorage.getItem("guestName");
+  const [revealURL, setURL] = useState("");
 
   useEffect(() => {
-    if (id) {
-      const joinURL = Meteor.absoluteUrl(`/join/${id}`);
+    if (joinCode) {
+      const joinURL = Meteor.absoluteUrl(`/join/${joinCode}`);
       setURL(joinURL);
     }
-  }, [id]);
+  }, [joinCode]);
+  const copyToClipboard = () => {
+    navigator.clipboard
+      .writeText(revealURL)
+      .then(() => console.log("Copied to clipboard!!"))
+      .catch((error) => console.error("Copy failed:", error));
+  };
 
   return (
-    <div className="waiting-room-box">
-        <div className="waiting-room-info-box">
-            <div className="room-code">
-                {id}
-            </div>
+    <div>
+      <h1>Welcome {playerName}!</h1>
+      <h1>ROOM VIEW</h1>
+      <h1>Room ID: {joinCode}</h1>
+      <br></br>
 
-            {CodeLink(revealURL)}
+      <QRBox joinUrl={revealURL} />
+      {CodeLink(revealURL)}
 
-            <QRBox joinUrl={revealURL} />
-        </div>
-
-        <div className="participants-display-box">
-            <div className="participants-header">
-                <div className="partcipants-count"></div>
-                <button className="glb-btn start-game-btn">Start Game</button>
-            </div>
-        </div>
+      <button onClick={copyToClipboard}>Copy Link</button>
     </div>
   );
 };

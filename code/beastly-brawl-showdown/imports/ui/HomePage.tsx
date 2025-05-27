@@ -12,16 +12,16 @@ export const HomePage = () => {
 
   return (
     <div className="homepage-container">
-      <div className="logo"></div>
+      <div className="logo-container">Put logo here</div>
       <div className="buttons-container">
-        <button className="glb-btn" onClick={handleGuestHostName}>
+        <button className="btn host-btn" onClick={handleGuestHostName}>
           HOST
         </button>
-        <button className="glb-btn join-btn" onClick={() => navigate("/join")}>
+        <button className="btn join-btn" onClick={() => navigate("/join")}>
           JOIN
         </button>
         <button
-          className="glb-btn"
+          className="btn settings-btn"
           onClick={() => navigate("/settings")}
         >
           SETTINGS
