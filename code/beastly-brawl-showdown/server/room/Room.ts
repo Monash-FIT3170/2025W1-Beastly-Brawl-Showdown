@@ -1,4 +1,4 @@
-import { Player } from "./Player";
+import { Player } from "../../imports/api/Player";
 
 export class Room {
   /** Preferences and Settings */
