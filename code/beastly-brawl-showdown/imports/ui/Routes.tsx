@@ -6,7 +6,6 @@ import ProjectorPage from "./host/projector/ProjectorPage";
 import { HostRoomRequestPage } from "./host/request-room/HostRoomRequestPage";
 import { Player } from "./player/game/PlayerPage";
 import JoinPage from "./player/join-room/JoinPage";
-import { Room } from "./player/game/Room";
 
 export const renderRoutes = () => (
   <>
@@ -14,7 +13,7 @@ export const renderRoutes = () => (
     <Route path="/home/" element={<HomePage />} />
 
     {/* Host */}
-    <Route path="/host/" element={<Room />} />
+    <Route path="/host/" element={<ProjectorPage />} />
     {/* <Route path="/host/" element={<HostRoomRequestPage />} /> */}
     {/* <Route path="/room/" element={<ProjectorPage />} /> */}
 
