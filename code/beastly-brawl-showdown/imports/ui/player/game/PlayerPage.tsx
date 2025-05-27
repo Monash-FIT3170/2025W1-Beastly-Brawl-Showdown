@@ -1,12 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 import Monster from "/imports/data/monsters/Monsters";
-import { MonsterContainer } from "../../MonsterSelection/MonsterContainer";
 import { allMonsters } from "/imports/data/monsters/MonsterData";
-import { BattleMiddle } from "../../BattleScreen/BattleMiddle";
-import { BattleTop } from "../../BattleScreen/BattleTop";
-import { BattleBottom } from "../../BattleScreen/BattleBottom";
 import { useNavigate } from "react-router-dom";
 import { BattleMonster } from "../../BattleScreen/BattleMonster";
 
@@ -19,8 +14,11 @@ export const Player = () => {
 
   // const [selectedMonsterType, setSelectedMonsterType] =
   //   useState<typeof Monster>();
-  const [selectedMonster, setSelectedMonster] = useState<Monster>();
   const [lockedSelectedMonster, setLockedSelectedMonster] = useState(false);
+  const [myMonster, setMyMonsterMonster] = useState<Monster>();
+  const [enemyMonster, setenemyMonsterMonster] = useState<Monster>();
+  const [hasSelfSumbittedTurn, setHasSelfSumbittedTurn] = useState(false);
+
 
   //#region Connect to game server
   const socketRef = useRef<Socket>();
@@ -55,6 +53,29 @@ export const Player = () => {
       setMonsterSelection(true);
     });
 
+    socketRef.current.on(
+      "turn-result",
+      (myMonsterNewState, enemyMonsterNewState) => {
+        // TODO update self state
+        console.log(
+          "current\nmymonster\n",
+          myMonster,
+          "enemymonn\n",
+          enemyMonster
+        );
+        console.log(
+          "updated\nmymonster\n",
+          myMonsterNewState,
+          "enemymonn\n",
+          enemyMonsterNewState
+        );
+
+        // TODO trigger play out turn
+        // TODO then reset to be ready for next turn
+        setHasSelfSumbittedTurn(false);
+      }
+    );
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect(); // Cleanup on unmount
@@ -67,75 +88,7 @@ export const Player = () => {
   const [isSelection, setMonsterSelection] = useState(false);
 
   const [showAnimation, setShowAnimation] = useState<boolean>(false);
-
-  // Function to trigger the rolling animation
-  const onRollAnimation = (): void => {
-    if (!showAnimation) {
-      setShowAnimation(true);
-      setTimeout(() => setShowAnimation(false), 3000);
-    }
-  };
-
-  if (!isConnected) {
-    return <p>Connecting to server...</p>;
-  }
-
-  if (!isSelection) {
-    return (
-      <div>
-        <h1>PLAYER VIEW</h1>
-        <p>Server URL: {serverUrl}</p>
-        <p>Name: {displayName}</p>
-        <p>Room Code: {joinCode}</p>
-      </div>
-    );
-  }
-
-  // return (
-  //   <MonsterSelectionScreen
-  //     selectedMonster={selectedMonster}
-  //     setSelectedMonsterCallback={setSelectedMonster}
-  //   />
-  // );
-
-  //#region Select Monster Phase
-  if (!lockedSelectedMonster || !selectedMonster) {
-    return (
-      <>
-        <div className="monsterSelectionScreen">
-          <h1>Choose your Monster:</h1>
-          {allMonsters.map((monster) => {
-            return (
-              <div className="monsterContainer">
-                <img
-                  src={monster.imageSelection}
-                  id={monster.type}
-                  key={monster.type}
-                  className="monsterImage"
-                  onClick={() => {
-                    setSelectedMonster(monster);
-                  }}
-                />
-              </div>
-            );
-          })}
-
-          {selectedMonster && (
-            <button
-              id="confirmMonsterButton"
-              onClick={() => setLockedSelectedMonster(true)}
-              disabled={lockedSelectedMonster}
-            >
-              Confirm
-            </button>
-          )}
-        </div>
-      </>
-    );
-  }
-  //#endregion
-
-  const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
+  const [displayedNumber, setDisplayedNumber] = useState<number | null>(null); // TODO TEMP
 
   //if the showwanimation is true then show thtet animation
   useEffect(() => {
@@ -172,6 +125,79 @@ export const Player = () => {
     };
   }, [showAnimation]);
 
+  
+  // Function to trigger the rolling animation
+  const onSelectActionAttack = (): void => {
+    // if (!socketRef.current) {
+    //   throw new Error("No connection to server exists.");
+    // }
+
+    // socketRef.current.emit("submit-move-attack", myMonster); // TODO TEMP
+
+    // setHasSelfSumbittedTurn(true); // TODO CHANGE RENDER STATE TO WAIT FOR ENEMY SUBMISSION
+    if (!showAnimation) {
+      setShowAnimation(true);
+      setTimeout(() => setShowAnimation(false), 3000);
+    }
+  };
+
+  if (!isConnected) {
+    return <p>Connecting to server...</p>;
+  }
+
+  if (!isSelection) {
+    return (
+      <div>
+        <h1>PLAYER VIEW</h1>
+        <p>Server URL: {serverUrl}</p>
+        <p>Name: {displayName}</p>
+        <p>Room Code: {joinCode}</p>
+      </div>
+    );
+  }
+
+  //#region Select Monster Phase
+  if (!lockedSelectedMonster || !myMonster) {
+    return (
+      <>
+        <div className="monsterSelectionScreen">
+          <h1>Choose your Monster:</h1>
+          {allMonsters.map((monster) => {
+            return (
+              <div className="monsterContainer">
+                <img
+                  src={monster.imageSelection}
+                  id={monster.type}
+                  key={monster.type}
+                  className="monsterImage"
+                  onClick={() => {
+                    setMyMonsterMonster(monster);
+                  }}
+                />
+              </div>
+            );
+          })}
+
+          {myMonster && (
+            <button
+              id="confirmMonsterButton"
+              onClick={() => setLockedSelectedMonster(true)}
+              disabled={lockedSelectedMonster}
+            >
+              Confirm
+            </button>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  if (hasSelfSumbittedTurn) {
+    <h1>Waiting for enemy...</h1>;
+  }
+
+  //#endregion
+
   return (
     <div className="battleScreen">
       <div className="battleScreenTop">
@@ -186,7 +212,7 @@ export const Player = () => {
       </div>
 
       <div className="battleMiddle">
-        {/* monster 1 */} 
+        {/* monster 1 */}
         <BattleMonster
           image="/img/monster-image/dragon.png"
           alt="Monster 1"
@@ -212,7 +238,10 @@ export const Player = () => {
       </div>
 
       <div className="battleScreenBottom">
-        <button className="battleScreenBottomButton" onClick={onRollAnimation}>
+        <button
+          className="battleScreenBottomButton"
+          onClick={onSelectActionAttack}
+        >
           <img
             className="battleScreenBottomButtonImage"
             src="/img/sword.png"
