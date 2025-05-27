@@ -5,6 +5,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 import { GameStates } from "../api/DataBases";
+import { Player } from "../api/Player";
 
 export default function WaitingRoom() {
   const { id } = useParams<{ id: string }>();
@@ -12,7 +13,8 @@ export default function WaitingRoom() {
 
   const playerName = sessionStorage.getItem("guestName");
   if (!playerName) throw new Error("Player name is not set in sessionStorage.");
-
+  const player = new Player(playerName);
+  
   const [revealURL, setRevealURL] = useState("");
 
   // Subscribe and track readiness
@@ -40,6 +42,12 @@ export default function WaitingRoom() {
       setRevealURL(joinURL);
       console.log(`[Client] Join URL set to: ${joinURL}`);
     }
+  }, [id]);
+
+  useEffect(() => {
+  if (id) {
+    Player.saveToRoom(id, player);
+  }
   }, [id]);
 
 

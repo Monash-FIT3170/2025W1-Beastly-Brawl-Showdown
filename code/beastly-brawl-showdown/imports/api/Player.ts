@@ -1,12 +1,13 @@
+import { Meteor } from "meteor/meteor";
 import { Players } from "/imports/api/DataBases";
 
 export class Player {
   private displayName: string;
   private playerId: string; //PlayerID
 
-  constructor(displayName: string, playerId?: string) {
+  constructor(displayName: string) {
     this.displayName = displayName;
-    this.playerId = playerId ?? Player.generateRandomId();
+    this.playerId = Player.generateRandomId();
   }
 
   /** Method to get the name of this player */
@@ -19,11 +20,6 @@ export class Player {
     return this.playerId;
   }
 
-  /** Method to display player name when player object is printed */
-  toString(): string {
-    return this.displayName;
-  }
-
   /** Generate a unique player ID */
   static generateRandomId(length = 8): string {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -31,20 +27,27 @@ export class Player {
   }
 
   /**Save Player to a room with the information we need */
-  async saveToRoom(roomId: string): Promise<string>{
-    const existing = await Players.findOneAsync({ roomId, playerId: this.playerId});
-    if (existing) return this.playerId;
-
-    await Players.insertAsync({
+  static async saveToRoom(roomId: string, player: Player): Promise<string> {
+  return new Promise((resolve, reject) => {
+    Meteor.call(
+      "players.save",
       roomId,
-      playerId: this.playerId,
-      displayName: this.displayName,
-      monster: null,
-      confirmed: false,
+      {
+        playerId: player.getID(),
+        displayName: player.getName(),
+      },
+      (error: Meteor.Error | null, result: string) => {
+        if (error) {
+          console.error("Error saving player to room:", error);
+          reject(error);
+        } else {
+          resolve(result);
+        }
+        }
+      );
     });
-
-    return this.playerId
   }
+
 
   /**Confirm a Monster has been selected and save it to the unique player, then set confirmed to be true */
   static async confirmMonster(roomId: string, playerId: string, monster: string){

@@ -1,6 +1,6 @@
 import "../imports/api/RoomMethods";
 import { RoomServerManager } from './room/RoomServerManager';
-import { GameStates } from '../imports/api/DataBases';
+import { GameStates, Players } from '../imports/api/DataBases';
 import { check } from "meteor/check";
 import "../imports/api/GameStateMethods";
 
@@ -14,38 +14,54 @@ export const sqids = new Sqids({
   alphabet: CODE_ALPHABET,
 });
 
+Meteor.publish("playersByRoom", function (roomId: string) {
+  check(roomId, String);
+  return Players.find({ roomId });
+});
+
 Meteor.startup(async () => {
   // do something
 });
 
+});
+
 Meteor.methods({
-  async initialize(roomId: string) {
+  async "players.checkAllConfirmed"(roomId: string) {
     check(roomId, String);
+    
+    const playersInRoom = await Players.find({ roomId }).fetchAsync();
+    if (playersInRoom.length === 0) {
+      throw new Meteor.Error("no-players", "No players in this room");
+    }
 
-    // Upsert a new gameState with default phase 'waiting' only if not exists
-    const result = await GameStates.upsertAsync(
-      { roomId },
-      {
-        $setOnInsert: {
-          phase: "waiting",
-          createdAt: new Date(),
-        }
-      }
-    );
+    const allConfirmed = playersInRoom.every(p => p.monster && p.confirmed);
+    
+    if (allConfirmed) {
+      // Automatically move to battle phase
+      await Meteor.callAsync("gameStates.setPhase", roomId, "battle");
+    }
 
-    console.log(`Initialized game state for roomId: ${roomId}`, result);
+    return allConfirmed;
   },
 
-  async setPhase(roomId: string, phase: string) {
+  async "players.save"(roomId: string, playerData: any) {
     check(roomId, String);
-    check(phase, String);
+    check(playerData, {
+      playerId: String,
+      displayName: String,
+    });
 
-    const result = await GameStates.updateAsync(
-      { roomId },
-      { $set: { phase } },
-      { upsert: true }
-    );
+    const existing = await Players.findOneAsync({ roomId, playerId: playerData.playerId });
+    if (existing) return playerData.playerId;
 
-    console.log(`Updated phase to "${phase}" for roomId: ${roomId}`, result);
+    await Players.insertAsync({
+      roomId,
+      playerId: playerData.playerId,
+      displayName: playerData.displayName,
+      monster: null,
+      confirmed: false,
+    });
+
+    return playerData.playerId;
   },
 });
