@@ -21,7 +21,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
       const intervalSpeed = 100; // time between number updates
 
       const finalResult = 20; // eventually will replace with dice roll utility
-      const totalSteps = rollDuration / intervalSpeed; //ge the ammount of times it gets swaped out
+      const totalSteps = rollDuration / intervalSpeed; //get the ammount of times it gets swaped out
 
       interval = setInterval(() => {
         if (i < totalSteps) {

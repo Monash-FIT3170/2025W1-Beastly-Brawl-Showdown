@@ -27,7 +27,7 @@ function askYesNo(question: string): Promise<boolean> {
 export default class MysticWyvern extends Monsters {
   private rerollCharge: boolean;
 
-  constructor() {
+  public constructor() {
     super(
       25,
       14,

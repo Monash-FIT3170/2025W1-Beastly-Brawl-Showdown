@@ -17,6 +17,7 @@ export default class Monsters {
   protected special: string;
   protected baseAbilityCharges: number;
   protected currentAbilityCharges: number;
+  /** MONSTER NAME */ // TODO CHAGNE THIS
   protected monsterType: string;
   protected baseDefenseCharges: number;
   protected currentDefenseCharges: number;
@@ -188,7 +189,7 @@ export default class Monsters {
     this.currentHealth = value;
   }
 
-  get type(): string {
+  get type(): string { //TODO CHAGNE THIS
     return this.monsterType;
   }
 
