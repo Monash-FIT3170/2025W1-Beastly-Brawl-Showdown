@@ -92,7 +92,7 @@ export const Player = () => {
 
   useEffect(() => {
     // Apply body display override only if not connected AND not in monster selection
-    if (isConnected && isSelection) {
+    if (isConnected && lockedSelectedMonster) {
       document.body.style.display = "block"; // or whatever you want here
       document.body.style.paddingTop = "0";
     }
