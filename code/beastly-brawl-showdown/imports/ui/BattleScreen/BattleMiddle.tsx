@@ -53,7 +53,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
   return (
     <div className="battleMiddle">
       {/* monster 1 */}
-      <BattleMonster image="/img/dragon.png" alt="Monster 1" position="monster1" />
+      <BattleMonster image="/img/monster-image/dragon.png" alt="Monster 1" position="monster1" />
 
       {showAnimation && (
         <div className="diceAnimation">
@@ -62,7 +62,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
         </div>
       )}
       {/* monster 2 */}
-      <BattleMonster image="/img/wolfman.png" alt="Monster 2" position="monster2" />
+      <BattleMonster image="/img/monster-image/wolfman.png" alt="Monster 2" position="monster2" />
     </div>
   );
 };

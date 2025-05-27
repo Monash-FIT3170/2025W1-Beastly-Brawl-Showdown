@@ -25,7 +25,7 @@ export const renderRoutes = () => (
     <Route path="/play/" element={<Player />} />
 
     {/* BATTLE PAGE */}
-    <Route path="battle/:id" element = {<BattleScreen/>}/>
+    <Route path="/battle" element={<BattleScreen />} />
 
     {/* DEFAULTS */}
     <Route path="/" element={<Navigate to="/home/" replace />} />
