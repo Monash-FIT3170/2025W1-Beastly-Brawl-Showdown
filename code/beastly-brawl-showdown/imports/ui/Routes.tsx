@@ -3,10 +3,8 @@ import { Navigate, Route } from "react-router-dom";
 import { NotFound } from "./error/NotFound";
 import { HomePage } from "./HomePage";
 import ProjectorPage from "./host/projector/ProjectorPage";
-import { HostRoomRequestPage } from "./host/request-room/HostRoomRequestPage";
 import { Player } from "./player/game/PlayerPage";
 import JoinPage from "./player/join-room/JoinPage";
-import { MonsterSelectionScreen } from "./MonsterSelection/MonsterSelectionScreen";
 import { BattleScreen } from "./BattleScreen/BattleScreen";
 
 export const renderRoutes = () => (

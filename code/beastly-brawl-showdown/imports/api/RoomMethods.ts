@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 import { Meteor } from "meteor/meteor";
-import { locateServer, locateServerBest } from "../../server/GameServerLocator";
+import {locateServerBest } from "../../server/GameServerLocator";
 
 Meteor.methods({
   // /** Request for a room to be allocated */
