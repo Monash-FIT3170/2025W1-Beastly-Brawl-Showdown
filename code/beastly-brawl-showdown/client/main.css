@@ -626,7 +626,9 @@ body {
   max-width: 1085px;
   max-height: 500px;
   padding: 10px;
-  display: grid;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 20px;
   background-color: #f0f0f0;
   border: 2px solid #333;
@@ -635,7 +637,7 @@ body {
 
 /*For the participants name*/
 .participants-box {
-  width: 90px;
+  min-width: 90px;
   height: 40px;
   text-align: center;
   vertical-align: middle;
@@ -643,6 +645,7 @@ body {
   background-color: #f0f0f0;
   border: 2px solid #333;
   border-radius: 15px; /* This creates the curved corners */
+  white-space: nowrap;
 }
 
 /* Shared container for full-page layout */
