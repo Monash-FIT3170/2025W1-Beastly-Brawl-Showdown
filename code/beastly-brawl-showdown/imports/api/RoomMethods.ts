@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 import { Meteor } from "meteor/meteor";
-import { locateServer, locateServerBest } from "../../server/GameServerLocator";
+import {locateServerBest } from "../../server/GameServerLocator";
 
 Meteor.methods({
   // /** Request for a room to be allocated */
@@ -27,12 +27,12 @@ Meteor.methods({
         console.log("Test connection to server (echo)");
         socket.emit("echo", echoMsg);
       });
-      socket.on("echo", async (msg) => {
+      socket.on("echo", async (msg: any) => {
         console.log("Echo sent:", echoMsg, " | Echo response:", msg);
         resolve(serverUrl);
       });
 
-      socket.on("connect_error", (err) => {
+      socket.on("connect_error", (err: { message: any; }) => {
         console.error(`Connection failed: ${err.message}`);
         reject(new Error("Room is not joinable."));
       });

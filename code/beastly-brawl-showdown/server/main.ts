@@ -1,8 +1,7 @@
 import "../imports/api/RoomMethods";
-import { RoomServerManager } from './room/RoomServerManager';
-import { GameStates, Players } from '../imports/api/DataBases';
-import { check } from "meteor/check";
 import "../imports/api/GameStateMethods";
+import { Meteor } from "meteor/meteor";
+import Sqids from "sqids";
 
 
 const CODE_MIN_LENGTH = 6; // TODO use a global / db record
@@ -14,54 +13,58 @@ export const sqids = new Sqids({
   alphabet: CODE_ALPHABET,
 });
 
-Meteor.publish("playersByRoom", function (roomId: string) {
-  check(roomId, String);
-  return Players.find({ roomId });
-});
-
 Meteor.startup(async () => {
-  // do something
+  //Do Something
 });
 
-});
+// Meteor.publish("playersByRoom", function (roomId: string) {
+//   check(roomId, String);
+//   return Players.find({ roomId });
+// });
 
-Meteor.methods({
-  async "players.checkAllConfirmed"(roomId: string) {
-    check(roomId, String);
+// Meteor.startup(async () => {
+//   // do something
+// });
+
+// });
+
+// Meteor.methods({
+//   async "players.checkAllConfirmed"(roomId: string) {
+//     check(roomId, String);
     
-    const playersInRoom = await Players.find({ roomId }).fetchAsync();
-    if (playersInRoom.length === 0) {
-      throw new Meteor.Error("no-players", "No players in this room");
-    }
+//     const playersInRoom = await Players.find({ roomId }).fetchAsync();
+//     if (playersInRoom.length === 0) {
+//       throw new Meteor.Error("no-players", "No players in this room");
+//     }
 
-    const allConfirmed = playersInRoom.every(p => p.monster && p.confirmed);
+//     const allConfirmed = playersInRoom.every(p => p.monster && p.confirmed);
     
-    if (allConfirmed) {
-      // Automatically move to battle phase
-      await Meteor.callAsync("gameStates.setPhase", roomId, "battle");
-    }
+//     if (allConfirmed) {
+//       // Automatically move to battle phase
+//       await Meteor.callAsync("gameStates.setPhase", roomId, "battle");
+//     }
 
-    return allConfirmed;
-  },
+//     return allConfirmed;
+//   },
 
-  async "players.save"(roomId: string, playerData: any) {
-    check(roomId, String);
-    check(playerData, {
-      playerId: String,
-      displayName: String,
-    });
+//   async "players.save"(roomId: string, playerData: any) {
+//     check(roomId, String);
+//     check(playerData, {
+//       playerId: String,
+//       displayName: String,
+//     });
 
-    const existing = await Players.findOneAsync({ roomId, playerId: playerData.playerId });
-    if (existing) return playerData.playerId;
+//     const existing = await Players.findOneAsync({ roomId, playerId: playerData.playerId });
+//     if (existing) return playerData.playerId;
 
-    await Players.insertAsync({
-      roomId,
-      playerId: playerData.playerId,
-      displayName: playerData.displayName,
-      monster: null,
-      confirmed: false,
-    });
+//     await Players.insertAsync({
+//       roomId,
+//       playerId: playerData.playerId,
+//       displayName: playerData.displayName,
+//       monster: null,
+//       confirmed: false,
+//     });
 
-    return playerData.playerId;
-  },
-});
+//     return playerData.playerId;
+//   },
+// });
