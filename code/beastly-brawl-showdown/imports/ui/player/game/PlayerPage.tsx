@@ -90,6 +90,21 @@ export const Player = () => {
   const [showAnimation, setShowAnimation] = useState<boolean>(false);
   const [displayedNumber, setDisplayedNumber] = useState<number | null>(null); // TODO TEMP
 
+  useEffect(() => {
+    // Apply body display override only if not connected AND not in monster selection
+    if (isConnected && isSelection) {
+      document.body.style.display = "block"; // or whatever you want here
+      document.body.style.paddingTop = "0";
+    }
+
+    // Cleanup on unmount or dependency change
+    return () => {
+      document.body.style.display = "flex"; // reset to default
+      document.body.style.paddingTop = "10";
+    };
+  }, [isConnected, isSelection]);
+
+  
   //if the showwanimation is true then show thtet animation
   useEffect(() => {
     let interval: NodeJS.Timeout;
