@@ -1,6 +1,7 @@
 import { RoomId, JoinCode, AccountId } from "./types";
 import { Player } from "./Player";
 import { GameSettings } from "./GameSettings";
+import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
 
 export class Room {
   readonly hostSocketId: string;
@@ -25,5 +26,17 @@ export class Room {
 
   hasPlayer(displayName: string) {
     return this.players.has(displayName);
+  }
+
+  /**
+   * Gives the desired player the monster they choose
+   * @param displayName name of the player
+   * @param monster name of monster they wish to select
+   */
+  setMonster(displayName: string, monster: Monsters) {
+    let changedPlayer = this.players.get(displayName);
+    if (changedPlayer) {
+      changedPlayer.monster = monster;
+    }
   }
 }

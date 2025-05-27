@@ -3,6 +3,7 @@ import { log_notice, log_warning } from "./utils";
 import { Room } from "./Room";
 import { Player } from "./Player";
 import { ServerId, RoomId, JoinCode, AccountId } from "./types";
+import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
 
 export class GameServer {
   readonly CODE_MIN_LENGTH = 6; // TODO move to argv
@@ -133,6 +134,7 @@ export class GameServer {
     socketId: string,
     roomId: RoomId,
     displayName: string,
+    monster: Monsters | undefined,
     linkedAcccountId: AccountId | undefined
   ) {
     //TODO validate input
@@ -146,7 +148,7 @@ export class GameServer {
       throw new Error("Display name already taken.");
     }
 
-    const newPlayer = new Player(socketId, displayName, linkedAcccountId);
+    const newPlayer = new Player(socketId, displayName, monster, linkedAcccountId);
     room.players.set(displayName, newPlayer);
   }
 }

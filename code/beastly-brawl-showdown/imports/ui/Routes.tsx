@@ -24,9 +24,6 @@ export const renderRoutes = () => (
     <Route path="/join/" element={<JoinPage />} />
     <Route path="/play/" element={<Player />} />
 
-    {/* MONSTER SELECTION */}
-    <Route path="/monster-selection/:id" element={<MonsterSelectionScreen />} />
-
     {/* BATTLE PAGE */}
     <Route path="battle/:id" element = {<BattleScreen/>}/>
 

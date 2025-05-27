@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 
@@ -8,7 +7,6 @@ export const Player = () => {
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
   const serverUrl = sessionStorage.getItem("serverUrl");
-  const navigate = useNavigate();
 
   //#region Connect to game server
   const socketRef = useRef<Socket>();
@@ -38,8 +36,8 @@ export const Player = () => {
       console.log(`Server says: ${msg}`);
     });
 
+    // Listens for game-started trigger from 
     socketRef.current.on("game-started", () => {
-      console.log(`Navigating to monster selection screen :)`)
       setMonsterSelection(true);
     })
 

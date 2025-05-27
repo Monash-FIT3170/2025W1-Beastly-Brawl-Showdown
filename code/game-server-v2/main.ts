@@ -149,10 +149,13 @@ async function main(config: ServerConfig) {
       // Notify everyone in this room
       gameServer.rooms.get(room)!.players.forEach((player) => {
         // Send players to monster selection screen
-          playerChannel.to(player.socketId).emit("game-started"); // TODO modify as needed
+          playerChannel.to(player.socketId).emit("game-started"); 
         });
       log_notice("All players informed of start.");
     });
+
+    // #region TODO 
+    // Listen for ALL CONFIRMS from ALL PLAYERS and then sends and assigns to battle screen
   });
 
   /// Pre-connection auth check
@@ -223,7 +226,7 @@ async function main(config: ServerConfig) {
     }
 
     try {
-      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
+      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined, undefined);
     } catch (err) {
       if (err instanceof Error) {
         log_warning("Join room failed unexpectedly.\n" + err.message);
