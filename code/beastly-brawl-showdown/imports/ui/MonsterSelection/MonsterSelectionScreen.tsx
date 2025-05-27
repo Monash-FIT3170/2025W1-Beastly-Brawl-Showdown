@@ -1,16 +1,17 @@
 import React from "react";
 import { MonsterContainer } from "./MonsterContainer";
+import { allMonsters } from "/imports/data/monsters/MonsterData";
 
 /**
  * Confirms the monster the player will be using and all function that this button needs
  * @returns HTML button component to confirm monster selection
  */
-function ConfirmButton() {
+function ConfirmButton({ onClick }: { onClick: () => void }) {
     return (
-        <button id="confirmMonsterButton" disabled>
+        <button id="confirmMonsterButton" onClick={onClick} disabled>
             Confirm
         </button>
-    )
+    );
 }
 
 export const MonsterSelectionScreen = () => {
@@ -48,13 +49,22 @@ export const MonsterSelectionScreen = () => {
         }
     }
 
+    function handleConfirm() {
+        // TODO: Go to battle screen and assign monster to player
+    }
+
     return (
         <div className="monsterSelectionScreen">
             <h1>Choose your Monster:</h1>
-            <MonsterContainer image="img/placeholder_monster_1.png" name="monster1" func={highlightAndShowConfirm}/>
-            <MonsterContainer image="img/placeholder_monster_2.png" name="monster2" func={highlightAndShowConfirm}/>
-            <MonsterContainer image="img/placeholder_monster_3.png" name="monster3" func={highlightAndShowConfirm}/>
-            <ConfirmButton/>
+            {allMonsters.map(monster => (
+                <MonsterContainer
+                    key={monster.type}
+                    image={monster.imageSelection}
+                    name={monster.type}
+                    func={highlightAndShowConfirm}
+                />
+            ))}
+            <ConfirmButton onClick={handleConfirm} />
         </div>
     )
 }

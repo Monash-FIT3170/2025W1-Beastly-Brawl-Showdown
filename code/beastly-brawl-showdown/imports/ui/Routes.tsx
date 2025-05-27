@@ -6,6 +6,8 @@ import ProjectorPage from "./host/projector/ProjectorPage";
 import { HostRoomRequestPage } from "./host/request-room/HostRoomRequestPage";
 import { Player } from "./player/game/PlayerPage";
 import JoinPage from "./player/join-room/JoinPage";
+import { MonsterSelectionScreen } from "./MonsterSelection/MonsterSelectionScreen";
+import { BattleScreen } from "./BattleScreen/BattleScreen";
 
 export const renderRoutes = () => (
   <>
@@ -21,6 +23,12 @@ export const renderRoutes = () => (
     <Route path="/join/:joinCode" element={<JoinPage />} />
     <Route path="/join/" element={<JoinPage />} />
     <Route path="/play/" element={<Player />} />
+
+    {/* MONSTER SELECTION */}
+    <Route path="/monster-selection/:id" element={<MonsterSelectionScreen />} />
+
+    {/* BATTLE PAGE */}
+    <Route path="battle/:id" element = {<BattleScreen/>}/>
 
     {/* DEFAULTS */}
     <Route path="/" element={<Navigate to="/home/" replace />} />

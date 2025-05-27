@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
+import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
+
 
 export const Player = () => {
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
   const serverUrl = sessionStorage.getItem("serverUrl");
+  const navigate = useNavigate();
 
   //#region Connect to game server
   const socketRef = useRef<Socket>();
@@ -34,6 +38,11 @@ export const Player = () => {
       console.log(`Server says: ${msg}`);
     });
 
+    socketRef.current.on("game-started", () => {
+      console.log(`Navigating to monster selection screen :)`)
+      setMonsterSelection(true);
+    })
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect(); // Cleanup on unmount
@@ -43,17 +52,23 @@ export const Player = () => {
   //#endregion
 
   const [isConnected, setIsConnected] = useState(false);
+  const [isSelection, setMonsterSelection] = useState(false);
+
 
   if (!isConnected) {
     return <p>Connecting to server...</p>;
   }
 
-  return (
-    <div>
-      <h1>PLAYER VIEW</h1>
-      <p>Server URL: {serverUrl}</p>
-      <p>Name: {displayName}</p>
-      <p>Room Code: {joinCode}</p>
-    </div>
-  );
+  if (!isSelection) {
+    return (
+      <div>
+        <h1>PLAYER VIEW</h1>
+        <p>Server URL: {serverUrl}</p>
+        <p>Name: {displayName}</p>
+        <p>Room Code: {joinCode}</p>
+      </div>
+    );
+  }
+
+  return <MonsterSelectionScreen />;
 };

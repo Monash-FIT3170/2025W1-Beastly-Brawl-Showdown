@@ -148,6 +148,7 @@ async function main(config: ServerConfig) {
 
       // Notify everyone in this room
       gameServer.rooms.get(room)!.players.forEach((player) => {
+        // Send players to monster selection screen
           playerChannel.to(player.socketId).emit("game-started"); // TODO modify as needed
         });
       log_notice("All players informed of start.");
