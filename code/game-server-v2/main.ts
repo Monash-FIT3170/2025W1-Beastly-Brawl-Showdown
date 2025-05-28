@@ -2,7 +2,7 @@ import { GameServer } from "./GameServer";
 import * as readline from "readline";
 import cors from "cors";
 import express from "express";
-import http from "http";
+import http, { maxHeaderSize } from "http";
 import { Server, Socket } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
@@ -156,6 +156,13 @@ async function main(config: ServerConfig) {
 
     // #region TODO
     // Listen for ALL CONFIRMS from ALL PLAYERS and then sends and assigns to battle screen
+    // Create matches for players in each room
+    socket.on("create-matches", async (msg, room) => {
+      gameServer.rooms.get(room)!.createMatches;
+    });
+
+    
+
   });
 
   /// Pre-connection auth check

@@ -53,10 +53,16 @@ export class Room {
 
   createMatch(player1: Player, player2: Player): Match {
     // Temporary way of assigning match an id
-    const matchId = `${this.roomId}.${this.matches.size}`;
+    const matchId = `${this.matches.size}`;
     const match = new Match(player1, player2, matchId);
     this.matches.set(matchId, match);
     return match;
+  }
+
+  createMatches() {
+    /** TODO */
+    // Choose matchup of players
+    // Call createMatch on the two players
   }
 
   getMatch(matchId: string) {

@@ -3,6 +3,7 @@ import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
 import { Action } from "./types";
 
 export class Match {
+  
   matchId: string;
   player1: Player;
   player2: Player;
@@ -16,10 +17,7 @@ export class Match {
   // I'm guessing monster object's health will change as the match progresses
 
   /** Map for player and monsters */
-  playerMonsters: Map<Player, Monsters | undefined> = new Map<
-    Player,
-    Monsters
-  >();
+  playerMonsters: Map<Player, Monsters | undefined> = new Map<Player,Monsters>();
   /** Map for player and their selected action */
   selectedMoves: Map<Player, Action> = new Map<Player, Action>();
 
