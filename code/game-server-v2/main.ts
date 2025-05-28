@@ -318,7 +318,9 @@ async function main(config: ServerConfig) {
       }
     });
 
+    //function that runs on any player selecting their monster, if they are the last player to select, it then emits YO WE READY START FIGHTING to everybody and also returns their enemy
     socket.on("monster-selected", (data) => {
+      //sets their ready to true (if they are able to emit this message, proly will have no problems)
       const roomid = socketToRoom.get(socket.id);
       if (roomid == undefined){
         return
@@ -344,17 +346,18 @@ async function main(config: ServerConfig) {
         }
       }
 
+      //creates matches then tells everybody tto fight
       if (allReady) {
         room.createMatches();
         for (const player of room.players.values()) {
           let enemy: Player | null = null;
           for (const match of room.matches.values()) {
-            const possibleEnemy = match.getEnemyByPlayer(player);
-            if (possibleEnemy) {
-              enemy = possibleEnemy;
-              break;
+            if (match.containsPlayer(player)){
+              enemy = match.getEnemyByPlayer(player);
+              break
             }
           }
+
           if (enemy !== null) {
             playerChannel.to(player.socketId).emit("matches-started", {
               enemyMonster: enemy.getMonster(),

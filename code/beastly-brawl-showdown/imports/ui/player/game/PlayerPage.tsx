@@ -52,11 +52,13 @@ export const Player = () => {
     socketRef.current.on("game-started", () => {
       setMonsterSelection(true);
     });
+    
 
+    //function for match starting
     const handleMatchStarted = (data: { enemyMonster: Monster }) => {
     setenemyMonsterMonster(data.enemyMonster);
     };
-    
+
     socketRef.current.on("match-started", handleMatchStarted)
 
     socketRef.current.on(

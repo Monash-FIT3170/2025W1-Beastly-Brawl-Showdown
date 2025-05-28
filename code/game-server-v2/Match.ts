@@ -40,5 +40,9 @@ export class Match {
     throw new Error("Player not found in match");
     }
   }
+  
+  containsPlayer(player: Player): boolean {
+    return this.player1 === player || this.player2 === player;
+  }
 
 }
