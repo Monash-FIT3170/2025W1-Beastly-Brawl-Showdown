@@ -149,12 +149,12 @@ async function main(config: ServerConfig) {
       // Notify everyone in this room
       gameServer.rooms.get(room)!.players.forEach((player) => {
         // Send players to monster selection screen
-          playerChannel.to(player.socketId).emit("game-started"); 
-        });
+        playerChannel.to(player.socketId).emit("game-started");
+      });
       log_notice("All players informed of start.");
     });
 
-    // #region TODO 
+    // #region TODO
     // Listen for ALL CONFIRMS from ALL PLAYERS and then sends and assigns to battle screen
   });
 
@@ -226,7 +226,13 @@ async function main(config: ServerConfig) {
     }
 
     try {
-      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined, undefined);
+      gameServer.joinRoom(
+        socket.id,
+        roomId,
+        auth.displayName,
+        undefined,
+        undefined
+      );
     } catch (err) {
       if (err instanceof Error) {
         log_warning("Join room failed unexpectedly.\n" + err.message);
@@ -257,7 +263,7 @@ async function main(config: ServerConfig) {
     // Create new player and add it to the correct gameserver room
     const newPlayer = new Player(socket.id, auth.displayName);
     gameServer.rooms.get(roomId)?.players.set(auth.displayName, newPlayer);
-    log_notice(`Player ${auth.displayName} assigned to room ${roomId}`)
+    log_notice(`Player ${auth.displayName} assigned to room ${roomId}`);
   });
 
   playerChannel.on("connection", async (socket: Socket) => {
@@ -279,6 +285,38 @@ async function main(config: ServerConfig) {
           .to(TEMP_playerSocketId)
           .emit("turn-result", "PLACEHOLDER RESULT");
       }
+    });
+
+    socket.on("submit-move", async (moveType) => {
+      console.log("Move submitted: ", JSON.stringify(moveType));
+
+      // TODO turn stuff
+      // for that match and for this player, store the desired move for that turn
+
+      // TODO if all users in that match submitted and a turn can be processed
+      if (false) {
+        // resolve the turn
+        // // const TEMP_playerSocketId = "sdfgrdfgrdgfrdfg";
+        // // playerChannel
+        // //   .to(TEMP_playerSocketId)
+        // //   .emit("turn-result", "PLACEHOLDER RESULT");
+        // idk do something to mark a new turn or however u do it
+        // emit the output of the turn to both players (i.e updated state of the monsters)
+        // if winner idk yet
+      }
+    });
+
+    socket.on("selected-monster", async (monster) => {
+      console.log("Monster submitted: ", JSON.stringify(monster));
+
+      // TODO monster selected is not ok (invalid monster or already selected one)
+      if (false) {
+        // if so emit {isValidSelection:false, monster:undef} back to user
+      }
+    
+      playerChannel
+        .to(socket.id)
+        .emit("selected-monster_result", "PLACEHOLDER RESULT");  //otherwise emit {isValidSelection:true, monster:monster}
     });
   });
 

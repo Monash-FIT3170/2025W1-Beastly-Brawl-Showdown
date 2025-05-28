@@ -62,17 +62,18 @@ export const Player = () => {
           myMonster,
           "enemymonn\n",
           enemyMonster
-        );
+        ); // TEMP
         console.log(
           "updated\nmymonster\n",
           myMonsterNewState,
           "enemymonn\n",
           enemyMonsterNewState
-        );
+        ); // TEMP
 
-        // TODO trigger play out turn
-        // TODO then reset to be ready for next turn
+        // TODO now animate the turn - using data that the server responds with
+        // TODO then reset stuff (buttons, ui, state) to be ready for next turn
         setHasSelfSumbittedTurn(false);
+        //TODO IDK - do something if game is over
       }
     );
 
@@ -143,18 +144,21 @@ useEffect(() => {
 
   
   // Function to trigger the rolling animation
-  const onSelectActionAttack = (): void => {
+  const onSelectAction = (actionName:string): void => {
+    /// TODO emit to server that an actions has been selected and which action that is
+    /// TODO hange state so that it shows "waiting for enemy" or something like that
+
     // if (!socketRef.current) {
     //   throw new Error("No connection to server exists.");
     // }
 
-    // socketRef.current.emit("submit-move-attack", myMonster); // TODO TEMP
+    // socketRef.current.emit("submit-move", actionName); 
 
-    // setHasSelfSumbittedTurn(true); // TODO CHANGE RENDER STATE TO WAIT FOR ENEMY SUBMISSION
-    if (!showAnimation) {
-      setShowAnimation(true);
-      setTimeout(() => setShowAnimation(false), 3000);
-    }
+    // setHasSelfSumbittedTurn(true); 
+    // if (!showAnimation) {
+    //   setShowAnimation(true);
+    //   setTimeout(() => setShowAnimation(false), 3000);
+    // }
   };
 
   if (!isConnected) {
@@ -164,10 +168,11 @@ useEffect(() => {
   if (!isSelection) {
     return (
       <div>
-        <h1>PLAYER VIEW</h1>
+        <h1>PLAYER</h1>
         <p>Server URL: {serverUrl}</p>
         <p>Name: {displayName}</p>
         <p>Room Code: {joinCode}</p>
+        <h2>Waiting for game to start...</h2>
       </div>
     );
   }
@@ -255,7 +260,7 @@ useEffect(() => {
       <div className="battleScreenBottom">
         <button
           className="battleScreenBottomButton"
-          onClick={onSelectActionAttack}
+          onClick={ ()=> onSelectAction("attack")}
         >
           <img
             className="battleScreenBottomButtonImage"
@@ -265,7 +270,7 @@ useEffect(() => {
         </button>
         <button
           className="battleScreenBottomButton"
-          onClick={() => console.warn("NOT implemented yet...")}
+          onClick={()=> onSelectAction("defend")}
         >
           <img
             className="battleScreenBottomButtonImage"
@@ -275,7 +280,7 @@ useEffect(() => {
         </button>
         <button
           className="battleScreenBottomButton"
-          onClick={() => console.warn("NOT implemented yet...")}
+          onClick={()=> onSelectAction("ability")}
         >
           <img
             className="battleScreenBottomButtonImage"
