@@ -2,6 +2,7 @@ import { RoomId, JoinCode, AccountId } from "./types";
 import { Player } from "./Player";
 import { GameSettings } from "./GameSettings";
 import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
+import { Match } from "./Match";
 
 export class Room {
   readonly hostSocketId: string;
@@ -17,6 +18,7 @@ export class Room {
   players: Map<string, Player> = new Map<string, Player>(); // <displayName, Player> temporarily
   gameState: any = undefined;
   settings: GameSettings = new GameSettings();
+  matches: Map<string, Match> = new Map();
 
   constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode) {
     this.hostSocketId = hostSocketId;
@@ -24,7 +26,7 @@ export class Room {
     this.joinCode = joinCode;
   }
 
-  hasPlayer(displayName: string) {
+  hasPlayer(displayName: string): boolean {
     return this.players.has(displayName);
   }
 
@@ -38,5 +40,9 @@ export class Room {
     if (changedPlayer) {
       changedPlayer.monster = monster;
     }
+  }
+
+  addPlayer(player: Player) {
+    this.players.set(player.displayName, player);
   }
 }
