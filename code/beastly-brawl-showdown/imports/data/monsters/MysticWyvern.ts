@@ -29,6 +29,7 @@ export default class MysticWyvern extends Monsters {
 
   public constructor() {
     super(
+      'MysticWyvern',
       25,
       14,
       2,

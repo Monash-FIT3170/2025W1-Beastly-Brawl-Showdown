@@ -3,6 +3,7 @@ import Monsters from "./Monsters";
 export default class StoneHideGuardian extends Monsters {
   constructor() {
     super(
+      'StoneHideGuardian',
       30,
       16,
       1,

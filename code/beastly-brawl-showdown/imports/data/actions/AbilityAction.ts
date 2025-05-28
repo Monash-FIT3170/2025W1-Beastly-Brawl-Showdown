@@ -1,4 +1,5 @@
 import Monsters from '../monsters/Monsters';
+import { Server as SocketIOServer } from 'socket.io';
 
 /**
  * Represents an ability action where a monster uses a special ability against a defender.
@@ -13,14 +14,18 @@ export default class AbilityAction {
     }
 
     /**
-     * Static method to perform the ability action outside of instance context.
-     * Calls useAbility on the attacker, passing the defender.
+     * Executes the ability and emits a socket event to a specific room.
+     * @param io - Socket.io server instance.
+     * @param roomId - The battle room to emit to.
      */
-    static perform(attacker: Monsters, defender: Monsters): void {
-        attacker.useAbility(defender);
-    }
-
-    execute(): void {
+    execute(io: SocketIOServer, roomId: string): void {
         this.attacker.useAbility(this.defender);
+
+        io.to(roomId).emit('battle-log', {
+            type: 'ability',
+            attacker: this.attacker.name,
+            defender: this.defender.name,
+            message: `${this.attacker.name} uses their special ability on ${this.defender.name}!`,
+        });
     }
 }

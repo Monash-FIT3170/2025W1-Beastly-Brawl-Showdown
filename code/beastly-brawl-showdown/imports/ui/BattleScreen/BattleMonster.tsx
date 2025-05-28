@@ -1,31 +1,42 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 
-// Define props for the BattleMonster component
+const socket: Socket = io(); // Defaults to current host
+
 type BattleMonsterProps = {
   image: string;
   alt: string;
-  position: string; // e.g., "monster1" or "monster2"
+  position: string; // "monster1" or "monster2"
+  playerId: string; // Who is this monster controlled by
+  initialHp: number; // pass initial HP here
+
 };
 
+export const BattleMonster: React.FC<BattleMonsterProps> = ({ image, alt, position, playerId }) => {
+  const [hp, setHp] = useState<number>(100);
 
-//when making, give it an image, an alt for the blind and which monster position it is in, 1 for left, 2 for right
-export const BattleMonster: React.FC<BattleMonsterProps> = ({ image, alt, position }) => {
-  // const [hp, setHp] = useState<number>(100);
-  const [hp] = useState<number>(100);
+  useEffect(() => {
+    // Update HP when server sends new value
+    socket.on('update-hp', ({ playerId: targetId, newHp }) => {
+      if (targetId === playerId) {
+        setHp(newHp);
+      }
+    });
 
-  // //just updates the hp bar, doesn't really work noww but no monsters now anyway
-  // const updateHp = (newHp: number): void => {
-  //   setHp(newHp);
-  // };
-//right now the hp is commented out since its not being used yet
+    return () => {
+      socket.off('update-hp');
+    };
+  }, [playerId]);
+
   return (
     <div className={position}>
       <div className="progressContainer">
-        {/* hp bar */}
         <progress value={hp} max={100} className="hpBar"></progress>
-        <span className="hpLabel">HP</span>
+        <span className="hpLabel">{hp} HP</span>
       </div>
       <img className="battleMonsterImg" src={image} alt={alt} />
     </div>
   );
+
+  //Server side io.emit('update-hp', { playerId: damagedPlayerId, newHp: updatedHp });
 };
