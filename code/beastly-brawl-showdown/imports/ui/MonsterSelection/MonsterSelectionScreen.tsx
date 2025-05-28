@@ -25,7 +25,10 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
     // Remove border from previous
     if (selectedMonster) {
       const deselect = document.getElementById(selectedMonster);
-      if (deselect) deselect.style.border = "none";
+      if (deselect) {
+        deselect.style.border = "none";
+        deselect.style.opacity = "1";
+      }
     }
 
     // Add border to new
@@ -33,6 +36,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
     if (selected) {
       selected.style.border = "solid";
       selected.style.borderWidth = "8px";
+      selected.style.opacity = "0.5";
     }
 
     setSelectedMonsterCallback(name);
@@ -45,7 +49,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
   }
 
   if (isConfirmed && selectedMonster) {
-    <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />
+    <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />;
   }
 
   return (
