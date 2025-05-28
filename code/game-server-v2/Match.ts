@@ -28,4 +28,17 @@ export class Match {
     this.playerMonsters.set(player1, player1.getMonster());
     this.playerMonsters.set(player2, player2.getMonster());
   }
+
+  getEnemyByPlayer(player: Player): Player {
+    if (player === this.player1){
+      return this.player2
+    }
+    else if (player === this.player2){
+      return this.player1
+    }
+    else {
+    throw new Error("Player not found in match");
+    }
+  }
+
 }

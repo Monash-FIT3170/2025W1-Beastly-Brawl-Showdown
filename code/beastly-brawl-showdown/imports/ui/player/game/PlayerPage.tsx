@@ -17,7 +17,7 @@ export const Player = () => {
   const [lockedSelectedMonster, setLockedSelectedMonster] = useState(false);
   const [myMonster, setMyMonsterMonster] = useState<Monster>();
   const [enemyMonster, setenemyMonsterMonster] = useState<Monster>();
-  const [hasSelfSumbittedTurn, setHasSelfSumbittedTurn] = useState(false);
+  const [hasSelfSubmittedTurn, setHasSelfSumbittedTurn] = useState(false);
 
 
   //#region Connect to game server
@@ -52,6 +52,12 @@ export const Player = () => {
     socketRef.current.on("game-started", () => {
       setMonsterSelection(true);
     });
+
+    const handleMatchStarted = (data: { enemyMonster: Monster }) => {
+    setenemyMonsterMonster(data.enemyMonster);
+    };
+    
+    socketRef.current.on("match-started", handleMatchStarted)
 
     socketRef.current.on(
       "turn-result",
@@ -220,7 +226,7 @@ useEffect(() => {
     );
   }
 
-  if (hasSelfSumbittedTurn) {
+  if (hasSelfSubmittedTurn) {
     <h1>Waiting for enemy...</h1>;
   }
 

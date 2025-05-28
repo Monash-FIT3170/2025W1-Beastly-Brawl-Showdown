@@ -335,7 +335,7 @@ async function main(config: ServerConfig) {
           break;
         }
       }
-      
+
       let allReady = true;
       for (const player of room.players.values()) {
         if (player.readyForGame === false) {
@@ -346,7 +346,21 @@ async function main(config: ServerConfig) {
 
       if (allReady) {
         room.createMatches();
-        socket.emit("matches-started");
+        for (const player of room.players.values()) {
+          let enemy: Player | null = null;
+          for (const match of room.matches.values()) {
+            const possibleEnemy = match.getEnemyByPlayer(player);
+            if (possibleEnemy) {
+              enemy = possibleEnemy;
+              break;
+            }
+          }
+          if (enemy !== null) {
+            playerChannel.to(player.socketId).emit("matches-started", {
+              enemyMonster: enemy.getMonster(),
+            });
+          }
+        }
       }
     });
 
