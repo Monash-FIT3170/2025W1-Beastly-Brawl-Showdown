@@ -18,4 +18,8 @@ export class Player {
     this.monster = monster;
     this.linkedAcccountId = linkedAcccountId;
   }
+
+  getMonster(): Monsters | undefined {
+    return this.monster;
+  }
 }
