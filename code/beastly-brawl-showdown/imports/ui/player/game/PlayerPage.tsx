@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import Monster from "/imports/data/monsters/Monsters";
-import { allMonsters } from "/imports/data/monsters/MonsterData";
+import { allMonsters } from "../../../data/monsters/MonsterData";
 import { useNavigate } from "react-router-dom";
 import { BattleMonster } from "../../BattleScreen/BattleMonster";
 

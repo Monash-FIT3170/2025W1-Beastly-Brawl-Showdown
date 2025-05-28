@@ -1,9 +1,6 @@
+import { Server as SocketIOServer } from 'socket.io';
 import Monsters from '../monsters/Monsters';
 
-/**
- * Represents an attack action between two monsters.
- * The attacker attempts to strike the defender with a total attack value.
- */
 export default class AttackAction {
     private attacker: Monsters;
     private defender: Monsters;
@@ -13,8 +10,23 @@ export default class AttackAction {
         this.defender = defender;
     }
 
-    async execute(): Promise<void> {
-        const totalAttack = this.attacker.attack();
-        this.defender.defend(await totalAttack);
+    async execute(io: SocketIOServer, roomId: string): Promise<void> {
+        const roll = await this.attacker.attack();
+        this.defender.defend(roll);
+
+        // Emit the attack log to the battle room
+        io.to(roomId).emit('battle-log', {
+            type: 'attack',
+            attacker: this.attacker.name,
+            defender: this.defender.name,
+            roll,
+            defenderHP: this.defender.health,
+        });
+
+        // Emit an HP update specifically to the room (not global)
+        io.to(roomId).emit('update-hp', {
+            playerId: this.defender.name, // ideally use a real unique ID
+            newHp: this.defender.health,
+        });
     }
 }

@@ -7,6 +7,7 @@ export default class ShadowFangPredator extends Monsters {
 
   constructor() {
     super(
+      'ShadowFangPredator',
       20,
       12,
       4,

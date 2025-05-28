@@ -9,6 +9,7 @@ import AbilityAction from "../actions/AbilityAction";
  * Includes default methods such as attack and defend for monster subclasses which share functionality.
  */
 export default class Monsters {
+  protected monsterName: string;
   protected baseHealth: number;
   protected currentHealth: number;
   protected baseAC: number;
@@ -17,7 +18,6 @@ export default class Monsters {
   protected special: string;
   protected baseAbilityCharges: number;
   protected currentAbilityCharges: number;
-  /** MONSTER NAME */ // TODO CHAGNE THIS
   protected monsterType: string;
   protected baseDefenseCharges: number;
   protected currentDefenseCharges: number;
@@ -27,6 +27,7 @@ export default class Monsters {
   protected imageUrl: string;
 
   constructor(
+    monsterName: string,
     health: number,
     AC: number,
     attackBonus: number,
@@ -35,6 +36,7 @@ export default class Monsters {
     imageSelectionURL: string,
     imageUrl: string
   ) {
+    this.monsterName = monsterName;
     this.baseHealth = health;
     this.currentHealth = health;
     this.baseAC = AC;
@@ -162,7 +164,7 @@ export default class Monsters {
    *
    * @param _defender The opponent affected by the ability.
    */
-  useAbility(_defender: Monsters): void {}
+  useAbility(_defender: Monsters): void { }
 
   // Getters and setters
   get AC(): number {
@@ -191,6 +193,10 @@ export default class Monsters {
 
   get type(): string { //TODO CHAGNE THIS
     return this.monsterType;
+  }
+
+  get name(): string{
+    return this.monsterName;
   }
 
   get abilityCharges(): number {

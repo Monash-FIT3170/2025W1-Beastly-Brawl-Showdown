@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { BattleMonster } from './BattleMonster';
+import Monsters from '/imports/data/monsters/Monsters';
+
 
 // Define the props type
 type BattleMiddleProps = {
   showAnimation: boolean;
+  player1Monster: Monsters;
+  player2Monster: Monsters;
+  playerId1: string;
+  playerId2: string;
 };
+
+
 //takes a boolean when initialized
-export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => {
+export const BattleMiddle: React.FC<BattleMiddleProps> = ({
+  showAnimation,
+  player1Monster,
+  player2Monster,
+  playerId1,
+  playerId2,
+}) => {
   const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
 
 
@@ -52,8 +66,14 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
 
   return (
     <div className="battleMiddle">
-      {/* monster 1 */}
-      <BattleMonster image="/img/monster-image/dragon.png" alt="Monster 1" position="monster1" />
+      <BattleMonster
+        image={player1Monster.image}
+        alt={player1Monster.type}
+        position="monster1"
+        playerId={playerId1}
+        initialHp={player1Monster.health}
+        
+      />
 
       {showAnimation && (
         <div className="diceAnimation">
@@ -61,8 +81,15 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation }) => 
           <span className="diceResult">{displayedNumber}</span>
         </div>
       )}
-      {/* monster 2 */}
-      <BattleMonster image="/img/monster-image/wolfman.png" alt="Monster 2" position="monster2" />
+
+      <BattleMonster
+        image={player2Monster.image}
+        alt={player2Monster.type}
+        position="monster2"
+        playerId={playerId2}
+        initialHp={player2Monster.health}
+      />
     </div>
   );
+
 };

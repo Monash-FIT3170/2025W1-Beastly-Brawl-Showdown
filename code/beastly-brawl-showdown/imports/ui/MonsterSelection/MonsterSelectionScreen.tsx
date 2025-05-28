@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MonsterContainer } from "./MonsterContainer";
-import { allMonsters } from "/imports/data/monsters/MonsterData";
+import { monsterData, MonsterName } from "../../data/monsters/MonsterData";
 import { BattleScreen } from "../BattleScreen/BattleScreen";
 
 interface MonsterSelectionScreenProps {
@@ -12,7 +12,6 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
   selectedMonster,
   setSelectedMonsterCallback,
 }) => {
-  // const [currentlySelected, setCurrentlySelected] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [confirmEnabled, setConfirmEnabled] = useState(false);
 
@@ -37,34 +36,32 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
     }
 
     setSelectedMonsterCallback(name);
-    setConfirmEnabled(true); // Enable button
+    setConfirmEnabled(true);
   }
 
   function handleConfirm() {
-    console.log(
-      "Confirm clicked. Currently selected monster:",
-      selectedMonster
-    );
+    console.log("Confirm clicked. Selected monster:", selectedMonster);
     setIsConfirmed(true);
   }
 
-  // TODO CHANGE THIS ------------------------------------------------------------------------
-  if (isConfirmed) {
-    console.log("Rendering BattleScreen");
-    return <BattleScreen />;
+  if (isConfirmed && selectedMonster) {
+    <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />
   }
 
   return (
     <div className="monsterSelectionScreen">
       <h1>Choose your Monster:</h1>
-      {allMonsters.map((monster) => (
-        <MonsterContainer
-          key={monster.type}
-          image={monster.imageSelection}
-          name={monster.type}
-          func={highlightAndShowConfirm}
-        />
-      ))}
+      {Object.entries(monsterData).map(([name, MonsterData]) => {
+        const previewMonster = new MonsterData();
+        return (
+          <MonsterContainer
+            key={name}
+            image={previewMonster.imageSelection}
+            name={name}
+            func={highlightAndShowConfirm}
+          />
+        );
+      })}
       <button
         id="confirmMonsterButton"
         onClick={handleConfirm}
