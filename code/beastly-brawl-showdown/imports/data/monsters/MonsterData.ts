@@ -1,9 +1,11 @@
-import MysticWyvern from "./MysticWyvern";
-import ShadowFangPredator from "./ShadowFangPredator";
-import StoneHideGuardian from "./StoneHideGuardian";
+import MysticWyvern from './MysticWyvern';
+import ShadowFangPredator from './ShadowFangPredator';
+import StoneHideGuardian from './StoneHideGuardian';
 
-export const monsterClasses = {
+export const monsterData = {
   MysticWyvern,
   ShadowFangPredator,
   StoneHideGuardian,
 };
+
+export type MonsterName = keyof typeof monsterData;
