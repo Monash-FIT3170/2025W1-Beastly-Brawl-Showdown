@@ -141,7 +141,18 @@ async function main(config: ServerConfig) {
 
     socket.on("start-game", async (msg) => {
       log_event(`Requested to start game: ${msg}`);
-
+      const roomId = gameServer.hostIdToRoomIdLookup.get(socket.id)!;
+      const room = gameServer.rooms.get(roomId)!;
+      //replace this with the actual place to get data from 
+      const matchState = room.gameState;
+      //emit to each of the two players in that room --> unsure
+      room.players.forEach(player => {
+      const personal = matchState.players[player.displayName];
+      playerChannel.to(player.socketId).emit("match-start", {
+        you:    personal,
+        global: { /*Data variables to be passed here*/ }
+    });
+  });
       // Notify everyone in this room
       gameServer.rooms
         .get(gameServer.hostIdToRoomIdLookup.get(socket.id)!)!
@@ -151,6 +162,7 @@ async function main(config: ServerConfig) {
       log_notice("All players informed of start.");
     });
   });
+
 
   /// Pre-connection auth check
   type PlayerChannelAuth = {
