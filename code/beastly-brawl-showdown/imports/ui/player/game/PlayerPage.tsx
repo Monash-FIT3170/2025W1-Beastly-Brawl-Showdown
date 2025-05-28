@@ -117,7 +117,7 @@ useEffect(() => {
       const rollDuration = 1000; // total roll duration in ms
       const intervalSpeed = 100; // time between number updates
 
-      const finalResult = 20; // eventually will replace with dice roll utility
+      const finalResult = Math.floor(Math.random() * 20) + 1; // eventually will replace with dice roll utility
       const totalSteps = rollDuration / intervalSpeed; //get the ammount of times it gets swaped out
 
       interval = setInterval(() => {
@@ -160,6 +160,13 @@ useEffect(() => {
     //   setTimeout(() => setShowAnimation(false), 3000);
     // }
   };
+  
+  function handleSeclection(){
+    setLockedSelectedMonster(true)
+    if (socketRef.current){
+      socketRef.current.emit("monster-selected", {Monster : myMonster})
+    }
+  }
 
   if (!isConnected) {
     return <p>Connecting to server...</p>;
@@ -193,7 +200,7 @@ useEffect(() => {
                   className="monsterImage"
                   onClick={() => {
                     setMyMonsterMonster(monster);
-                  }}
+                  }}//i'mpretty sure thits is a bug btw? why not just do onclick={setmymonster(monstter)}
                 />
               </div>
             );
@@ -202,7 +209,7 @@ useEffect(() => {
           {myMonster && (
             <button
               id="confirmMonsterButton"
-              onClick={() => setLockedSelectedMonster(true)}
+              onClick={handleSeclection}
               disabled={lockedSelectedMonster}
             >
               Confirm
@@ -237,8 +244,7 @@ useEffect(() => {
         <BattleMonster
           image="/img/monster-image/dragon.png"
           alt="Monster 1"
-          position="monster1"
-        />
+          position="monster1"/>
 
         {showAnimation && (
           <div className="diceAnimation">
@@ -253,8 +259,7 @@ useEffect(() => {
         <BattleMonster
           image="/img/monster-image/wolfman.png"
           alt="Monster 2"
-          position="monster2"
-        />
+          position="monster2" />
       </div>
 
       <div className="battleScreenBottom">
