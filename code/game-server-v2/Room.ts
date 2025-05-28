@@ -18,7 +18,8 @@ export class Room {
   players: Map<string, Player> = new Map<string, Player>(); // <displayName, Player> temporarily
   gameState: any = undefined;
   settings: GameSettings = new GameSettings();
-  matches: Map<string, Match> = new Map();
+  matches: Map<string, Match> = new Map<string, Match>();
+  playerToMatch: Map<Player, Match> = new Map<Player, Match>();
 
   constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode) {
     this.hostSocketId = hostSocketId;
@@ -42,7 +43,23 @@ export class Room {
     }
   }
 
+  /**
+   * Adds player
+   * @param player player to add
+   */
   addPlayer(player: Player) {
     this.players.set(player.displayName, player);
+  }
+
+  createMatch(player1: Player, player2: Player): Match {
+    // Temporary way of assigning match an id
+    const matchId = `${this.roomId}.${this.matches.size}`;
+    const match = new Match(player1, player2, matchId);
+    this.matches.set(matchId, match);
+    return match;
+  }
+
+  getMatch(matchId: string) {
+    return this.matches.get(matchId);
   }
 }
