@@ -49,4 +49,20 @@ export class Match {
     io.to(this.player1.socketId).emit("match-start", player1Data);
     io.to(this.player2.socketId).emit("match-start", player2Data);
   }
+  getEnemyByPlayer(player: Player): Player {
+    if (player === this.player1){
+      return this.player2
+    }
+    else if (player === this.player2){
+      return this.player1
+    }
+    else {
+    throw new Error("Player not found in match");
+    }
+  }
+  
+  containsPlayer(player: Player): boolean {
+    return this.player1 === player || this.player2 === player;
+  }
+
 }
