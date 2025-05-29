@@ -91,13 +91,14 @@ export const JoinForm = () => {
         <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
         <form className="task-form" onSubmit={handleSubmitAuth}>
           <input
+            className="form-textbox"
             type="text"
             placeholder="Add Room Code"
             value={inputJoinCode}
             onChange={(e) => setInputJoinCode(e.target.value)}
           />
           <div className="buttons-container">
-            <button className="btn" type="submit">
+            <button className="glb-btn" type="submit">
               Continue
             </button>
           </div>
@@ -111,13 +112,14 @@ export const JoinForm = () => {
         <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
         <form className="task-form" onSubmit={handleSubmitAuth}>
           <input
+            className="form-textbox"
             type="text"
             placeholder="Display Name"
             value={inputDisplayName}
             onChange={(e) => setInputDisplayName(e.target.value)}
           />
           <div className="buttons-container">
-            <button className="btn" type="submit">
+            <button className="glb-btn" type="submit">
               Go!
             </button>
           </div>

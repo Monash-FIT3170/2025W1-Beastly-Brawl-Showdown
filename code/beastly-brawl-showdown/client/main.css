@@ -5,6 +5,34 @@
   font-family: 'Press Start 2P' !important;
 }
 
+body {
+  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+  min-height: 100vh;
+  display: flex;
+  padding-top: 10px;
+  background-color: #f0f0f0;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Shared button styles */
+.glb-btn {
+  background-color: #8B4513;
+  color: #d4a574;
+  border-color: #B3673F;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  border: 2px solid #654321;
+  text-transform: capitalize;
+  min-width: 200px;
+  min-height: 50px;
+}
+
+/* Design page container stuff */
 .design-page-body {
   height: 100vh;
   overflow: hidden;
@@ -15,6 +43,45 @@
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   height: 100vh;
+}
+
+/* For log in page */
+.logo {
+  background-image: url('logo.png');
+  background-size: 100% 100%;
+  background-position: center;
+  height: 280px;
+  width: 299px;
+}
+
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.userForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-textbox {
+  background-color: #8B4513;
+  color: #d4a574;
+  border: none;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  border: 2px solid #654321;
+  text-transform: capitalize;
 }
 
 /* Top Row */
@@ -33,7 +100,12 @@
   justify-content: center;
 }
 
+/* Guest page */
+#guest-header {
+  text-shadow: 1px 1px 2px #d4a574;
+}
 
+/* Design page */
 .title {
   font-size: 3rem;
   font-weight: bold;
@@ -534,6 +606,8 @@
   outline: none;
   color: #000;       /* Change if needed */
   text-align: center; /* Or left/right as you like */
+  align-items: center;
+  align-content: center;
   font-family: inherit;
   image-rendering: pixelated;
 }
@@ -560,15 +634,6 @@
   margin: 10px auto;
 }
 
-body {
-  display: flex;
-  padding-top: 10px;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f0f0f0;
-  justify-content: center;
-  align-items: center;
-}
-
 /*For the main screen*/
 .screen {
   display: flex;
@@ -576,32 +641,78 @@ body {
   align-items: center;
 }
 
-/*The box to display the link to join the room*/
-.code-link {
-  width: 990px;
-  height: 75px;
-  padding-left: 10px;
-  padding-right: 10px;
+/* Fullscreen layout */
+.waiting-screen {
   display: flex;
-  justify-content: left;
+  flex-direction: column;
   align-items: center;
-  background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
-  font-family: Arial, sans-serif;
-  overflow: auto;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+}
+
+
+/* Horizontal lines */
+.waiting-line {
+  width: 200px;
+  height: 1px;
+  background-color: #444;
+}
+
+/* Wrapper for text and lines */
+.waiting-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Waiting text */
+.waiting-text {
+  font-size: 20px;
+}
+
+/*This shows everything related to the waiting room*/
+.waiting-room-box {
+  width: 1000px;
+  margin: 60px auto 0;
+}
+
+/*This shows and arranges the link and qr code components*/
+.waiting-room-info-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+/* For the room code */
+.room-code, .code-link {
+  height: 80px;
+  background: #8B4513;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  flex: 1;
 }
 
 /*The box to show the qr code*/
 .qr-box {
-  width: 75px;
-  height: 75px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f0f0f0;
+  width: 80px;
+  height: 80px;
+  background: white;
   border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #333;
 }
 
 .qr-box canvas{
@@ -615,11 +726,11 @@ body {
 }
 
 /*This shows everything related to the waiting room*/
-.waiting-room-box {
+/* .waiting-room-box {
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
+} */
 
 /*Component that displays the participants names dynamically*/
 .participants-display-box {
@@ -631,23 +742,78 @@ body {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 20px;
-  background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
+  background: white;
+  /* border: 4px solid #4A90E2; */
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
 }
 
-/*For the participants name*/
-.participants-box {
-  min-width: 90px;
+/* Header within the display box */
+.participants-header {
+  width: 100%;
+  background-color: #8B4513;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+}
+
+/* Player count */
+.participants-count {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.lobby-title {
+  margin-bottom: 1rem; 
+}
+
+/* Start game btn */
+.start-game-btn {
+  background: linear-gradient(to bottom, #FF8C42, #E67E22);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.start-btn:hover {
+  background: linear-gradient(to bottom, #E67E22, #D35400);
+}
+
+/* Grid for the players */
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  padding: 0 15px 15px 15px;
+}
+
+/* participants-name-box */
+.participants-name-box {
+  background: linear-gradient(to bottom, #A0522D, #8B4513);
+  color: white;
+  border: 2px solid #654321;
+  min-width: 110px;
   height: 40px;
-  padding: 0 10px;
+  padding: 10px 8px;
+  border-radius: 6px;
   text-align: center;
+  font-weight: bold;
   vertical-align: middle;
+  cursor: pointer;
   line-height: 40px;
+  font-size: 13px;
   background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Shared container for full-page layout */
@@ -665,11 +831,13 @@ body {
   display: flex;
   padding-top: 10px;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  justify-content: flex-start;
+  /* justify-content: flex-start; */
   min-height: 100vh;
   padding: 2rem;
   text-align: center;
+  gap: 15px;
 }
 
 /* Logo styling (optional image) */
@@ -845,7 +1013,9 @@ progress::-moz-progress-bar {
 .buttons-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 /* Button color variants */
@@ -854,8 +1024,8 @@ progress::-moz-progress-bar {
   color: white;
 }
 .join-btn {
-  background-color: #b2d9ed;
-  color: white;
+  background-color: #694230;
+  border-color: #936049;
 }
 
 
@@ -864,12 +1034,22 @@ progress::-moz-progress-bar {
   color: white;
 }
 
+.join-buttons-container{
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
 /* Settings page styling */
 .settings-container {
-  padding: 2rem;
+  padding: 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.settings-container h1{
+  margin-bottom: 3rem;
 }
 
 .volume-control {
@@ -932,7 +1112,7 @@ input[type="range"] {
 }
 
 .toggle-btn.on {
-  background-color: #6b5b95; /* Purple */
+  background-color: #6fc276;
   color: white;
 }
 

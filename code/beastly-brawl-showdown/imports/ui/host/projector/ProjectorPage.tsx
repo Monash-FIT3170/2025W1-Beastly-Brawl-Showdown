@@ -86,8 +86,8 @@ export default function ProjectorPage() {
 
   return (
     <div className="waiting-room-box">
-      <h1>Game Lobby</h1>
-      <h2>Room ID: {joinCode}</h2>
+      <h1 className="lobby-title">Game Lobby</h1>
+      <h2 >Room ID: {joinCode}</h2>
       <WaitingRoomInfoBox joinUrl={getJoinUrl()} />
       <ParticipantDisplayBox name={playerList.toString()} />
     </div>
