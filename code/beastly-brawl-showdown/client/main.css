@@ -766,6 +766,10 @@ body {
   font-size: 16px;
 }
 
+.lobby-title {
+  margin-bottom: 1rem; 
+}
+
 /* Start game btn */
 .start-game-btn {
   background: linear-gradient(to bottom, #FF8C42, #E67E22);
