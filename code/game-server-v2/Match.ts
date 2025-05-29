@@ -4,7 +4,6 @@ import { Action } from "../shared/types";
 import { Server } from "socket.io";
 
 export class Match {
-  
   matchId: string;
   player1: Player;
   player2: Player;
@@ -18,7 +17,10 @@ export class Match {
   // I'm guessing monster object's health will change as the match progresses
 
   /** Map for player and monsters */
-  playerMonsters: Map<Player, Monsters | undefined> = new Map<Player,Monsters>();
+  playerMonsters: Map<Player, Monsters | undefined> = new Map<
+    Player,
+    Monsters
+  >();
   /** Map for player and their selected action */
   selectedMoves: Map<Player, Action> = new Map<Player, Action>();
 
@@ -36,31 +38,37 @@ export class Match {
 
     const player1Data = {
       matchId: this.matchId,
-      you: { socketId: this.player1.socketId, displayName: this.player1.displayName, monster: monster1 },
-      opponent: { socketId: this.player2.socketId, displayName: this.player2.displayName, monster: monster2 }
+      you: {
+        socketId: this.player1.socketId,
+        displayName: this.player1.displayName,
+        monster: monster1,
+      },
+      opponent: {
+        socketId: this.player2.socketId,
+        displayName: this.player2.displayName,
+        monster: monster2,
+      },
     };
 
     const player2Data = {
       matchId: this.matchId,
       you: { displayName: this.player2.displayName, monster: monster2 },
-      opponent: { displayName: this.player1.displayName, monster: monster1 }
+      opponent: { displayName: this.player1.displayName, monster: monster1 },
     };
 
     io.to(this.player1.socketId).emit("match-start", player1Data);
     io.to(this.player2.socketId).emit("match-start", player2Data);
   }
   getEnemyByPlayer(player: Player): Player {
-    if (player === this.player1){
-      return this.player2
-    }
-    else if (player === this.player2){
-      return this.player1
-    }
-    else {
-    throw new Error("Player not found in match");
+    if (player === this.player1) {
+      return this.player2;
+    } else if (player === this.player2) {
+      return this.player1;
+    } else {
+      throw new Error("Player not found in match");
     }
   }
-  
+
   containsPlayer(player: Player): boolean {
     return this.player1 === player || this.player2 === player;
   }

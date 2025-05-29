@@ -29,7 +29,7 @@ export default function ProjectorPage() {
           console.error("Error locating room:", error);
           return;
         }
-  
+
         console.log("Server found at:", result);
         setServerUrl(result);
       });

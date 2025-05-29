@@ -51,7 +51,7 @@ export class Room {
     this.players.set(player.displayName, player);
   }
 
-  createMatch(player1: Player, player2: Player, matchId:string): Match {
+  createMatch(player1: Player, player2: Player, matchId: string): Match {
     const match = new Match(player1, player2, matchId);
     this.matches.set(matchId, match);
     return match;
@@ -61,7 +61,7 @@ export class Room {
     /** TODO */
     // Choose matchup of players
     // Call createMatch on the two players
-    const playerList = Array.from(this.players.values())
+    const playerList = Array.from(this.players.values());
     for (let i = 0; i < playerList.length - 1; i += 2) {
       //right now its just first player vs second player and so on (3vs4, 5vs6), ig if you wanted it to be different (1v5) could always just shuffle the array beforehand
       const player1 = playerList[i];
@@ -71,9 +71,11 @@ export class Room {
 
       this.createMatch(player1, player2, matchId);
     }
-    if (playerList.length %2 != 0){
-      console.log("The last player in the playerlist won't be matched with anybody")
-      }
+    if (playerList.length % 2 != 0) {
+      console.log(
+        "The last player in the playerlist won't be matched with anybody",
+      );
+    }
   }
 
   getMatch(matchId: string) {

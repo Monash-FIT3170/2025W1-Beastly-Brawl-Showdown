@@ -1,9 +1,9 @@
 import { AccountId, RoomId } from "../shared/types";
-import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters"
+import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
 
 /**
- * A set of data from which a player's information is stored. 
- * 
+ * A set of data from which a player's information is stored.
+ *
  * **Players are per room**
  */
 export class Player {
@@ -13,16 +13,16 @@ export class Player {
   displayName: string;
   monster?: Monsters;
   linkedAcccountId?: AccountId;
-  readyForGame?:boolean;
+  readyForGame?: boolean;
 
   constructor(
     roomId: RoomId,
     socketId: string,
     displayName: string,
     monster?: Monsters | undefined,
-    linkedAcccountId?: AccountId | undefined
+    linkedAcccountId?: AccountId | undefined,
   ) {
-    this.roomId = roomId
+    this.roomId = roomId;
     this.socketId = socketId;
     this.displayName = displayName;
     this.monster = monster;
@@ -33,7 +33,7 @@ export class Player {
     return this.monster;
   }
 
-  setMonster(monster: Monsters){
+  setMonster(monster: Monsters) {
     this.monster = monster;
   }
 }
