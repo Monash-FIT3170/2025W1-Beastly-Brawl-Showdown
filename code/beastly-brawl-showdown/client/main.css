@@ -28,6 +28,8 @@ body {
   transition: all 0.3s ease;
   border: 2px solid #654321;
   text-transform: capitalize;
+  min-width: 200px;
+  min-height: 50px;
 }
 
 /* Design page container stuff */
@@ -639,6 +641,37 @@ body {
   align-items: center;
 }
 
+/* Fullscreen layout */
+.waiting-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+}
+
+
+/* Horizontal lines */
+.waiting-line {
+  width: 200px;
+  height: 1px;
+  background-color: #444;
+}
+
+/* Wrapper for text and lines */
+.waiting-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Waiting text */
+.waiting-text {
+  font-size: 20px;
+}
+
 /*This shows everything related to the waiting room*/
 .waiting-room-box {
   width: 1000px;
@@ -661,6 +694,7 @@ body {
   color: white;
   padding: 15px 20px;
   border-radius: 8px;
+  margin-top: 1.5rem;
   text-align: center;
   align-items: center;
   align-content: center;
@@ -716,13 +750,13 @@ body {
 
 /* Header within the display box */
 .participants-header {
+  width: 100%;
+  background-color: #8B4513;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0 0 15px 0;
-  background: #8B4513;
-  padding: 10px 15px;
-  border-radius: 0;
+  
 }
 
 /* Player count */
@@ -760,7 +794,7 @@ body {
   background: linear-gradient(to bottom, #A0522D, #8B4513);
   color: white;
   border: 2px solid #654321;
-  min-width: 90px;
+  min-width: 110px;
   height: 40px;
   padding: 10px 8px;
   border-radius: 6px;
@@ -772,6 +806,9 @@ body {
   font-size: 13px;
   background-color: #f0f0f0;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Shared container for full-page layout */
@@ -971,6 +1008,7 @@ progress::-moz-progress-bar {
 .buttons-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1rem;
   margin-top: 1rem;
 }
