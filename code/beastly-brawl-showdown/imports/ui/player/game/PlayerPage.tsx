@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
-import { BattleScreen } from "../../BattleScreen/BattleScreen";
 
 export const Player = () => {
   const joinCode = sessionStorage.getItem("joinCode");
@@ -74,11 +73,16 @@ export const Player = () => {
     );
   }
 
+  //Broadcast Player is done with the monster Selection when tbey have selected a monster
   const handleMonsterSelection = (monster: string) => {
-    // TODO: Pass to monster battle page, await all players selecting monsters
-    console.log("Monster selected :D")
-
-  }
+    socketRef.current?.emit('selected-monster', {
+      joinCode,
+      displayName,
+      monster,
+    })
+    setMonsterSelected(true);
+    console.log("Monster selected :D");
+  };
 
   // If no monster has been selected yet, start selection
   if (!monsterSelected) {

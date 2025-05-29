@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MonsterContainer } from "./MonsterContainer";
-import { monsterData, MonsterName } from "../../data/monsters/MonsterData";
-import { BattleScreen } from "../BattleScreen/BattleScreen";
+import { monsterData } from "../../data/monsters/MonsterData";
 
 interface MonsterSelectionScreenProps {
   setSelectedMonsterCallback: (value: string) => void;
@@ -62,10 +61,11 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
   }
 
   // If confirm button pressed and monster selected, return result to parent page (PlayerPage.tsx)
-  if (isConfirmed && selectedMonster) {
-    // <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />;
-    setSelectedMonsterCallback(selectedMonster)
-  }
+  useEffect(() => {
+    if (isConfirmed && selectedMonster) {
+      setSelectedMonsterCallback(selectedMonster);
+    }
+  }, [isConfirmed, selectedMonster, setSelectedMonsterCallback]);
 
   // HTML display of the monsters
   return (
