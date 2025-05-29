@@ -5,6 +5,32 @@
   font-family: 'Press Start 2P' !important;
 }
 
+body {
+  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+  min-height: 100vh;
+  display: flex;
+  padding-top: 10px;
+  background-color: #f0f0f0;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Shared button styles */
+.glb-btn {
+  background-color: #8B4513;
+  color: #d4a574;
+  border-color: #B3673F;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  border: 2px solid #654321;
+  text-transform: capitalize;
+}
+
+/* Design page container stuff */
 .design-page-body {
   height: 100vh;
   overflow: hidden;
@@ -15,6 +41,45 @@
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   height: 100vh;
+}
+
+/* For log in page */
+.logo {
+  background-image: url('logo.png');
+  background-size: 100% 100%;
+  background-position: center;
+  height: 280px;
+  width: 299px;
+}
+
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.userForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-textbox {
+  background-color: #8B4513;
+  color: #d4a574;
+  border: none;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  border: 2px solid #654321;
+  text-transform: capitalize;
 }
 
 /* Top Row */
@@ -33,7 +98,12 @@
   justify-content: center;
 }
 
+/* Guest page */
+#guest-header {
+  text-shadow: 1px 1px 2px #d4a574;
+}
 
+/* Design page */
 .title {
   font-size: 3rem;
   font-weight: bold;
@@ -534,6 +604,8 @@
   outline: none;
   color: #000;       /* Change if needed */
   text-align: center; /* Or left/right as you like */
+  align-items: center;
+  align-content: center;
   font-family: inherit;
   image-rendering: pixelated;
 }
@@ -560,6 +632,8 @@
   margin: 10px auto;
 }
 
+/*For the main screen*/
+.screen {
 body {
   display: flex;
   padding-top: 10px;
