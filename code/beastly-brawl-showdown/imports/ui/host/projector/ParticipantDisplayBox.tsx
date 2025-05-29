@@ -16,11 +16,7 @@ export const ParticipantDisplayBox = ({ name }: { name: string }) => {
 
       <div className="participants-grid">
         {names.length > 0 &&
-          names.map((n) => (
-            <div key={n} className="participants-name-box">
-              {n}
-            </div>
-          ))}
+          names.map((n) => <ParticipantBox key={n} name={n} />)}
       </div>
     </div>
   );
