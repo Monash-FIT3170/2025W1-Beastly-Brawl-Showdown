@@ -96,10 +96,10 @@ export default function SettingsPage({
       </div>
 
       <div className="settings-buttons">
-        <button className="btn confirm-btn" onClick={handleConfirm}>
+        <button className="btn glb-btn" onClick={handleConfirm}>
           ✔️ Confirm
         </button>
-        <button className="btn cancel-btn" onClick={handleCancel}>
+        <button className="btn glb-btn" onClick={handleCancel}>
           ❌ Cancel
         </button>
       </div>
