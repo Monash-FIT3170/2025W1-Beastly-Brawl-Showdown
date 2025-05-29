@@ -344,7 +344,7 @@ async function main(config: ServerConfig) {
       }
 
       if (allReady) {
-        room.createBracket();
+        room.createMatches();
         for (const player of room.players.values()) {
           let enemy: Player | null = null;
           for (const match of room.matches.values()) {
