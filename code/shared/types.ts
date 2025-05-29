@@ -5,6 +5,7 @@ export type RoomId = number;
 export type JoinCode = string;
 export type AccountId = string;
 export type Action = string;
+export type MatchId = number;
 
 export enum RoomPhase {
   /** Waiting for players to join (pre-start) */
@@ -25,5 +26,4 @@ export type PlayerChannelAuth = {
   joinCode: string;
   displayName: string;
 };
-
 

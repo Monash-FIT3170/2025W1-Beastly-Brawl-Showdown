@@ -117,7 +117,7 @@ async function main(config: ServerConfig) {
 
     socket.on("disconnect", () => log_event("Host disconnected."));
 
-    //#region >>> New Room
+    //#region <<< New Room
     socket.on(RequestNewRoom.name, RequestNewRoom);
     function RequestNewRoom(): void {
       log_event(`Host ${socket.id}`);
@@ -139,7 +139,7 @@ async function main(config: ServerConfig) {
     }
     //#endregion
 
-    //#region >>> Start Game
+    //#region <<< Start Game
     socket.on(RequestStartGame.name, RequestStartGame);
     /** Host has requested to start game */
     function RequestStartGame(): void {
@@ -163,7 +163,7 @@ async function main(config: ServerConfig) {
     }
     //#endregion
 
-    //#region >>> Start Round
+    //#region <<< Start Round
     socket.on(RequestStartRound.name, RequestStartRound);
     /** Event that is triggered when the host begins the next round. */
     function RequestStartRound(): void {
@@ -175,7 +175,7 @@ async function main(config: ServerConfig) {
       }
 
       // TODO: generate new matchups
-      room.createMatches(); // TODO test
+      room.createBracket(); // TODO test
 
       // TODO: Notify all players to start match (also send match initial state)
       // // room.players.forEach((player) => {
@@ -280,7 +280,7 @@ async function main(config: ServerConfig) {
 
     socket.on("disconnect", () => log_event("Player disconnected."));
 
-    //#region >>> Submit Move
+    //#region <<< Submit Move
     socket.on(RequestSubmitMove.name, RequestSubmitMove);
     function RequestSubmitMove(move: any): void {
       // TODO type
@@ -303,7 +303,7 @@ async function main(config: ServerConfig) {
     }
     //#endregion
 
-    //#region >>> Monster Select
+    //#region <<< Monster Select
     socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
     function RequestSubmitMonster(data): void {
       // TODO
@@ -344,7 +344,7 @@ async function main(config: ServerConfig) {
       }
 
       if (allReady) {
-        room.createMatches();
+        room.createBracket();
         for (const player of room.players.values()) {
           let enemy: Player | null = null;
           for (const match of room.matches.values()) {

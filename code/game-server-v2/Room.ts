@@ -1,4 +1,4 @@
-import { RoomId, JoinCode, AccountId } from "../shared/types";
+import { RoomId, JoinCode, AccountId, MatchId } from "../shared/types";
 import { Player } from "./Player";
 import { GameSettings } from "./GameSettings";
 import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
@@ -18,7 +18,7 @@ export class Room {
   players: Map<string, Player> = new Map<string, Player>(); // <displayName, Player> temporarily
   gameState: any = undefined;
   settings: GameSettings = new GameSettings();
-  matches: Map<string, Match> = new Map<string, Match>();
+  matches: Map<MatchId, Match> = new Map<MatchId, Match>();
   playerToMatch: Map<Player, Match> = new Map<Player, Match>();
 
   constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode) {
@@ -51,8 +51,8 @@ export class Room {
     this.players.set(player.displayName, player);
   }
 
-  createMatch(player1: Player, player2: Player, matchId: string): Match {
-    const match = new Match(player1, player2, matchId);
+  createMatch(matchId: MatchId, player1: Player, player2: Player): Match {
+    const match = new Match(matchId, player1, player2);
     this.matches.set(matchId, match);
     return match;
   }
@@ -67,18 +67,16 @@ export class Room {
       const player1 = playerList[i];
       const player2 = playerList[i + 1];
       //for now match id is just the order of match creation, does it have to be a fancy String for some reason?
-      const matchId = `${i / 2 + 1}`;
+      const matchId = i / 2 + 1;
 
-      this.createMatch(player1, player2, matchId);
+      this.createMatch(matchId, player1, player2);
     }
     if (playerList.length % 2 != 0) {
-      console.log(
-        "The last player in the playerlist won't be matched with anybody",
-      );
+      console.log("The last player in the playerlist won't be matched with anybody");
     }
   }
 
-  getMatch(matchId: string) {
+  getMatch(matchId: MatchId) {
     return this.matches.get(matchId);
   }
 
