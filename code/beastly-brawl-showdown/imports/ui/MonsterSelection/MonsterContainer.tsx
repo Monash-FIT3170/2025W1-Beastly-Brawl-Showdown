@@ -3,17 +3,18 @@ import React from "react";
 export const MonsterContainer = ({
   image,
   name,
-  highlightAndShowConfirm,
+  currentlySelectedMonster,
 }: {
   image: string;
   name: string;
-  highlightAndShowConfirm: (name: string) => void;
+  currentlySelectedMonster: (name: string) => void;
 }) => {
+    
   /**
    * Onclick handler, sends name of selected monster back to selection screen
    */
   function onClick() {
-    highlightAndShowConfirm(name);
+    currentlySelectedMonster(name);
   }
 
   return (

@@ -22,7 +22,11 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
     console.log("Component rendered. isConfirmed =", isConfirmed);
   }, [isConfirmed]);
 
-  function highlightAndShowConfirm(name: string) {
+  /**
+   * Updates the currently selected monster visually and in code 
+   * @param name name of monster currently selected
+   */
+  function currentlySelectedMonster(name: string) {
     console.log("Monster clicked:", name);
 
     // Assign monster name value
@@ -63,6 +67,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
     setSelectedMonsterCallback(selectedMonster)
   }
 
+  // HTML display of the monsters
   return (
     <div className="monsterSelectionScreen">
       <h1>Choose your Monster:</h1>
@@ -73,7 +78,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
             key={name}
             image={previewMonster.imageSelection}
             name={name}
-            highlightAndShowConfirm={highlightAndShowConfirm}
+            currentlySelectedMonster={currentlySelectedMonster}
           />
         );
       })}
