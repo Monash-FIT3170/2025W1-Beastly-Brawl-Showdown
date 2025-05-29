@@ -18,6 +18,7 @@ export default class AbilityAction {
      * @param io - Socket.io server instance.
      * @param roomId - The battle room to emit to.
      */
+    // TODO: make sure this socket connection uses the same connection as the player class
     execute(io: SocketIOServer, roomId: string): void {
         this.attacker.useAbility(this.defender);
 
