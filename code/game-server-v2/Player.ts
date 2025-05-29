@@ -6,6 +6,7 @@ export class Player {
   displayName: string;
   monster?: Monsters;
   linkedAcccountId?: AccountId;
+  readyForGame?:boolean;
 
   constructor(
     socketId: string,
@@ -21,5 +22,9 @@ export class Player {
 
   getMonster(): Monsters | undefined {
     return this.monster;
+  }
+
+  setMonster(monster: Monsters){
+    this.monster = monster;
   }
 }

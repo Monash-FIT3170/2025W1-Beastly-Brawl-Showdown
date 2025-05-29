@@ -53,6 +53,12 @@ export const Player = () => {
       setMonsterSelection(true);
     });
 
+    const handleMatchStarted = (data: { enemyMonster: Monster }) => {
+    setenemyMonsterMonster(data.enemyMonster);
+    };
+    
+    socketRef.current.on("match-started", handleMatchStarted)
+    
     socketRef.current.on(
       "turn-result",
       (myMonsterNewState, enemyMonsterNewState) => {
@@ -75,6 +81,7 @@ export const Player = () => {
         setHasSelfSumbittedTurn(false);
         //TODO IDK - do something if game is over
       }
+      
     );
 
     return () => {
@@ -165,6 +172,14 @@ useEffect(() => {
     return <p>Connecting to server...</p>;
   }
 
+  function handleSelection(){
+    setLockedSelectedMonster(true)
+    if (socketRef.current){
+      socketRef.current.emit("monster-selected", {Monster : myMonster})
+    }
+  }
+
+  
   if (!isSelection) {
     return (
       <div>
@@ -202,7 +217,7 @@ useEffect(() => {
           {myMonster && (
             <button
               id="confirmMonsterButton"
-              onClick={() => setLockedSelectedMonster(true)}
+              onClick={handleSelection}
               disabled={lockedSelectedMonster}
             >
               Confirm

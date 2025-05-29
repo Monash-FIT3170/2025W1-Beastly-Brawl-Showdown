@@ -32,6 +32,8 @@ async function main(config: ServerConfig) {
   const playerChannel = socketServer.of("/player");
   const hostChannel = socketServer.of("/host");
 
+  const socketToRoom = new Map<string, number>();
+
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
   connectDb();
@@ -271,6 +273,7 @@ async function main(config: ServerConfig) {
     const newPlayer = new Player(socket.id, auth.displayName);
     gameServer.rooms.get(roomId)?.players.set(auth.displayName, newPlayer);
     log_notice(`Player ${auth.displayName} assigned to room ${roomId}`);
+    socketToRoom.set(socket.id, roomId)
   });
 
   playerChannel.on("connection", async (socket: Socket) => {
@@ -313,6 +316,52 @@ async function main(config: ServerConfig) {
       }
     });
 
+        socket.on("monster-selected", (data) => {
+      const roomid = socketToRoom.get(socket.id);
+      if (roomid == undefined){
+        return
+      }
+      const room = gameServer.rooms.get(roomid);
+      if (!room){
+        return
+      }
+      for (const [displayName, player] of room.players.entries()) {
+        if (player.socketId === socket.id) {
+          player.setMonster(data.Monster);
+          console.log(`Updated monster for player ${displayName}`);
+          player.readyForGame = true;
+          break;
+        }
+      }
+      
+      let allReady = true;
+      for (const player of room.players.values()) {
+        if (player.readyForGame === false) {
+          allReady = false;
+          break;
+        }
+      }
+
+      if (allReady) {
+        room.createMatches();
+        for (const player of room.players.values()) {
+          let enemy: Player | null = null;
+          for (const match of room.matches.values()) {
+            if (match.containsPlayer(player)){
+              enemy = match.getEnemyByPlayer(player);
+              break
+            }
+          }
+
+          if (enemy !== null) {
+            playerChannel.to(player.socketId).emit("matches-started", {
+              enemyMonster: enemy.getMonster(),
+            });
+          }
+        }
+      }
+    });
+    //I'm not sure if its that imporatnt to verify monsters and idk how too for now so i just did the implementatiton above
     socket.on("selected-monster", async (monster) => {
       console.log("Monster submitted: ", JSON.stringify(monster));
 
