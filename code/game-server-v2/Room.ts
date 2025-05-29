@@ -68,4 +68,11 @@ export class Room {
   getMatch(matchId: string) {
     return this.matches.get(matchId);
   }
+
+  /**
+   * Clears out all matches
+   */
+  clearMatches() {
+    this.matches.clear;
+  }
 }

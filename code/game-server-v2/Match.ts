@@ -65,4 +65,28 @@ export class Match {
     return this.player1 === player || this.player2 === player;
   }
 
+  /**
+   * Sets the selected move
+   * @param player the player who chose the move
+   * @param selectedMove the selected move
+   */
+  setSelectedMove(player: Player, selectedMove: Action) {
+    if (this.selectedMoves.size < 2) {
+      this.selectedMoves.set(player, selectedMove);
+    }
+  }
+
+  /**
+   * Clears the previous moves
+   */
+  clearMoves() {
+    this.selectedMoves.clear();
+  }
+
+  /**
+   * Handles updating the state of monsters
+   */
+  resolveTurn() {
+    // TODO
+  }
 }
