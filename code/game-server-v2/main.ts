@@ -260,7 +260,7 @@ async function main(config: ServerConfig) {
     hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("player-set-changed", playerNameList);
 
     // Create new player and add it to the correct gameserver room
-    const newPlayer = new Player(socket.id, auth.displayName);
+    const newPlayer = new Player(roomId, socket.id, auth.displayName);
     gameServer.rooms.get(roomId)?.players.set(auth.displayName, newPlayer);
     log_notice(`Player ${auth.displayName} assigned to room ${roomId}`);
 
@@ -295,6 +295,7 @@ async function main(config: ServerConfig) {
       }
     }
 
+    socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
     function RequestSubmitMonster(data): void {
       // TODO
       // log_notice("Monster submitted:\n" + JSON.stringify(monster));
@@ -312,11 +313,7 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      const roomid = socketToRoom.get(socket.id);
-      if (roomid == undefined) {
-        return;
-      }
-      const room = gameServer.rooms.get(roomid);
+      const room = gameServer.rooms.get(player.roomId);
       if (!room) {
         return;
       }
@@ -356,7 +353,6 @@ async function main(config: ServerConfig) {
         }
       }
     }
-    socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
   });
 
   //#endregion
