@@ -175,7 +175,7 @@ async function main(config: ServerConfig) {
       }
 
       // TODO: generate new matchups
-      room.createBracket(); // TODO test
+      room.createMatches(); // TODO test
 
       // TODO: Notify all players to start match (also send match initial state)
       // // room.players.forEach((player) => {
