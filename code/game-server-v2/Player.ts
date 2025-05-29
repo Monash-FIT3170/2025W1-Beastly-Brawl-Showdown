@@ -1,4 +1,4 @@
-import { AccountId } from "./types";
+import { AccountId } from "../shared/types";
 import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters"
 
 export class Player {

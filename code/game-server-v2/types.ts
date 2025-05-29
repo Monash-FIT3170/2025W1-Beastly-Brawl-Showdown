@@ -1,7 +1,19 @@
-// TODO export to all folders / make global across services
+import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
+import { RoomId, RoomPhase } from "../shared/types";
 
-export type ServerId = number;
-export type RoomId = number;
-export type JoinCode = string;
-export type AccountId = string;
-export type Action = string;
+// /**
+//  * Data stored in `socket.data` for host channel
+//  */
+// export class HostSocketData {
+//   assignedRoomId: RoomId | null = null;
+//   roomPhase: RoomPhase | null = null;
+// }
+
+// /**
+//  * Data stored in `socket.data` for player channel
+//  */
+// export class PlayerSocketData {
+//   roomId: RoomId | null = null;
+//   displayName: RoomId | null = null;
+//   selectedMonster: Monsters | null = null;
+// }

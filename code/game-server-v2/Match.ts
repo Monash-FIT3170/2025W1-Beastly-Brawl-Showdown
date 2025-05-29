@@ -1,6 +1,6 @@
 import { Player } from "./Player";
 import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
-import { Action } from "./types";
+import { Action } from "../shared/types";
 import { Server } from "socket.io";
 
 export class Match {

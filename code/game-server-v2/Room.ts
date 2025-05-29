@@ -1,4 +1,4 @@
-import { RoomId, JoinCode, AccountId } from "./types";
+import { RoomId, JoinCode, AccountId } from "../shared/types";
 import { Player } from "./Player";
 import { GameSettings } from "./GameSettings";
 import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
