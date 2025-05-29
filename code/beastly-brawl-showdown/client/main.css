@@ -735,6 +735,7 @@ body {
 /*Component that displays the participants names dynamically*/
 .participants-display-box {
   max-width: 1085px;
+  min-height: 50px;
   max-height: 500px;
   padding: 10px;
   display: flex;
