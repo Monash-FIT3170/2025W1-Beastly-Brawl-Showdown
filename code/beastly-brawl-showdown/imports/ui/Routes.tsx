@@ -23,7 +23,7 @@ export const renderRoutes = () => (
     <Route path="/play/" element={<Player />} />
 
     {/* BATTLE PAGE */}
-    <Route path="/battle" element={<BattleScreen />} />
+    <Route path="/battle" element={<BattleScreen selectedMonsterName={"MysticWyvern"} />} />
 
     {/* DEFAULTS */}
     <Route path="/" element={<Navigate to="/home/" replace />} />

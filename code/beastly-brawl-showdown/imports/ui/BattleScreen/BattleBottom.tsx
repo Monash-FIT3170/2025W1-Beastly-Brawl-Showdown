@@ -1,3 +1,4 @@
+import React from 'react';
 type BattleBottomProps = {
   onAction: (action: 'attack' | 'defend' | 'ability') => void;
 };

@@ -1,18 +1,18 @@
 import React from 'react';
-import { io, Socket } from 'socket.io-client';
 import { monsterData, MonsterName } from '../../data/monsters/MonsterData';
 import { BattleTop } from './BattleTop';
 import { BattleMiddle } from './BattleMiddle';
 import { BattleBottom } from './BattleBottom';
+import { usePlayerSocket } from '../player/game/PlayerPage';
 
 interface BattleScreenProps {
   selectedMonsterName: MonsterName; // Use the typed key
 }
 
-const socket: Socket = io();
-
 export const BattleScreen: React.FC<BattleScreenProps> = ({ selectedMonsterName }) => {
-  const MonsterData = monsterData[selectedMonsterName]; 
+  const { socket } = usePlayerSocket();
+
+  const MonsterData = monsterData[selectedMonsterName];
   const player1Monster = new MonsterData();
   const player2Monster = new MonsterData(); // Replace later with actual enemy logic
 
@@ -26,6 +26,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ selectedMonsterName 
   };
 
   const handleAction = (action: 'attack' | 'defend' | 'ability') => {
+    if (!socket) return;
+
     socket.emit('playerAction', {
       playerId: 'player1-id',
       action,
