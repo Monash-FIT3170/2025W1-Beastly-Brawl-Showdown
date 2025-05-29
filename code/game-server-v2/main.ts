@@ -2,7 +2,7 @@ import { GameServer } from "./GameServer";
 import * as readline from "readline";
 import cors from "cors";
 import express from "express";
-import http, { maxHeaderSize } from "http";
+import http from "http";
 import { Server, Socket } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
@@ -265,7 +265,7 @@ async function main(config: ServerConfig) {
     log_notice(`Player ${auth.displayName} assigned to room ${roomId}`);
 
     socket.data.player = newPlayer;
-    socketToRoom.set(socket.id, roomId)
+    socketToRoom.set(socket.id, roomId);
     next();
   });
 
@@ -295,14 +295,30 @@ async function main(config: ServerConfig) {
       }
     }
 
-        socket.on("monster-selected", (data) => {
+    function RequestSubmitMonster(data): void {
+      // TODO
+      // log_notice("Monster submitted:\n" + JSON.stringify(monster));
+
+      // // TODO monster selected is not ok (invalid monster or already selected one)
+      // if (false) {
+      //   // if so emit {isValidSelection:false, monster:undef} back to user
+      // }
+
+      // playerChannel.to(socket.id).emit("selected-monster_result", "PLACEHOLDER RESULT"); //otherwise emit {isValidSelection:true, monster:monster}
+
+      const player = socket.data.player as Player;
+      if (!player) {
+        socket.emit("error", "This player has not been initiated.");
+        return;
+      }
+
       const roomid = socketToRoom.get(socket.id);
-      if (roomid == undefined){
-        return
+      if (roomid == undefined) {
+        return;
       }
       const room = gameServer.rooms.get(roomid);
-      if (!room){
-        return
+      if (!room) {
+        return;
       }
       for (const [displayName, player] of room.players.entries()) {
         if (player.socketId === socket.id) {
@@ -312,7 +328,7 @@ async function main(config: ServerConfig) {
           break;
         }
       }
-      
+
       let allReady = true;
       for (const player of room.players.values()) {
         if (player.readyForGame === false) {
@@ -326,9 +342,9 @@ async function main(config: ServerConfig) {
         for (const player of room.players.values()) {
           let enemy: Player | null = null;
           for (const match of room.matches.values()) {
-            if (match.containsPlayer(player)){
+            if (match.containsPlayer(player)) {
               enemy = match.getEnemyByPlayer(player);
-              break
+              break;
             }
           }
 
@@ -339,18 +355,8 @@ async function main(config: ServerConfig) {
           }
         }
       }
-    });
-    //I'm not sure if its that imporatnt to verify monsters and idk how too for now so i just did the implementatiton above
-    socket.on("selected-monster", async (monster) => {
-      log_notice("Monster submitted:\n" + JSON.stringify(monster));
-
-      // TODO monster selected is not ok (invalid monster or already selected one)
-      if (false) {
-        // if so emit {isValidSelection:false, monster:undef} back to user
-      }
-
-      playerChannel.to(socket.id).emit("selected-monster_result", "PLACEHOLDER RESULT"); //otherwise emit {isValidSelection:true, monster:monster}
-    });
+    }
+    socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
   });
 
   //#endregion
@@ -383,7 +389,6 @@ async function main(config: ServerConfig) {
     //#endregion
   });
 }
-
 
 //#region TEMP
 log_notice("Loading config...");
