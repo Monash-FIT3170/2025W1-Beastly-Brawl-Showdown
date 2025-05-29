@@ -4,35 +4,49 @@ import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionS
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 
 //#region Socket Context Definition
+
+// Typing the context and socket for typescript
 interface PlayerSocketContextType {
   socket: Socket | null;
   isConnected: boolean;
 }
 
+// Creates persistent instance of the socket connection
 const PlayerSocketContext = createContext<PlayerSocketContextType>({
   socket: null,
   isConnected: false,
 });
 
+/**
+ * Wrapper class to allow the socket to be passed to other components
+ * @param children Name of react component (screen) that needs to access the socket connection
+ * @returns Blueprint to allow child component to access the socket
+ */
 const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Has the player established connection through the socket
   const [isConnected, setIsConnected] = useState(false);
+
+  // Connection to the socket
   const socketRef = useRef<Socket | null>(null);
 
+  // Variables accessed through session storage
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
   const serverUrl = sessionStorage.getItem("serverUrl");
 
   useEffect(() => {
     if (!socketRef.current) {
+      // Establish connection to the server through channel defined in main.ts
       socketRef.current = io(serverUrl + "/player", {
         auth: { joinCode, displayName },
       });
 
+      // Establish connection handshake to server
       socketRef.current.on("connect", () => {
         console.log("Connected to server");
         setIsConnected(true);
       });
-
+      
       socketRef.current.on("disconnect", () => {
         console.log("Disconnected from server");
         setIsConnected(false);
@@ -48,6 +62,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, [serverUrl, joinCode, displayName]);
 
+  // Blueprint that allows component wrapped in this class to access the player's socket connection
   return (
     <PlayerSocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
       {children}
@@ -55,22 +70,27 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
+// Export context containing the socket connection to be accessible in other react components
 export const usePlayerSocket = () => useContext(PlayerSocketContext);
 //#endregion
 
 //#region Main Player Component
 const PlayerContent = () => {
+  // Socket established using the exported context function
   const { socket, isConnected } = usePlayerSocket();
+
+  // Session storage variables initialised for this component
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
   const serverUrl = sessionStorage.getItem("serverUrl");
 
+  // State triggers to change screens and perform actions
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
-
+    // Listen for game start
     socket.on("game-started", () => {
       setStartSelection(true);
     });
@@ -80,10 +100,12 @@ const PlayerContent = () => {
     };
   }, [socket]);
 
+  // Screen that displays when player is connecting to server
   if (!isConnected) {
     return <p>Connecting to server...</p>;
   }
 
+  // Once connected, this screen will display
   if (!startSelection) {
     return (
       <div>
@@ -95,35 +117,31 @@ const PlayerContent = () => {
     );
   }
 
+  // Function that takes the result of monster selection and sends it to the server, then switches screen. 
   const handleMonsterSelection = (monster: string) => {
     if (socket){
       socket.emit("monster-selected", {Monster : monster})
     }
+    // TODO: Make sure all players select a monster before changing the state below
     setMonsterSelected(true);
     console.log("Monster selected:", monster);
   }
 
-  // const handleMonsterSelection = (monster: string) => {
-  //   socket?.emit("selected-monster", {
-  //     joinCode,
-  //     displayName,
-  //     monster,
-  //   });
-  //   setMonsterSelected(true);
-  //   console.log("Monster selected:", monster);
-  // };
-
+  // Monster selection is displayed when a monster has not been selected
   if (!monsterSelected) {
     return (
       <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />
     );
   }
 
+  // Battle screen displays when all checks have been passed
+  // TODO: selectedMonsterName should not exist, battle screen needs some other way to know what monsters to display
   return <BattleScreen selectedMonsterName={"MysticWyvern"} />;
 };
 //#endregion
 
 //#region Exported Component
+// Wrap the contents of the page to allow original player content to access the socket
 export const Player = () => (
   <PlayerSocketProvider>
     <PlayerContent />
