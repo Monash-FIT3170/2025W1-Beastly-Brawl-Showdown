@@ -1,61 +1,78 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MonsterContainer } from "./MonsterContainer";
+import { monsterData, MonsterName } from "../../data/monsters/MonsterData";
+import { BattleScreen } from "../BattleScreen/BattleScreen";
 
-/**
- * Confirms the monster the player will be using and all function that this button needs
- * @returns HTML button component to confirm monster selection
- */
-function ConfirmButton() {
-    return (
-        <button id="confirmMonsterButton" disabled>
-            Confirm
-        </button>
-    )
+interface MonsterSelectionScreenProps {
+  selectedMonster?: string;
+  setSelectedMonsterCallback: (value: string) => void;
 }
 
-export const MonsterSelectionScreen = () => {
-    // Name of currently selected monster
-    let currentlySelected: string; 
+export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
+  selectedMonster,
+  setSelectedMonsterCallback,
+}) => {
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [confirmEnabled, setConfirmEnabled] = useState(false);
 
-    /**
-     * Enable confirm button and border the selected monster
-     * @param {string} name 
-     */
-    function highlightAndShowConfirm(name: string) {
-        if (currentlySelected) {
-            // Deselect currently selected item
-            const deselect = document.getElementById(currentlySelected);
-            if (deselect) {
-                deselect.style.border = "none";
-            }
-            
-        }
+  useEffect(() => {
+    console.log("Component rendered. isConfirmed =", isConfirmed);
+  }, [isConfirmed]);
 
-        // Create border around selected mosnter
-        const selected = document.getElementById(name);
-        if (selected) {
-            selected.style.border = "solid"
-            selected.style.borderWidth = "8px";
-        }
+  function highlightAndShowConfirm(name: string) {
+    console.log("Monster clicked:", name);
 
-        currentlySelected = name;
-
-        // Enable confirm button once an option has been selected
-        const confirmButton = document.getElementById("confirmMonsterButton") as HTMLButtonElement;
-        if (confirmButton) {
-            confirmButton.disabled = false;
-            confirmButton.style.cursor = "default";
-        }
+    // Remove border from previous
+    if (selectedMonster) {
+      const deselect = document.getElementById(selectedMonster);
+      if (deselect) {
+        deselect.style.border = "none";
+        deselect.style.opacity = "1";
+      }
     }
 
-    return (
-        <div className="monsterSelectionScreen">
-            <h1>Choose your Monster:</h1>
-            <MonsterContainer image="img/placeholder_monster_1.png" name="monster1" func={highlightAndShowConfirm}/>
-            <MonsterContainer image="img/placeholder_monster_2.png" name="monster2" func={highlightAndShowConfirm}/>
-            <MonsterContainer image="img/placeholder_monster_3.png" name="monster3" func={highlightAndShowConfirm}/>
-            <ConfirmButton/>
-        </div>
-    )
-}
+    // Add border to new
+    const selected = document.getElementById(name);
+    if (selected) {
+      selected.style.border = "solid";
+      selected.style.borderWidth = "8px";
+      selected.style.opacity = "0.5";
+    }
 
+    setSelectedMonsterCallback(name);
+    setConfirmEnabled(true);
+  }
+
+  function handleConfirm() {
+    console.log("Confirm clicked. Selected monster:", selectedMonster);
+    setIsConfirmed(true);
+  }
+
+  if (isConfirmed && selectedMonster) {
+    <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />;
+  }
+
+  return (
+    <div className="monsterSelectionScreen">
+      <h1>Choose your Monster:</h1>
+      {Object.entries(monsterData).map(([name, MonsterData]) => {
+        const previewMonster = new MonsterData();
+        return (
+          <MonsterContainer
+            key={name}
+            image={previewMonster.imageSelection}
+            name={name}
+            func={highlightAndShowConfirm}
+          />
+        );
+      })}
+      <button
+        id="confirmMonsterButton"
+        onClick={handleConfirm}
+        disabled={!confirmEnabled}
+      >
+        Confirm
+      </button>
+    </div>
+  );
+};

@@ -3,9 +3,9 @@ import { Navigate, Route } from "react-router-dom";
 import { NotFound } from "./error/NotFound";
 import { HomePage } from "./HomePage";
 import ProjectorPage from "./host/projector/ProjectorPage";
-import { HostRoomRequestPage } from "./host/request-room/HostRoomRequestPage";
 import { Player } from "./player/game/PlayerPage";
 import JoinPage from "./player/join-room/JoinPage";
+import { BattleScreen } from "./BattleScreen/BattleScreen";
 
 export const renderRoutes = () => (
   <>
@@ -21,6 +21,9 @@ export const renderRoutes = () => (
     <Route path="/join/:joinCode" element={<JoinPage />} />
     <Route path="/join/" element={<JoinPage />} />
     <Route path="/play/" element={<Player />} />
+
+    {/* BATTLE PAGE */}
+    <Route path="/battle" element={<BattleScreen />} />
 
     {/* DEFAULTS */}
     <Route path="/" element={<Navigate to="/home/" replace />} />

@@ -1,4 +1,3 @@
-import { DDP } from "meteor/ddp";
 import { Mongo } from "meteor/mongo";
 import { sqids } from "./main";
 
@@ -28,7 +27,7 @@ export async function locateServerBest(): Promise<string> {
 }
 
 export async function locateServer(joinCode: string): Promise<string> {
-  const [serverNo, roomId] = sqids.decode(joinCode);
+  const [serverNo] = sqids.decode(joinCode);
 
   const serverInfo = await GameServerRecords.findOneAsync({
     serverNumber: serverNo,

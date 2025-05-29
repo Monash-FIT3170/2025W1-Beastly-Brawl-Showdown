@@ -1,4 +1,5 @@
 import Monsters from '../monsters/Monsters';
+import { Server as SocketIOServer } from 'socket.io';
 
 /**
  * Represents a defend action taken by a monster.
@@ -11,7 +12,13 @@ export default class DefendAction {
         this.monster = monster;
     }
 
-    execute(): void {
+    execute(io: SocketIOServer, roomId: string): void {
         this.monster.activateDefense();
+
+        io.to(roomId).emit('battle-log', {
+            type: 'defend',
+            monster: this.monster.name,
+            message: `${this.monster.name} is defending! AC is now ${this.monster.AC}.`,
+        });
     }
 }

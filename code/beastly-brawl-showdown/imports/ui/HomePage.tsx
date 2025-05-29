@@ -1,4 +1,3 @@
-import { Meteor } from "meteor/meteor";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 // import "/imports/ui/global.css";

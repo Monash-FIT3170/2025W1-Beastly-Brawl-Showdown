@@ -2,11 +2,12 @@ import { GameServer } from "./GameServer";
 import * as readline from "readline";
 import cors from "cors";
 import express from "express";
-import http from "http";
+import http, { maxHeaderSize } from "http";
 import { Server, Socket } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
+import { Player } from "./Player";
 
 type ServerConfig = {
   serverIp: string;
@@ -30,6 +31,8 @@ async function main(config: ServerConfig) {
 
   const playerChannel = socketServer.of("/player");
   const hostChannel = socketServer.of("/host");
+
+  const socketToRoom = new Map<string, number>();
 
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
@@ -137,19 +140,31 @@ async function main(config: ServerConfig) {
       } catch {
         socket.emit("error", "Could not create room.");
       }
+      // log_attention(`Socket ID (create room listener): ${socket.id}`);
     });
 
-    socket.on("start-game", async (msg) => {
+    // Listens for start button press (takes roomId from ProjectorPage.tsx)
+    socket.on("start-game", async (msg, room) => {
       log_event(`Requested to start game: ${msg}`);
+      // log_attention(`Socket ID (start game listener): ${socket.id}`);
 
       // Notify everyone in this room
-      gameServer.rooms
-        .get(gameServer.hostIdToRoomIdLookup.get(socket.id)!)!
-        .players.forEach((player) => {
-          playerChannel.to(player.socketId).emit("game-started"); // TODO modify as needed
-        });
+      gameServer.rooms.get(room)!.players.forEach((player) => {
+        // Send players to monster selection screen
+        playerChannel.to(player.socketId).emit("game-started");
+      });
       log_notice("All players informed of start.");
     });
+
+    // #region TODO
+    // Listen for ALL CONFIRMS from ALL PLAYERS and then sends and assigns to battle screen
+    // Create matches for players in each room
+    socket.on("create-matches", async (msg, room) => {
+      gameServer.rooms.get(room)!.createMatches;
+    });
+
+    
+
   });
 
   /// Pre-connection auth check
@@ -211,7 +226,7 @@ async function main(config: ServerConfig) {
       socket.emit("error", "No display name");
       return;
     }
-    
+
     const roomId = gameServer.translateJoinCodeToRoomId(auth.joinCode);
     if (!gameServer.hasRoom(roomId)) {
       log_event("Joined with invalid join code");
@@ -220,11 +235,17 @@ async function main(config: ServerConfig) {
     }
 
     try {
-      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
+      gameServer.joinRoom(
+        socket.id,
+        roomId,
+        auth.displayName,
+        undefined,
+        undefined
+      );
     } catch (err) {
       if (err instanceof Error) {
         log_warning("Join room failed unexpectedly.\n" + err.message);
-        log_attention(gameServer.rooms.get(roomId)?.players)
+        log_attention(gameServer.rooms.get(roomId)?.players);
       } else {
         log_attention("Unexpected error is not of error type.");
       }
@@ -237,11 +258,22 @@ async function main(config: ServerConfig) {
     const playerNameList = [
       ...gameServer.rooms.get(roomId)?.players.values()!,
     ].map((player) => player.displayName);
-    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId)
+    console.log(
+      "Update player list",
+      playerNameList,
+      "to",
+      gameServer.rooms.get(roomId)!.hostSocketId
+    );
     hostChannel
       .to(gameServer.rooms.get(roomId)!.hostSocketId)
       .emit("player-set-changed", playerNameList);
     next();
+
+    // Create new player and add it to the correct gameserver room
+    const newPlayer = new Player(socket.id, auth.displayName);
+    gameServer.rooms.get(roomId)?.players.set(auth.displayName, newPlayer);
+    log_notice(`Player ${auth.displayName} assigned to room ${roomId}`);
+    socketToRoom.set(socket.id, roomId)
   });
 
   playerChannel.on("connection", async (socket: Socket) => {
@@ -263,6 +295,84 @@ async function main(config: ServerConfig) {
           .to(TEMP_playerSocketId)
           .emit("turn-result", "PLACEHOLDER RESULT");
       }
+    });
+
+    socket.on("submit-move", async (moveType) => {
+      console.log("Move submitted: ", JSON.stringify(moveType));
+
+      // TODO turn stuff
+      // for that match and for this player, store the desired move for that turn
+
+      // TODO if all users in that match submitted and a turn can be processed
+      if (false) {
+        // resolve the turn
+        // // const TEMP_playerSocketId = "sdfgrdfgrdgfrdfg";
+        // // playerChannel
+        // //   .to(TEMP_playerSocketId)
+        // //   .emit("turn-result", "PLACEHOLDER RESULT");
+        // idk do something to mark a new turn or however u do it
+        // emit the output of the turn to both players (i.e updated state of the monsters)
+        // if winner idk yet
+      }
+    });
+
+        socket.on("monster-selected", (data) => {
+      const roomid = socketToRoom.get(socket.id);
+      if (roomid == undefined){
+        return
+      }
+      const room = gameServer.rooms.get(roomid);
+      if (!room){
+        return
+      }
+      for (const [displayName, player] of room.players.entries()) {
+        if (player.socketId === socket.id) {
+          player.setMonster(data.Monster);
+          console.log(`Updated monster for player ${displayName}`);
+          player.readyForGame = true;
+          break;
+        }
+      }
+      
+      let allReady = true;
+      for (const player of room.players.values()) {
+        if (player.readyForGame === false) {
+          allReady = false;
+          break;
+        }
+      }
+
+      if (allReady) {
+        room.createMatches();
+        for (const player of room.players.values()) {
+          let enemy: Player | null = null;
+          for (const match of room.matches.values()) {
+            if (match.containsPlayer(player)){
+              enemy = match.getEnemyByPlayer(player);
+              break
+            }
+          }
+
+          if (enemy !== null) {
+            playerChannel.to(player.socketId).emit("matches-started", {
+              enemyMonster: enemy.getMonster(),
+            });
+          }
+        }
+      }
+    });
+    //I'm not sure if its that imporatnt to verify monsters and idk how too for now so i just did the implementatiton above
+    socket.on("selected-monster", async (monster) => {
+      console.log("Monster submitted: ", JSON.stringify(monster));
+
+      // TODO monster selected is not ok (invalid monster or already selected one)
+      if (false) {
+        // if so emit {isValidSelection:false, monster:undef} back to user
+      }
+    
+      playerChannel
+        .to(socket.id)
+        .emit("selected-monster_result", "PLACEHOLDER RESULT");  //otherwise emit {isValidSelection:true, monster:monster}
     });
   });
 
