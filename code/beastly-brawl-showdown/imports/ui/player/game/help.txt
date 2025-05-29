@@ -1,0 +1,100 @@
+    socketRef.current.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+
+    socketRef.current.on("echo", (msg: string) => {
+      console.log(`Server says: ${msg}`);
+    });
+
+    // Listens for game-started trigger from
+    socketRef.current.on("game-started", () => {
+      setMonsterSelection(true);
+    });
+
+    const handleMatchStarted = (data: { enemyMonster: Monster }) => {
+    setenemyMonsterMonster(data.enemyMonster);
+    };
+    
+    socketRef.current.on("match-started", handleMatchStarted)
+    
+    socketRef.current.on(
+      "turn-result",
+      (myMonsterNewState, enemyMonsterNewState) => {
+        // TODO update self state
+        console.log(
+          "current\nmymonster\n",
+          myMonster,
+          "enemymonn\n",
+          enemyMonster
+        ); // TEMP
+        console.log(
+          "updated\nmymonster\n",
+          myMonsterNewState,
+          "enemymonn\n",
+          enemyMonsterNewState
+        ); // TEMP
+
+        // TODO now animate the turn - using data that the server responds with
+        // TODO then reset stuff (buttons, ui, state) to be ready for next turn
+        setHasSelfSumbittedTurn(false);
+        //TODO IDK - do something if game is over
+      }
+      
+    );
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect(); // Cleanup on unmount
+      }
+    };
+  }, []);
+  //#endregion
+
+  const [isConnected, setIsConnected] = useState(false);
+  const [isSelection, setMonsterSelection] = useState(false);
+
+  const [showAnimation, setShowAnimation] = useState<boolean>(false);
+  const [displayedNumber, setDisplayedNumber] = useState<number | null>(null); // TODO TEMP
+
+useEffect(() => {
+  if (isConnected && lockedSelectedMonster) {
+    document.body.style.display = "block";
+    document.body.style.paddingTop = "0";
+  } else {
+    document.body.style.display = "flex";
+    document.body.style.paddingTop = "10px";
+  }
+
+  return () => {
+    // cleanup if needed
+    document.body.style.display = "";
+    document.body.style.paddingTop = "";
+  };
+}, [isConnected, lockedSelectedMonster]);
+  
+  //if the showwanimation is true then show thtet animation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout;
+
+    if (showAnimation) {
+      let i = 0;
+      const rollDuration = 1000; // total roll duration in ms
+      const intervalSpeed = 100; // time between number updates
+
+      const finalResult = 20; // eventually will replace with dice roll utility
+      const totalSteps = rollDuration / intervalSpeed; //get the ammount of times it gets swaped out
+
+      interval = setInterval(() => {
+        if (i < totalSteps) {
+          setDisplayedNumber(Math.floor(Math.random() * 20) + 1); // roll 1-20
+          i++;
+        } else {
+          clearInterval(interval);
+          setDisplayedNumber(finalResult);
+
+          timeout = setTimeout(() => {
+            console.log("Final result displayed for 3 seconds");
+          }, 3000);
+        }
+      }, intervalSpeed);

@@ -33,6 +33,8 @@ async function main(config: ServerConfig) {
   const playerChannel = socketServer.of("/player");
   const hostChannel = socketServer.of("/host");
 
+  const socketToRoom = new Map<string, number>();
+
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
   connectDb();
@@ -270,6 +272,7 @@ async function main(config: ServerConfig) {
     const newPlayer = new Player(socket.id, auth.displayName);
     gameServer.rooms.get(roomId)?.players.set(auth.displayName, newPlayer);
     log_notice(`Player ${auth.displayName} assigned to room ${roomId}`);
+    socketToRoom.set(socket.id, roomId)
   });
 
   playerChannel.on("connection", async (socket: Socket) => {
@@ -312,51 +315,49 @@ async function main(config: ServerConfig) {
       }
     });
 
-    //LISTENS TO "selected-monster", checks if all players have selected a monster
-    socket.on("selected-monster", async (data) => {
-      try {
-        const { displayName, monster } = data;
+    socket.on("monster-selected", (data) => {
+      const roomid = socketToRoom.get(socket.id);
+      if (roomid == undefined){
+        return
+      }
+      const room = gameServer.rooms.get(roomid);
+      if (!room){
+        return
+      }
+      for (const [displayName, player] of room.players.entries()) {
+        if (player.socketId === socket.id) {
+          player.setMonster(data.Monster);
+          console.log(`Updated monster for player ${displayName}`);
+          player.readyForGame = true;
+          break;
+        }
+      }
+      
+      let allReady = true;
+      for (const player of room.players.values()) {
+        if (player.readyForGame === false) {
+          allReady = false;
+          break;
+        }
+      }
 
-        let room: Room | undefined = undefined;
-        for (const r of gameServer.rooms.values()) {
-          const player = r.players.get(displayName);
-          if (player && player.socketId === socket.id) {
-            room = r;
-            break;
+      if (allReady) {
+        room.createMatches();
+        for (const player of room.players.values()) {
+          let enemy: Player | null = null;
+          for (const match of room.matches.values()) {
+            if (match.containsPlayer(player)){
+              enemy = match.getEnemyByPlayer(player);
+              break
+            }
+          }
+
+          if (enemy !== null) {
+            playerChannel.to(player.socketId).emit("matches-started", {
+              enemyMonster: enemy.getMonster(),
+            });
           }
         }
-
-        if (!room) {
-          console.error(`Room not found for player ${displayName}`);
-          return;
-        }
-
-        //Gets the Player
-        const player = room.players.get(displayName);
-        if (!player) {
-          console.error(`Player ${displayName} not found in room ${room}`);
-          return;
-        }
-
-        //set Monster to player
-        room.setMonster(displayName, monster);
-        console.log(`Player ${displayName} selected monster ${monster}`);
-
-        //Check if all players have selected monsters
-        const allSelected = [...room.players.values()].every(p => p.monster != undefined);
-        if (allSelected) {
-          console.log("All players have selected their monsters. Starting match...");
-
-          // Notify the host for this room
-          hostChannel.to(room.hostSocketId).emit("all-monsters-selected", {
-            players: [...room.players.values()].map(p => ({
-              displayName: p.displayName,
-              monster: p.monster,
-            })),
-          });
-        }
-      } catch (error) {
-        console.error("Error handling selected-monster:", error);
       }
     });
   });

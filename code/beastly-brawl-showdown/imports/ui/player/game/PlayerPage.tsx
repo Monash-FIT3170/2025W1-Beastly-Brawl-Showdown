@@ -96,14 +96,22 @@ const PlayerContent = () => {
   }
 
   const handleMonsterSelection = (monster: string) => {
-    socket?.emit("selected-monster", {
-      joinCode,
-      displayName,
-      monster,
-    });
+    if (socket){
+      socket.emit("monster-selected", {Monster : monster})
+    }
     setMonsterSelected(true);
     console.log("Monster selected:", monster);
-  };
+  }
+
+  // const handleMonsterSelection = (monster: string) => {
+  //   socket?.emit("selected-monster", {
+  //     joinCode,
+  //     displayName,
+  //     monster,
+  //   });
+  //   setMonsterSelected(true);
+  //   console.log("Monster selected:", monster);
+  // };
 
   if (!monsterSelected) {
     return (
