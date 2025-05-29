@@ -4,16 +4,19 @@ import { monsterData, MonsterName } from "../../data/monsters/MonsterData";
 import { BattleScreen } from "../BattleScreen/BattleScreen";
 
 interface MonsterSelectionScreenProps {
-  selectedMonster?: string;
   setSelectedMonsterCallback: (value: string) => void;
 }
 
 export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
-  selectedMonster,
   setSelectedMonsterCallback,
 }) => {
+
+
   const [isConfirmed, setIsConfirmed] = useState(false);
+  // Enable confirm button
   const [confirmEnabled, setConfirmEnabled] = useState(false);
+  // Currently selected monster
+  const [selectedMonster, setMonsterName] = useState("");
 
   useEffect(() => {
     console.log("Component rendered. isConfirmed =", isConfirmed);
@@ -21,6 +24,9 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
 
   function highlightAndShowConfirm(name: string) {
     console.log("Monster clicked:", name);
+
+    // Assign monster name value
+    setMonsterName(name);
 
     // Remove border from previous
     if (selectedMonster) {
@@ -39,17 +45,22 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
       selected.style.opacity = "0.5";
     }
 
-    setSelectedMonsterCallback(name);
+    // Enabled button once monster has been clicked
     setConfirmEnabled(true);
   }
 
+  /**
+   * Handles passing of information back to PlayerPage.tsx
+   */
   function handleConfirm() {
     console.log("Confirm clicked. Selected monster:", selectedMonster);
     setIsConfirmed(true);
   }
 
+  // If confirm button pressed and monster selected, return result to parent page (PlayerPage.tsx)
   if (isConfirmed && selectedMonster) {
-    <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />;
+    // <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />;
+    setSelectedMonsterCallback(selectedMonster)
   }
 
   return (
@@ -62,7 +73,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
             key={name}
             image={previewMonster.imageSelection}
             name={name}
-            func={highlightAndShowConfirm}
+            highlightAndShowConfirm={highlightAndShowConfirm}
           />
         );
       })}
