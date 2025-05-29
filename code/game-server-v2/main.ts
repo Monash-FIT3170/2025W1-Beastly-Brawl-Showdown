@@ -6,19 +6,9 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
-import {
-  log_attention,
-  log_event,
-  log_notice,
-  log_warning,
-} from "../shared/utils";
+import { log_attention, log_event, log_notice, log_warning } from "../shared/utils";
 import { Player } from "./Player";
-import {
-  RoomPhase,
-  PlayerChannelAuth,
-  RoomId,
-  HostChannelAuth,
-} from "../shared/types";
+import { RoomPhase, PlayerChannelAuth, RoomId, HostChannelAuth } from "../shared/types";
 import { Room } from "./Room";
 // import { HostSocketData, PlayerSocketData } from "./types";
 
@@ -55,24 +45,20 @@ async function main(config: ServerConfig) {
     serverNumber: config.serverNumber,
   });
   if (existingRecordCount > 0) {
-    console.log(
-      `Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`,
-    );
+    console.log(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
     if (!config.overrideExistingRecordOnStartup) {
       throw new Error("A record already exists, room could not be registered.");
     }
   }
-  const updatedRecord =
-    await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
-      { serverNumber: config.serverNumber },
-      {
-        serverNumber: config.serverNumber,
-        serverUrl:
-          config.serverIp.toString() + ":" + config.serverPort.toString(),
-        lastUpdated: new Date(),
-      },
-      { upsert: true, new: true },
-    );
+  const updatedRecord = await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
+    { serverNumber: config.serverNumber },
+    {
+      serverNumber: config.serverNumber,
+      serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
+      lastUpdated: new Date(),
+    },
+    { upsert: true, new: true }
+  );
   log_notice("New Record:\n" + JSON.stringify(updatedRecord));
   log_notice("Registered to records.");
 
@@ -113,9 +99,7 @@ async function main(config: ServerConfig) {
   });
 
   hostChannel.use((socket, next) => {
-    log_event(
-      `Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`,
-    );
+    log_event(`Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as HostChannelAuth;
     // TODO for now always accept the host name
     // if (!auth.hostName) {
@@ -133,14 +117,13 @@ async function main(config: ServerConfig) {
 
     socket.on("disconnect", () => log_event("Host disconnected."));
 
+    //#region >>> New Room
     socket.on(RequestNewRoom.name, RequestNewRoom);
     function RequestNewRoom(): void {
       log_event(`Host ${socket.id}`);
       // TODO prevent multiple rooms at the same time
       try {
-        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
-          socket.id,
-        );
+        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(socket.id);
 
         socket.emit("request-room_response", {
           roomId: roomId,
@@ -154,7 +137,9 @@ async function main(config: ServerConfig) {
 
       log_event(`Socket #${socket.id} can start accepting users.`);
     }
+    //#endregion
 
+    //#region >>> Start Game
     socket.on(RequestStartGame.name, RequestStartGame);
     /** Host has requested to start game */
     function RequestStartGame(): void {
@@ -164,9 +149,7 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      log_notice(
-        `Socket ${socket.id} requested game start for room #${room.roomId}.`,
-      );
+      log_notice(`Socket ${socket.id} requested game start for room #${room.roomId}.`);
 
       //* Notify everyone in this room
       room.players.forEach((player) => {
@@ -178,7 +161,9 @@ async function main(config: ServerConfig) {
 
       // TODO: notify host to switch to screen "choose your monster now !" or something like that if needed
     }
+    //#endregion
 
+    //#region >>> Start Round
     socket.on(RequestStartRound.name, RequestStartRound);
     /** Event that is triggered when the host begins the next round. */
     function RequestStartRound(): void {
@@ -198,6 +183,7 @@ async function main(config: ServerConfig) {
       // //   playerChannel.to(player.socketId).emit("game-started");
       // // });
     }
+    //#endregion
   });
   //#endregion
 
@@ -236,18 +222,14 @@ async function main(config: ServerConfig) {
       res.send(checkResult);
       return;
     }
-    checkResult.isDisplayNameValid = !gameServer.rooms
-      .get(roomId)
-      ?.hasPlayer(req.body.displayName);
+    checkResult.isDisplayNameValid = !gameServer.rooms.get(roomId)?.hasPlayer(req.body.displayName);
 
     log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
     res.send(checkResult);
   });
 
   playerChannel.use((socket, next) => {
-    log_event(
-      `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`,
-    );
+    log_event(`Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as PlayerChannelAuth;
 
     if (!auth.joinCode) {
@@ -267,13 +249,7 @@ async function main(config: ServerConfig) {
     }
 
     try {
-      gameServer.joinRoom(
-        socket.id,
-        roomId,
-        auth.displayName,
-        undefined,
-        undefined,
-      );
+      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined, undefined);
     } catch (err) {
       if (err instanceof Error) {
         log_warning("Join room failed unexpectedly.\n" + err.message);
@@ -284,21 +260,10 @@ async function main(config: ServerConfig) {
       next(new Error("Invalid credentials"));
     }
 
-    log_event(
-      `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`,
-    );
-    const playerNameList = [
-      ...gameServer.rooms.get(roomId)?.players.values()!,
-    ].map((player) => player.displayName);
-    console.log(
-      "Update player list",
-      playerNameList,
-      "to",
-      gameServer.rooms.get(roomId)!.hostSocketId,
-    );
-    hostChannel
-      .to(gameServer.rooms.get(roomId)!.hostSocketId)
-      .emit("player-set-changed", playerNameList);
+    log_event(`Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`);
+    const playerNameList = [...gameServer.rooms.get(roomId)?.players.values()!].map((player) => player.displayName);
+    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId);
+    hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("player-set-changed", playerNameList);
 
     // Create new player and add it to the correct gameserver room
     const newPlayer = new Player(roomId, socket.id, auth.displayName);
@@ -315,6 +280,7 @@ async function main(config: ServerConfig) {
 
     socket.on("disconnect", () => log_event("Player disconnected."));
 
+    //#region >>> Submit Move
     socket.on(RequestSubmitMove.name, RequestSubmitMove);
     function RequestSubmitMove(move: any): void {
       // TODO type
@@ -335,7 +301,9 @@ async function main(config: ServerConfig) {
         // if winner idk yet
       }
     }
+    //#endregion
 
+    //#region >>> Monster Select
     socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
     function RequestSubmitMonster(data): void {
       // TODO
@@ -394,13 +362,12 @@ async function main(config: ServerConfig) {
         }
       }
     }
+    //#endregion
   });
 
   //#endregion
   httpServer.listen(config.serverPort, () => {
-    log_notice(
-      `Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()}. <CTRL+C> to shutdown.`,
-    );
+    log_notice(`Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()}. <CTRL+C> to shutdown.`);
 
     //#region IO
     // Readline setup
