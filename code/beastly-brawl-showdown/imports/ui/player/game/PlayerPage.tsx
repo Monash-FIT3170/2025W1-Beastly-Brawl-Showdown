@@ -49,11 +49,13 @@ export const Player = () => {
   }
 
   return (
-    <div>
-      <h1>PLAYER VIEW</h1>
-      <p>Server URL: {serverUrl}</p>
-      <p>Name: {displayName}</p>
-      <p>Room Code: {joinCode}</p>
+    <div className="waiting-screen">
+      <div className="logo" />
+      <div className="waiting-wrapper">
+        <div className="waiting-line" />
+        <p className="waiting-text">Waiting ...</p>
+        <div className="waiting-line" />
+      </div>
     </div>
   );
 };
