@@ -634,48 +634,51 @@ body {
 
 /*For the main screen*/
 .screen {
-body {
-  display: flex;
-  padding-top: 10px;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f0f0f0;
-  justify-content: center;
-  align-items: center;
-}
-
-/*For the main screen*/
-.screen {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/*The box to display the link to join the room*/
-.code-link {
-  width: 990px;
-  height: 75px;
-  padding-left: 10px;
-  padding-right: 10px;
+/*This shows everything related to the waiting room*/
+.waiting-room-box {
+  width: 1000px;
+  margin: 60px auto 0;
+}
+
+/*This shows and arranges the link and qr code components*/
+.waiting-room-info-box {
   display: flex;
-  justify-content: left;
+  justify-content: space-between;
   align-items: center;
-  background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
-  font-family: Arial, sans-serif;
-  overflow: auto;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+/* For the room code */
+.room-code, .code-link {
+  height: 80px;
+  background: #8B4513;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  flex: 1;
 }
 
 /*The box to show the qr code*/
 .qr-box {
-  width: 75px;
-  height: 75px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f0f0f0;
+  width: 80px;
+  height: 80px;
+  background: white;
   border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #333;
 }
 
 .qr-box canvas{
@@ -689,11 +692,11 @@ body {
 }
 
 /*This shows everything related to the waiting room*/
-.waiting-room-box {
+/* .waiting-room-box {
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
+} */
 
 /*Component that displays the participants names dynamically*/
 .participants-display-box {
@@ -704,22 +707,70 @@ body {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 20px;
-  background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
+  background: white;
+  /* border: 4px solid #4A90E2; */
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
 }
 
-/*For the participants name*/
-.participants-box {
+/* Header within the display box */
+.participants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 15px 0;
+  background: #8B4513;
+  padding: 10px 15px;
+  border-radius: 0;
+}
+
+/* Player count */
+.participants-count {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Start game btn */
+.start-game-btn {
+  background: linear-gradient(to bottom, #FF8C42, #E67E22);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.start-btn:hover {
+  background: linear-gradient(to bottom, #E67E22, #D35400);
+}
+
+/* Grid for the players */
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  padding: 0 15px 15px 15px;
+}
+
+/* participants-name-box */
+.participants-name-box {
+  background: linear-gradient(to bottom, #A0522D, #8B4513);
+  color: white;
+  border: 2px solid #654321;
   min-width: 90px;
   height: 40px;
-  padding: 0 10px;
+  padding: 10px 8px;
+  border-radius: 6px;
   text-align: center;
+  font-weight: bold;
   vertical-align: middle;
+  cursor: pointer;
   line-height: 40px;
+  font-size: 13px;
   background-color: #f0f0f0;
-  border: 2px solid #333;
-  border-radius: 15px; /* This creates the curved corners */
   white-space: nowrap;
 }
 
@@ -738,11 +789,13 @@ body {
   display: flex;
   padding-top: 10px;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  justify-content: flex-start;
+  /* justify-content: flex-start; */
   min-height: 100vh;
   padding: 2rem;
   text-align: center;
+  gap: 15px;
 }
 
 /* Logo styling (optional image) */
@@ -919,6 +972,7 @@ progress::-moz-progress-bar {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 /* Button color variants */
@@ -927,8 +981,8 @@ progress::-moz-progress-bar {
   color: white;
 }
 .join-btn {
-  background-color: #b2d9ed;
-  color: white;
+  background-color: #694230;
+  border-color: #936049;
 }
 
 
@@ -937,12 +991,22 @@ progress::-moz-progress-bar {
   color: white;
 }
 
+.join-buttons-container{
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
 /* Settings page styling */
 .settings-container {
-  padding: 2rem;
+  padding: 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.settings-container h1{
+  margin-bottom: 3rem;
 }
 
 .volume-control {
@@ -1005,7 +1069,7 @@ input[type="range"] {
 }
 
 .toggle-btn.on {
-  background-color: #6b5b95; /* Purple */
+  background-color: #6fc276;
   color: white;
 }
 
