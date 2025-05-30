@@ -1,309 +1,172 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState, } from "react";
 import { io, Socket } from "socket.io-client";
-import Monster from "/imports/data/monsters/Monsters";
-import { allMonsters } from "../../../data/monsters/MonsterData";
-import { useNavigate } from "react-router-dom";
-import { BattleMonster } from "../../BattleScreen/BattleMonster";
+import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
+import { BattleScreen } from "../../BattleScreen/BattleScreen";
+import { monsterData, MonsterName } from "/imports/data/monsters/MonsterData";
+import Monsters from "/imports/data/monsters/Monsters";
 
-export const Player = () => {
-  const navigate = useNavigate();
+//#region Socket Context Definition
 
+// Typing the context and socket for typescript
+interface PlayerSocketContextType {
+  socket: Socket | null;
+  isConnected: boolean;
+}
+
+// Creates persistent instance of the socket connection
+const PlayerSocketContext = createContext<PlayerSocketContextType>({
+  socket: null,
+  isConnected: false,
+});
+
+/**
+ * Wrapper class to allow the socket to be passed to other components
+ * @param children Name of react component (screen) that needs to access the socket connection
+ * @returns Blueprint to allow child component to access the socket
+ */
+const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Has the player established connection through the socket
+  const [isConnected, setIsConnected] = useState(false);
+
+  // Connection to the socket
+  const socketRef = useRef<Socket | null>(null);
+
+  // Variables accessed through session storage
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
   const serverUrl = sessionStorage.getItem("serverUrl");
 
-  // const [selectedMonsterType, setSelectedMonsterType] =
-  //   useState<typeof Monster>();
-  const [lockedSelectedMonster, setLockedSelectedMonster] = useState(false);
-  const [myMonster, setMyMonsterMonster] = useState<Monster>();
-  const [enemyMonster, setenemyMonsterMonster] = useState<Monster>();
-  const [hasSelfSumbittedTurn, setHasSelfSumbittedTurn] = useState(false);
-
-
-  //#region Connect to game server
-  const socketRef = useRef<Socket>();
   useEffect(() => {
-    socketRef.current = io(serverUrl + "/player", {
-      auth: {
-        joinCode: joinCode,
-        displayName: displayName,
-      },
-    });
-    console.log("Connecting to server with auth...");
+    if (!socketRef.current) {
+      // Establish connection to the server through channel defined in main.ts
+      socketRef.current = io(serverUrl + "/player", {
+        auth: { joinCode, displayName },
+      });
 
-    socketRef.current.on("connect", () => {
-      console.log("Connected to server");
-      setIsConnected(true);
-    });
-
-    socketRef.current.on("connect_error", (err: Error) => {
-      console.error(`Connection failed: ${err.message}`);
-    });
-
-    socketRef.current.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
-
-    socketRef.current.on("echo", (msg: string) => {
-      console.log(`Server says: ${msg}`);
-    });
-
-    // Listens for game-started trigger from
-    socketRef.current.on("game-started", () => {
-      setMonsterSelection(true);
-    });
-
-    const handleMatchStarted = (data: { enemyMonster: Monster }) => {
-    setenemyMonsterMonster(data.enemyMonster);
-    };
-    
-    socketRef.current.on("match-started", handleMatchStarted)
-    
-    socketRef.current.on(
-      "turn-result",
-      (myMonsterNewState, enemyMonsterNewState) => {
-        // TODO update self state
-        console.log(
-          "current\nmymonster\n",
-          myMonster,
-          "enemymonn\n",
-          enemyMonster
-        ); // TEMP
-        console.log(
-          "updated\nmymonster\n",
-          myMonsterNewState,
-          "enemymonn\n",
-          enemyMonsterNewState
-        ); // TEMP
-
-        // TODO now animate the turn - using data that the server responds with
-        // TODO then reset stuff (buttons, ui, state) to be ready for next turn
-        setHasSelfSumbittedTurn(false);
-        //TODO IDK - do something if game is over
-      }
+      // Establish connection handshake to server
+      socketRef.current.on("connect", () => {
+        console.log("Connected to server");
+        setIsConnected(true);
+      });
       
-    );
+      socketRef.current.on("disconnect", () => {
+        console.log("Disconnected from server");
+        setIsConnected(false);
+      });
 
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect(); // Cleanup on unmount
-      }
-    };
-  }, []);
-  //#endregion
-
-  const [isConnected, setIsConnected] = useState(false);
-  const [isSelection, setMonsterSelection] = useState(false);
-
-  const [showAnimation, setShowAnimation] = useState<boolean>(false);
-  const [displayedNumber, setDisplayedNumber] = useState<number | null>(null); // TODO TEMP
-
-useEffect(() => {
-  if (isConnected && lockedSelectedMonster) {
-    document.body.style.display = "block";
-    document.body.style.paddingTop = "0";
-  } else {
-    document.body.style.display = "flex";
-    document.body.style.paddingTop = "10px";
-  }
-
-  return () => {
-    // cleanup if needed
-    document.body.style.display = "";
-    document.body.style.paddingTop = "";
-  };
-}, [isConnected, lockedSelectedMonster]);
-  
-  //if the showwanimation is true then show thtet animation
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    let timeout: NodeJS.Timeout;
-
-    if (showAnimation) {
-      let i = 0;
-      const rollDuration = 1000; // total roll duration in ms
-      const intervalSpeed = 100; // time between number updates
-
-      const finalResult = 20; // eventually will replace with dice roll utility
-      const totalSteps = rollDuration / intervalSpeed; //get the ammount of times it gets swaped out
-
-      interval = setInterval(() => {
-        if (i < totalSteps) {
-          setDisplayedNumber(Math.floor(Math.random() * 20) + 1); // roll 1-20
-          i++;
-        } else {
-          clearInterval(interval);
-          setDisplayedNumber(finalResult);
-
-          timeout = setTimeout(() => {
-            console.log("Final result displayed for 3 seconds");
-          }, 3000);
-        }
-      }, intervalSpeed);
+      socketRef.current.on("connect_error", (err) => {
+        console.error("Connection failed:", err.message);
+      });
     }
 
-    // Clean up interval and timeout
     return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
+      socketRef.current?.disconnect();
     };
-  }, [showAnimation]);
+  }, [serverUrl, joinCode, displayName]);
 
-  
-  // Function to trigger the rolling animation
-  const onSelectAction = (actionName:string): void => {
-    /// TODO emit to server that an actions has been selected and which action that is
-    /// TODO hange state so that it shows "waiting for enemy" or something like that
+  // Blueprint that allows component wrapped in this class to access the player's socket connection
+  return (
+    <PlayerSocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+      {children}
+    </PlayerSocketContext.Provider>
+  );
+};
 
-    // if (!socketRef.current) {
-    //   throw new Error("No connection to server exists.");
-    // }
+// Export context containing the socket connection to be accessible in other react components
+export const usePlayerSocket = () => useContext(PlayerSocketContext);
+//#endregion
 
-    // socketRef.current.emit("submit-move", actionName); 
+//#region Main Player Component
+const PlayerContent = () => {
+  // Socket established using the exported context function
+  const { socket, isConnected } = usePlayerSocket();
 
-    // setHasSelfSumbittedTurn(true); 
-    // if (!showAnimation) {
-    //   setShowAnimation(true);
-    //   setTimeout(() => setShowAnimation(false), 3000);
-    // }
-  };
+  // Session storage variables initialised for this component
+  const joinCode = sessionStorage.getItem("joinCode");
+  const displayName = sessionStorage.getItem("displayName");
+  const serverUrl = sessionStorage.getItem("serverUrl");
 
+  // State triggers to change screens and perform actions
+  const [startSelection, setStartSelection] = useState(false);
+  const [monsterSelected, setMonsterSelected] = useState(false);
+
+  useEffect(() => {
+    if (!socket) return;
+    // Listen for game start
+    socket.on("game-started", () => {
+      setStartSelection(true);
+    });
+
+    return () => {
+      socket.off("game-started");
+    };
+  }, [socket]);
+
+  // Screen that displays when player is connecting to server
   if (!isConnected) {
     return <p>Connecting to server...</p>;
   }
 
-  function handleSelection(){
-    setLockedSelectedMonster(true)
-    if (socketRef.current){
-      socketRef.current.emit("monster-selected", {Monster : myMonster})
-    }
-  }
-
-  
-  if (!isSelection) {
+  // Once connected, this screen will display
+  if (!startSelection) {
     return (
       <div>
-        <h1>PLAYER</h1>
+        <h1>PLAYER VIEW</h1>
         <p>Server URL: {serverUrl}</p>
         <p>Name: {displayName}</p>
         <p>Room Code: {joinCode}</p>
-        <h2>Waiting for game to start...</h2>
       </div>
     );
   }
 
-  //#region Select Monster Phase
-  if (!lockedSelectedMonster || !myMonster) {
+  // Type checking function converting string to MonsterName union
+  function isMonsterName(name: string): name is MonsterName {
+    return name in monsterData;
+  }
+
+  // Function that takes the result of monster selection and sends it to the server, then switches screen. 
+  const handleMonsterSelection = (monster: string) => { 
+    // Checking if string is valid monster
+    if (isMonsterName(monster)) {
+      // Create new monster based on string given
+      const data: Monsters = new monsterData[monster]();
+
+      // Check if socket exists
+      if (socket) {
+        socket.emit("RequestSubmitMonster", { Monsters: data });
+
+        // TODO: Make sure all players select a monster before changing the state below
+        setMonsterSelected(true);
+        console.log("Monster selected:", monster);
+      }
+      else {
+        console.log(`No socket connection available: socket ${socket}`)
+      }
+    }
+    else {
+      console.log(`Invalid monster name: ${monster}`);
+    }
+  }
+
+  // Monster selection is displayed when a monster has not been selected
+  if (!monsterSelected) {
     return (
-      <>
-        <div className="monsterSelectionScreen">
-          <h1>Choose your Monster:</h1>
-          {allMonsters.map((monster) => {
-            return (
-              <div className="monsterContainer">
-                <img
-                  src={monster.imageSelection}
-                  id={monster.type}
-                  key={monster.type}
-                  className="monsterImage"
-                  onClick={() => {
-                    setMyMonsterMonster(monster);
-                  }}
-                />
-              </div>
-            );
-          })}
-
-          {myMonster && (
-            <button
-              id="confirmMonsterButton"
-              onClick={handleSelection}
-              disabled={lockedSelectedMonster}
-            >
-              Confirm
-            </button>
-          )}
-        </div>
-      </>
+      <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />
     );
   }
 
-  if (hasSelfSumbittedTurn) {
-    <h1>Waiting for enemy...</h1>;
-  }
-
-  //#endregion
-
-  return (
-    <div className="battleScreen">
-      <div className="battleScreenTop">
-        <img className="topBackIcon" src="/img/back_line.png" alt="back" />
-        {/*should change the main to be the screen to go back too after surrendering */}
-        <button
-          onClick={() => navigate("/home")}
-          className="battleScreenTopButton"
-        >
-          Surrender
-        </button>
-      </div>
-
-      <div className="battleMiddle">
-        {/* monster 1 */}
-        <BattleMonster
-          image="/img/monster-image/dragon.png"
-          alt="Monster 1"
-          position="monster1"
-        />
-
-        {showAnimation && (
-          <div className="diceAnimation">
-            <img
-              src="/img/d20.png"
-              alt="Rolling animation"
-            />
-            <span className="diceResult">{displayedNumber}</span>
-          </div>
-        )}
-        {/* monster 2 */}
-        <BattleMonster
-          image="/img/monster-image/wolfman.png"
-          alt="Monster 2"
-          position="monster2"
-        />
-      </div>
-
-      <div className="battleScreenBottom">
-        <button
-          className="battleScreenBottomButton"
-          onClick={ ()=> onSelectAction("attack")}
-        >
-          <img
-            className="battleScreenBottomButtonImage"
-            src="/img/sword.png"
-            alt="Sword"
-          />
-        </button>
-        <button
-          className="battleScreenBottomButton"
-          onClick={()=> onSelectAction("defend")}
-        >
-          <img
-            className="battleScreenBottomButtonImage"
-            src="/img/ability.jpg"
-            alt="Ability"
-          />
-        </button>
-        <button
-          className="battleScreenBottomButton"
-          onClick={()=> onSelectAction("ability")}
-        >
-          <img
-            className="battleScreenBottomButtonImage"
-            src="/img/shield.png"
-            alt="Shield"
-          />
-        </button>
-      </div>
-    </div>
-  );
+  // Battle screen displays when all checks have been passed
+  // TODO: selectedMonsterName should not exist, battle screen needs some other way to know what monsters to display
+  return <BattleScreen selectedMonsterName={"MysticWyvern"} />;
 };
+//#endregion
+
+//#region Exported Component
+// Wrap the contents of the page to allow original player content to access the socket
+export const Player = () => (
+  <PlayerSocketProvider>
+    <PlayerContent />
+  </PlayerSocketProvider>
+);
+//#endregion
+

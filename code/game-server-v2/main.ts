@@ -158,37 +158,10 @@ async function main(config: ServerConfig) {
       });
 
       log_notice("All players informed of start.");
-
-      // TODO: notify host to switch to screen "choose your monster now !" or something like that if needed
     }
-    //#endregion
-
-    //#region <<< Start Round
-    socket.on(RequestStartRound.name, RequestStartRound);
-    /** Event that is triggered when the host begins the next round. */
-    function RequestStartRound(): void {
-      const room = socket.data.room as Room;
-
-      if (!room) {
-        socket.emit("error", "This host has not been assigned a room.");
-        return;
-      }
-
-      // TODO: generate new matchups
-      room.createMatches(); // TODO test
-
-      // TODO: Notify all players to start match (also send match initial state)
-      // // room.players.forEach((player) => {
-      // //   // Send players to monster selection screen
-      // //   playerChannel.to(player.socketId).emit("game-started");
-      // // });
-    }
-    //#endregion
   });
-  //#endregion
 
-  //#region Player Events
-  /**  Pre-connection auth check. Allow the player to check if they can connect before actually openning a websocket */
+  /// Pre-connection auth check
   expressApp.post("/player-auth-precheck", (req, res) => {
     log_event("Player is prechecking auth\n" + JSON.stringify(req.body));
 
@@ -305,7 +278,7 @@ async function main(config: ServerConfig) {
 
     //#region <<< Monster Select
     socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
-    function RequestSubmitMonster(data:any): void {
+    function RequestSubmitMonster(data: any): void {
       // TODO
       // log_notice("Monster submitted:\n" + JSON.stringify(monster));
 

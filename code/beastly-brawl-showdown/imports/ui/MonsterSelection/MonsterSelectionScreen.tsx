@@ -1,26 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { MonsterContainer } from "./MonsterContainer";
-import { monsterData, MonsterName } from "../../data/monsters/MonsterData";
-import { BattleScreen } from "../BattleScreen/BattleScreen";
+import { monsterData } from "../../data/monsters/MonsterData";
 
 interface MonsterSelectionScreenProps {
-  selectedMonster?: string;
   setSelectedMonsterCallback: (value: string) => void;
 }
 
 export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
-  selectedMonster,
   setSelectedMonsterCallback,
 }) => {
+
+
   const [isConfirmed, setIsConfirmed] = useState(false);
+  // Enable confirm button
   const [confirmEnabled, setConfirmEnabled] = useState(false);
+  // Currently selected monster
+  const [selectedMonster, setMonsterName] = useState("");
 
   useEffect(() => {
     console.log("Component rendered. isConfirmed =", isConfirmed);
   }, [isConfirmed]);
 
-  function highlightAndShowConfirm(name: string) {
+  /**
+   * Updates the currently selected monster visually and in code 
+   * @param name name of monster currently selected
+   */
+  function currentlySelectedMonster(name: string) {
     console.log("Monster clicked:", name);
+
+    // Assign monster name value
+    setMonsterName(name);
 
     // Remove border from previous
     if (selectedMonster) {
@@ -39,19 +48,26 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
       selected.style.opacity = "0.5";
     }
 
-    setSelectedMonsterCallback(name);
+    // Enabled button once monster has been clicked
     setConfirmEnabled(true);
   }
 
+  /**
+   * Handles passing of information back to PlayerPage.tsx
+   */
   function handleConfirm() {
     console.log("Confirm clicked. Selected monster:", selectedMonster);
     setIsConfirmed(true);
   }
 
-  if (isConfirmed && selectedMonster) {
-    <BattleScreen selectedMonsterName={selectedMonster as MonsterName} />;
-  }
+  // If confirm button pressed and monster selected, return result to parent page (PlayerPage.tsx)
+  useEffect(() => {
+    if (isConfirmed && selectedMonster) {
+      setSelectedMonsterCallback(selectedMonster);
+    }
+  }, [isConfirmed, selectedMonster, setSelectedMonsterCallback]);
 
+  // HTML display of the monsters
   return (
     <div className="monsterSelectionScreen">
       <h1>Choose your Monster:</h1>
@@ -62,7 +78,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
             key={name}
             image={previewMonster.imageSelection}
             name={name}
-            func={highlightAndShowConfirm}
+            currentlySelectedMonster={currentlySelectedMonster}
           />
         );
       })}
