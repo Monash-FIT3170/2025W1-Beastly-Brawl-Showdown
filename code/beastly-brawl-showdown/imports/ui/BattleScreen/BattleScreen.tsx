@@ -92,6 +92,10 @@ export const BattleScreen: React.FC = () => {
     // triggerAnimation();
   };
   //#endregion
+  if (!myMonster || !enemyMonster) {
+    return <div>Loading battle...</div>;
+  }
+
 
   // HTML to show each monster and the animations
   if (!myMonster || !enemyMonster) {
@@ -111,4 +115,5 @@ export const BattleScreen: React.FC = () => {
       <BattleBottom onAction={handleAction} />
     </div>
   );
+
 };
