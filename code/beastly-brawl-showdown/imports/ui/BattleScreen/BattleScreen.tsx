@@ -92,19 +92,22 @@ export const BattleScreen: React.FC = () => {
     // triggerAnimation();
   };
   //#endregion
+  if (!myMonster || !enemyMonster) {
+    return <div>Loading battle...</div>;
+  }
 
-  // HTML to show each monster and the animations
   return (
     <div className="battleScreen">
       <BattleTop />
       <BattleMiddle
         showAnimation={showAnimation}
-        player1Monster={myMonster!}
-        player2Monster={enemyMonster!}
+        player1Monster={myMonster}
+        player2Monster={enemyMonster}
         playerId1="player1-id"
         playerId2="player2-id"
       />
       <BattleBottom onAction={handleAction} />
     </div>
   );
+
 };
