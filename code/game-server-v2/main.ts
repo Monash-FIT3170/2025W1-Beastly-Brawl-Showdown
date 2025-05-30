@@ -11,6 +11,7 @@ import { Player } from "./Player";
 import { RoomPhase, PlayerChannelAuth, RoomId, HostChannelAuth } from "../shared/types";
 import { Room } from "./Room";
 import { ByeMatch, DuelMatch } from "./Match";
+import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
 // import { HostSocketData, PlayerSocketData } from "./types";
 
 type ServerConfig = {
@@ -279,7 +280,11 @@ async function main(config: ServerConfig) {
 
     //#region <<< Monster Select
     socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
+    // socket.on("RequestSubmitMonster", (data) => {
+    //   RequestSubmitMonster(data);
+    // })
     function RequestSubmitMonster(data: any): void {
+      console.log(data);
       // TODO
       // log_notice("Monster submitted:\n" + JSON.stringify(monster));
 
@@ -289,21 +294,24 @@ async function main(config: ServerConfig) {
       // }
 
       // playerChannel.to(socket.id).emit("selected-monster_result", "PLACEHOLDER RESULT"); //otherwise emit {isValidSelection:true, monster:monster}
-
+      
+      // Use socket data to intialise the correct player
       const player = socket.data.player as Player;
       if (!player) {
         socket.emit("error", "This player has not been initiated.");
         return;
       }
 
+      // Get the room ID of the players
       const room = gameServer.rooms.get(player.roomId);
       if (!room) {
         socket.emit("error", "500 Internal Server Error");
         return;
       }
 
-      player.setMonster(data.monster); // TODO - PLACEHOLDER
+      player.setMonster(data.data); // TODO - PLACEHOLDER
       player.isReadyForGame = true;
+      console.log(player.monster);
 
       let allReady = true;
       for (const player of room.players.values()) {
@@ -315,6 +323,7 @@ async function main(config: ServerConfig) {
 
       if (!allReady) {
         /// Not everyone is ready
+        log_notice(`Wait for all players!`);
         return;
       }
 
@@ -323,21 +332,24 @@ async function main(config: ServerConfig) {
       for (let i = 0; i < room.matches[room.matches.length - 1].length; i++) {
         /// foreach match in current round
         const currentMatch = room.getMatch(room.matches.length - 1, i);
-        if (typeof currentMatch == typeof ByeMatch) {
+        if (currentMatch instanceof ByeMatch) {
           playerChannel.to((currentMatch as ByeMatch).player.socketId).emit("round-start-bye", {}); // TODO - PLACEHOLDER
           continue;
         }
 
-        if (typeof currentMatch == typeof DuelMatch) {
-          (currentMatch as DuelMatch).sides.forEach(side => {
-             playerChannel.to(side.player.socketId).emit("round-start", {currentMatch}); // TODO - PLACEHOLDER
+        if (currentMatch instanceof DuelMatch) {   // TODO - typechecks not behaving as expected
+          (currentMatch as DuelMatch).sides.forEach((side) => {
+            playerChannel
+              .to(side.player.socketId)
+              .emit("round-start", { currentMatch }); // TODO - PLACEHOLDER
           });
+          continue;
         }
         log_attention("Unexpected behaviour. This should not be reached. Perhaps you forgot to implement a match type.");
       }
 
       // TODO spectate?
-      // hostChannel.emit("round-start", {}); // TODO - PLACEHOLDER
+      hostChannel.emit("round-start", {}); // TODO - PLACEHOLDER
     }
     //#endregion
   });

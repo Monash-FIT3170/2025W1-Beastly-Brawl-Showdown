@@ -13,7 +13,7 @@ export class Player {
   displayName: string;
   monster?: Monsters;
   linkedAcccountId?: AccountId;
-  isReadyForGame?: boolean;
+  isReadyForGame: boolean;
 
   /// Game stats
   byeCount: number = 0;
@@ -27,6 +27,7 @@ export class Player {
     this.displayName = displayName;
     this.monster = monster;
     this.linkedAcccountId = linkedAcccountId;
+    this.isReadyForGame = false;
   }
 
   getMonster(): Monsters | undefined {
