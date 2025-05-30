@@ -337,11 +337,9 @@ async function main(config: ServerConfig) {
           continue;
         }
 
-        if (currentMatch instanceof DuelMatch) {   // TODO - typechecks not behaving as expected
+        if (currentMatch instanceof DuelMatch) {
           (currentMatch as DuelMatch).sides.forEach((side) => {
-            playerChannel
-              .to(side.player.socketId)
-              .emit("round-start", { currentMatch }); // TODO - PLACEHOLDER
+            playerChannel.to(side.player.socketId).emit("round-start", { currentMatch }); // TODO - PLACEHOLDER
           });
           continue;
         }
