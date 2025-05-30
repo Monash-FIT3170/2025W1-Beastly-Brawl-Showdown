@@ -66,4 +66,17 @@ export class Match {
       this.sides[i].pendingMove = null;
     }
   }
+
+  CalculateBattle(): [Monsters,Monsters]{
+    
+    if(this.sides[0].pendingMove == 'attack'){
+      this.sides[0].monsterState.health = this.sides[0].monsterState.health - this.sides[1].monsterState.AC
+    }
+
+    if(this.sides[0].pendingMove == 'attack'){
+      this.sides[1].monsterState.health = this.sides[1].monsterState.health - this.sides[0].monsterState.AC
+    }
+    
+    return[this.sides[0].monsterState,this.sides[1].monsterState]
+  }
 }
