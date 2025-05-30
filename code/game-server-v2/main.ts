@@ -305,7 +305,7 @@ async function main(config: ServerConfig) {
 
     //#region <<< Monster Select
     socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
-    function RequestSubmitMonster(data): void {
+    function RequestSubmitMonster(data:any): void {
       // TODO
       // log_notice("Monster submitted:\n" + JSON.stringify(monster));
 

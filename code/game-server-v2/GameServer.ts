@@ -149,6 +149,7 @@ export class GameServer {
     }
 
     const newPlayer = new Player(
+      roomId,
       socketId,
       displayName,
       monster,
