@@ -253,8 +253,20 @@ async function main(config: ServerConfig) {
 
     socket.on("disconnect", () => log_event("Player disconnected."));
 
+    socket.on('playerAction', (move: any) => {
+      console.log("Move submitted:", JSON.stringify(move));
+      const player = socket.data.player;
+
+      if (!player) {
+        socket.emit("error", "Player not identified.");
+        return;}
+      });
+
     //#region <<< Submit Move
     socket.on(RequestSubmitMove.name, RequestSubmitMove);
+    
+    function ForwardSelectedMove(): void{}
+
     function RequestSubmitMove(move: any): void {
       // TODO type
       console.log("Move submitted: ", JSON.stringify(move));
