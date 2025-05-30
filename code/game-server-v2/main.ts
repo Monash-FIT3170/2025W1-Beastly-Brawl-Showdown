@@ -259,57 +259,56 @@ async function main(config: ServerConfig) {
 
     // Checks for what action the player chose.
     socket.on('playerAction', (move: any) => {
-    // Prints actions chosen.
+      // Prints actions chosen.
       console.log("Move submitted:", JSON.stringify(move));
-    
+
 
       // Looks through every room and every player in that room to see
       // if the player that pressed that button is in that room.
-    for (const [roomId, room] of gameServer.rooms) {
+      for (const [roomId, room] of gameServer.rooms) {
 
-      // Iterate over all players in this room
-      for (const [playerId, player] of room.players) {
-      
-        // Check if this is the player who sent the move
-        if (player.socketId === move.playerId) {
-          const selectedPlayer: Player = player;
-          const match = room.playerToMatch.get(selectedPlayer);
+        // Iterate over all players in this room
+        for (const [playerId, player] of room.players) {
 
-        // Checks to see if the there is a match for the player. 
-        // Stupid ah Javascript >:c.
-        if (match) {
-          const selectedMatch: Match = match;
+          // Check if this is the player who sent the move
+          if (player.socketId === move.playerSocket) {
+            const selectedPlayer: Player = player;
+            const match = room.playerToMatch.get(selectedPlayer);
 
-          // Checks to see which side the player is on
-          if(selectedMatch.sides[0].player = selectedPlayer){
-            selectedMatch.sides[0].pendingMove = move.action;
+            // Checks to see if the there is a match for the player. 
+            // Stupid ah Javascript >:c.
+            if (match instanceof DuelMatch){
+
+              // Checks to see which side the player is on
+              if (match.sides[0].player = selectedPlayer) {
+                match.sides[0].pendingMove = move.action;
+              }
+              else {
+                match.sides[1].pendingMove = move.action;
+              }
+
+              // Checks to see if both players have chosen an action.
+              if (match.sides[0].pendingMove != null && match.sides[1].pendingMove != null) {
+
+                const [monster1, monster2] = match.CalculateBattle();
+
+              }
+
+            } else {
+              console.warn("No match found for player", selectedPlayer);
+            }
           }
-          else{
-            selectedMatch.sides[1].pendingMove = move.action;
-          }
-        
-          // Checks to see if both players have chosen an action.
-          if (selectedMatch.sides[0].pendingMove != null && selectedMatch.sides[1].pendingMove != null){
+        }
 
-            const [monster1, monster2] = selectedMatch.CalculateBattle();
+      }
 
-        } 
-        
-    } else {
-          console.warn("No match found for player", selectedPlayer);
-  }
-}
-}
-
-}
-
-});
+    });
 
 
     //#region <<< Submit Move
     socket.on(RequestSubmitMove.name, RequestSubmitMove);
-    
-    function ForwardSelectedMove(): void{}
+
+    function ForwardSelectedMove(): void { }
 
     function RequestSubmitMove(move: any): void {
       // TODO type
@@ -385,7 +384,7 @@ async function main(config: ServerConfig) {
 
         if (typeof currentMatch == typeof DuelMatch) {
           (currentMatch as DuelMatch).sides.forEach(side => {
-             playerChannel.to(side.player.socketId).emit("round-start", {currentMatch}); // TODO - PLACEHOLDER
+            playerChannel.to(side.player.socketId).emit("round-start", { currentMatch }); // TODO - PLACEHOLDER
           });
         }
         log_attention("Unexpected behaviour. This should not be reached. Perhaps you forgot to implement a match type.");
