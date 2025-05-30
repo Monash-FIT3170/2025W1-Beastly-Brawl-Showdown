@@ -9,18 +9,35 @@ type SideData = {
   pendingMove: any | null;
 };
 
-export class Match {
+export type Match = DuelMatch | ByeMatch;
+
+class BaseMatch {
   matchId: MatchId;
+  constructor(matchId: MatchId) {
+    this.matchId = matchId;
+  }
+}
+
+export class ByeMatch extends BaseMatch {
+  player: Player;
+
+  constructor(matchId: MatchId, player: Player) {
+    super(matchId);
+    this.player = player;
+  }
+}
+
+export class DuelMatch extends BaseMatch {
   sides: SideData[] = [];
   /** Converts a player into the side index */
   playerSideIndexLookup: Map<Player, number> = new Map<Player, number>();
-  /** The match id that the winner goes to, if null this is the final */
-  winnerNextMatchId: MatchId | null = null;
-  /** The match id that the loser goes to, if null this player is eliminated. */
-  loserNextMatchId: MatchId | null = null;
+  // // /** The match id that the winner goes to, if null this is the final */
+  // // winnerNextMatchId: MatchId | null = null;
+  // // /** The match id that the loser goes to, if null this player is eliminated. */
+  // // loserNextMatchId: MatchId | null = null;
 
   constructor(matchId: MatchId, player1: Player, player2: Player) {
-    this.matchId = matchId;
+    super(matchId);
 
     // TODO - change into args of any length (argv style)
     const side1: SideData = {
