@@ -13,15 +13,15 @@ export class Player {
   displayName: string;
   monster?: Monsters;
   linkedAcccountId?: AccountId;
-  readyForGame?: boolean;
+  isReadyForGame?: boolean;
 
-  constructor(
-    roomId: RoomId,
-    socketId: string,
-    displayName: string,
-    monster?: Monsters | undefined,
-    linkedAcccountId?: AccountId | undefined,
-  ) {
+  /// Game stats
+  byeCount: number = 0;
+  winCount: number = 0;
+  lossCount: number = 0;
+  playerToSpectate: Player | null = null;
+
+  constructor(roomId: RoomId, socketId: string, displayName: string, monster?: Monsters | undefined, linkedAcccountId?: AccountId | undefined) {
     this.roomId = roomId;
     this.socketId = socketId;
     this.displayName = displayName;
