@@ -133,7 +133,7 @@ const PlayerContent = () => {
 
       // Check if socket exists
       if (socket) {
-        socket.emit("monster-selected", { Monsters: data });
+        socket.emit("RequestSubmitMonster", { Monsters: data });
 
         // TODO: Make sure all players select a monster before changing the state below
         setMonsterSelected(true);

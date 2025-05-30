@@ -1,8 +1,8 @@
 import Sqids from "sqids";
-import { log_notice, log_warning } from "./utils";
+import { log_notice, log_warning } from "../shared/utils";
 import { Room } from "./Room";
 import { Player } from "./Player";
-import { ServerId, RoomId, JoinCode, AccountId } from "./types";
+import { ServerId, RoomId, JoinCode, AccountId } from "../shared/types";
 import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
 
 export class GameServer {
@@ -96,7 +96,7 @@ export class GameServer {
     const newRoom: Room = new Room(
       hostSocketId,
       this.peekNextRoomId(),
-      this.sqids.encode([this.serverId, this.peekNextRoomId()])
+      this.sqids.encode([this.serverId, this.peekNextRoomId()]),
     );
 
     if (this.hasRoom(newRoom.roomId)) {
@@ -135,7 +135,7 @@ export class GameServer {
     roomId: RoomId,
     displayName: string,
     monster: Monsters | undefined,
-    linkedAcccountId: AccountId | undefined
+    linkedAcccountId: AccountId | undefined,
   ) {
     //TODO validate input
 
@@ -148,7 +148,13 @@ export class GameServer {
       throw new Error("Display name already taken.");
     }
 
-    const newPlayer = new Player(socketId, displayName, monster, linkedAcccountId);
+    const newPlayer = new Player(
+      roomId,
+      socketId,
+      displayName,
+      monster,
+      linkedAcccountId,
+    );
     room.players.set(displayName, newPlayer);
   }
 }
