@@ -377,15 +377,16 @@ async function main(config: ServerConfig) {
       for (let i = 0; i < room.matches[room.matches.length - 1].length; i++) {
         /// foreach match in current round
         const currentMatch = room.getMatch(room.matches.length - 1, i);
-        if (typeof currentMatch == typeof ByeMatch) {
+        if (currentMatch instanceof ByeMatch) {
           playerChannel.to((currentMatch as ByeMatch).player.socketId).emit("round-start-bye", {}); // TODO - PLACEHOLDER
           continue;
         }
 
-        if (typeof currentMatch == typeof DuelMatch) {
-          (currentMatch as DuelMatch).sides.forEach(side => {
+        if (currentMatch instanceof DuelMatch) {
+          (currentMatch as DuelMatch).sides.forEach((side) => {
             playerChannel.to(side.player.socketId).emit("round-start", { currentMatch }); // TODO - PLACEHOLDER
           });
+          continue;
         }
         log_attention("Unexpected behaviour. This should not be reached. Perhaps you forgot to implement a match type.");
       }
