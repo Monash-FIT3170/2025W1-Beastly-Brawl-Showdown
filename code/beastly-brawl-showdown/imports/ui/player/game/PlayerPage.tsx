@@ -89,6 +89,7 @@ const PlayerContent = () => {
   // State triggers to change screens and perform actions
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
+  const [allReady, setReady] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
@@ -96,6 +97,12 @@ const PlayerContent = () => {
     socket.on("game-started", () => {
       setStartSelection(true);
     });
+
+    // Listen for round-start
+    socket.on("round-start", () => {
+      console.log(`Round start command received from server`)
+      setReady(true);
+    })
 
     return () => {
       socket.off("game-started");
@@ -124,8 +131,8 @@ const PlayerContent = () => {
     return name in monsterData;
   }
 
-  // Function that takes the result of monster selection and sends it to the server, then switches screen. 
-  const handleMonsterSelection = (monster: string) => { 
+  // Function that takes the result of monster selection and sends it to the server, then switches screen.
+  const handleMonsterSelection = (monster: string) => {
     // Checking if string is valid monster
     if (isMonsterName(monster)) {
       // Create new monster based on string given
@@ -133,31 +140,37 @@ const PlayerContent = () => {
 
       // Check if socket exists
       if (socket) {
-        socket.emit("RequestSubmitMonster", { Monsters: data });
+        console.log(data);
+        socket.emit("RequestSubmitMonster", { data });
 
         // TODO: Make sure all players select a monster before changing the state below
         setMonsterSelected(true);
         console.log("Monster selected:", monster);
+      } else {
+        console.log(`No socket connection available: socket ${socket}`);
       }
-      else {
-        console.log(`No socket connection available: socket ${socket}`)
-      }
-    }
-    else {
+    } else {
       console.log(`Invalid monster name: ${monster}`);
     }
-  }
+  };
 
   // Monster selection is displayed when a monster has not been selected
   if (!monsterSelected) {
     return (
-      <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />
+      <MonsterSelectionScreen
+        setSelectedMonsterCallback={handleMonsterSelection}
+      />
     );
+  }
+
+  // Waiting screen while players select monsters
+  if (!allReady) {
+    return <p>Waiting for all players to select their monsters...</p>;
   }
 
   // Battle screen displays when all checks have been passed
   // TODO: selectedMonsterName should not exist, battle screen needs some other way to know what monsters to display
-  return <BattleScreen/>;
+  return <BattleScreen />;
 };
 //#endregion
 

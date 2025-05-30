@@ -96,6 +96,12 @@ export const BattleScreen: React.FC = () => {
     return <div>Loading battle...</div>;
   }
 
+
+  // HTML to show each monster and the animations
+  if (!myMonster || !enemyMonster) {
+    return <div>Loading battle...</div>;
+  }
+
   return (
     <div className="battleScreen">
       <BattleTop />
