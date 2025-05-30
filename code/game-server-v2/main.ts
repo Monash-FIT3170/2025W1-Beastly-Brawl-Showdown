@@ -337,7 +337,7 @@ async function main(config: ServerConfig) {
       }
 
       // TODO spectate?
-      hostChannel.emit("round-start", {}); // TODO - PLACEHOLDER
+      // hostChannel.emit("round-start", {}); // TODO - PLACEHOLDER
     }
     //#endregion
   });

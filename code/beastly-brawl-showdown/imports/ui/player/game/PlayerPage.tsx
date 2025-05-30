@@ -157,7 +157,7 @@ const PlayerContent = () => {
 
   // Battle screen displays when all checks have been passed
   // TODO: selectedMonsterName should not exist, battle screen needs some other way to know what monsters to display
-  return <BattleScreen selectedMonsterName={"MysticWyvern"} />;
+  return <BattleScreen/>;
 };
 //#endregion
 
