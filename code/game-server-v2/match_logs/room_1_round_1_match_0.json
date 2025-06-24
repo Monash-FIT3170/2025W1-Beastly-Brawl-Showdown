@@ -1,0 +1,50 @@
+{
+  "roomId": 1,
+  "round": 1,
+  "matchIndex": 0,
+  "player1": {
+    "name": "a",
+    "monster": {
+      "monsterName": "MysticWyvern",
+      "baseHealth": 25,
+      "currentHealth": 25,
+      "baseAC": 14,
+      "currentAC": 14,
+      "atkBonus": 2,
+      "special": "Reroll once per battle",
+      "baseAbilityCharges": 1,
+      "currentAbilityCharges": 1,
+      "monsterType": "Balanced",
+      "baseDefenseCharges": 3,
+      "currentDefenseCharges": 3,
+      "defending": false,
+      "stunRemaining": 0,
+      "imageSelectionURL": "/img/monster-selection-images/placeholder_monster_1.png",
+      "imageUrl": "/img/monster-image/dragon.png",
+      "rerollCharge": true
+    }
+  },
+  "player2": {
+    "name": "b",
+    "monster": {
+      "monsterName": "ShadowFangPredator",
+      "baseHealth": 20,
+      "currentHealth": 20,
+      "baseAC": 12,
+      "currentAC": 12,
+      "atkBonus": 4,
+      "special": "Critical hit on natural 18-20",
+      "baseAbilityCharges": 1,
+      "currentAbilityCharges": 1,
+      "monsterType": "Attacker",
+      "baseDefenseCharges": 3,
+      "currentDefenseCharges": 3,
+      "defending": false,
+      "stunRemaining": 0,
+      "imageSelectionURL": "/img/monster-selection-images/placeholder_monster_2.png",
+      "imageUrl": "/img/monster-image/wolfman.png",
+      "critRoll": 18,
+      "isInvulnerable": false
+    }
+  }
+}

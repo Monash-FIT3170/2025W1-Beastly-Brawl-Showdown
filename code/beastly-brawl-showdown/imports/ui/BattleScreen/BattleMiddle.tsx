@@ -8,8 +8,6 @@ type BattleMiddleProps = {
   showAnimation: boolean;
   player1Monster: Monsters;
   player2Monster: Monsters;
-  playerId1: string;
-  playerId2: string;
 };
 
 
@@ -18,8 +16,6 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   showAnimation,
   player1Monster,
   player2Monster,
-  playerId1,
-  playerId2,
 }) => {
   const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
 
@@ -67,12 +63,8 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   return (
     <div className="battleMiddle">
       <BattleMonster
-        image={player1Monster.image}
-        alt={player1Monster.type}
+        monster={player1Monster}
         position="monster1"
-        playerId={playerId1}
-        initialHp={player1Monster.health}
-        
       />
 
       {showAnimation && (
@@ -83,12 +75,10 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
       )}
 
       <BattleMonster
-        image={player2Monster.image}
-        alt={player2Monster.type}
+        monster={player2Monster}
         position="monster2"
-        playerId={playerId2}
-        initialHp={player2Monster.health}
       />
+
     </div>
   );
 

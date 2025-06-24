@@ -9,22 +9,22 @@ import AbilityAction from "../actions/AbilityAction";
  * Includes default methods such as attack and defend for monster subclasses which share functionality.
  */
 export default class Monsters {
-  protected monsterName: string;
-  protected baseHealth: number;
-  protected currentHealth: number;
-  protected baseAC: number;
-  protected currentAC: number;
-  protected atkBonus: number;
-  protected special: string;
-  protected baseAbilityCharges: number;
-  protected currentAbilityCharges: number;
-  protected monsterType: string;
-  protected baseDefenseCharges: number;
-  protected currentDefenseCharges: number;
-  protected defending: boolean;
-  protected stunRemaining: number;
-  protected imageSelectionURL: string;
-  protected imageUrl: string;
+  monsterName: string;
+  baseHealth: number;
+  currentHealth: number;
+  baseAC: number;
+  currentAC: number;
+  atkBonus: number;
+  special: string;
+  baseAbilityCharges: number;
+  currentAbilityCharges: number;
+  monsterType: string;
+  baseDefenseCharges: number;
+  currentDefenseCharges: number;
+  defending: boolean;
+  stunRemaining: number;
+  imageSelectionURL: string;
+  imageUrl: string;
 
   constructor(
     monsterName: string,

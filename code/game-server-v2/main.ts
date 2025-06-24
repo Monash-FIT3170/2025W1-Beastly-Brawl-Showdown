@@ -10,9 +10,9 @@ import { log_attention, log_event, log_notice, log_warning } from "../shared/uti
 import { Player } from "./Player";
 import { RoomPhase, PlayerChannelAuth, RoomId, HostChannelAuth } from "../shared/types";
 import { Room } from "./Room";
-import { model } from "mongoose";
-import Monsters from "../beastly-brawl-showdown/imports/data/monsters/Monsters";
 import { ByeMatch, DuelMatch, Match } from "./Match";
+import fs from "fs";
+
 // import { HostSocketData, PlayerSocketData } from "./types";
 
 type ServerConfig = {
@@ -204,6 +204,28 @@ async function main(config: ServerConfig) {
     res.send(checkResult);
   });
 
+  // Serve match log files
+  expressApp.get("/match-log/:roomId/:round/:matchIndex", (req, res) => {
+    const { roomId, round, matchIndex } = req.params;
+    const filePath = `match_logs/room_${roomId}_round_${round}_match_${matchIndex}.json`;
+
+    fs.readFile(filePath, "utf8", (err, data) => {
+      if (err) {
+        console.error(`Failed to read match log at ${filePath}:`, err.message);
+        return res.status(404).send("Match log not found");
+      }
+
+      try {
+        const json = JSON.parse(data);
+        res.json(json);
+      } catch (parseError) {
+        console.error("Invalid JSON in match log");
+        res.status(500).send("Invalid match log format");
+      }
+    });
+  });
+
+
   playerChannel.use((socket, next) => {
     log_event(`Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as PlayerChannelAuth;
@@ -276,7 +298,7 @@ async function main(config: ServerConfig) {
 
             // Checks to see if the there is a match for the player. 
             // Stupid ah Javascript >:c.
-            if (match instanceof DuelMatch){
+            if (match instanceof DuelMatch) {
 
               // Checks to see which side the player is on
               if (match.sides[0].player = selectedPlayer) {
@@ -332,75 +354,95 @@ async function main(config: ServerConfig) {
 
     //#region <<< Monster Select
     socket.on(RequestSubmitMonster.name, RequestSubmitMonster);
-    // socket.on("RequestSubmitMonster", (data) => {
-    //   RequestSubmitMonster(data);
-    // })
+
     function RequestSubmitMonster(data: any): void {
-      console.log(data);
-      // TODO
-      // log_notice("Monster submitted:\n" + JSON.stringify(monster));
-
-      // // TODO monster selected is not ok (invalid monster or already selected one)
-      // if (false) {
-      //   // if so emit {isValidSelection:false, monster:undef} back to user
-      // }
-
-      // playerChannel.to(socket.id).emit("selected-monster_result", "PLACEHOLDER RESULT"); //otherwise emit {isValidSelection:true, monster:monster}
-      
-      // Use socket data to intialise the correct player
       const player = socket.data.player as Player;
       if (!player) {
         socket.emit("error", "This player has not been initiated.");
         return;
       }
 
-      // Get the room ID of the players
       const room = gameServer.rooms.get(player.roomId);
       if (!room) {
         socket.emit("error", "500 Internal Server Error");
         return;
       }
 
-      player.setMonster(data.data); // TODO - PLACEHOLDER
+      player.setMonster(data.data);
       player.isReadyForGame = true;
-      console.log(player.monster);
+      console.log(`Player ${player.displayName} is ready with monster:`, player.monster);
 
-      let allReady = true;
-      for (const player of room.players.values()) {
-        if (player.isReadyForGame === false) {
-          allReady = false;
-          break;
-        }
-      }
-
+      // Check if all players are ready
+      const allReady = Array.from(room.players.values()).every((p) => p.isReadyForGame);
       if (!allReady) {
-        /// Not everyone is ready
-        log_notice(`Wait for all players!`);
+        log_notice("Waiting for all players to submit their monsters...");
         return;
       }
 
-      /// start next round
+      // Now that everyone is ready: generate next round
       room.generateNextRound();
-      for (let i = 0; i < room.matches[room.matches.length - 1].length; i++) {
-        /// foreach match in current round
-        const currentMatch = room.getMatch(room.matches.length - 1, i);
-        if (currentMatch instanceof ByeMatch) {
-          playerChannel.to((currentMatch as ByeMatch).player.socketId).emit("round-start-bye", {}); // TODO - PLACEHOLDER
+      const round = room.matches.length;
+
+      for (let i = 0; i < room.matches[round - 1].length; i++) {
+        const match = room.getMatch(round - 1, i);
+
+        if (match instanceof ByeMatch) {
+          const byePlayer = match.player;
+          playerChannel.to(byePlayer.socketId).emit("round-start-bye", {});
           continue;
         }
 
-        if (currentMatch instanceof DuelMatch) {
-          (currentMatch as DuelMatch).sides.forEach((side) => {
-            playerChannel.to(side.player.socketId).emit("round-start", { currentMatch }); // TODO - PLACEHOLDER
+        if (match instanceof DuelMatch) {
+          const [side1, side2] = match.sides;
+          const player1 = side1.player;
+          const player2 = side2.player;
+
+          // Save match log
+          const logData = {
+            roomId: room.roomId,
+            round,
+            matchIndex: i,
+            player1: {
+              name: player1.displayName,
+              monster: player1.monster,
+            },
+            player2: {
+              name: player2.displayName,
+              monster: player2.monster,
+            },
+          };
+
+          const logDir = "match_logs";
+          fs.mkdirSync(logDir, { recursive: true });
+          const filePath = `${logDir}/room_${logData.roomId}_round_${round}_match_${i}.json`;
+          fs.writeFileSync(filePath, JSON.stringify(logData, null, 2));
+          log_notice(`Wrote match log to ${filePath}`);
+
+          // Emit round-start to both players
+          console.log(`Emitting round-start to players in room ${room.roomId}, round ${round}, match ${i}:`);
+          console.log(`→ Player 1: ${player1.displayName}, Socket ID: ${player1.socketId}`);
+          console.log(`→ Player 2: ${player2.displayName}, Socket ID: ${player2.socketId}`);
+
+          playerChannel.to(player1.socketId).emit("round-start", {
+            roomId: room.roomId,
+            round,
+            matchIndex: i,
           });
+          playerChannel.to(player2.socketId).emit("round-start", {
+            roomId: room.roomId,
+            round,
+            matchIndex: i,
+          });
+
           continue;
         }
-        log_attention("Unexpected behaviour. This should not be reached. Perhaps you forgot to implement a match type.");
+
+        log_attention("Unknown match type encountered during round start.");
       }
 
-      // TODO spectate?
-      hostChannel.emit("round-start", {}); // TODO - PLACEHOLDER
+      hostChannel.emit("round-start", {}); // Optional: Inform spectators or host
     }
+
     //#endregion
   });
 

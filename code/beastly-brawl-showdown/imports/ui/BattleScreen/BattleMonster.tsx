@@ -1,42 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
-
-const socket: Socket = io(); // Defaults to current host
+import Monsters from '/imports/data/monsters/Monsters';
+import { usePlayerSocket } from '../player/game/PlayerPage';
 
 type BattleMonsterProps = {
-  image: string;
-  alt: string;
+  monster: Monsters;
   position: string; // "monster1" or "monster2"
-  playerId: string; // Who is this monster controlled by
-  initialHp: number; // pass initial HP here
-
 };
 
-export const BattleMonster: React.FC<BattleMonsterProps> = ({ image, alt, position, playerId }) => {
-  const [hp, setHp] = useState<number>(100);
+
+export const BattleMonster: React.FC<BattleMonsterProps> = ({ monster, position }) => {
+  const { socket } = usePlayerSocket();
+  const [hp, setHp] = useState<number>(monster.currentHealth);
+  const maxHp = monster.baseHealth;
 
   useEffect(() => {
-    // Update HP when server sends new value
-    socket.on('update-hp', ({ playerId: targetId, newHp }) => {
-      if (targetId === playerId) {
+    if (!socket) return;
+
+    const handleUpdateHp = ({ playerId, newHp }: { playerId: string; newHp: number }) => {
+      if (playerId === monster.monsterName) {
         setHp(newHp);
       }
-    });
+    };
+
+    socket.on('update-hp', handleUpdateHp);
 
     return () => {
-      socket.off('update-hp');
+      socket.off('update-hp', handleUpdateHp);
     };
-  }, [playerId]);
+  }, [socket, monster.monsterName]);
 
   return (
     <div className={position}>
       <div className="progressContainer">
-        <progress value={hp} max={100} className="hpBar"></progress>
-        <span className="hpLabel">{hp} HP</span>
+        <progress value={hp} max={maxHp} className="hpBar" />
+        <span className="hpLabel">{hp} / {maxHp} HP</span>
       </div>
-      <img className="battleMonsterImg" src={image} alt={alt} />
+      <img className="battleMonsterImg" src={monster.imageUrl} alt={monster.monsterName} />
     </div>
   );
-
-  //Server side io.emit('update-hp', { playerId: damagedPlayerId, newHp: updatedHp });
 };

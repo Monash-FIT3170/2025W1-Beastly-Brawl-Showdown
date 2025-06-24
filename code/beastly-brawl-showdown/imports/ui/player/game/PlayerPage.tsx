@@ -48,7 +48,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.log("Connected to server");
         setIsConnected(true);
       });
-      
+
       socketRef.current.on("disconnect", () => {
         console.log("Disconnected from server");
         setIsConnected(false);
@@ -78,6 +78,8 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 
 //#region Main Player Component
 const PlayerContent = () => {
+  const [matchData, setMatchData] = useState<any | null>(null);
+
   // Socket established using the exported context function
   const { socket, isConnected } = usePlayerSocket();
 
@@ -99,10 +101,39 @@ const PlayerContent = () => {
     });
 
     // Listen for round-start
-    socket.on("round-start", () => {
-      console.log(`Round start command received from server`)
-      setReady(true);
-    })
+    socket.on("round-start", async ({ roomId, round, matchIndex }) => {
+      console.log(`Round started. Waiting to fetch match log...`);
+
+      // Wait a moment to let the server write the file
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1000ms delay
+
+      try {
+        console.log(`${serverUrl}/match-log/${roomId}/${round}/${matchIndex}`);
+        const res = await fetch(`${serverUrl}/match-log/${roomId}/${round}/${matchIndex}`);
+        if (!res.ok) throw new Error("Failed to load match log");
+
+        const matchLog = await res.json();
+        console.log("Fetched match log:", matchLog);
+        const myName = sessionStorage.getItem("displayName");
+        const myMonster =
+          matchLog.player1.name === myName
+            ? matchLog.player1.monster
+            : matchLog.player2.monster;
+        const enemyMonster =
+          matchLog.player1.name !== myName
+            ? matchLog.player1.monster
+            : matchLog.player2.monster;
+
+        setMatchData({ myMonster, enemyMonster });
+        console.log(matchData);
+        
+
+        setReady(true);
+      } catch (err) {
+        console.error("Error fetching match log:", err);
+      }
+    });
+
 
     return () => {
       socket.off("game-started");
@@ -169,8 +200,8 @@ const PlayerContent = () => {
   }
 
   // Battle screen displays when all checks have been passed
-  // TODO: selectedMonsterName should not exist, battle screen needs some other way to know what monsters to display
-  return <BattleScreen />;
+  return <BattleScreen matchData={matchData} />;
+
 };
 //#endregion
 
