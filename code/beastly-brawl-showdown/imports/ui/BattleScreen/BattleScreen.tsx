@@ -16,6 +16,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   // Establish connection to existing socket
   const { socket /*, isConnected*/ } = usePlayerSocket();
 
+  // Establish if a move has been selected
+  const [hasSubmittedAction, setHasSubmittedAction] = useState(false);
+
   // Initialize monsters
   const [myMonster, setMyMonster] = useState<Monsters>();
   const [enemyMonster, setEnemyMonster] = useState<Monsters>();
@@ -30,14 +33,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
 
   const handleAction = (action: 'attack' | 'defend' | 'ability') => {
-    if (!socket) return;
+    if (!socket || hasSubmittedAction) return;
 
     socket.emit('playerAction', {
-      playerSocket: socket.id, // use actual socket id string here
+      playerSocket: socket.id,
       action,
     });
 
-    // You can toggle animation here if implemented
+    setHasSubmittedAction(true); // Disable buttons after action
   };
 
   if (!myMonster || !enemyMonster) {
@@ -52,7 +55,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         player1Monster={myMonster}
         player2Monster={enemyMonster}
       />
-      <BattleBottom onAction={handleAction} />
+      <BattleBottom onAction={handleAction} disabled={hasSubmittedAction} />
     </div>
   );
 };

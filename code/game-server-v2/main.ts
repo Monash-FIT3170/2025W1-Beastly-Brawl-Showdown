@@ -328,28 +328,53 @@ async function main(config: ServerConfig) {
 
     //#region <<< Submit Move
     socket.on(RequestSubmitMove.name, RequestSubmitMove);
-
-    function ForwardSelectedMove(): void { }
-
+    
     function RequestSubmitMove(move: any): void {
-      // TODO type
+      // move should include playerSocket (socket.id) and action (string)
       console.log("Move submitted: ", JSON.stringify(move));
 
-      // TODO turn stuff
-      // for that match and for this player, store the desired move for that turn
+      // Find the room and player for this socket id
+      for (const [roomId, room] of gameServer.rooms) {
+        // Iterate over all players in this room
+        for (const [playerId, player] of room.players) {
+          if (player.socketId === move.playerSocket) {
+            const selectedPlayer: Player = player;
+            const match = room.playerToMatch.get(selectedPlayer);
 
-      // TODO if all users in that match submitted and a turn can be processed
-      if (false) {
-        // resolve the turn
-        // // const TEMP_playerSocketId = "sdfgrdfgrdgfrdfg";
-        // // playerChannel
-        // //   .to(TEMP_playerSocketId)
-        // //   .emit("turn-result", "PLACEHOLDER RESULT");
-        // idk do something to mark a new turn or however u do it
-        // emit the output of the turn to both players (i.e updated state of the monsters)
-        // if winner idk yet
+            if (match instanceof DuelMatch) {
+              // Determine which side the player is on and store the move
+              if (match.sides[0].player === selectedPlayer) {
+                match.sides[0].pendingMove = move.action;
+              } else if (match.sides[1].player === selectedPlayer) {
+                match.sides[1].pendingMove = move.action;
+              } else {
+                console.warn("Player not found in any side of match");
+                return;
+              }
+
+              // If both players have submitted their moves, calculate the battle
+              if (match.sides[0].pendingMove != null && match.sides[1].pendingMove != null) {
+                const [monster1, monster2] = match.CalculateBattle();
+
+                // TODO: Emit updated monster states to each player via socket
+                playerChannel.to(match.sides[0].player.socketId).emit("battle-update", monster1);
+                playerChannel.to(match.sides[1].player.socketId).emit("battle-update", monster2);
+
+                // Clear pending moves for next turn
+                match.sides[0].pendingMove = null;
+                match.sides[1].pendingMove = null;
+
+                // You may want to check if match ends here and emit appropriate events
+              }
+            } else {
+              console.warn("No match found for player", selectedPlayer);
+            }
+            return; // Found player and handled move, exit loops
+          }
+        }
       }
     }
+    //#endregion
     //#endregion
 
     //#region <<< Monster Select
