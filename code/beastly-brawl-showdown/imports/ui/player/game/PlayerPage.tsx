@@ -101,38 +101,18 @@ const PlayerContent = () => {
     });
 
     // Listen for round-start
-    socket.on("round-start", async ({ roomId, round, matchIndex }) => {
-      console.log(`Round started. Waiting to fetch match log...`);
+    socket.on("round-start", ({ player1, player2 }) => {
+      const myName = sessionStorage.getItem("displayName");
 
-      // Wait a moment to let the server write the file
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1000ms delay
+      const myMonster =
+        player1.name === myName ? player1.monster : player2.monster;
+      const enemyMonster =
+        player1.name !== myName ? player1.monster : player2.monster;
 
-      try {
-        console.log(`${serverUrl}/match-log/${roomId}/${round}/${matchIndex}`);
-        const res = await fetch(`${serverUrl}/match-log/${roomId}/${round}/${matchIndex}`);
-        if (!res.ok) throw new Error("Failed to load match log");
-
-        const matchLog = await res.json();
-        console.log("Fetched match log:", matchLog);
-        const myName = sessionStorage.getItem("displayName");
-        const myMonster =
-          matchLog.player1.name === myName
-            ? matchLog.player1.monster
-            : matchLog.player2.monster;
-        const enemyMonster =
-          matchLog.player1.name !== myName
-            ? matchLog.player1.monster
-            : matchLog.player2.monster;
-
-        setMatchData({ myMonster, enemyMonster });
-        console.log(matchData);
-        
-
-        setReady(true);
-      } catch (err) {
-        console.error("Error fetching match log:", err);
-      }
+      setMatchData({ myMonster, enemyMonster });
+      setReady(true);
     });
+
 
 
     return () => {

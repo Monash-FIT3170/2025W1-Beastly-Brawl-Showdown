@@ -11,7 +11,6 @@ import { Player } from "./Player";
 import { RoomPhase, PlayerChannelAuth, RoomId, HostChannelAuth } from "../shared/types";
 import { Room } from "./Room";
 import { ByeMatch, DuelMatch, Match } from "./Match";
-import fs from "fs";
 
 // import { HostSocketData, PlayerSocketData } from "./types";
 
@@ -204,26 +203,26 @@ async function main(config: ServerConfig) {
     res.send(checkResult);
   });
 
-  // Serve match log files
-  expressApp.get("/match-log/:roomId/:round/:matchIndex", (req, res) => {
-    const { roomId, round, matchIndex } = req.params;
-    const filePath = `match_logs/room_${roomId}_round_${round}_match_${matchIndex}.json`;
+  // // Serve match log files
+  // expressApp.get("/match-log/:roomId/:round/:matchIndex", (req, res) => {
+  //   const { roomId, round, matchIndex } = req.params;
+  //   const filePath = `match_logs/room_${roomId}_round_${round}_match_${matchIndex}.json`;
 
-    fs.readFile(filePath, "utf8", (err, data) => {
-      if (err) {
-        console.error(`Failed to read match log at ${filePath}:`, err.message);
-        return res.status(404).send("Match log not found");
-      }
+  //   fs.readFile(filePath, "utf8", (err, data) => {
+  //     if (err) {
+  //       console.error(`Failed to read match log at ${filePath}:`, err.message);
+  //       return res.status(404).send("Match log not found");
+  //     }
 
-      try {
-        const json = JSON.parse(data);
-        res.json(json);
-      } catch (parseError) {
-        console.error("Invalid JSON in match log");
-        res.status(500).send("Invalid match log format");
-      }
-    });
-  });
+  //     try {
+  //       const json = JSON.parse(data);
+  //       res.json(json);
+  //     } catch (parseError) {
+  //       console.error("Invalid JSON in match log");
+  //       res.status(500).send("Invalid match log format");
+  //     }
+  //   });
+  // });
 
 
   playerChannel.use((socket, next) => {
@@ -328,7 +327,7 @@ async function main(config: ServerConfig) {
 
     //#region <<< Submit Move
     socket.on(RequestSubmitMove.name, RequestSubmitMove);
-    
+
     function RequestSubmitMove(move: any): void {
       // move should include playerSocket (socket.id) and action (string)
       console.log("Move submitted: ", JSON.stringify(move));
@@ -422,11 +421,11 @@ async function main(config: ServerConfig) {
           const player1 = side1.player;
           const player2 = side2.player;
 
-          // Save match log
-          const logData = {
-            roomId: room.roomId,
-            round,
-            matchIndex: i,
+          // Emit round-start to both players
+          console.log(`→ Player 1: ${player1.displayName}, Socket ID: ${player1.socketId}`);
+          console.log(`→ Player 2: ${player2.displayName}, Socket ID: ${player2.socketId}`);
+
+          const matchData = {
             player1: {
               name: player1.displayName,
               monster: player1.monster,
@@ -437,27 +436,9 @@ async function main(config: ServerConfig) {
             },
           };
 
-          const logDir = "match_logs";
-          fs.mkdirSync(logDir, { recursive: true });
-          const filePath = `${logDir}/room_${logData.roomId}_round_${round}_match_${i}.json`;
-          fs.writeFileSync(filePath, JSON.stringify(logData, null, 2));
-          log_notice(`Wrote match log to ${filePath}`);
-
-          // Emit round-start to both players
-          console.log(`Emitting round-start to players in room ${room.roomId}, round ${round}, match ${i}:`);
-          console.log(`→ Player 1: ${player1.displayName}, Socket ID: ${player1.socketId}`);
-          console.log(`→ Player 2: ${player2.displayName}, Socket ID: ${player2.socketId}`);
-
-          playerChannel.to(player1.socketId).emit("round-start", {
-            roomId: room.roomId,
-            round,
-            matchIndex: i,
-          });
-          playerChannel.to(player2.socketId).emit("round-start", {
-            roomId: room.roomId,
-            round,
-            matchIndex: i,
-          });
+          // Emit to both players
+          playerChannel.to(player1.socketId).emit("round-start", matchData);
+          playerChannel.to(player2.socketId).emit("round-start", matchData);
 
           continue;
         }
