@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.2",
+    "@types/mocha": "^10.0.10",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "ts-node": "^10.9.2",

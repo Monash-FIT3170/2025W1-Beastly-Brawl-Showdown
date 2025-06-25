@@ -272,60 +272,14 @@ async function main(config: ServerConfig) {
     next();
   });
 
-  playerChannel.on("connection", async (socket: Socket) => {
+
+  //#region <<< Submit Move
+
+    playerChannel.on("connection", async (socket: Socket) => {
     log_event(`Player connected: ${socket.id}. Binding listeners...`);
 
     socket.on("disconnect", () => log_event("Player disconnected."));
 
-    // Checks for what action the player chose.
-    socket.on('playerAction', (move: any) => {
-      // Prints actions chosen.
-      console.log("Move submitted:", JSON.stringify(move));
-
-
-      // Looks through every room and every player in that room to see
-      // if the player that pressed that button is in that room.
-      for (const [roomId, room] of gameServer.rooms) {
-
-        // Iterate over all players in this room
-        for (const [playerId, player] of room.players) {
-
-          // Check if this is the player who sent the move
-          if (player.socketId === move.playerSocket) {
-            const selectedPlayer: Player = player;
-            const match = room.playerToMatch.get(selectedPlayer);
-
-            // Checks to see if the there is a match for the player. 
-            // Stupid ah Javascript >:c.
-            if (match instanceof DuelMatch) {
-
-              // Checks to see which side the player is on
-              if (match.sides[0].player = selectedPlayer) {
-                match.sides[0].pendingMove = move.action;
-              }
-              else {
-                match.sides[1].pendingMove = move.action;
-              }
-
-              // Checks to see if both players have chosen an action.
-              if (match.sides[0].pendingMove != null && match.sides[1].pendingMove != null) {
-
-                const [monster1, monster2] = match.CalculateBattle();
-
-              }
-
-            } else {
-              console.warn("No match found for player", selectedPlayer);
-            }
-          }
-        }
-
-      }
-
-    });
-
-
-    //#region <<< Submit Move
     socket.on(RequestSubmitMove.name, RequestSubmitMove);
 
     function RequestSubmitMove(move: any): void {
@@ -337,8 +291,13 @@ async function main(config: ServerConfig) {
         // Iterate over all players in this room
         for (const [playerId, player] of room.players) {
           if (player.socketId === move.playerSocket) {
+            // Found the player, now we can process the move
             const selectedPlayer: Player = player;
-            const match = room.playerToMatch.get(selectedPlayer);
+            console.log("Player found:", selectedPlayer.displayName, "with socket ID:", selectedPlayer.socketId);
+
+            // Check if the player is in a match
+            const match = room.getMatchByPlayer(selectedPlayer);
+            console.log("Match found for player(check2):", selectedPlayer.socketId);
 
             if (match instanceof DuelMatch) {
               // Determine which side the player is on and store the move
@@ -350,6 +309,8 @@ async function main(config: ServerConfig) {
                 console.warn("Player not found in any side of match");
                 return;
               }
+            
+              console.log(match);
 
               // If both players have submitted their moves, calculate the battle
               if (match.sides[0].pendingMove != null && match.sides[1].pendingMove != null) {
@@ -373,7 +334,6 @@ async function main(config: ServerConfig) {
         }
       }
     }
-    //#endregion
     //#endregion
 
     //#region <<< Monster Select

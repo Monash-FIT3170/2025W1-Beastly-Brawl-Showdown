@@ -20,7 +20,7 @@ export class Room {
   settings: GameSettings = new GameSettings();
   matches: Match[][] = [];
   // matches: Map<MatchId, Match> = new Map<MatchId, Match>();
-  playerToMatch: Map<Player, Match> = new Map<Player, Match>();
+  playerToMatch: Map<string, Match> = new Map<string, Match>();
 
   constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode) {
     this.hostSocketId = hostSocketId;
@@ -108,8 +108,18 @@ export class Room {
       }
 
       // Make new match with playerPending and playersToAssign[i]
-      newRound.push(new DuelMatch(matchesGenerated, playerPending, playersToAssign[i]));
+      const match = new DuelMatch(matchesGenerated, playerPending, playersToAssign[i]);
+      newRound.push(match);
+
+      // Store match for both players using their socketIds
+      this.playerToMatch.set(playerPending.socketId, match);
+      this.playerToMatch.set(playersToAssign[i].socketId, match);
+      console.log(
+        `Match created (ID: ${match.matchId}): ${playerPending.displayName} vs ${playersToAssign[i].displayName}`
+      );
+
       matchesGenerated++;
+      playerPending = null; // Reset for next match
     }
     this.matches.push(newRound);
   }
@@ -117,4 +127,9 @@ export class Room {
   getMatch(roundNumber: number, matchId: MatchId) {
     return this.matches[roundNumber][matchId];
   }
+
+  getMatchByPlayer(player: Player): Match | undefined {
+    return this.playerToMatch.get(player.socketId);
+  }
+
 }

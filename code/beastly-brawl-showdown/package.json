@@ -8,7 +8,7 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
   "dependencies": {
-    "@babel/runtime": "^7.27.3",
+    "@babel/runtime": "^7.27.6",
     "easyqrcodejs": "^4.6.2",
     "meteor-node-stubs": "^1.2.19",
     "react": "^18.3.1",

@@ -35,7 +35,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const handleAction = (action: 'attack' | 'defend' | 'ability') => {
     if (!socket || hasSubmittedAction) return;
 
-    socket.emit('playerAction', {
+    socket.emit("RequestSubmitMove", {
       playerSocket: socket.id,
       action,
     });
