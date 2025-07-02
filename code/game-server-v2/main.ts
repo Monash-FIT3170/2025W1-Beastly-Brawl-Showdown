@@ -275,7 +275,7 @@ async function main(config: ServerConfig) {
 
   //#region <<< Submit Move
 
-    playerChannel.on("connection", async (socket: Socket) => {
+  playerChannel.on("connection", async (socket: Socket) => {
     log_event(`Player connected: ${socket.id}. Binding listeners...`);
 
     socket.on("disconnect", () => log_event("Player disconnected."));
@@ -309,7 +309,7 @@ async function main(config: ServerConfig) {
                 console.warn("Player not found in any side of match");
                 return;
               }
-            
+
               console.log(match);
 
               // If both players have submitted their moves, calculate the battle
@@ -382,23 +382,23 @@ async function main(config: ServerConfig) {
           const player2 = side2.player;
 
           // Emit round-start to both players
-          console.log(`→ Player 1: ${player1.displayName}, Socket ID: ${player1.socketId}`);
-          console.log(`→ Player 2: ${player2.displayName}, Socket ID: ${player2.socketId}`);
+          console.log(`→ Match ${i}: ${player1.displayName} vs ${player2.displayName}`);
 
-          const matchData = {
-            player1: {
-              name: player1.displayName,
-              monster: player1.monster,
-            },
-            player2: {
-              name: player2.displayName,
-              monster: player2.monster,
-            },
+          // Create matchData from each player's perspective
+          const matchDataForP1 = {
+            myMonster: player1.monster,
+            enemyMonster: player2.monster,
           };
 
+          const matchDataForP2 = {
+            myMonster: player2.monster,
+            enemyMonster: player1.monster,
+          };
+
+
           // Emit to both players
-          playerChannel.to(player1.socketId).emit("round-start", matchData);
-          playerChannel.to(player2.socketId).emit("round-start", matchData);
+          playerChannel.to(player1.socketId).emit("round-start", matchDataForP1);
+          playerChannel.to(player2.socketId).emit("round-start", matchDataForP2);
 
           continue;
         }
