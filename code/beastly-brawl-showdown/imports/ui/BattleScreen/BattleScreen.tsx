@@ -31,6 +31,23 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setEnemyMonster(matchData.enemyMonster);
   }, [matchData]);
 
+  //Listen for battle-update from server
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleBattleUpdate = (data: { myMonster: Monsters; enemyMonster: Monsters }) => {
+      console.log("Received battle update", data);
+      setMyMonster(data.myMonster);
+      setEnemyMonster(data.enemyMonster);
+      setHasSubmittedAction(false); // Re-enable buttons for next turn
+    };
+
+    socket.on("battle-update", handleBattleUpdate);
+
+    return () => {
+      socket.off("battle-update", handleBattleUpdate);
+    };
+  }, [socket]);
 
   const handleAction = (action: 'attack' | 'defend' | 'ability') => {
     if (!socket || hasSubmittedAction) return;

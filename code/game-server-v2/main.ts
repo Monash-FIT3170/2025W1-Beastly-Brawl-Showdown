@@ -315,10 +315,21 @@ async function main(config: ServerConfig) {
               // If both players have submitted their moves, calculate the battle
               if (match.sides[0].pendingMove != null && match.sides[1].pendingMove != null) {
                 const [monster1, monster2] = match.CalculateBattle();
+                console.log("Battle calculated:", monster1, monster2);
 
-                // TODO: Emit updated monster states to each player via socket
-                playerChannel.to(match.sides[0].player.socketId).emit("battle-update", monster1);
-                playerChannel.to(match.sides[1].player.socketId).emit("battle-update", monster2);
+                const player1SocketId = match.sides[0].player.socketId;
+                const player2SocketId = match.sides[1].player.socketId;
+
+                playerChannel.to(player1SocketId).emit("battle-update", {
+                  myMonster: monster1,
+                  enemyMonster: monster2,
+                });
+
+                playerChannel.to(player2SocketId).emit("battle-update", {
+                  myMonster: monster2,
+                  enemyMonster: monster1,
+                });
+
 
                 // Clear pending moves for next turn
                 match.sides[0].pendingMove = null;

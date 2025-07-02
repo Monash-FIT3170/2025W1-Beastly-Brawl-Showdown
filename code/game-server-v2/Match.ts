@@ -84,16 +84,25 @@ export class DuelMatch extends BaseMatch {
     }
   }
 
-  CalculateBattle(): [Monsters,Monsters]{
-    
-    if(this.sides[0].pendingMove == 'attack'){
-      this.sides[0].monsterState.health = this.sides[0].monsterState.health - this.sides[1].monsterState.AC
+  CalculateBattle(): [Monsters, Monsters] {
+    const [sideA, sideB] = this.sides;
+
+    const actionA = sideA.pendingMove;
+    const actionB = sideB.pendingMove;
+
+    const damage = 5;
+
+    // Side A attacks B
+    if (actionA === 'attack' && actionB !== 'defend') {
+      sideB.monsterState.health -= damage;
     }
 
-    if(this.sides[0].pendingMove == 'attack'){
-      this.sides[1].monsterState.health = this.sides[1].monsterState.health - this.sides[0].monsterState.AC
+    // Side B attacks A
+    if (actionB === 'attack' && actionA !== 'defend') {
+      sideA.monsterState.health -= damage;
     }
-    
-    return[this.sides[0].monsterState,this.sides[1].monsterState]
+
+    return [sideA.monsterState, sideB.monsterState];
   }
+
 }

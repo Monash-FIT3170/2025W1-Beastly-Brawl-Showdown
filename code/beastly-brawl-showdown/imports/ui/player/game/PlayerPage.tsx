@@ -101,19 +101,16 @@ const PlayerContent = () => {
     });
 
     // Listen for round-start
-    socket.on("round-start", ({ player1, player2 }) => {
-      const myName = sessionStorage.getItem("displayName");
+    socket.on("round-start", (matchData) => {
+      if (!matchData?.myMonster || !matchData?.enemyMonster) {
+        console.warn("Received incomplete match data:", matchData);
+        return;
+      }
 
-      const myMonster =
-        player1.name === myName ? player1.monster : player2.monster;
-      const enemyMonster =
-        player1.name !== myName ? player1.monster : player2.monster;
-
-      setMatchData({ myMonster, enemyMonster });
+      console.log("Received match data:", matchData);
+      setMatchData(matchData);
       setReady(true);
     });
-
-
 
     return () => {
       socket.off("game-started");
