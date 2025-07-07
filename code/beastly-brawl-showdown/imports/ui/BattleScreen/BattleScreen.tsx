@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { monsterData, MonsterName } from '../../data/monsters/MonsterData';
+import { MonsterPool } from '../../../../combat/data/monster_pool';
+import { makeMonster } from '../../../../combat/system/monster';
+import type { Monster } from '../../../../combat/system/monster';
 import { BattleTop } from './BattleTop';
 import { BattleMiddle } from './BattleMiddle';
 import { BattleBottom } from './BattleBottom';
 import { usePlayerSocket } from '../player/game/PlayerPage';
-import Monsters from '/imports/data/monsters/Monsters';
 
 export const BattleScreen: React.FC = () => {
 
   // #region Variable initialisation
   // Establish connection to existing socket
-  const { socket, isConnected } = usePlayerSocket();
+  const { socket } = usePlayerSocket();
 
-  // Initialise the 2 monsters with the monsterdata class 
-  const [myMonster, setMyMonster] = useState<Monsters>();
-  const [enemyMonster, setEnemyMonster] = useState<Monsters>();
+  // Initialise the 2 players
+  const [myMonster, setMyMonster] = useState<Monster | null>(null);
+  const [enemyMonster, setEnemyMonster] = useState<Monster | null>(null);
 
   // State to trigger animation showing or not
-  const [showAnimation, setShowAnimation] = useState(false);
+  const [showAnimation] = useState(false);
   // #endregion
 
   // #region Socket Methods
@@ -27,18 +28,25 @@ export const BattleScreen: React.FC = () => {
     if (!socket) return;
 
 
-    const handleMatchStarted = (data: { myMonster: string; enemyMonster: string }) => {
-      console.log("Match started:", data);
+    const handleMatchStarted = (data: {
+      myMonster: string;
+      enemyMonster: string;
+      myId?: string;
+      enemyId?: string;
+    }) => {
+      console.log('Match started:', data);
 
-      const MyMonsterClass = monsterData[data.myMonster as MonsterName];
-      const EnemyMonsterClass = monsterData[data.enemyMonster as MonsterName];
+      const myMonsterTemplate = MonsterPool.find(m => m.name === data.myMonster);
+      const enemyMonsterTemplate = MonsterPool.find(m => m.name === data.enemyMonster);
 
-      if (MyMonsterClass && EnemyMonsterClass) {
-        setMyMonster(new MyMonsterClass());
-        setEnemyMonster(new EnemyMonsterClass());
-      } else {
+      if (!myMonsterTemplate || !enemyMonsterTemplate) {
         console.warn("Invalid monster name(s) received from server:", data);
+        return;
       }
+
+      // Create monster instances from templates
+      setMyMonster(makeMonster(myMonsterTemplate));
+      setEnemyMonster(makeMonster(enemyMonsterTemplate));
     };
 
     socket.on("match-started", handleMatchStarted);
@@ -109,8 +117,8 @@ export const BattleScreen: React.FC = () => {
         showAnimation={showAnimation}
         player1Monster={myMonster}
         player2Monster={enemyMonster}
-        playerId1="player1-id"
-        playerId2="player2-id"
+        playerId1={"player1-id"}
+        playerId2={"player2-id"}
       />
       <BattleBottom onAction={handleAction} />
     </div>

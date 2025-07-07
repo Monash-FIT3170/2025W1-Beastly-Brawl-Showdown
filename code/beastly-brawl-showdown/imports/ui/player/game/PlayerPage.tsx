@@ -2,8 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState, } from "
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
-import { monsterData, MonsterName } from "/imports/data/monsters/MonsterData";
-import Monsters from "/imports/data/monsters/Monsters";
+import { MonsterPool } from '../../../../../combat/data/monster_pool';
 
 //#region Socket Context Definition
 
@@ -127,8 +126,8 @@ const PlayerContent = () => {
   }
 
   // Type checking function converting string to MonsterName union
-  function isMonsterName(name: string): name is MonsterName {
-    return name in monsterData;
+  function isMonsterName(name: string): boolean{
+    return MonsterPool.some(monster => monster.name === name);
   }
 
   // Function that takes the result of monster selection and sends it to the server, then switches screen.
@@ -136,12 +135,15 @@ const PlayerContent = () => {
     // Checking if string is valid monster
     if (isMonsterName(monster)) {
       // Create new monster based on string given
-      const data: Monsters = new monsterData[monster]();
+      const template = MonsterPool.find(m => m.name === monster);
+      if (!template) {
+        console.error(`Monster template not found for name: ${monster}`);
+        return;
+      } 
 
       // Check if socket exists
       if (socket) {
-        console.log(data);
-        socket.emit("RequestSubmitMonster", { data });
+        socket.emit("RequestSubmitMonster", { Monstername: monster, template: template, joinCode, displayName });
 
         // TODO: Make sure all players select a monster before changing the state below
         setMonsterSelected(true);
