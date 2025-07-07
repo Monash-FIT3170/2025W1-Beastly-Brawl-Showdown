@@ -44,12 +44,11 @@ const ActionPool: Action[] = [
 
       // Check if the monster has dodge component
       const dodgeComponent = getComponent(monster, "dodge");
-      if (dodgeComponent && dodgeComponent.used === false) {
+      if (dodgeComponent && "used" in dodgeComponent && dodgeComponent.used === false) {
         console.log(`${actionData.targetSideId} has dodged the attack.`);
         dodgeComponent.used = true; // Mark the dodge as used
         return; // Exit early, the attack is dodged
       }
-        // Monster has a dodge component, increase armor 
 
       // Check if the attack hits
       if (rollResult <= monster.currentArmorClass) {
@@ -73,9 +72,8 @@ const ActionPool: Action[] = [
 
       // Give the player an option of rerolling if they can once they ACK the roll
       const rerollComponent = getComponent(monster, "rerollAttack");
-      let usedReroll = false;
 
-      if (rerollComponent && rerollComponent.charges > 0) {
+      if (rerollComponent && "charges" in rerollComponent && rerollComponent.charges > 0) {
         // Ask player if they want to reroll
         console.log(`${sourceSideId} EMIT: Ask player if they want to reroll.`);
 
@@ -88,14 +86,12 @@ const ActionPool: Action[] = [
           const success = rerollComponent.use(); // Consume charge only after player accepts
           if (success) {
             rollResult = roll(20);
-            usedReroll = true;
             console.log(`${sourceSideId} the reroll is ${rollResult}`);
           } else {
             console.log(`${sourceSideId} tried to reroll, but had no charges left.`);
           }
         }
       }
-
 
       const damageComponent: Component = {
         name: "damage",
@@ -107,9 +103,6 @@ const ActionPool: Action[] = [
       };
       monster.components.push(damageComponent);
 
-      if (usedReroll) {
-        console.log(`${sourceSideId} used a reroll for the attack.`);
-      }
     },
   },
 
@@ -129,7 +122,8 @@ const ActionPool: Action[] = [
       monster.defendActionCharges -= 1;
 
       // Increase the monster's armor class by 2 for this turn
-      monster.currentArmorClass += 2;
+      monster.temporaryArmorModifier = (monster.temporaryArmorModifier ?? 0) + 2;
+      resetMonsterArmorClass(monster);
       console.log(`${sourceSideId}'s AC increased by 2 for this turn.`);
 
       // Create a component to increase AC
@@ -137,6 +131,7 @@ const ActionPool: Action[] = [
         name: "defense",
         OnOutcome: (battle: Battle) => {
           // Reset the monster's armor class to its base value at the end of the turn
+          monster.temporaryArmorModifier = 0; // Reset temporary modifier
           resetMonsterArmorClass(monster);
         },
       };

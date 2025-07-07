@@ -38,6 +38,8 @@ export type Monster = {
   queuedActionData: ActionData | null; //? Turn into an actual queue if needed
   defendActionCharges: number; //? How many times can the monster defend in a round
   currentArmorClass: number; //? The current armor class, which can change during the battle
+  permanentArmorModifier?: number; //? Permanent armor modifier, if any
+  temporaryArmorModifier?: number; //? Temporary armor modifier, if any
 
   //* Non-default components
   components: Array<Component>;
@@ -55,5 +57,8 @@ export function makeMonster(template: MonsterTemplate): Monster {
 }
 
 export function resetMonsterArmorClass(monster: Monster): void {
-  monster.currentArmorClass = monster.template.baseStats.armorClass;
+  const base = monster.template.baseStats.armorClass;
+  const perm = monster.permanentArmorModifier ?? 0;
+  const temp = monster.temporaryArmorModifier ?? 0;
+  monster.currentArmorClass = base + perm + temp;
 }

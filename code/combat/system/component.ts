@@ -77,7 +77,7 @@ export function createStunComponent(): Component {
       return this.duration > 0;
     },
   };
-} 
+}
 
 export function createGreaterCritComponent(): Component {
   return {
