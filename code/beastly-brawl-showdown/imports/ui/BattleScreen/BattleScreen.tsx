@@ -27,7 +27,6 @@ export const BattleScreen: React.FC = () => {
     // Error checking for null socket
     if (!socket) return;
 
-
     const handleMatchStarted = (data: {
       myMonster: string;
       enemyMonster: string;
@@ -49,7 +48,24 @@ export const BattleScreen: React.FC = () => {
       setEnemyMonster(makeMonster(enemyMonsterTemplate));
     };
 
-    socket.on("match-started", handleMatchStarted);
+    const handleBattleUpdate = (data: {
+      myMonster: Monster;
+      enemyMonster: Monster;  
+    }) => {
+      console.log('Battle update:', data);
+      setMyMonster(data.myMonster);
+      setEnemyMonster(data.enemyMonster);
+    };
+
+    socket.on('matchStarted', handleMatchStarted);
+    socket.on('battleUpdate', handleBattleUpdate);
+
+    return () => {
+      socket.off('matchStarted', handleMatchStarted);
+      socket.off('battleUpdate', handleBattleUpdate);
+    };
+  }, [socket]);
+
 
     //#region RECEIVE DICE AND ATTACK ANIMATIONS
     //     let interval: NodeJS.Timeout;
@@ -78,7 +94,7 @@ export const BattleScreen: React.FC = () => {
     //   }, intervalSpeed);
     // }
     //#endregion
-  });
+
   //#endregion
 
   //#region Actions
@@ -92,8 +108,7 @@ export const BattleScreen: React.FC = () => {
   const handleAction = (action: 'attack' | 'defend' | 'ability') => {
     if (!socket) return;
 
-    socket.emit('playerAction', {
-      playerSocket: usePlayerSocket,
+    socket.emit('submitMove', {
       action,
     });
 

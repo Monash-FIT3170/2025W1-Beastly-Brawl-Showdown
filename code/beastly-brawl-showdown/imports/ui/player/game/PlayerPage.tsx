@@ -143,7 +143,7 @@ const PlayerContent = () => {
 
       // Check if socket exists
       if (socket) {
-        socket.emit("RequestSubmitMonster", { Monstername: monster, template: template, joinCode, displayName });
+        socket.emit("submitMonsterChoice", { Monstername: monster, template: template, joinCode, displayName });
 
         // TODO: Make sure all players select a monster before changing the state below
         setMonsterSelected(true);

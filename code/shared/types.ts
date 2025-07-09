@@ -7,19 +7,20 @@ type BasicClientToServerEvents = {
 };
 type BasicServerToClientEvents = {
   pong: () => void;
-
   error: (msg: string) => void;
 };
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   submitMonsterChoice: () => void;
   submitGameReadyState: () => void;
-  submitMove: () => void;
+  submitMove: (move: {action: `attack` | `defend` | `ability`}) => void;
   submitMoveLockState: () => void;
 };
+
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
   requestMonsterSelection: (setMonsterId: (monsterId: MonsterId) => void) => void;
+  allPlayersReady: () => void;
 };
 
 export type PlayerSocketData = {};

@@ -8,6 +8,7 @@ export function asBattleId(value: number): BattleId {
   }
   return value as BattleId;
 }
+
 export type Battle = {
   battleId: BattleId;
   sides: Side[];

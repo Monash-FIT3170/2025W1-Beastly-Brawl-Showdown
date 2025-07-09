@@ -8,10 +8,11 @@ export function asSideId(value: number): SideId {
   }
   return value as SideId;
 }
+
 export type Side = {
   id: SideId;
-
   controllingPlayer: Player;
   monster: Monster;
+  pendingMoveId: "attack" | "defend" | "ability" | null; // The ID of the move that is pending execution
 };
 
