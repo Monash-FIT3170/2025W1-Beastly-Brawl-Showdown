@@ -14,7 +14,7 @@ function App() {
           <h2>Output</h2>
           <Renderer historyString={historyInput} currentEventIndex={sliderValue} />
           <label>
-            Slider Value: {sliderValue}
+            History Item No.: {sliderValue}
             <input type="range" min={0} value={sliderValue} onChange={(e) => setSliderValue(Number(e.target.value))} />
           </label>
         </div>
