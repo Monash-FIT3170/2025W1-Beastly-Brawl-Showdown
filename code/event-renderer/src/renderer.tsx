@@ -18,7 +18,7 @@ function Renderer({ historyString, currentEventIndex }: RendererProps) {
             </p>
           );
         case "damage":
-          const e: DamageEvent = event;
+          const e: DamageEvent = event as DamageEvent;
           return (
             <p>
               {currentEventIndex}: [Monster from side {e.source}] [dealt {e.amount}] to [monster from side {e.target}]
