@@ -4,6 +4,7 @@ import Renderer from "./renderer";
 
 function App() {
   const [historyInput, setHistoryInput] = useState("");
+  const [sliderValue, setSliderValue] = useState(0);
 
   return (
     <>
@@ -11,7 +12,11 @@ function App() {
       <div>
         <div>
           <h2>Output</h2>
-          <Renderer historyString={historyInput} />
+          <Renderer historyString={historyInput} currentEventIndex={sliderValue} />
+          <label>
+            Slider Value: {sliderValue}
+            <input type="range" min={0} value={sliderValue} onChange={(e) => setSliderValue(Number(e.target.value))} />
+          </label>
         </div>
         <div>
           <h2>Input</h2>

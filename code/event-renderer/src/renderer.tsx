@@ -2,36 +2,32 @@ import { type BattleEvent, type DamageEvent } from "../../combat/system/history/
 
 type RendererProps = {
   historyString: string;
+  currentEventIndex: number;
 };
 
-function Renderer({ historyString }: RendererProps) {
+function Renderer({ historyString, currentEventIndex }: RendererProps) {
   try {
     const history: BattleEvent[] = JSON.parse(historyString);
-    return (
-      <>
-        <div>
-          {history.map((event, i) => {
-            switch (event.name) {
-              case "battleOver":
-                return (
-                  <p>
-                    {i}: {"End of battle"}
-                  </p>
-                );
-              case "damage":
-                const e: DamageEvent = event;
-                return (
-                  <p>
-                    {i}: [Monster from side {e.source}] [dealt {e.amount}] to [monster from side {e.target}]
-                  </p>
-                );
-              default:
-                return <p>{i}: UNKNOWN EVENT ERROR</p>;
-            }
-          })}
-        </div>
-      </>
-    );
+    const event = history[currentEventIndex];
+    {
+      switch (event.name) {
+        case "battleOver":
+          return (
+            <p>
+              {currentEventIndex}: {"End of battle"}
+            </p>
+          );
+        case "damage":
+          const e: DamageEvent = event;
+          return (
+            <p>
+              {currentEventIndex}: [Monster from side {e.source}] [dealt {e.amount}] to [monster from side {e.target}]
+            </p>
+          );
+        default:
+          return <p>{currentEventIndex}: UNKNOWN EVENT ERROR</p>;
+      }
+    }
   } catch {
     return (
       <>
