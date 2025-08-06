@@ -99,11 +99,26 @@ export class Battle {
               resolve();
             }
           };
+          //have a typed move options list, instead of ternary operators
+          //holds moves with their EntryIDs and consitions (move allowed or not)
+          const moveOptions: { id: EntryID | null, condition: boolean }[] = [
+          { id: side.monster.base.attackActionId || null, condition: true },
+          { id: side.monster.base.defendActionId || null, condition: side.monster.defendActionCharges > 0 },
+          { id: side.monster.base.abilityActionId || null, condition: side.monster.base.abilityActionId != null }
+
+          ];
+
+          // filter out moves where condition is false or id is null, 
+          // then extract the valid EntryIDs into moveIdOptions
+          const moveIdOptions = moveOptions
+            .filter(option => option.condition && option.id !== null)
+            .map(option => option.id as EntryID);
+
           const notice: chooseMove = {
             kind: "chooseMove",
             data: {
-              moveIdOptions: [side.monster.base.attackActionId, ...(side.monster.defendActionCharges > 0 ? [side.monster.base.defendActionId] : [])],
-            }, // TODO select special attack
+              moveIdOptions: moveIdOptions
+            },
             callback: callback,
           };
           this.noticeBoard.postNotice(side.id, notice);
