@@ -103,11 +103,13 @@ button {
 
 .form-textbox {
   width: 20vw;
+  min-width: 12.5rem;
   background-color: #f6e0c8;
   color: black;
   border: none;
   padding: 15px 20px;
-  font-size: 1.1rem;
+  /* font-size: min(1.1rem, 1.5vw); */
+  font-size: clamp(1.0rem, 1.5vw, 1.1rem);
   font-weight: bold;
   text-align: center;
   cursor: pointer;  
@@ -1293,6 +1295,7 @@ input[type="range"] {
 @media screen and (max-width: 768px) {
   .form-textbox {
     width: 65vw;
+    font-size: clamp(1.0rem, 1.5vw, 1.1rem);
   }
 
   .monster-selection-grid {
