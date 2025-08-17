@@ -17,7 +17,7 @@ interface BattleSceneProps {
 console.log("BattleScene loaded");
 
 //so the way this works is we have an array of turns which in itself has an array of events which have occured in it
-//we've parsed the initial raw JSON data into an array (parsed) so if you want leftside you do parsed[0]
+//we've parsed the initial raw JSON data into an array (parsed) so if you want leftside you do player1
 //the list of values you can retrieve from the parsed information is in snapshot_parser part
 //you can add to the values just need ask if you need anything more
 const BattleScene: React.FC<BattleSceneProps> = ({ events, turnIndex, autoplay, onAdvanceTurn }) => {
@@ -71,8 +71,12 @@ const gameLog = useMemo(() => {
     return <p>Waiting for game data...</p>;
   }
   
-  console.log(parsed[0].image);
+  let player1 = parsed[0];
+  let player2 = parsed[1];
 
+  console.log(player1.image);
+
+  
   return (
     <div
       style={{
@@ -92,11 +96,11 @@ const gameLog = useMemo(() => {
           padding: "20px",
         }}
       >
-        <h2>{parsed[0].name}</h2>
-        <p>HP: {parsed[0].health}</p>
-        <p>Defend Charges: {parsed[0].defendActionCharge}</p>
+        <h2>{player1.name}</h2>
+        <p>HP: {player1.health}</p>
+        <p>Defend Charges: {player1.defendActionCharge}</p>
         <img
-          src = {parsed[0].image}
+          src = {player1.image}
         />
       </div>
 
@@ -130,11 +134,11 @@ const gameLog = useMemo(() => {
           padding: "20px",
         }}
       >
-        <h2>{parsed[1].name}</h2>
-        <p>HP: {parsed[1].health}</p>
-        <p>Defend Charges: {parsed[1].defendActionCharge}</p>
+        <h2>{player2.name}</h2>
+        <p>HP: {player2.health}</p>
+        <p>Defend Charges: {player2.defendActionCharge}</p>
         <img
-          src = {parsed[1].image}
+          src = {player2.image}
         />
       </div>
     </div>
