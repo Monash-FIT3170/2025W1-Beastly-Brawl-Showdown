@@ -1,0 +1,79 @@
+name: Prettier Check & Fix
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  prettier-beastly-brawl:
+    name: Prettier - Frontend (beastly-brawl-showdown)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: code/beastly-brawl-showdown
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prettier and auto-fix
+        run: npx prettier . --write
+
+      - name: Commit and push changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-format with Prettier [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+  prettier-game-server:
+    name: Prettier - Backend (game-server-v2)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: code/game-server-v2
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prettier and auto-fix
+        run: npx prettier . --write
+
+      - name: Commit and push changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-format with Prettier [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
