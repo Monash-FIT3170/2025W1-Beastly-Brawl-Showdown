@@ -10,6 +10,18 @@ export class TournamentManager {
     this.matches = [];
   }
 
+  runRounds(remainingPlayers: Player[]){
+  // After the Host presses start and begins the tournament through RequestSubmitMonster in "main", 
+  // "startTournament(players: Player[])" (in this file) will initiate and the match will begin 
+  // as startTournament runs its first match using creatematchs (this file) and checks the results 
+  // using checkRoundCompletion (this file) before checkRoundCompletion pingpongs this 
+  // function over and over again to simulate a tournament.
+
+  this.creatematchs(remainingPlayers)
+  this.checkRoundCompletion()
+
+  }
+
   creatematchs(playerList: Player[]) {
     this.matches = [];
 
@@ -47,16 +59,19 @@ export class TournamentManager {
       console.log(`Tournament Over. Winner: ${winners[0].displayName}`);
       return;
     }
+    else{
+      // If there are still players remaining, then keep running the rounds.
+      this.runRounds(winners)
+    }
 
-    // If there are multiple winners, create new matchs for the next round
-    this.creatematchs(winners);
+    
   }
 
-  async startTournament(): Promise<void> {
-    const players = Array.from(this.playersByAccountId.values());
+  async startTournament(players: Player[]): Promise<void> {
     this.creatematchs(players);
 
     await Promise.all(this.matches.map(match => match.runBattle(this.playersByAccountId)))
     await this.checkRoundCompletion()
+    
   }
 }
