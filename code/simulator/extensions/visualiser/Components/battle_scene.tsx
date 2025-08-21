@@ -1,14 +1,13 @@
-import React, { useState,useMemo } from "react";
-import { Turn } from "../../../core/event/Turn"
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Turn } from "../../../core/event/Turn";
 import type { BaseEvent } from "../../../core/event/base_event";
 import type { SnapshotEvent } from "../../../core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
 
-//this class is basically the entire simulator/information part of the battles, we might need to get playernames tho
 interface BattleSceneProps {
-  events: BaseEvent[]
+  events: BaseEvent[];
   turnIndex: number;
   autoplay?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
@@ -16,67 +15,135 @@ interface BattleSceneProps {
 
 console.log("BattleScene loaded");
 
-//so the way this works is we have an array of turns which in itself has an array of events which have occured in it
-//we've parsed the initial raw JSON data into an array (parsed) so if you want leftside you do player1
-//the list of values you can retrieve from the parsed information is in snapshot_parser part
-//you can add to the values just need ask if you need anything more
-const BattleScene: React.FC<BattleSceneProps> = ({ events, turnIndex, autoplay, onAdvanceTurn }) => {
-
-  // Build an array of Turn objects based on events
-  //this just gets a turn array filled with turn objects that cut off whenever a snapshot (new turn) occurs
+const BattleScene: React.FC<BattleSceneProps> = ({
+  events,
+  turnIndex,
+  autoplay,
+  onAdvanceTurn,
+}) => {
+  // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
 
-  // Clamp is used to restrict the number to make sure it stays within range
+  // Clamp selected index
   const selectedTurnIndex =
     Number.isInteger(turnIndex)
       ? clamp(turnIndex, 0, Math.max(0, turns.length - 1))
       : Math.max(0, turns.length - 1);
 
-  // Use selectedTurnIndex (not raw turnIndex) everywhere you access turns
+  // Determine the current turn and its start-of-turn snapshot
   const currentTurn = turns[selectedTurnIndex];
   const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
-  const parsed = currentSnapshot ? parseSnapshot(currentSnapshot) : [];
 
-  // Build full log for ALL turns, regardless of selectedTurnIndex
-const gameLog = useMemo(() => {
-  const logEntries: { key: string; text: string }[] = [];
-  if (!turns.length) return logEntries;
+  // Parsed snapshot at the start of the selected turn
+  const initialTurnState = currentSnapshot ? parseSnapshot(currentSnapshot) : [];
 
-  const lastTurnIndex = Math.max(0, turns.length - 1);
+  // Build the game log
+  const gameLog = useMemo(() => {
+    const logEntries: { key: string; text: string }[] = [];
+    if (!turns.length) return logEntries;
 
-  for (let turnNumber = 0; turnNumber <= lastTurnIndex; turnNumber++) {
-    const currentTurn = turns[turnNumber];
+    // Keeps the turn index at greater than 0
+    const lastTurnIndex = Math.max(0, turns.length - 1);
 
-    // Start-of-turn marker
-    logEntries.push({
-      key: `turn-${turnNumber}-start`,
-      text: `Turn ${turnNumber + 1} started`,
-    });
+    // Pushing turns to the log
+    for (let turnNumber = 0; turnNumber <= lastTurnIndex; turnNumber++) {
+      const t = turns[turnNumber];
 
-    // All events within this turn
-    for (let eventIndex = 0; eventIndex < currentTurn.turnEvents.length; eventIndex++) {
-      const event = currentTurn.turnEvents[eventIndex];
       logEntries.push({
-        key: `turn-${turnNumber}-event-${eventIndex}`,
-        text: currentTurn.printEventString(event) ?? "Unknown event",
+        key: `turn-${turnNumber}-start`,
+        text: `Turn ${turnNumber + 1} started`,
       });
+
+      // For each turn, push events to the log
+      for (let eventIndex = 0; eventIndex < t.turnEvents.length; eventIndex++) {
+        const ev = t.turnEvents[eventIndex];
+        logEntries.push({
+          key: `turn-${turnNumber}-event-${eventIndex}`,
+          text: t.printEventString(ev) ?? "Unknown event",
+        });
+      }
     }
-  }
+    return logEntries;
+  }, [turns]);
 
-  return logEntries;
-}, [turns]);
-
-
-  if (parsed.length < 2) {
+  // Check if there are 2 players
+  if (initialTurnState.length < 2) {
     return <p>Waiting for game data...</p>;
   }
-  
-  let player1 = parsed[0];
-  let player2 = parsed[1];
 
-  console.log(player1.image);
+  // What the panels currently show as events are applied
+  const [visibleState, setVisibleState] = useState(initialTurnState);
 
-  
+  // Keep a ref to avoid stale closures inside the async loop
+  const latestVisibleRef = useRef(initialTurnState);
+
+  // When the base snapshot changes (different selected turn), reset visible state
+  useEffect(() => {
+    setVisibleState(initialTurnState);
+    latestVisibleRef.current = initialTurnState;
+  }, [initialTurnState]);
+
+  // Utility: simple deep copy (swap if you have a better clone util)
+  const deepCopy = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
+
+  // === TODO: Implement how each event mutates visible state ===
+  function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
+    // Check for defense charges
+    if (ev.name == "startMove") {
+      return
+    }
+
+    // Check for health
+    return state; // placeholder
+  }
+
+  // 6) Step through events of the selected turn and update the panels live
+  useEffect(() => {
+    if (!currentTurn) return;
+
+    let cancelled = false;
+    const perEventDelayMs = 600;
+
+    // Reset to start-of-turn before replaying the events
+    setVisibleState(initialTurnState);
+    latestVisibleRef.current = initialTurnState;
+
+    (async () => {
+      for (const ev of currentTurn.turnEvents) {
+        if (cancelled) return;
+
+        const nextState = applyEventToVisible(
+          deepCopy(latestVisibleRef.current),
+          ev
+        );
+
+        // This call triggers the live DOM change in the panels
+        setVisibleState(nextState);
+
+        // Keep ref in sync for the next iteration
+        latestVisibleRef.current = nextState;
+
+        // Give time between events so users can see each change
+        await new Promise((r) => setTimeout(r, perEventDelayMs));
+      }
+
+      // Optional: auto-advance to the next turn when finished
+      if (!cancelled && autoplay && onAdvanceTurn) {
+        onAdvanceTurn(selectedTurnIndex + 1);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTurnIndex, currentTurn, initialTurnState, autoplay, onAdvanceTurn]);
+
+  // Clear names for what the UI reads:
+  const visiblePlayer1 = visibleState[0];
+  const visiblePlayer2 = visibleState[1];
+
+  console.log(visiblePlayer1.image);
+
   return (
     <div
       style={{
@@ -88,24 +155,15 @@ const gameLog = useMemo(() => {
         border: "1px solid black",
       }}
     >
-      {/* Left Div (PLAYER 1 MONSTER) */}
-      <div
-        style={{
-          flex: 3,
-          backgroundColor: "#d0e6ff",
-          padding: "20px",
-        }}
-      >
-        <h2>{player1.name}</h2>
-        <p>HP: {player1.health}</p>
-        <p>Defend Charges: {player1.defendActionCharge}</p>
-        <img
-          src = {player1.image}
-        />
+      {/* Left Panel (PLAYER 1) */}
+      <div style={{ flex: 3, backgroundColor: "#d0e6ff", padding: "20px" }}>
+        <h2>{visiblePlayer1.name}</h2>
+        <p>HP: {visiblePlayer1.health}</p>
+        <p>Defend Charges: {visiblePlayer1.defendActionCharge}</p>
+        <img src={visiblePlayer1.image} />
       </div>
 
-      {/* Middle Div (INFORMATION ON ROLLS, ACTIONS TAKEN) */}
-
+      {/* Middle Panel (Log of ALL turns — unchanged) */}
       <div
         style={{
           flex: 1,
@@ -121,28 +179,22 @@ const gameLog = useMemo(() => {
           <p>No events yet.</p>
         ) : (
           gameLog.map(({ key, text }) => (
-            <p key={key} style={{ margin: "5px 0" }}>{text}</p>
+            <p key={key} style={{ margin: "5px 0" }}>
+              {text}
+            </p>
           ))
         )}
       </div>
 
-      {/* Right Div (PLAYER 2 MONSTER) */}
-      <div
-        style={{
-          flex: 3,
-          backgroundColor: "#ffd0d0",
-          padding: "20px",
-        }}
-      >
-        <h2>{player2.name}</h2>
-        <p>HP: {player2.health}</p>
-        <p>Defend Charges: {player2.defendActionCharge}</p>
-        <img
-          src = {player2.image}
-        />
+      {/* Right Panel (PLAYER 2) */}
+      <div style={{ flex: 3, backgroundColor: "#ffd0d0", padding: "20px" }}>
+        <h2>{visiblePlayer2.name}</h2>
+        <p>HP: {visiblePlayer2.health}</p>
+        <p>Defend Charges: {visiblePlayer2.defendActionCharge}</p>
+        <img src={visiblePlayer2.image} />
       </div>
     </div>
   );
-}
+};
 
 export default BattleScene;
