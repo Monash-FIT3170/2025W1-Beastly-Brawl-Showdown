@@ -944,3 +944,143 @@ input[type="range"] {
   top: 1.8rem;
   left: 1rem;
 }
+
+.diceResult {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem; /* change to resize number */
+}
+
+.diceAnimation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* center horizontally & vertically */
+}
+
+.diceAnimation img{
+  width: 240px;
+  height: 240px;
+}
+
+.health-ring-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.health-ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg); /* so health starts at top */
+}
+
+.health-ring circle {
+  fill: none;
+  stroke-width: 20px;
+}
+
+.ring-bg {
+  stroke: transparent;
+}
+
+.ring-fg {
+  stroke: red;
+  transition: stroke-dashoffset 0.3s ease; /* smooth health change */
+}
+
+.monster-img {
+  position: absolute;
+  top: 10px;  /* half of stroke width */
+  left: 10px; /* half of stroke width */
+  width: 120px; /* size - stroke */
+  height: 120px; /* size - stroke */
+  border-radius: 50%;
+  object-fit: cover;
+  background: white;
+}
+
+/* Stage background */
+.stage-bg {
+  position: relative;
+  background: url("/homepage/background_3.png") center/cover no-repeat;
+  image-rendering: pixelated;
+  flex: 1;              /* fills the space between top and bottom bars */
+  display: grid;
+  place-items: center;  /* centers children */
+}
+
+/* Portrait positions (centered, one up, one down) */
+.portrait {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.portrait--top { top: 14vh; }
+.portrait--bottom { bottom: 18vh; }
+
+/* Optional: remove the old green bg on .battleMiddle */
+.battleMiddle { background: transparent; }
+
+/* Center arena with background */
+.arena {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+@media screen and (max-width: 768px) {
+  .form-textbox {
+    width: 65vw;
+  }
+
+  .battleScreenBottom {
+    flex-direction: row;
+    gap: 45px;
+    padding: 30px;
+    background: transparent;
+  }
+
+  .battleScreenBottom .glb-btn {
+    min-width: auto;
+    width: 90px;
+    height: 90px;
+    padding: 5px;
+  }
+
+  .battleScreenBottomButtonImage {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Reduce monster image sizes */
+  .battleMonsterImg {
+    width: 8rem;
+    height: 8rem;
+  }
+
+  /* Move portraits closer together */
+  .portrait--top { top: 16vh; }
+  .portrait--bottom { bottom: 20vh; }
+
+  /* Scale dice position */
+  .diceAnimation {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .diceAnimation img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .diceResult {
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    top: 50%;
+  }
+}
