@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Turn } from "../../../core/event/Turn";
 import type { BaseEvent } from "../../../core/event/base_event";
-import type { SnapshotEvent } from "../../../core/event/core_events";
+import type { BuffEvent, DamageEvent, SnapshotEvent } from "../../../core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
@@ -35,7 +35,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
 
   // Parsed snapshot at the start of the selected turn
-  const initialTurnState = currentSnapshot ? parseSnapshot(currentSnapshot) : [];
+  const initialTurnState = useMemo(
+    () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
+    [selectedTurnIndex] // <- stable driver
+  );
 
   // Build the game log
   const gameLog = useMemo(() => {
@@ -66,11 +69,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     return logEntries;
   }, [turns]);
 
-  // Check if there are 2 players
-  if (initialTurnState.length < 2) {
-    return <p>Waiting for game data...</p>;
-  }
-
   // What the panels currently show as events are applied
   const [visibleState, setVisibleState] = useState(initialTurnState);
 
@@ -83,28 +81,43 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     latestVisibleRef.current = initialTurnState;
   }, [initialTurnState]);
 
-  // Utility: simple deep copy (swap if you have a better clone util)
+  // Utility: simple deep copy
   const deepCopy = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
 
-  // === TODO: Implement how each event mutates visible state ===
+  // Updates the visible state based on the event
   function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
     // Check for defense charges
-    if (ev.name == "startMove") {
-      return
+    if (ev.name == "buff") {
+      // Cast the event to a BuffEvent
+      let buffEvent = ev as BuffEvent;
+      // Get the id of the player who used the buff
+      let playerId = Number(buffEvent.source);
+
+      // Decrease the player's defense charges
+      state[playerId].defendActionCharge -= 1;
+
+    } else if (ev.name == "damage") {
+      // Cast the event to a DamageEvent
+      let damageEvent = ev as DamageEvent;
+      // Get the id of the player who was damaged
+      let playerId = Number(damageEvent.target);
+
+      // Decrease the player's health
+      state[playerId].health -= damageEvent.amount;
     }
 
     // Check for health
     return state; // placeholder
   }
 
-  // 6) Step through events of the selected turn and update the panels live
+  // Step through events of the selected turn and update the panels live
   useEffect(() => {
     if (!currentTurn) return;
 
     let cancelled = false;
     const perEventDelayMs = 600;
 
-    // Reset to start-of-turn before replaying the events
+    // reset for this run
     setVisibleState(initialTurnState);
     latestVisibleRef.current = initialTurnState;
 
@@ -113,36 +126,39 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         if (cancelled) return;
 
         const nextState = applyEventToVisible(
-          deepCopy(latestVisibleRef.current),
+          // use structuredClone if available; otherwise keep your deepCopy
+          typeof structuredClone === "function"
+            ? structuredClone(latestVisibleRef.current as any)
+            : JSON.parse(JSON.stringify(latestVisibleRef.current)),
           ev
         );
 
-        // This call triggers the live DOM change in the panels
-        setVisibleState(nextState);
+        setVisibleState(nextState);           // <- triggers the live UI update
+        latestVisibleRef.current = nextState; // keep ref fresh
 
-        // Keep ref in sync for the next iteration
-        latestVisibleRef.current = nextState;
-
-        // Give time between events so users can see each change
-        await new Promise((r) => setTimeout(r, perEventDelayMs));
+        await new Promise(r => setTimeout(r, perEventDelayMs));
+        if (cancelled) return;
       }
 
-      // Optional: auto-advance to the next turn when finished
-      if (!cancelled && autoplay && onAdvanceTurn) {
+      if (!cancelled && autoplay && onAdvanceTurn && selectedTurnIndex < turns.length - 1) {
         onAdvanceTurn(selectedTurnIndex + 1);
       }
     })();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedTurnIndex, currentTurn, initialTurnState, autoplay, onAdvanceTurn]);
+    return () => { cancelled = true; };
+  }, [selectedTurnIndex, currentTurn, autoplay, onAdvanceTurn]);
+
+
+  // Check if there are 2 players
+  if (visibleState.length < 2) {
+    return <p>Waiting for game data...</p>;
+  }
 
   // Clear names for what the UI reads:
   const visiblePlayer1 = visibleState[0];
   const visiblePlayer2 = visibleState[1];
 
-  console.log(visiblePlayer1.image);
+  // console.log(visiblePlayer1.image);
 
   return (
     <div
@@ -160,7 +176,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         <h2>{visiblePlayer1.name}</h2>
         <p>HP: {visiblePlayer1.health}</p>
         <p>Defend Charges: {visiblePlayer1.defendActionCharge}</p>
-        <img src={visiblePlayer1.image} />
+        {/* <img src={visiblePlayer1.image} /> */}
       </div>
 
       {/* Middle Panel (Log of ALL turns — unchanged) */}
@@ -191,7 +207,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         <h2>{visiblePlayer2.name}</h2>
         <p>HP: {visiblePlayer2.health}</p>
         <p>Defend Charges: {visiblePlayer2.defendActionCharge}</p>
-        <img src={visiblePlayer2.image} />
+        {/* <img src={visiblePlayer2.image} /> */}
       </div>
     </div>
   );
