@@ -9,10 +9,36 @@ const BattleVisualizerDemo: React.FC = () => {
   const [events, setEvents] = useState<BaseEvent[]>([]);
   const [turnInput, setTurnInput] = useState(0);
 
+  // NEW: simple UI state
+  const [isAutoplay, setIsAutoplay] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   return (
     <div style={{ padding: "20px" }}>
       <EventTextBox onEventsSubmit={setEvents} />
-      <BattleScene events={events} turnIndex={turnInput} autoplay={false} onAdvanceTurn={(next) => setTurnIndex(next)}/>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 16px" }}>
+        <button onClick={() => setIsPlaying(p => !p)}>
+          {isPlaying ? "Pause" : "Play"}
+        </button>
+
+        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={isAutoplay}
+            onChange={(e) => setIsAutoplay(e.target.checked)}
+          />
+          Autoplay
+        </label>
+      </div>
+
+      <BattleScene
+        events={events}
+        turnIndex={turnInput}
+        autoplay={isAutoplay && isPlaying}
+        onAdvanceTurn={(next) => setTurnInput(next)}
+      />
+
       <BattleBar
         turnInput={turnInput}
         setTurnInput={setTurnInput}

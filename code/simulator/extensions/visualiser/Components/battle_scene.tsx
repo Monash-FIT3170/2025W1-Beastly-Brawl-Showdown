@@ -81,9 +81,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     latestVisibleRef.current = initialTurnState;
   }, [initialTurnState]);
 
-  // Utility: simple deep copy
-  const deepCopy = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
-
   // Updates the visible state based on the event
   function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
     // Check for defense charges
@@ -117,7 +114,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     let cancelled = false;
     const perEventDelayMs = 600;
 
-    // reset for this run
+    // Reset to the already existing snapshot
     setVisibleState(initialTurnState);
     latestVisibleRef.current = initialTurnState;
 
@@ -126,15 +123,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         if (cancelled) return;
 
         const nextState = applyEventToVisible(
-          // use structuredClone if available; otherwise keep your deepCopy
           typeof structuredClone === "function"
             ? structuredClone(latestVisibleRef.current as any)
             : JSON.parse(JSON.stringify(latestVisibleRef.current)),
           ev
         );
 
-        setVisibleState(nextState);           // <- triggers the live UI update
-        latestVisibleRef.current = nextState; // keep ref fresh
+        // Update live
+        setVisibleState(nextState);
+        // Update ref
+        latestVisibleRef.current = nextState;
 
         await new Promise(r => setTimeout(r, perEventDelayMs));
         if (cancelled) return;
