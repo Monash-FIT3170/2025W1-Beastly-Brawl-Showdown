@@ -107,6 +107,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     return state; // placeholder
   }
 
+  function cloneState(
+    state: ReturnType<typeof parseSnapshot>
+  ): ReturnType<typeof parseSnapshot> {
+    if (typeof structuredClone === "function") {
+      return structuredClone(state);
+    } else {
+      return JSON.parse(JSON.stringify(state));
+    }
+  }
+
   // Step through events of the selected turn and update the panels live
   useEffect(() => {
     if (!currentTurn) return;
@@ -114,18 +124,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     let cancelled = false;
     const perEventDelayMs = 600;
 
- 
-
     (async () => {
       for (const ev of currentTurn.turnEvents) {
         if (cancelled) return;
 
-        const nextState = applyEventToVisible(
-          typeof structuredClone === "function"
-            ? structuredClone(latestVisibleRef.current as any)
-            : JSON.parse(JSON.stringify(latestVisibleRef.current)),
-          ev
-        );
+        const stateCopy = cloneState(latestVisibleRef.current);
+        const nextState = applyEventToVisible(stateCopy, ev)
 
         // Update live
         setVisibleState(nextState);
