@@ -114,9 +114,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     let cancelled = false;
     const perEventDelayMs = 600;
 
-    // Reset to the already existing snapshot
-    setVisibleState(initialTurnState);
-    latestVisibleRef.current = initialTurnState;
+ 
 
     (async () => {
       for (const ev of currentTurn.turnEvents) {
