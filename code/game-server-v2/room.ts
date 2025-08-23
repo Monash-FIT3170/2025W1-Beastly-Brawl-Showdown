@@ -24,12 +24,19 @@ export class Room {
     this.joinCode = joinCode;
   }
 
-hasPlayer(displayName: string): boolean {
-  return this.players.some(player => player.displayName === displayName);
-}
+  hasPlayer(displayName: string): boolean {
+    return this.players.some(player => player.displayName === displayName);
+  }
 
-getPlayer(displayName: string): Player | undefined {
-  return this.players.find(player => player.displayName === displayName);
-}
+  getPlayer(displayName: string): Player | undefined {
+    return this.players.find(player => player.displayName === displayName);
+  }
+
+  getMatchByPlayer(displayName: string) {
+    return this.tournamentManager.matches.find(match => 
+      match.player1.displayName === displayName || 
+      (match.player2 && match.player2.displayName === displayName)
+    );
+  }
 
 }

@@ -5,6 +5,13 @@ import { BattleBottom } from './BattleBottom';
 import { usePlayerSocket } from '../player/game/PlayerPage';
 import { Monster, MonsterTemplate } from '/imports/simulator/core/monster/monster';
 
+interface BattleScreenProps {
+  matchData: {
+    myMonster: Monster;
+    enemyMonster: Monster;
+  };
+}
+
 export const BattleScreen: React.FC = () => {
 
   // #region Variable initialisation
@@ -34,49 +41,15 @@ export const BattleScreen: React.FC = () => {
     };
 
     socket.on("match-started", handleMatchStarted);
-
-    //#region RECEIVE DICE AND ATTACK ANIMATIONS
-    //     let interval: NodeJS.Timeout;
-    // let timeout: NodeJS.Timeout;
-
-    // if (showAnimation) {
-    //   let i = 0;
-    //   const rollDuration = 1000; // total roll duration in ms
-    //   const intervalSpeed = 100; // time between number updates
-
-    //   const finalResult = 20; // eventually will replace with dice roll utility
-    //   const totalSteps = rollDuration / intervalSpeed; //get the ammount of times it gets swaped out
-
-    //   interval = setInterval(() => {
-    //     if (i < totalSteps) {
-    //       setDisplayedNumber(Math.floor(Math.random() * 20) + 1); // roll 1-20
-    //       i++;
-    //     } else {
-    //       clearInterval(interval);
-    //       setDisplayedNumber(finalResult);
-
-    //       timeout = setTimeout(() => {
-    //         console.log("Final result displayed for 3 seconds");
-    //       }, 3000);
-    //     }
-    //   }, intervalSpeed);
-    // }
-    //#endregion
   });
   //#endregion
 
   //#region Actions
-  // const triggerAnimation = () => {
-  //   if (!showAnimation) {
-  //     setShowAnimation(true);
-  //     setTimeout(() => setShowAnimation(false), 3000);
-  //   }
-  // };
 
   const handleAction = (action: 'attack' | 'defend' | 'ability') => {
     if (!socket) return;
 
-    socket.emit('playerAction', {
+    socket.emit('RequestSubmitMove', {
       playerSocket: usePlayerSocket,
       action,
     });
@@ -84,10 +57,6 @@ export const BattleScreen: React.FC = () => {
     // triggerAnimation();
   };
   //#endregion
-  if (!myMonster || !enemyMonster) {
-    return <div>Loading battle...</div>;
-  }
-
 
   // HTML to show each monster and the animations
   if (!myMonster || !enemyMonster) {
