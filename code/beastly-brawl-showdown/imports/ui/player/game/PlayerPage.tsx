@@ -66,9 +66,34 @@ const PlayerContent = () => {
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
+  const [_, setReady] = useState(false);
 
   // Animation ref
   const waitingTextRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+    if (!socket) return;
+    // Listen for game start
+    socket.on("game-started", () => {
+      setStartSelection(true);
+    });
+
+    // Listen for round-start
+    socket.on("round-start", (matchData) => {
+      if (!matchData?.myMonster || !matchData?.enemyMonster) {
+        console.warn("Received incomplete match data:", matchData);
+        return;
+      }
+
+      console.log("Received match data:", matchData);
+      setMatchData(matchData);
+      setReady(true);
+    });
+
+    return () => {
+      socket.off("game-started");
+    };
+  }, [socket]);
 
   // Restart bounce animation loop
   useEffect(() => {
@@ -173,7 +198,8 @@ const PlayerContent = () => {
     return <WaitingScreen />;
   }
 
-  return <BattleScreen />;
+  // Battle screen displays when all checks have been passed
+  return <BattleScreen matchData={matchData} />;
 };
 //#endregion
 

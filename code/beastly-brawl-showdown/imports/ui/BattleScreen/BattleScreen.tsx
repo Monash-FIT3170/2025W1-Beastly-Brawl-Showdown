@@ -12,7 +12,7 @@ interface BattleScreenProps {
   };
 }
 
-export const BattleScreen: React.FC = () => {
+export const BattleScreen: React.FC<BattleScreenProps> = ({matchData}) => {
 
   // #region Variable initialisation
   // Establish connection to existing socket
@@ -21,12 +21,18 @@ export const BattleScreen: React.FC = () => {
   // Initialise the 2 monsters with the monsterdata class 
   const [myMonster, setMyMonster] = useState<Monster>();
   const [enemyMonster, setEnemyMonster] = useState<Monster>();
+  const [hasSubmittedMove, setHasSubmittedMove] = useState(false);
 
   // State to trigger animation showing or not
   const [showAnimation] = useState(false);
   // #endregion
 
   // #region Socket Methods
+  useEffect(() => {
+    setMyMonster(matchData.myMonster);
+    setEnemyMonster(matchData.enemyMonster);
+  }, [matchData]);
+
   // Socket methods to communicate with server (main.ts) go here
   useEffect(() => {
     // Error checking for null socket
@@ -38,6 +44,7 @@ export const BattleScreen: React.FC = () => {
 
       setMyMonster(new Monster(data.myMonster));
       setEnemyMonster(new Monster(data.enemyMonster));
+      setHasSubmittedMove(false);
     };
 
     socket.on("match-started", handleMatchStarted);
@@ -54,7 +61,7 @@ export const BattleScreen: React.FC = () => {
       action,
     });
 
-    // triggerAnimation();
+    setHasSubmittedMove(true);
   };
   //#endregion
 
@@ -73,7 +80,7 @@ export const BattleScreen: React.FC = () => {
         playerId1="player1-id"
         playerId2="player2-id"
       />
-      <BattleBottom onAction={handleAction} />
+      <BattleBottom onAction={handleAction} disabled={hasSubmittedMove} />
     </div>
   );
 
