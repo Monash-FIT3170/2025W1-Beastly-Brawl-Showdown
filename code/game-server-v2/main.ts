@@ -307,7 +307,6 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      // TODO: trigger round start
       // Loop through every room in the game server
       for (const room of gameServer.rooms.values()) {
         // Trigger start from each room's tournament manager
@@ -321,14 +320,20 @@ async function main(config: ServerConfig) {
     socket.on("submit-move", async (msg) => {
       console.log("Move submitted: ", JSON.stringify(msg));
 
-      // TODO turn stuff
+      // Find the room and player
+      for (const [roomId, room] of gameServer.rooms) {
+        const player = Array.from(room.players.values()).find(p => p.socketId === msg.playerSocket);
+        if (!player) continue;
 
-      // TODO if all users submitted and a turn can be processed
-      if (false) {
-        const TEMP_playerSocketId = "sdfgrdfgrdgfrdfg";
-        playerChannel
-          .to(TEMP_playerSocketId)
-          .emit("turn-result", "PLACEHOLDER RESULT");
+        const match = room.getMatchByPlayer(player.displayName);
+        if (!match) {
+          console.warn("No match found for player", player.displayName);
+          return;
+        }
+
+        // Submit move into the Battle
+        match.submitMove(player, msg.action, msg.targetSide);
+        return; // exit loop
       }
     });
   });

@@ -14,6 +14,7 @@ export class Match {
     spectators: AccountId[];
     matchType: MatchType;
     matchID: number;
+    battle?: Battle;
 
     /**
      * Constructor.
@@ -29,6 +30,62 @@ export class Match {
         this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
         this.matchID = matchID;
     }
+
+    createBattle(): void {
+        if (this.matchType == MatchType.BYE) {
+            return;
+        }
+
+        if (!this.player1.monster || !this.player2?.monster) {
+            throw new Error(`Match ${this.matchID}: One or both players are missing a monster.`);
+        }
+
+        const options: BattleOptions = {
+            seed: Math.floor(Math.random() * 10000),
+            playerOptionSet: [
+                {
+                    name: this.player1.displayName,
+                    monsterTemplate: this.player1.monster,
+                },
+                {
+                    name: this.player2.displayName,
+                    monsterTemplate: this.player2.monster,
+                },
+            ],
+            player_option_timeout: 30,
+        };
+
+        const battle = new Battle(options);
+    }
+
+    getSideForPlayer(player: Player): number {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no sides available.`);
+        }
+        if (this.player1.displayName === player.displayName) {
+            return 0;
+        } else if (this.player2?.displayName === player.displayName) {
+            return 1;
+        } else {
+            throw new Error(`Player ${player.displayName} is not in this match.`);
+        }
+    }
+
+    submitMove(player: Player, moveId: string, targetSide: number): void {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
+        }
+
+        const sideIndex = this.getSideForPlayer(player);
+        const noticeMap = this.battle.noticeBoard.noticeMaps[sideIndex];
+        const chooseMoveNotice = noticeMap.get("chooseMove");
+
+        if (!chooseMoveNotice) {
+            throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no chooseMove notice.`);
+        }
+
+        // chooseMoveNotice.callback(moveId, targetSide);
+    }
     /**
      * Called by tournament_manager when all matches are ready to commence.
      * Initialises and runs the battle, then processes the winner and loser after completion.
@@ -38,54 +95,26 @@ export class Match {
      * @returns None
      */
     async runBattle(playersByAccountId: Map<string, Player>): Promise<void> {
-        if (this.matchType == MatchType.BYE) {
-            if (this.player1.linkedAccountId) {
-                this.winner = playersByAccountId.get(this.player1.linkedAccountId);
-            }
+
+        if (this.matchType === MatchType.BYE) {
+            this.winner = this.player1;
+            console.log(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
             return;
         }
 
-        if (!this.player1.monster || !this.player2?.monster) {
-            throw new Error(`Match ${this.matchID}: One or both players are missing a monster.`);
-        }
+        if (!this.battle) { throw new Error(`Match ${this.matchID} has no battle to run.`); }
 
-        const options: BattleOptions = {
-        seed: Math.floor(Math.random() * 10000),
-        playerOptionSet: [
-            {
-            name: this.player1.displayName,
-            monsterTemplate: this.player1.monster,
-            },
-            {
-            name: this.player2.displayName,
-            monsterTemplate: this.player2.monster,
-            },
-        ],
-            player_option_timeout: 30,
-        };
+        const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
+        const winnerIndex = this.battle.sides.indexOf(survivingSide!);
 
-        const battle = new Battle(options);
-        await battle.run();
+        this.winner = winnerIndex === 0 ? this.player1 : this.player2;
+        const loser = winnerIndex === 0 ? this.player2 : this.player1;
 
-        const survivingSide = battle.sides.find((side) => side.monster.health > 0);
-        const winnerIndex = battle.sides.indexOf(survivingSide!);
-        
-        const winnerId = winnerIndex === 0 
-        ? this.player1.linkedAccountId 
-        : this.player2?.linkedAccountId;
-        if (winnerId) {
-            this.winner = playersByAccountId.get(winnerId);
-        }
-        const loserId = this.player1.linkedAccountId === winnerId
-        ? this.player2?.linkedAccountId
-        : this.player1.linkedAccountId;
-        if (loserId) {
-            const winnerPlayer = playersByAccountId.get(loserId);
-            if (winnerPlayer) {
-                winnerPlayer.addSpectator(loserId);
+        if (loser) {
+            if (loser.linkedAccountId) {
+                this.winner?.addSpectator(loser.linkedAccountId);
             }
+            console.log(`Match ${this.matchID}: Player ${loser.displayName} has been defeated.`);
         }
-
-        console.log(`Match ${this.matchID}: Winner is ${winnerId}`);
     }
 }
