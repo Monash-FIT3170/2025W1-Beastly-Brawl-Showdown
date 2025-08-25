@@ -12,7 +12,7 @@ interface BattleScreenProps {
   };
 }
 
-export const BattleScreen: React.FC<BattleScreenProps> = ({matchData}) => {
+export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
   // #region Variable initialisation
   // Establish connection to existing socket
@@ -57,8 +57,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({matchData}) => {
     if (!socket) return;
 
     socket.emit('RequestSubmitMove', {
-      playerSocket: usePlayerSocket,
-      action,
+      playerSocket: socket.id, // your socket ID
+      action: action,          // the move id
+      targetSide: 1,           // or 0 depending on who you target
     });
 
     setHasSubmittedMove(true);

@@ -10,7 +10,8 @@ import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
-import { TournamentManager } from "./tournament_manager";
+import { SideId } from "../simulator/core/side";
+import { MonsterPool } from "../simulator/data/monster_pool";
 
 
 type ServerConfig = {
@@ -137,6 +138,7 @@ async function main(config: ServerConfig) {
       try {
         const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
           socket.id,
+          playerChannel
         );
 
         socket.emit("request-room_response", {
@@ -282,7 +284,6 @@ async function main(config: ServerConfig) {
       log_event(`Monster submission signal received: ${JSON.stringify(data)}`);
 
       const player = socket.data.player as Player;
-      log_event(`Player: ${JSON.stringify(player)}`);
       if (!player) {
         socket.emit("error", "This player has not been initiated.");
         return;
@@ -294,11 +295,11 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      player.setMonster(data.data);
+      // Store selected monster template name
+      player.setMonsterTemplate(data.data.base.name);
       player.isReady = true;
 
-      log_event(`Player ${player.displayName} is ready`);
-      log_event(`Monster selected: ${JSON.stringify(data.data)}`);
+      log_event(`Player ${player.displayName} selected monster template: ${data.data.base.name}`);
 
       // Check if all players are ready
       const allReady = Array.from(room.players.values()).every((p) => p.isReady);
@@ -307,34 +308,35 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      // Loop through every room in the game server
-      for (const room of gameServer.rooms.values()) {
-        // Trigger start from each room's tournament manager
-        room.tournamentManager.startTournament(room.players);
-      }
+      // All players ready, start tournament
+      room.players.forEach((player) => {
+        const opponent = Array.from(room.players.values()).find((p) => p !== player);
+        if (!opponent) return;
+
+        room.playerChannel.to(player.socketId).emit("round-start", {
+          myMonster: player.selectedMonsterTemplateName,
+          enemyMonster: opponent.selectedMonsterTemplateName,
+        });
+      });
+
+      // Start the tournament
+      room.tournamentManager.startTournament(Array.from(room.players.values()));
+
     });
 
 
     // #region Submit Move
+    socket.on("RequestSubmitMove", (msg) => {
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
 
-    socket.on("submit-move", async (msg) => {
-      console.log("Move submitted: ", JSON.stringify(msg));
+      const match = room.tournamentManager.matches.find(
+        m => m.player1 === player || m.player2 === player
+      );
+      if (!match) return;
 
-      // Find the room and player
-      for (const [roomId, room] of gameServer.rooms) {
-        const player = Array.from(room.players.values()).find(p => p.socketId === msg.playerSocket);
-        if (!player) continue;
-
-        const match = room.getMatchByPlayer(player.displayName);
-        if (!match) {
-          console.warn("No match found for player", player.displayName);
-          return;
-        }
-
-        // Submit move into the Battle
-        match.submitMove(player, msg.action, msg.targetSide);
-        return; // exit loop
-      }
+      match.submitMove(player, msg.action as never, msg.targetSide as SideId);
     });
   });
 

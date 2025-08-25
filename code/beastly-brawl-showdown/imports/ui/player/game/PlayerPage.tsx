@@ -62,36 +62,41 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<any | null>(null);
+  const [matchData, setMatchData] = useState<{ myMonster: Monster; enemyMonster: Monster } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
-  const [_, setReady] = useState(false);
 
   // Animation ref
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
+  // Single listener for game start and round-start
+  useEffect(() => {
     if (!socket) return;
-    // Listen for game start
-    socket.on("game-started", () => {
-      setStartSelection(true);
-    });
 
-    // Listen for round-start
-    socket.on("round-start", (matchData) => {
-      if (!matchData?.myMonster || !matchData?.enemyMonster) {
-        console.warn("Received incomplete match data:", matchData);
+    socket.on("game-started", () => setStartSelection(true));
+
+    socket.on("round-start", (data) => {
+      log_event("Received round-start data:", data);
+
+      if (!data?.myMonsterTemplate || !data?.enemyMonsterTemplate) {
+        console.warn("Received incomplete round-start data:", data);
         return;
       }
 
-      console.log("Received match data:", matchData);
-      setMatchData(matchData);
-      setReady(true);
+      console.log(`Round started! Player's monster: ${data.myMonsterTemplate}, Opponent's monster: ${data.enemyMonsterTemplate}`);
+
+      // Create Monster instances for BattleScreen
+      const myMonster = new Monster(MonsterPool.find(m => m.name === data.myMonsterTemplate)!);
+      const enemyMonster = new Monster(MonsterPool.find(m => m.name === data.enemyMonsterTemplate)!);
+
+      setMatchData({ myMonster, enemyMonster });
+      setAllReady(true);
     });
 
     return () => {
       socket.off("game-started");
+      socket.off("round-start");
     };
   }, [socket]);
 
@@ -121,26 +126,6 @@ const PlayerContent = () => {
     };
   }, [isConnected]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("game-started", () => setStartSelection(true));
-
-    socket.on("round-start", (data) => {
-      if (!data?.myMonster || !data?.enemyMonster) {
-        console.warn("Received incomplete round-start data:", data);
-        return;
-      }
-      setMatchData(data);
-      setAllReady(true);
-    });
-
-    return () => {
-      socket.off("game-started");
-      socket.off("round-start");
-    };
-  }, [socket]);
-
   const handleMonsterSelection = (monsterName: string) => {
     const template = MonsterPool.find((m) => m.name === monsterName);
     if (!template) {
@@ -160,9 +145,7 @@ const PlayerContent = () => {
   };
 
   // GUI flow
-  if (!isConnected) {
-    return <p>Connecting to server...</p>;
-  }
+  if (!isConnected) return <p>Connecting to server...</p>;
 
   const WaitingScreen = () => (
     <div className="waiting-screen">
@@ -186,20 +169,12 @@ const PlayerContent = () => {
     </div>
   );
 
-  if (!startSelection) {
-    return <WaitingScreen />;
-  }
-
-  if (!monsterSelected) {
-    return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
-  }
-
-  if (!allReady) {
-    return <WaitingScreen />;
-  }
+  if (!startSelection) return <WaitingScreen />;
+  if (!monsterSelected) return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
+  if (!allReady) return <WaitingScreen />;
 
   // Battle screen displays when all checks have been passed
-  return <BattleScreen matchData={matchData} />;
+  return <BattleScreen matchData={matchData!} />;
 };
 //#endregion
 
@@ -209,4 +184,8 @@ export const Player = () => (
     <PlayerContent />
   </PlayerSocketProvider>
 );
+
+function log_event(message: string, data?: any) {
+  console.log(message, data);
+}
 //#endregion
