@@ -281,25 +281,17 @@ async function main(config: ServerConfig) {
 
     // #region Select Monster
     socket.on("RequestSubmitMonster", (data: any) => {
-      log_event(`Monster submission signal received: ${JSON.stringify(data)}`);
-
       const player = socket.data.player as Player;
-      if (!player) {
-        socket.emit("error", "This player has not been initiated.");
-        return;
-      }
+      if (!player) return;
 
       const room = gameServer.rooms.get(player.roomId);
-      if (!room) {
-        socket.emit("error", "500 Internal Server Error");
-        return;
-      }
+      if (!room) return;
 
-      // Store selected monster template name
-      player.setMonsterTemplate(data.data.base.name);
+      // Store selected monster template name directly
+      player.setMonsterTemplate(data.data); // data.data is now just the template name
       player.isReady = true;
 
-      log_event(`Player ${player.displayName} selected monster template: ${data.data.base.name}`);
+      log_event(`Player ${player.displayName} selected monster template: ${data.data}`);
 
       // Check if all players are ready
       const allReady = Array.from(room.players.values()).every((p) => p.isReady);
@@ -313,16 +305,15 @@ async function main(config: ServerConfig) {
         const opponent = Array.from(room.players.values()).find((p) => p !== player);
         if (!opponent) return;
 
+        log_event(`Player ${player.selectedMonsterTemplateName} vs Opponent ${opponent.selectedMonsterTemplateName}`);
+
         room.playerChannel.to(player.socketId).emit("round-start", {
           myMonster: player.selectedMonsterTemplateName,
           enemyMonster: opponent.selectedMonsterTemplateName,
         });
       });
-
-      // Start the tournament
-      room.tournamentManager.startTournament(Array.from(room.players.values()));
-
     });
+
 
 
     // #region Submit Move
