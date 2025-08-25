@@ -36,7 +36,7 @@ const BattleVisualizerDemo: React.FC = () => {
         events={events}
         turnIndex={turnInput}
         isPlaying={isPlaying}
-        autoplay={isAutoplay}
+        autoAdvance={isAutoplay}
         onAdvanceTurn={(next) => setTurnInput(next)}
       />
 
