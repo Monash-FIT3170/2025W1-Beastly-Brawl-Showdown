@@ -67,10 +67,8 @@ const PlayerContent = () => {
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
 
-  // Animation ref
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
-  // Single listener for game start and round-start
   useEffect(() => {
     if (!socket) return;
 
@@ -79,16 +77,19 @@ const PlayerContent = () => {
     socket.on("round-start", (data) => {
       log_event("Received round-start data:", data);
 
-      if (!data?.myMonsterTemplate || !data?.enemyMonsterTemplate) {
-        console.warn("Received incomplete round-start data:", data);
+      const myTemplateName = data?.myMonster; // template name string
+      const enemyTemplateName = data?.enemyMonster; // template name string
+
+      if (!myTemplateName || !enemyTemplateName) {
+        console.warn("Incomplete round-start data:", data);
         return;
       }
 
-      console.log(`Round started! Player's monster: ${data.myMonsterTemplate}, Opponent's monster: ${data.enemyMonsterTemplate}`);
+      console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
 
       // Create Monster instances for BattleScreen
-      const myMonster = new Monster(MonsterPool.find(m => m.name === data.myMonsterTemplate)!);
-      const enemyMonster = new Monster(MonsterPool.find(m => m.name === data.enemyMonsterTemplate)!);
+      const myMonster = new Monster(MonsterPool.find(m => m.name === myTemplateName)!);
+      const enemyMonster = new Monster(MonsterPool.find(m => m.name === enemyTemplateName)!);
 
       setMatchData({ myMonster, enemyMonster });
       setAllReady(true);
@@ -100,7 +101,6 @@ const PlayerContent = () => {
     };
   }, [socket]);
 
-  // Restart bounce animation loop
   useEffect(() => {
     if (!isConnected) return;
 
@@ -127,16 +127,14 @@ const PlayerContent = () => {
   }, [isConnected]);
 
   const handleMonsterSelection = (monsterName: string) => {
-    const template = MonsterPool.find((m) => m.name === monsterName);
-    if (!template) {
+    if (!MonsterPool.find((m) => m.name === monsterName)) {
       console.error("Invalid monster selected:", monsterName);
       return;
     }
 
-    const monsterInstance = new Monster(template);
-
     if (socket) {
-      socket.emit("RequestSubmitMonster", { data: monsterInstance });
+      // Only send the template name string now
+      socket.emit("RequestSubmitMonster", { data: monsterName });
       setMonsterSelected(true);
       console.log("Monster selected:", monsterName);
     } else {
@@ -144,7 +142,6 @@ const PlayerContent = () => {
     }
   };
 
-  // GUI flow
   if (!isConnected) return <p>Connecting to server...</p>;
 
   const WaitingScreen = () => (
@@ -173,7 +170,6 @@ const PlayerContent = () => {
   if (!monsterSelected) return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
   if (!allReady) return <WaitingScreen />;
 
-  // Battle screen displays when all checks have been passed
   return <BattleScreen matchData={matchData!} />;
 };
 //#endregion
