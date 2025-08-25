@@ -1,6 +1,9 @@
 import { Player } from "./player";
 import { AccountId } from "../shared/types";
 import { Battle, BattleOptions, PlayerOptions } from "../simulator/core/battle"
+import { SideId } from "../simulator/core/side";
+import { MonsterTemplate, Monster } from "../simulator/core/monster/monster";
+import { MonsterPool } from "../simulator/data/monster_pool"
 
 enum MatchType {
     DUEL,
@@ -15,6 +18,7 @@ export class Match {
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
+    playerChannel: any;
 
     /**
      * Constructor.
@@ -23,12 +27,13 @@ export class Match {
      * @param matchID Unique integer created in tournament_manager
      * @param player2 Optional second player in the match (the match is a bye if left empty)
      */
-    constructor(player1: Player, matchID: number, player2?: Player) {
+    constructor(player1: Player, player2: Player | undefined, matchID: number, playerChannel: any) {
         this.player1 = player1;
         this.player2 = player2;
         this.spectators = player1.spectators.concat(player2?.spectators ?? []);
         this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
         this.matchID = matchID;
+        this.playerChannel = playerChannel;
     }
 
     createBattle(): void {
@@ -36,26 +41,33 @@ export class Match {
             return;
         }
 
-        if (!this.player1.monster || !this.player2?.monster) {
-            throw new Error(`Match ${this.matchID}: One or both players are missing a monster.`);
+        // Instantiate monsters from server-side template
+        const p1Template = MonsterPool.find(t => t.name === this.player1.selectedMonsterTemplateName);
+        const p2Template = MonsterPool.find(t => t.name === this.player2?.selectedMonsterTemplateName);
+
+        if (!p1Template || !p2Template) {
+            throw new Error(`Match ${this.matchID}: Could not find template for one or both players.`);
         }
+
+        this.player1.setMonster(p1Template);
+        this.player2?.setMonster(p2Template);
 
         const options: BattleOptions = {
             seed: Math.floor(Math.random() * 10000),
             playerOptionSet: [
                 {
                     name: this.player1.displayName,
-                    monsterTemplate: this.player1.monster,
+                    monsterTemplate: this.player1.monster!,
                 },
                 {
-                    name: this.player2.displayName,
-                    monsterTemplate: this.player2.monster,
+                    name: this.player2!.displayName,
+                    monsterTemplate: this.player2!.monster!,
                 },
             ],
             player_option_timeout: 30,
         };
 
-        const battle = new Battle(options);
+        this.battle = new Battle(options);
     }
 
     getSideForPlayer(player: Player): number {
@@ -71,7 +83,8 @@ export class Match {
         }
     }
 
-    submitMove(player: Player, moveId: string, targetSide: number): void {
+    // Called by main when a player submits a move
+    submitMove(player: Player, moveId: never, targetSide: SideId): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
@@ -84,8 +97,9 @@ export class Match {
             throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no chooseMove notice.`);
         }
 
-        // chooseMoveNotice.callback(moveId, targetSide);
+        chooseMoveNotice.callback(moveId, targetSide);
     }
+
     /**
      * Called by tournament_manager when all matches are ready to commence.
      * Initialises and runs the battle, then processes the winner and loser after completion.
@@ -94,7 +108,7 @@ export class Match {
      * @param playersByAccountId Hashmap of players in the tournament
      * @returns None
      */
-    async runBattle(playersByAccountId: Map<string, Player>): Promise<void> {
+    async runBattle(playerChannel: any): Promise<void> {
 
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
@@ -102,7 +116,24 @@ export class Match {
             return;
         }
 
-        if (!this.battle) { throw new Error(`Match ${this.matchID} has no battle to run.`); }
+        if (!this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to run.`);
+        }
+
+        // Attach notice callbacks to socket
+        this.battle.noticeBoard.subscribeListener({
+            onPostNotice: (sideIndex, notice) => {
+                const player = sideIndex === 0 ? this.player1 : this.player2!;
+                this.playerChannel.to(player.socketId).emit("newNotice", notice);
+            },
+            onRemoveNotice: (sideIndex, notice) => {
+                const player = sideIndex === 0 ? this.player1 : this.player2!;
+                this.playerChannel.to(player.socketId).emit("removeNotice", notice);
+            }
+        });
+
+
+        await this.battle.run();
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);

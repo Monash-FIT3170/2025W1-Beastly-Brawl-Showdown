@@ -15,13 +15,15 @@ export class Room {
 
   players: Player[] = [];
   gameState: any = undefined;
+  playerChannel: any;
+  tournamentManager: TournamentManager;
 
-  tournamentManager: TournamentManager = new TournamentManager()
-
-  constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode) {
+  constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode, playerChannel: any) {
     this.hostSocketId = hostSocketId;
     this.roomId = roomId;
     this.joinCode = joinCode;
+    this.playerChannel = playerChannel;
+    this.tournamentManager = new TournamentManager(this.playerChannel);
   }
 
   hasPlayer(displayName: string): boolean {

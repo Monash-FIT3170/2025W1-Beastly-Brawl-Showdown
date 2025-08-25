@@ -8,6 +8,7 @@ export class Player {
   linkedAccountId?: string;
   spectators: string[];
   monster?: MonsterTemplate;
+  selectedMonsterTemplateName?: string;
   isReady: boolean = false;
 
   constructor(roomId: RoomId, socketId: string, displayName: string, linkedAccountId: string | undefined) {
@@ -36,5 +37,9 @@ export class Player {
 
   setMonster(monster: MonsterTemplate) {
     this.monster = monster;
+  }
+
+  setMonsterTemplate(name: string) {
+    this.selectedMonsterTemplateName = name;
   }
 }

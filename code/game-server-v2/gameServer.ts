@@ -25,6 +25,7 @@ export class GameServer {
   hostIdToRoomIdLookup = new Map<string, RoomId>();
   /**  The array to store rooms */
   rooms = new Map<RoomId, Room>();
+  playerChannel: any;
 
   constructor(serverId: ServerId, maxCapacity: number) {
     if (serverId < 0) {
@@ -87,7 +88,7 @@ export class GameServer {
     return this.countActiveRooms() >= this.maxCapacity;
   }
 
-  createRoom(hostSocketId: string): { roomId: RoomId; joinCode: JoinCode } {
+  createRoom(hostSocketId: string, playerChannel: any): { roomId: RoomId; joinCode: JoinCode } {
     if (this.isFull()) {
       throw new Error("Server is full.");
     }
@@ -96,6 +97,7 @@ export class GameServer {
       hostSocketId,
       this.peekNextRoomId(),
       this.sqids.encode([this.serverId, this.peekNextRoomId()]),
+      playerChannel
     );
 
     if (this.hasRoom(newRoom.roomId)) {
