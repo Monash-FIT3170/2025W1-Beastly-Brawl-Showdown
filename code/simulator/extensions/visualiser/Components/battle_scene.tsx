@@ -9,7 +9,8 @@ import { clamp } from "./utils/clamp";
 interface BattleSceneProps {
   events: BaseEvent[];
   turnIndex: number;
-  autoplay?: boolean; // play subsequent turns automatically
+  isPlaying: boolean;
+  autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
 }
 
@@ -18,7 +19,8 @@ console.log("BattleScene loaded");
 const BattleScene: React.FC<BattleSceneProps> = ({
   events,
   turnIndex,
-  autoplay,
+  isPlaying,
+  autoAdvance,
   onAdvanceTurn,
 }) => {
   // Build turns from raw events
@@ -92,6 +94,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's defense charges
       state[playerId].defendActionCharge -= 1;
+      break;
       }
 
       case "damage": {
@@ -102,38 +105,48 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's health
       state[playerId].health -= damageEvent.amount;
+      break;
       }
 
       case "battleOver": {
         // TODO
+        break;
       }
       case "roll": {
         // TODO
+        break;
       }
       case "reroll": {
         // TODO
+        break;
       }
       case "blocked": {
         // TODO
+        break;
       }
       case "startMove": {
         // TODO
+        break;
       }
       case "moveSuccess": {
         // TODO
+        break;
       }
       case "evaded": {
         // TODO
+        break;
       }
       case "moveFailed": {
         // TODO
+        break;
       }
 
       default: {
         // TODO: unhandled event type
+        break;
       }
     }
-    // Check for health
+
     return state; // placeholder
   }
 
@@ -150,13 +163,20 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   useEffect(() => {
     if (!currentTurn) return;
 
+    // Check if is playing
+    if (!isPlaying) return;
+
+    // Make cancel false at the start of each turn's playthrough
     let cancelled = false;
     const perEventDelayMs = 600;
 
+    // Play out events
     (async () => {
       for (const ev of currentTurn.turnEvents) {
+        // Check for cancel
         if (cancelled) return;
 
+        // Make copy to update
         const stateCopy = cloneState(latestVisibleRef.current);
         const nextState = applyEventToVisible(stateCopy, ev)
 
@@ -165,17 +185,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         // Update ref
         latestVisibleRef.current = nextState;
 
+        // Delay between events (Could be to put animations or this could be done in applyEventToVisible)
         await new Promise(r => setTimeout(r, perEventDelayMs));
         if (cancelled) return;
       }
 
-      if (!cancelled && autoplay && onAdvanceTurn && selectedTurnIndex < turns.length - 1) {
+      // What to do after this turn's playthrough is done
+      if (!cancelled && autoAdvance && onAdvanceTurn && selectedTurnIndex < turns.length - 1) {
         onAdvanceTurn(selectedTurnIndex + 1);
       }
     })();
 
     return () => { cancelled = true; };
-  }, [selectedTurnIndex, currentTurn, autoplay, onAdvanceTurn]);
+  }, [selectedTurnIndex, currentTurn, autoAdvance, onAdvanceTurn]);
 
 
   // Check if there are 2 players
