@@ -39,7 +39,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   // Parsed snapshot at the start of the selected turn
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
-    [selectedTurnIndex] // <- stable driver
+    [currentSnapshot] // <- stable driver
   );
 
   // Build the game log
