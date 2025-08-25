@@ -83,8 +83,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
   // Updates the visible state based on the event
   function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
-    // Check for defense charges
-    if (ev.name == "buff") {
+    switch (ev.name) {
+      case "buff": {
       // Cast the event to a BuffEvent
       let buffEvent = ev as BuffEvent;
       // Get the id of the player who used the buff
@@ -92,24 +92,53 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's defense charges
       state[playerId].defendActionCharge -= 1;
+      }
 
-    } else if (ev.name == "damage") {
-      // Cast the event to a DamageEvent
+      case "damage": {
+        // Cast the event to a DamageEvent
       let damageEvent = ev as DamageEvent;
       // Get the id of the player who was damaged
       let playerId = Number(damageEvent.target);
 
       // Decrease the player's health
       state[playerId].health -= damageEvent.amount;
-    }
+      }
 
+      case "battleOver": {
+        // TODO
+      }
+      case "roll": {
+        // TODO
+      }
+      case "reroll": {
+        // TODO
+      }
+      case "blocked": {
+        // TODO
+      }
+      case "startMove": {
+        // TODO
+      }
+      case "moveSuccess": {
+        // TODO
+      }
+      case "evaded": {
+        // TODO
+      }
+      case "moveFailed": {
+        // TODO
+      }
+
+      default: {
+        // TODO: unhandled event type
+      }
+    }
     // Check for health
     return state; // placeholder
   }
 
-  function cloneState(
-    state: ReturnType<typeof parseSnapshot>
-  ): ReturnType<typeof parseSnapshot> {
+  function cloneState(state: ReturnType<typeof parseSnapshot>): ReturnType<typeof parseSnapshot> {
+    // Check if this built in function exists
     if (typeof structuredClone === "function") {
       return structuredClone(state);
     } else {
