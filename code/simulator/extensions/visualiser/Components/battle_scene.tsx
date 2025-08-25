@@ -81,7 +81,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   useEffect(() => {
     setVisibleState(initialTurnState);
     latestVisibleRef.current = initialTurnState;
-  }, [initialTurnState]);
+  }, [initialTurnState, isPlaying]);
 
   // Updates the visible state based on the event
   function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
@@ -197,7 +197,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     })();
 
     return () => { cancelled = true; };
-  }, [selectedTurnIndex, currentTurn, autoAdvance, onAdvanceTurn]);
+  }, [selectedTurnIndex, currentTurn, isPlaying, autoAdvance, onAdvanceTurn]);
 
 
   // Check if there are 2 players
