@@ -1,4 +1,5 @@
-import { MonsterTemplate } from "../simulator/core/monster/monster";
+import { MonsterTemplate, Monster } from "../simulator/core/monster/monster";
+import { MonsterPool } from "../simulator/data/monster_pool";
 import { RoomId } from "./types";
 
 export class Player {
@@ -39,7 +40,7 @@ export class Player {
     this.monster = monster;
   }
 
-  setMonsterTemplate(name: string) {
-    this.selectedMonsterTemplateName = name;
+  setMonsterTemplate(templateName: string) {
+    this.selectedMonsterTemplateName = templateName;
   }
 }

@@ -4,6 +4,7 @@ import { Battle, BattleOptions, PlayerOptions } from "../simulator/core/battle"
 import { SideId } from "../simulator/core/side";
 import { MonsterTemplate, Monster } from "../simulator/core/monster/monster";
 import { MonsterPool } from "../simulator/data/monster_pool"
+import { log_event } from "./utils";
 
 enum MatchType {
     DUEL,
@@ -49,8 +50,14 @@ export class Match {
             throw new Error(`Match ${this.matchID}: Could not find template for one or both players.`);
         }
 
+        // Assign templates to players (keep server-side type consistency)
         this.player1.setMonster(p1Template);
         this.player2?.setMonster(p2Template);
+        
+        log_event(`Player 1 (${this.player1.displayName}) monster template:\n${JSON.stringify(this.player1.monster, null, 2)}`);
+        if (this.player2) {
+            log_event(`Player 2 (${this.player2.displayName}) monster template:\n${JSON.stringify(this.player2.monster, null, 2)}`);
+        }
 
         const options: BattleOptions = {
             seed: Math.floor(Math.random() * 10000),

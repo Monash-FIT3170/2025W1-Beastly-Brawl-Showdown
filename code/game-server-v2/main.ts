@@ -288,7 +288,7 @@ async function main(config: ServerConfig) {
       if (!room) return;
 
       // Store selected monster template name directly
-      player.setMonsterTemplate(data.data); // data.data is now just the template name
+      player.setMonsterTemplate(data.data);
       player.isReady = true;
 
       log_event(`Player ${player.displayName} selected monster template: ${data.data}`);
@@ -301,6 +301,8 @@ async function main(config: ServerConfig) {
       }
 
       // All players ready, start tournament
+      room.tournamentManager.startTournament(Array.from(room.players.values()));
+
       room.players.forEach((player) => {
         const opponent = Array.from(room.players.values()).find((p) => p !== player);
         if (!opponent) return;
