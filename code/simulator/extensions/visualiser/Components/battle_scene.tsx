@@ -47,6 +47,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   // Keep a ref to avoid stale closures inside the async loop
   const latestVisibleRef = useRef(initialTurnState);
 
+  // This is to prevent replaying the turn when autoplay is toggled
+  const onAdvanceRef = useRef(onAdvanceTurn);
+  useEffect(() => { onAdvanceRef.current = onAdvanceTurn; }, [onAdvanceTurn]);
+  const autoAdvanceRef = useRef(autoAdvance);
+  useEffect(() => { autoAdvanceRef.current = autoAdvance; }, [autoAdvance]);
+
   // When the base snapshot changes (different selected turn), reset visible state
   useEffect(() => {
     setVisibleState(initialTurnState);
@@ -161,13 +167,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       // What to do after this turn's playthrough is done
-      if (!cancelled && autoAdvance && onAdvanceTurn && selectedTurnIndex < turns.length - 1) {
-        onAdvanceTurn(selectedTurnIndex + 1);
+      if (!cancelled && autoAdvanceRef.current && onAdvanceRef.current && selectedTurnIndex < turns.length - 1) {
+        onAdvanceRef.current(selectedTurnIndex + 1);
       }
     })();
 
     return () => { cancelled = true; };
-  }, [selectedTurnIndex, currentTurn, isPlaying, autoAdvance, onAdvanceTurn]);
+  }, [selectedTurnIndex, currentTurn, isPlaying]);
 
 
   // Check if there are 2 players

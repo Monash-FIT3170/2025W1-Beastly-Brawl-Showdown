@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import EventTextBox from "./Components/event_textbox";
 import BattleScene from "./Components/battle_scene";
 import BattleBar from "./Components/battle_bar";
@@ -14,6 +14,11 @@ const BattleVisualizerDemo: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [isLogOpen, setIsLogOpen] = useState(false);
+
+  // To make the function stable so that the turn doesn't replay accidentally
+  const handleAdvanceTurn = useCallback((next: number) => {
+    setTurnInput(next);
+  }, []);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -43,7 +48,7 @@ const BattleVisualizerDemo: React.FC = () => {
         turnIndex={turnInput}
         isPlaying={isPlaying}
         autoAdvance={isAutoplay}
-        onAdvanceTurn={(next) => setTurnInput(next)}
+        onAdvanceTurn={handleAdvanceTurn}
       />
 
       <BattleBar
