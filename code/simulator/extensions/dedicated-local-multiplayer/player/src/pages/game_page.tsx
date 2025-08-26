@@ -6,7 +6,7 @@ import type { Notice } from "@beastly-brawl-showdown/sim-core/notice/notice";
 import { useRef } from "react";
 import type { SideId } from "@beastly-brawl-showdown/sim-core/side";
 import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "@beastly-brawl-showdown/sim-core/action/targeting";
-import {COMMON_MOVE_POOL } from "@sim/data/common/common_move_pool";
+import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@sim/data/common/common_move_pool";
 import type { OrderedEvent } from "@beastly-brawl-showdown/sim-core/event/event_history";
 
 const GamePage: React.FC = () => {
@@ -114,7 +114,7 @@ const GamePage: React.FC = () => {
               onSelectedMoveId={(moveId) => {
                 console.log(`Action pressed: ${moveId}`);
                 let targeting: TargetingData;
-                switch (COMMON_MOVE_POOL[moveId].targetingMethod) {
+                switch (COMMON_MOVE_POOL[moveId as COMMON_MOVE_NAMES].targetingMethod) {
                   case "self": {
                     const selfTargeting: SelfTargeting = {
                       targetingMethod: "self",
@@ -132,7 +132,7 @@ const GamePage: React.FC = () => {
                   }
 
                   default:
-                    console.error(`Error: Unknown targeting method: ${COMMON_MOVE_POOL[moveId].targetingMethod}`);
+                    console.error(`Error: Unknown targeting method: ${COMMON_MOVE_POOL[moveId as COMMON_MOVE_NAMES].targetingMethod}`);
                     return;
                 }
                 const params: Parameters<typeof currentNotice.callback> = [moveId, targeting];

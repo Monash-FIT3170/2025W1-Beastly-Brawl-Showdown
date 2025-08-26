@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import EventTextBox from "./Components/event_textbox";
 import BattleScene from "./Components/battle_scene";
 import BattleBar from "./Components/battle_bar";
-import type { BaseEvent } from "@core/event/base_event";
+import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
 
 const BattleVisualizerDemo: React.FC = () => {
