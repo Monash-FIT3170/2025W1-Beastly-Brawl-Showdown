@@ -1,6 +1,6 @@
 import type { BaseEvent } from "../../../core/event/base_event";
 import type { SnapshotEvent } from "../../../core/event/core_events";
-import { Turn } from "../../../core/event/Turn";
+import { Turn } from "./";
 
 export function parseTurns(events: BaseEvent[]): Turn[] {
   const turnArray: Turn[] = [];

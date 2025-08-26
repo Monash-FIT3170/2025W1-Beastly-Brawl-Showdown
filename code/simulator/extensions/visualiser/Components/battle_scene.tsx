@@ -1,7 +1,7 @@
 import React, { useState,useMemo } from "react";
-import { Turn } from "../../../core/event/Turn"
-import type { BaseEvent } from "../../../core/event/base_event";
-import type { SnapshotEvent } from "../../../core/event/core_events";
+import { Turn } from "@beastly-brawl-showdown/sim-core/event/Turn"
+import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
+import type { SnapshotEvent } from "@beastly-brawl-showdown/sim-core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
