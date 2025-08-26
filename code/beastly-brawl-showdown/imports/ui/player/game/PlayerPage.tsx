@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
-import { MonsterPool } from "/imports/simulator/data/monster_pool";
-import { Monster } from "/imports/simulator/core/monster/monster";
+import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
+import { MonsterTemplate } from "../../../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 
 //#region Socket Context Definition
@@ -62,7 +62,7 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<{ myMonster: Monster; enemyMonster: Monster } | null>(null);
+  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number }; enemyMonster: { template: MonsterTemplate; currentHp: number } } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
@@ -77,8 +77,8 @@ const PlayerContent = () => {
     socket.on("round-start", (data) => {
       log_event("Received round-start data:", data);
 
-      const myTemplateName = data?.myMonster; // template name string
-      const enemyTemplateName = data?.enemyMonster; // template name string
+      const myTemplateName = data?.myMonster;
+      const enemyTemplateName = data?.enemyMonster;
 
       if (!myTemplateName || !enemyTemplateName) {
         console.warn("Incomplete round-start data:", data);
@@ -88,10 +88,13 @@ const PlayerContent = () => {
       console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
 
       // Create Monster instances for BattleScreen
-      const myMonster = new Monster(MonsterPool.find(m => m.name === myTemplateName)!);
-      const enemyMonster = new Monster(MonsterPool.find(m => m.name === enemyTemplateName)!);
+      const myMonster = COMMON_MONSTER_POOL.find((m: { name: any; }) => m.name === myTemplateName)!;
+      const enemyMonster = new COMMON_MONSTER_POOL.find((m: { name: any; }) => m.name === enemyTemplateName)!;
 
-      setMatchData({ myMonster, enemyMonster });
+      setMatchData({
+        myMonster: { template: myMonster, currentHp: data.myHp },
+        enemyMonster: { template: enemyMonster, currentHp: data.enemyHp },
+      });
       setAllReady(true);
     });
 
@@ -127,7 +130,7 @@ const PlayerContent = () => {
   }, [isConnected]);
 
   const handleMonsterSelection = (monsterName: string) => {
-    if (!MonsterPool.find((m) => m.name === monsterName)) {
+    if (!COMMON_MONSTER_POOL.find((m: { name: string; }) => m.name === monsterName)) {
       console.error("Invalid monster selected:", monsterName);
       return;
     }

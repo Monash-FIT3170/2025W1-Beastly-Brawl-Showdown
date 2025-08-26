@@ -1,5 +1,4 @@
-import { MonsterTemplate, Monster } from "../simulator/core/monster/monster";
-import { MonsterPool } from "../simulator/data/monster_pool";
+import { MonsterTemplate } from "../simulator/core/monster/monster";
 import { RoomId } from "./types";
 
 export class Player {
