@@ -6,7 +6,7 @@ import type { Notice } from "@beastly-brawl-showdown/sim-core/notice/notice";
 import { useRef } from "react";
 import type { SideId } from "@beastly-brawl-showdown/sim-core/side";
 import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "@beastly-brawl-showdown/sim-core/action/targeting";
-import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@sim/data/common/common_move_pool";
+import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
 import type { OrderedEvent } from "@beastly-brawl-showdown/sim-core/event/event_history";
 
 const GamePage: React.FC = () => {

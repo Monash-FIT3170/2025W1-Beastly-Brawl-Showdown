@@ -4,7 +4,7 @@ import { NoticeBoard } from "@beastly-brawl-showdown/sim-core/notice/notice_boar
 import { SideId } from "@beastly-brawl-showdown/sim-core/side";
 import { EventHistory } from "@beastly-brawl-showdown/sim-core/event/event_history";
 import { EntryID } from "@beastly-brawl-showdown/sim-core/utils";
-import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@sim/data/common/common_move_pool";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
 
 export class CliAdapter {
   noticeBoard: NoticeBoard;

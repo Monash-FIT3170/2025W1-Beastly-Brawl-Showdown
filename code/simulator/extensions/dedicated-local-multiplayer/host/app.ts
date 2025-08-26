@@ -8,8 +8,8 @@ import { ChooseMove, Notice, Roll } from "@beastly-brawl-showdown/sim-core/notic
 import { OrderedEvent } from "@beastly-brawl-showdown/sim-core/event/event_history";
 import { SideId } from "@beastly-brawl-showdown/sim-core/side";
 import { PlayerToServerEvents, ServerToPlayerEvents } from "./api";
-import { COMMON_MONSTER_POOL } from "@sim/data/common/common_monster_pool";
-import { COMMON_MOVE_POOL } from "@sim/data/common/common_move_pool";
+import { COMMON_MONSTER_POOL } from "@beastly-brawl-showdown/sim-data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
 
 type Player = {
   name: string;

@@ -1,7 +1,7 @@
-import { Battle, BattleOptions } from "@sim/core/battle";
+import { Battle, BattleOptions } from "@beastly-brawl-showdown/sim-core/battle";
 import { CliAdapter } from "./cli_adapter";
-import { COMMON_MONSTER_POOL } from "@sim/data/common/common_monster_pool";
-import { COMMON_MOVE_POOL } from "@sim/data/common/common_move_pool";
+import { COMMON_MONSTER_POOL } from "@beastly-brawl-showdown/sim-data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
 
 const battleOptions: BattleOptions = {
   seed: 0,
