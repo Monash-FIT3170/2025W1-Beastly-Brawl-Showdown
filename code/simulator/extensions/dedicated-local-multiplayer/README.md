@@ -1,4 +1,4 @@
-# Local Multiplayer Prototype
+# Local Multiplayer Prototype / Demo
 
 ![Structure](structure.svg)
 
@@ -10,12 +10,12 @@
 - Player
   - GUI
 
-## Demo
+## Run instructions
 
 For host server
 
 ```sh
-ts-node /app.ts
+ts-node ./app.ts
 ```
 
 For player frontend server
@@ -23,3 +23,17 @@ For player frontend server
 ```sh
 npm run dev
 ```
+
+# Player/Client Procedure
+## Steps
+Once the client has connected successfully...
+### 1: Request Information
+- Game State
+  - Event History
+- Player Information
+### 2: Check Notices
+- Trigger popups to resolve notices
+## Concerns
+> What happens when disconnected?
+
+This should be designed in a way such that connecting makes no difference between whether the battle is in progress or not.

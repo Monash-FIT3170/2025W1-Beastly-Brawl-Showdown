@@ -1,14 +1,19 @@
 import { BaseEvent } from "./base_event";
 
+export type OrderedEvent = BaseEvent & {
+  /** The index in history this number exists as */
+  index: number;
+};
+
 type EventHistoryListener = {
-  onNewEvent(event: BaseEvent): void;
+  onNewEvent(event: OrderedEvent): void;
 };
 
 export class EventHistory {
   /**
    * Do not modify this directly
    */
-  readonly events: BaseEvent[];
+  readonly events: OrderedEvent[];
   listeners: EventHistoryListener[];
 
   constructor() {
@@ -17,8 +22,9 @@ export class EventHistory {
   }
 
   addEvent(event: BaseEvent) {
-    this.events.push(event);
-    this.emitOnNewEvent(event);
+    const orderedEvent = { ...event, index: this.events.length };
+    this.events.push(orderedEvent);
+    this.emitOnNewEvent(orderedEvent);
   }
 
   subscribeListener(listener: EventHistoryListener) {
@@ -28,7 +34,7 @@ export class EventHistory {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
-  private emitOnNewEvent(event: BaseEvent) {
+  private emitOnNewEvent(event: OrderedEvent) {
     this.listeners.forEach((listener) => {
       listener.onNewEvent(event);
     });

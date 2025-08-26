@@ -1,5 +1,7 @@
-import { Battle } from "../battle";
-import { SideId } from "../side";
+import { Battle } from "../../battle";
+import { SideId } from "../../side";
+import { removeComponent } from "../monster";
+import { MonsterStatType } from "../monster_stats";
 import { BaseComponent } from "./component";
 
 export class RerollChargeComponent implements BaseComponent<"reroll"> {
@@ -28,9 +30,7 @@ export class DodgeStateComponent implements BaseComponent<"dodging"> {
   onEndTurn(battle: Battle, selfSide: SideId): void {
     this.remainingDuration--;
     if (this.remainingDuration <= 0) {
-      battle.sides[selfSide].monster.components.splice(
-        battle.sides[selfSide].monster.components.indexOf(this)
-      );
+      removeComponent(battle.sides[selfSide].monster, this);
     }
   }
 }
@@ -45,22 +45,21 @@ export class DefendComponent implements BaseComponent<"defend"> {
     this.bonusArmour = bonusArmour;
   }
 
-  getArmourBonus(): number {
-    return this.bonusArmour;
+  getStatBonus(statType: MonsterStatType) {
+    if (statType === "armour") {
+      return this.bonusArmour;
+    }
+    return null;
   }
   onEndTurn(battle: Battle, selfSide: SideId): void {
     this.remainingDuration--;
     if (this.remainingDuration <= 0) {
-      battle.sides[selfSide].monster.components.splice(
-        battle.sides[selfSide].monster.components.indexOf(this)
-      );
+      removeComponent(battle.sides[selfSide].monster, this);
     }
   }
 }
 
-export class AbilityChargeStunComponent
-  implements BaseComponent<"abilityChargeStun">
-{
+export class AbilityChargeStunComponent implements BaseComponent<"abilityChargeStun"> {
   kind = "abilityChargeStun" as const;
   charges: number;
   constructor(charges: number) {
@@ -79,24 +78,37 @@ export class StunnedStateComponent implements BaseComponent<"stunned"> {
   onEndTurn(battle: Battle, selfSide: SideId): void {
     this.remainingDuration--;
     if (this.remainingDuration <= 0) {
-      battle.sides[selfSide].monster.components.splice(
-        battle.sides[selfSide].monster.components.indexOf(this)
-      );
+      removeComponent(battle.sides[selfSide].monster, this);
     }
   }
 }
+
+export class SpeedModifierComponent implements BaseComponent<"speedModifier"> {
+  kind = "speedModifier" as const;
+  speedBonus: number;
+
+  constructor(speedBonus: number) {
+    this.speedBonus = speedBonus;
+  }
+
+  getStatBonus(statType: MonsterStatType) {
+    if (statType === "speed") {
+      return this.speedBonus;
+    }
+    return null;
+  }
+}
+
 type CommonComponentTypes =
   | typeof RerollChargeComponent
   | typeof DodgeChargeComponent
   | typeof DodgeStateComponent
   | typeof DefendComponent
   | typeof AbilityChargeStunComponent
-  | typeof StunnedStateComponent;
+  | typeof StunnedStateComponent
+  | typeof SpeedModifierComponent;
 //# Map it then export
 type ComponentInstanceType = InstanceType<CommonComponentTypes>;
 export type ComponentKindMap = {
-  [K in ComponentInstanceType["kind"]]: Extract<
-    ComponentInstanceType,
-    { kind: K }
-  >;
+  [K in ComponentInstanceType["kind"]]: Extract<ComponentInstanceType, { kind: K }>;
 };

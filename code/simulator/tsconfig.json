@@ -1,3 +1,9 @@
 {
-  "extends": "../../.config/tsconfig.base.json"
+  "files": [],
+  "references": [
+    { "path": "./core" },
+    { "path": "./data" },
+    { "path": "./extensions/visualiser" },
+    { "path": "./extensions/cli-tester" }
+  ]
 }

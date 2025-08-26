@@ -1,27 +1,23 @@
 import { DefaultEventsMap, Server, Socket } from "socket.io";
-import { MonsterPool } from "../../../data/monster_pool";
-import { Battle } from "../../../core/battle";
+import { MonsterId, MonsterPool } from "@sim/core/monster/monster_pool";
+import { Battle, PlayerOptions } from "@sim/core/battle";
 import express from "express";
 import { createServer } from "node:http";
 import * as readline from "readline";
-import { MonsterTemplate } from "../../../core/monster/monster";
-import { ChooseMove, Notice, NoticeKind, Roll } from "../../../core/notice/notice";
-import { BaseEvent } from "../../../core/event/base_event";
+import { ChooseMove, Notice, Roll } from "@sim/core/notice/notice";
+import { OrderedEvent } from "@sim/core/event/event_history";
+import { SideId } from "@sim/core/side";
+import { PlayerToServerEvents, ServerToPlayerEvents } from "./api";
+import { COMMON_MONSTER_POOL } from "@sim/data/common/common_monster_pool";
+import { commonMovePool } from "@sim/data/common/common_move_pool";
 
 type Player = {
   name: string;
-  monsterTemplate: MonsterTemplate;
+  sideId: SideId;
+  monsterId: MonsterId;
   socket: Socket<PlayerToServerEvents, ServerToPlayerEvents, never, PlayerSocketData>;
 };
 
-export interface ServerToPlayerEvents {
-  newEvent: (event: BaseEvent) => void;
-  newNotice: (notice: Notice) => void;
-}
-export interface PlayerToServerEvents {
-  /// Extract the notice type that matches the kind=K requirement, then get the callback Params
-  resolveNotice<K extends NoticeKind>(kind: K, params: Parameters<Extract<Notice, { kind: K }>["callback"]>): void;
-}
 interface PlayerSocketData {
   // name: string;
   // monsterTemplateId: number;
@@ -43,8 +39,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server<PlayerToServerEvents, ServerToPlayerEvents, never, PlayerSocketData>(server, {
   cors: {
-    origin: "http://localhost:5173/"
-  }
+    origin: "http://localhost:5173/",
+  },
 });
 
 /// Middleware
@@ -63,19 +59,20 @@ io.use((socket, next) => {
   /// Valid connection
   const newPlayer: Player = {
     name: auth.name, //`P${players.length + 1}`,
+    sideId: players.length as SideId,
     socket: socket,
-    monsterTemplate: MonsterPool[1],
+    monsterId: "mystic_wryven",
   };
 
   players.push(newPlayer);
-  console.log(`New player:\n\t- Name: ${newPlayer.name}\n\t- Monster Template: ${JSON.stringify(newPlayer.monsterTemplate)}`);
+  console.log(`New player:\n\t- Name: ${newPlayer.name}\n\t- Monster Template: ${JSON.stringify(newPlayer.monsterId)}`);
   next();
 });
 
 /// Start accepting requests to connect
 io.on("connection", (socket) => {
-  socket.on("disconnect", (dcReason) => {
-    console.log(`Socket disconnected: ${dcReason}`);
+  socket.on("disconnect", (dc_reason) => {
+    console.log(`Socket disconnected: ${dc_reason}`);
   });
 
   socket.onAny((args) => {
@@ -116,13 +113,14 @@ function startSimulator() {
   /// Create battle
   const battle: Battle = new Battle({
     seed: 0,
+    monsterPool: COMMON_MONSTER_POOL,
+    movePool: commonMovePool,
     playerOptionSet: players.map((player) => {
-      return {
-        name: player.name,
-        monsterTemplate: player.monsterTemplate,
+      const playerOptions: PlayerOptions = {
+        monsterId: player.monsterId,
       };
+      return playerOptions;
     }),
-    player_option_timeout: 1000,
   });
 
   /// Subscribe to notice events
@@ -136,6 +134,17 @@ function startSimulator() {
     },
   });
   players.map((player, index) => {
+    player.socket.on("getSelfInfo", () => {
+      return player.sideId;
+    });
+
+    player.socket.on("getHistory", () => {
+      return battle.eventHistory.events;
+    });
+    player.socket.on("getNotices", () => {
+      return Array.from(battle.noticeBoard.noticeMaps[player.sideId].values());
+    });
+
     player.socket.on("resolveNotice", (noticeKind, params) => {
       switch (noticeKind) {
         // TODO make generic
@@ -152,6 +161,8 @@ function startSimulator() {
           roll.callback(...rollParams);
           break;
         }
+
+        // TODO Reroll
         default:
           console.error(`Notice resolution [noticeKind=${noticeKind}] not implmeneted.`);
           break;
@@ -161,7 +172,7 @@ function startSimulator() {
 
   /// Subscribe to event history
   battle.eventHistory.subscribeListener({
-    onNewEvent: function (event: BaseEvent): void {
+    onNewEvent: function (event: OrderedEvent): void {
       console.log(JSON.stringify(event));
 
       // TODO - better way to broadcast to all

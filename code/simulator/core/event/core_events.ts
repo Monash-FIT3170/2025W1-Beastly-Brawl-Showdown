@@ -1,8 +1,8 @@
 import { Side, SideId } from "../side";
-import { EntryID } from "../types";
+import { EntryID } from "../utils";
 import { BaseEvent } from "./base_event";
 
-export interface BattleOverEvent extends BaseEvent {
+export interface BattleOverEvent extends BaseEvent{
   name: "battleOver";
 }
 
