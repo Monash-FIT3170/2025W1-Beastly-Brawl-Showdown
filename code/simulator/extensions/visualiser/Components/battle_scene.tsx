@@ -1,77 +1,191 @@
-import React, { useState,useMemo } from "react";
-import { Turn } from "@beastly-brawl-showdown/sim-core/event/Turn"
-import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
-import type { SnapshotEvent } from "@beastly-brawl-showdown/sim-core/event/core_events";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { BaseEvent } from "../../../core/event/base_event";
+import type { BuffEvent, DamageEvent } from "../../../core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
 
-//this class is basically the entire simulator/information part of the battles, we might need to get playernames tho
 interface BattleSceneProps {
-  events: BaseEvent[]
+  events: BaseEvent[];
   turnIndex: number;
-  autoplay?: boolean; // play subsequent turns automatically
+  isPlaying: boolean;
+  autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
 }
 
 console.log("BattleScene loaded");
 
-//so the way this works is we have an array of turns which in itself has an array of events which have occured in it
-//we've parsed the initial raw JSON data into an array (parsed) so if you want leftside you do parsed[0]
-//the list of values you can retrieve from the parsed information is in snapshot_parser part
-//you can add to the values just need ask if you need anything more
-const BattleScene: React.FC<BattleSceneProps> = ({ events, turnIndex, autoplay, onAdvanceTurn }) => {
-
-  // Build an array of Turn objects based on events
-  //this just gets a turn array filled with turn objects that cut off whenever a snapshot (new turn) occurs
+const BattleScene: React.FC<BattleSceneProps> = ({
+  events,
+  turnIndex,
+  isPlaying,
+  autoAdvance,
+  onAdvanceTurn,
+}) => {
+  // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
 
-  // Clamp is used to restrict the number to make sure it stays within range
+  // Clamp selected index
   const selectedTurnIndex =
     Number.isInteger(turnIndex)
       ? clamp(turnIndex, 0, Math.max(0, turns.length - 1))
       : Math.max(0, turns.length - 1);
 
-  // Use selectedTurnIndex (not raw turnIndex) everywhere you access turns
+  // Determine the current turn and its start-of-turn snapshot
   const currentTurn = turns[selectedTurnIndex];
   const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
-  const parsed = currentSnapshot ? parseSnapshot(currentSnapshot) : [];
 
-  // Build full log for ALL turns, regardless of selectedTurnIndex
-const gameLog = useMemo(() => {
-  const logEntries: { key: string; text: string }[] = [];
-  if (!turns.length) return logEntries;
+  // Parsed snapshot at the start of the selected turn
+  const initialTurnState = useMemo(
+    () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
+    [currentSnapshot] // <- stable driver
+  );
 
-  const lastTurnIndex = Math.max(0, turns.length - 1);
+  // What the panels currently show as events are applied
+  const [visibleState, setVisibleState] = useState(initialTurnState);
 
-  for (let turnNumber = 0; turnNumber <= lastTurnIndex; turnNumber++) {
-    const currentTurn = turns[turnNumber];
+  // Keep a ref to avoid stale closures inside the async loop
+  const latestVisibleRef = useRef(initialTurnState);
 
-    // Start-of-turn marker
-    logEntries.push({
-      key: `turn-${turnNumber}-start`,
-      text: `Turn ${turnNumber + 1} started`,
-    });
+  // This is to prevent replaying the turn when autoplay is toggled
+  const onAdvanceRef = useRef(onAdvanceTurn);
+  useEffect(() => { onAdvanceRef.current = onAdvanceTurn; }, [onAdvanceTurn]);
+  const autoAdvanceRef = useRef(autoAdvance);
+  useEffect(() => { autoAdvanceRef.current = autoAdvance; }, [autoAdvance]);
 
-    // All events within this turn
-    for (let eventIndex = 0; eventIndex < currentTurn.turnEvents.length; eventIndex++) {
-      const event = currentTurn.turnEvents[eventIndex];
-      logEntries.push({
-        key: `turn-${turnNumber}-event-${eventIndex}`,
-        text: currentTurn.printEventString(event) ?? "Unknown event",
-      });
+  // When the base snapshot changes (different selected turn), reset visible state
+  useEffect(() => {
+    setVisibleState(initialTurnState);
+    latestVisibleRef.current = initialTurnState;
+  }, [initialTurnState, isPlaying]);
+
+  // Updates the visible state based on the event
+  function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
+    switch (ev.name) {
+      case "buff": {
+      // Cast the event to a BuffEvent
+      let buffEvent = ev as BuffEvent;
+      // Get the id of the player who used the buff
+      let playerId = Number(buffEvent.source);
+
+      // Decrease the player's defense charges
+      state[playerId].defendActionCharge -= 1;
+      break;
+      }
+
+      case "damage": {
+        // Cast the event to a DamageEvent
+      let damageEvent = ev as DamageEvent;
+      // Get the id of the player who was damaged
+      let playerId = Number(damageEvent.target);
+
+      // Decrease the player's health
+      state[playerId].health -= damageEvent.amount;
+      break;
+      }
+
+      case "battleOver": {
+        // TODO
+        break;
+      }
+      case "roll": {
+        // TODO
+        break;
+      }
+      case "reroll": {
+        // TODO
+        break;
+      }
+      case "blocked": {
+        // TODO
+        break;
+      }
+      case "startMove": {
+        // TODO
+        break;
+      }
+      case "moveSuccess": {
+        // TODO
+        break;
+      }
+      case "evaded": {
+        // TODO
+        break;
+      }
+      case "moveFailed": {
+        // TODO
+        break;
+      }
+
+      default: {
+        // TODO: unhandled event type
+        break;
+      }
+    }
+
+    return state; // placeholder
+  }
+
+  function cloneState(state: ReturnType<typeof parseSnapshot>): ReturnType<typeof parseSnapshot> {
+    // Check if this built in function exists
+    if (typeof structuredClone === "function") {
+      return structuredClone(state);
+    } else {
+      return JSON.parse(JSON.stringify(state));
     }
   }
 
-  return logEntries;
-}, [turns]);
+  // Step through events of the selected turn and update the panels live
+  useEffect(() => {
+    if (!currentTurn) return;
+
+    // Check if is playing
+    if (!isPlaying) return;
+
+    // Make cancel false at the start of each turn's playthrough
+    let cancelled = false;
+    const perEventDelayMs = 600;
+
+    // Play out events
+    (async () => {
+      for (const ev of currentTurn.turnEvents) {
+        // Check for cancel
+        if (cancelled) return;
+
+        // Make copy to update
+        const stateCopy = cloneState(latestVisibleRef.current);
+        const nextState = applyEventToVisible(stateCopy, ev)
+
+        // Update live
+        setVisibleState(nextState);
+        // Update ref
+        latestVisibleRef.current = nextState;
+
+        // Delay between events (Could be to put animations or this could be done in applyEventToVisible)
+        await new Promise(r => setTimeout(r, perEventDelayMs));
+        if (cancelled) return;
+      }
+
+      // What to do after this turn's playthrough is done
+      if (!cancelled && autoAdvanceRef.current && onAdvanceRef.current && selectedTurnIndex < turns.length - 1) {
+        onAdvanceRef.current(selectedTurnIndex + 1);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [selectedTurnIndex, currentTurn, isPlaying]);
 
 
-  if (parsed.length < 2) {
+  // Check if there are 2 players
+  if (visibleState.length < 2) {
     return <p>Waiting for game data...</p>;
   }
-  
-  console.log(parsed[0].image);
+
+  // Clear names for what the UI reads:
+  const visiblePlayer1 = visibleState[0];
+  const visiblePlayer2 = visibleState[1];
+
+  // console.log(visiblePlayer1.image);
 
   return (
     <div
@@ -84,61 +198,23 @@ const gameLog = useMemo(() => {
         border: "1px solid black",
       }}
     >
-      {/* Left Div (PLAYER 1 MONSTER) */}
-      <div
-        style={{
-          flex: 3,
-          backgroundColor: "#d0e6ff",
-          padding: "20px",
-        }}
-      >
-        <h2>{parsed[0].name}</h2>
-        <p>HP: {parsed[0].health}</p>
-        <p>Defend Charges: {parsed[0].defendActionCharge}</p>
-        <img
-          src = {parsed[0].image}
-        />
+      {/* Left Panel (PLAYER 1) */}
+      <div style={{ flex: 3, backgroundColor: "#d0e6ff", padding: "20px" }}>
+        <h2>{visiblePlayer1.name}</h2>
+        <p>HP: {visiblePlayer1.health}</p>
+        <p>Defend Charges: {visiblePlayer1.defendActionCharge}</p>
+        {/* <img src={visiblePlayer1.image} /> */}
       </div>
 
-      {/* Middle Div (INFORMATION ON ROLLS, ACTIONS TAKEN) */}
-
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: "#f77a7aff",
-          padding: "20px",
-          textAlign: "left",
-          overflowY: "auto",
-          maxHeight: "135px",
-          border: "1px solid black",
-        }}
-      >
-        {gameLog.length === 0 ? (
-          <p>No events yet.</p>
-        ) : (
-          gameLog.map(({ key, text }) => (
-            <p key={key} style={{ margin: "5px 0" }}>{text}</p>
-          ))
-        )}
-      </div>
-
-      {/* Right Div (PLAYER 2 MONSTER) */}
-      <div
-        style={{
-          flex: 3,
-          backgroundColor: "#ffd0d0",
-          padding: "20px",
-        }}
-      >
-        <h2>{parsed[1].name}</h2>
-        <p>HP: {parsed[1].health}</p>
-        <p>Defend Charges: {parsed[1].defendActionCharge}</p>
-        <img
-          src = {parsed[1].image}
-        />
+      {/* Right Panel (PLAYER 2) */}
+      <div style={{ flex: 3, backgroundColor: "#ffd0d0", padding: "20px" }}>
+        <h2>{visiblePlayer2.name}</h2>
+        <p>HP: {visiblePlayer2.health}</p>
+        <p>Defend Charges: {visiblePlayer2.defendActionCharge}</p>
+        {/* <img src={visiblePlayer2.image} /> */}
       </div>
     </div>
   );
-}
+};
 
 export default BattleScene;
