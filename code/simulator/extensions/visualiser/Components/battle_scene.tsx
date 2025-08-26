@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Turn } from "../../../core/event/Turn";
 import type { BaseEvent } from "../../../core/event/base_event";
-import type { BuffEvent, DamageEvent, SnapshotEvent } from "../../../core/event/core_events";
+import type { BuffEvent, DamageEvent } from "../../../core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
@@ -41,35 +40,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
     [currentSnapshot] // <- stable driver
   );
-
-  // Build the game log
-  const gameLog = useMemo(() => {
-    const logEntries: { key: string; text: string }[] = [];
-    if (!turns.length) return logEntries;
-
-    // Keeps the turn index at greater than 0
-    const lastTurnIndex = Math.max(0, turns.length - 1);
-
-    // Pushing turns to the log
-    for (let turnNumber = 0; turnNumber <= lastTurnIndex; turnNumber++) {
-      const t = turns[turnNumber];
-
-      logEntries.push({
-        key: `turn-${turnNumber}-start`,
-        text: `Turn ${turnNumber + 1} started`,
-      });
-
-      // For each turn, push events to the log
-      for (let eventIndex = 0; eventIndex < t.turnEvents.length; eventIndex++) {
-        const ev = t.turnEvents[eventIndex];
-        logEntries.push({
-          key: `turn-${turnNumber}-event-${eventIndex}`,
-          text: t.printEventString(ev) ?? "Unknown event",
-        });
-      }
-    }
-    return logEntries;
-  }, [turns]);
 
   // What the panels currently show as events are applied
   const [visibleState, setVisibleState] = useState(initialTurnState);
@@ -228,29 +198,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         <p>HP: {visiblePlayer1.health}</p>
         <p>Defend Charges: {visiblePlayer1.defendActionCharge}</p>
         {/* <img src={visiblePlayer1.image} /> */}
-      </div>
-
-      {/* Middle Panel (Log of ALL turns — unchanged) */}
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: "#f77a7aff",
-          padding: "20px",
-          textAlign: "left",
-          overflowY: "auto",
-          maxHeight: "135px",
-          border: "1px solid black",
-        }}
-      >
-        {gameLog.length === 0 ? (
-          <p>No events yet.</p>
-        ) : (
-          gameLog.map(({ key, text }) => (
-            <p key={key} style={{ margin: "5px 0" }}>
-              {text}
-            </p>
-          ))
-        )}
       </div>
 
       {/* Right Panel (PLAYER 2) */}

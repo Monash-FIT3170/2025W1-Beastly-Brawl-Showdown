@@ -4,14 +4,16 @@ import BattleScene from "./Components/battle_scene";
 import BattleBar from "./Components/battle_bar";
 import type { BaseEvent } from "../../core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
+import GameLog from "./Components/GameLog";
 
 const BattleVisualizerDemo: React.FC = () => {
   const [events, setEvents] = useState<BaseEvent[]>([]);
   const [turnInput, setTurnInput] = useState(0);
 
-  // NEW: simple UI state
   const [isAutoplay, setIsAutoplay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const [isLogOpen, setIsLogOpen] = useState(false);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -30,6 +32,10 @@ const BattleVisualizerDemo: React.FC = () => {
           />
           Autoplay
         </label>
+
+        <div style={{ marginLeft: "auto" }}>
+          <button onClick={() => setIsLogOpen(true)}>Open Log</button>
+        </div>
       </div>
 
       <BattleScene
@@ -44,6 +50,12 @@ const BattleVisualizerDemo: React.FC = () => {
         turnInput={turnInput}
         setTurnInput={setTurnInput}
         maxTurns={parseTurns(events).length}
+      />
+
+      <GameLog
+        isOpen={isLogOpen}
+        onClose={() => setIsLogOpen(false)}
+        events={events}
       />
     </div>
   );
