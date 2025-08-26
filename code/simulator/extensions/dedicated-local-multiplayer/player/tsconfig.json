@@ -7,6 +7,9 @@
     {
       "path": "../../../data"
     },
+        {
+      "path": "../../visualiser"
+    },
     // {
     //   "path": "./tsconfig.app.json"
     // },
