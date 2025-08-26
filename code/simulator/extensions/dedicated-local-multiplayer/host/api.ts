@@ -1,6 +1,6 @@
-import type { OrderedEvent } from "@sim/core/event/event_history";
-import type { Notice, NoticeKind } from "@sim/core/notice/notice";
-import type { SideId } from "@sim/core/side";
+import type { OrderedEvent } from "@beastly-brawl-showdown/sim-core/event/event_history";
+import type { Notice, NoticeKind } from "@beastly-brawl-showdown/sim-core/notice/notice";
+import type { SideId } from "@beastly-brawl-showdown/sim-core/side";
 
 export interface ServerToPlayerEvents {
   newEvent: (event: OrderedEvent) => void;

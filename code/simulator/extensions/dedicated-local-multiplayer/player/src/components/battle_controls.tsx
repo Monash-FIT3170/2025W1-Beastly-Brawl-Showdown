@@ -1,6 +1,6 @@
 import React from "react";
-import type { ChooseMove } from "@sim/core/notice/notice";
-import type { EntryID } from "@sim/core/types";
+import type { ChooseMove } from "@beastly-brawl-showdown/sim-core/notice/notice";
+import type { EntryID } from "@beastly-brawl-showdown/sim-core/types";
 import { commonMovePool } from "@sim/data/common/common_move_pool";
 
 interface BattleControlsProps {
