@@ -8,8 +8,8 @@ import { AbilityChargeStunComponent, DefendComponent, DodgeChargeComponent, Dodg
 import { getComponent, getStat, Monster } from "@beastly-brawl-showdown/sim-core/monster/monster";
 import { SideId } from "@beastly-brawl-showdown/sim-core/side";
 
-type MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun";
-export const COMMON_MOVE_POOL: MovePool<MOVE_NAMES> = {
+export type COMMON_MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun";
+export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
   nothing: {
     moveId: "nothing",
     type: "move",
