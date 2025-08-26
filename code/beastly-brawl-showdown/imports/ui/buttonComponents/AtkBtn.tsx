@@ -1,7 +1,5 @@
-import React from 'react';
+import React from "react";
 
 export const AtkBtn = () => {
-    return (
-        <button className="small-btn atk-btn"></button>
-    )    
-}
+  return <button className="small-btn atk-btn"></button>;
+};

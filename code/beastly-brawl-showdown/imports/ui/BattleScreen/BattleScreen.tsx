@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { monsterData, MonsterName } from '../../data/monsters/MonsterData';
 import { BattleTop } from './BattleTop';
 import { BattleMiddle } from './BattleMiddle';
 import { BattleBottom } from './BattleBottom';
 import { usePlayerSocket } from '../player/game/PlayerPage';
-import Monsters from '/imports/data/monsters/Monsters';
+import { Monster, MonsterTemplate } from '/imports/simulator/core/monster/monster';
 
 export const BattleScreen: React.FC = () => {
 
   // #region Variable initialisation
   // Establish connection to existing socket
-  const { socket, isConnected } = usePlayerSocket();
+  const { socket } = usePlayerSocket();
 
   // Initialise the 2 monsters with the monsterdata class 
-  const [myMonster, setMyMonster] = useState<Monsters>();
-  const [enemyMonster, setEnemyMonster] = useState<Monsters>();
+  const [myMonster, setMyMonster] = useState<Monster>();
+  const [enemyMonster, setEnemyMonster] = useState<Monster>();
 
   // State to trigger animation showing or not
-  const [showAnimation, setShowAnimation] = useState(false);
+  const [showAnimation] = useState(false);
   // #endregion
 
   // #region Socket Methods
@@ -27,18 +26,11 @@ export const BattleScreen: React.FC = () => {
     if (!socket) return;
 
 
-    const handleMatchStarted = (data: { myMonster: string; enemyMonster: string }) => {
+    const handleMatchStarted = (data: { myMonster: MonsterTemplate; enemyMonster: MonsterTemplate }) => {
       console.log("Match started:", data);
 
-      const MyMonsterClass = monsterData[data.myMonster as MonsterName];
-      const EnemyMonsterClass = monsterData[data.enemyMonster as MonsterName];
-
-      if (MyMonsterClass && EnemyMonsterClass) {
-        setMyMonster(new MyMonsterClass());
-        setEnemyMonster(new EnemyMonsterClass());
-      } else {
-        console.warn("Invalid monster name(s) received from server:", data);
-      }
+      setMyMonster(new Monster(data.myMonster));
+      setEnemyMonster(new Monster(data.enemyMonster));
     };
 
     socket.on("match-started", handleMatchStarted);
@@ -103,7 +95,7 @@ export const BattleScreen: React.FC = () => {
   }
 
   return (
-    <div className="battleScreen">
+    <div className="canvas-body" id="battle-screen-body">
       <BattleTop />
       <BattleMiddle
         showAnimation={showAnimation}

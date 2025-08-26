@@ -7,7 +7,7 @@ export const UserForm = () => {
   const navigate = useNavigate();
 
   // todo: make this login the user or smth
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
+  const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     if (!userName) return;
@@ -26,7 +26,6 @@ export const UserForm = () => {
     navigate("/guest-name?target=home");
   };
 
-
   return (
     <form className="userForm" onSubmit={handleSubmit}>
       <input
@@ -41,10 +40,12 @@ export const UserForm = () => {
         value={password}
         onChange={(e) => setPassWord(e.target.value)}
       />
-      
+
       <button type="submit">Login</button>
       <button type="button">Sign Up</button>
-      <button type="button" onClick = {handleGuestLogin}>Login As Guest</button>
+      <button type="button" onClick={handleGuestLogin}>
+        Login As Guest
+      </button>
     </form>
   );
 };

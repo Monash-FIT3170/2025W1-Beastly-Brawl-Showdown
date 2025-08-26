@@ -1,19 +1,20 @@
 import { DefaultEventsMap, Server, Socket } from "socket.io";
-import { MonsterPool } from "../../../data/monster_pool";
-import { Battle, PlayerOptions } from "../../../core/battle";
+import { MonsterId, MonsterPool } from "@beastly-brawl-showdown/sim-core/monster/monster_pool";
+import { Battle, PlayerOptions } from "@beastly-brawl-showdown/sim-core/battle";
 import express from "express";
 import { createServer } from "node:http";
 import * as readline from "readline";
-import { MonsterTemplate } from "../../../core/monster/monster";
-import { ChooseMove, Notice, Roll } from "../../../core/notice/notice";
-import { OrderedEvent } from "../../../core/event/event_history";
-import { SideId } from "../../../core/side";
+import { ChooseMove, Notice, Roll } from "@beastly-brawl-showdown/sim-core/notice/notice";
+import { OrderedEvent } from "@beastly-brawl-showdown/sim-core/event/event_history";
+import { SideId } from "@beastly-brawl-showdown/sim-core/side";
 import { PlayerToServerEvents, ServerToPlayerEvents } from "./api";
+import { COMMON_MONSTER_POOL } from "@beastly-brawl-showdown/sim-data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
 
 type Player = {
   name: string;
   sideId: SideId;
-  monsterTemplate: MonsterTemplate;
+  monsterId: MonsterId;
   socket: Socket<PlayerToServerEvents, ServerToPlayerEvents, never, PlayerSocketData>;
 };
 
@@ -60,11 +61,11 @@ io.use((socket, next) => {
     name: auth.name, //`P${players.length + 1}`,
     sideId: players.length as SideId,
     socket: socket,
-    monsterTemplate: MonsterPool[1],
+    monsterId: "mystic_wryven",
   };
 
   players.push(newPlayer);
-  console.log(`New player:\n\t- Name: ${newPlayer.name}\n\t- Monster Template: ${JSON.stringify(newPlayer.monsterTemplate)}`);
+  console.log(`New player:\n\t- Name: ${newPlayer.name}\n\t- Monster Template: ${JSON.stringify(newPlayer.monsterId)}`);
   next();
 });
 
@@ -112,9 +113,11 @@ function startSimulator() {
   /// Create battle
   const battle: Battle = new Battle({
     seed: 0,
+    monsterPool: COMMON_MONSTER_POOL,
+    movePool: COMMON_MOVE_POOL,
     playerOptionSet: players.map((player) => {
       const playerOptions: PlayerOptions = {
-        monsterTemplate: player.monsterTemplate,
+        monsterId: player.monsterId,
       };
       return playerOptions;
     }),
@@ -139,7 +142,7 @@ function startSimulator() {
       return battle.eventHistory.events;
     });
     player.socket.on("getNotices", () => {
-      return battle.noticeBoard.noticeMaps[player.sideId];
+      return Array.from(battle.noticeBoard.noticeMaps[player.sideId].values());
     });
 
     player.socket.on("resolveNotice", (noticeKind, params) => {

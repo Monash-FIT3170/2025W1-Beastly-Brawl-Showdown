@@ -1,3 +1,5 @@
+import React from "react";
+
 import React from 'react';
 type BattleBottomProps = {
   onAction: (action: 'attack' | 'defend' | 'ability') => void;
@@ -24,6 +26,8 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction }) => {
       >
         <img src="/img/shield.png" alt="Shield" className="battleScreenBottomButtonImage" />
       </button>
+      <div className="shield-uses">{shieldUsesLeft}</div>
     </div>
   );
 };
+

@@ -2,26 +2,26 @@ import { Meteor } from "meteor/meteor";
 import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 import { io, Socket } from "socket.io-client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export default function ProjectorPage() {
   const [serverUrl, setServerUrl] = useState<string>();
   const [roomId, setRoomId] = useState<number>();
-  const [joinCode, setJoinCode] = useState<string>();
+  const [joinCode, setJoinCode] = useState<string>("");
 
   const [playerList, setPlayerList] = useState<string[]>([]);
+  const socketRef = useRef<Socket | null>(null);
 
   function getJoinUrl() {
     return Meteor.absoluteUrl() + "join/" + joinCode;
   }
 
-  //#region Connect to game server
-  const socketRef = useRef<Socket>();
   useEffect(() => {
     if (socketRef.current) {
-      return; /// Already has a socket
+      return;
     }
 
+    //#region Startup
     if (!serverUrl) {
       /// Try get best server url
       Meteor.call("getBestServerUrl", (error: any, result: string) => {
@@ -39,6 +39,7 @@ export default function ProjectorPage() {
       console.log("Waiting for server url to load.");
       return;
     }
+
 
     // Connect to game server
     socketRef.current = io(serverUrl + "/host");
@@ -67,19 +68,28 @@ export default function ProjectorPage() {
     //#endregion
 
     //#region Request Room
-    socketRef.current.on("request-room_response", (roomInfo: { roomId: number; joinCode: string }) => {
-      console.log("Room request response", roomInfo);
-      setRoomId(roomInfo.roomId);
-      setJoinCode(roomInfo.joinCode);
-    });
+    socketRef.current.on(
+      "request-room_response",
+      (roomInfo: { roomId: number; joinCode: string }) => {
+        console.log("Room request response", roomInfo);
+        setRoomId(roomInfo.roomId);
+        setJoinCode(roomInfo.joinCode);
+      }
+    );
 
+    //#region Host App events
     socketRef.current.on("player-set-changed", (newPlayerList: string[]) => {
       console.log("New set of players:", newPlayerList.toString());
       setPlayerList(newPlayerList);
     });
 
-    console.log("Request new room.");
-    socketRef.current.emit("RequestNewRoom");
+
+    if (!roomId) {
+      socketRef.current.emit("request-room");
+      return;
+    }
+    //#endregion
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect(); // Cleanup on unmount
@@ -88,41 +98,35 @@ export default function ProjectorPage() {
   }, [serverUrl]);
   //#endregion
 
-  //#region Startup
-  if (!serverUrl) {
-    return (
-      <>
-        <p>Connecting to servers...</p>
-      </>
-    );
-  }
-
-  if (!roomId) {
-    return (
-      <>
-        <p>Starting room...</p>
-      </>
-    );
-  }
-  //#endregion
-
   //#region Host App
 
-  /**
-   * Handle button click to start the game
-   * Sends arguments to main.ts listener
-   */
-  function startGame() {
-    socketRef.current.emit("RequestStartGame");
+  function handleStartGame() {
+    if (socketRef.current) {
+      socketRef.current.emit("start-game", { roomId }); // Send start-game to server
+      console.log("Start game requested!");
+    }
   }
 
+  if (!serverUrl || !roomId) return <p>Connecting / Starting room...</p>;
+
   return (
-    <div className="waiting-room-box">
-      <h1>Game Lobby</h1>
-      <h2>Room ID: {joinCode}</h2>
-      <WaitingRoomInfoBox joinUrl={getJoinUrl()} />
+    <div className="canvas-body" id="waiting-room-body">
+      <div className="waiting-room-header">
+        <div className="join-info">
+          Join the game with your phone!
+          <br />
+          Scan the QR code or join with the code!
+        </div>
+        <WaitingRoomInfoBox joinCode={joinCode} joinUrl={getJoinUrl()} />
+      </div>
+
+      <div className="waiting-room-logo">
+        <h1>Beastly Brawl Showdown!</h1>
+      </div>
+
       <ParticipantDisplayBox name={playerList.toString()} />
-      <button className="btn" onClick={startGame}>
+
+      <button className="glb-btn" id="start-game-btn" onClick={handleStartGame}>
         Start Game
       </button>
     </div>

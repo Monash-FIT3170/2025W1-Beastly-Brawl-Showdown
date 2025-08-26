@@ -1,7 +1,17 @@
 {
-  "files": [],
+  "extends": "../../../../../.config/tsconfig.extension.json",
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    {
+      "path": "../host"
+    },
+    {
+      "path": "../../visualiser"
+    },
+    // {
+    //   "path": "./tsconfig.app.json"
+    // },
+    // {
+    //   "path": "./tsconfig.node.json"
+    // }
   ]
 }

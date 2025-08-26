@@ -13,6 +13,6 @@ Meteor.startup(() => {
   root.render(
     <BrowserRouter>
       <App />
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 });

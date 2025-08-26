@@ -19,7 +19,7 @@ export async function locateServerBest(): Promise<string> {
   });
 
   if (!serverInfo) {
-    console.log(serverInfo)
+    console.log(serverInfo);
     throw new Error(`Server #${bestServerNo} is unavailable.`);
   }
 

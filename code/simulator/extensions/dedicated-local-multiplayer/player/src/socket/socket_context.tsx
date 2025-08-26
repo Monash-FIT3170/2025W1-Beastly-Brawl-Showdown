@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import type { Socket } from "socket.io-client";
-import { type PlayerToServerEvents, type ServerToPlayerEvents } from "../../../api";
+import { type PlayerToServerEvents, type ServerToPlayerEvents } from "../../../host/api";
 
 type SocketContextType = {
   // socket: Socket | null;

@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Turn } from "../../../core/event/Turn";
+import React, { useState,useMemo } from "react";
+import { Turn } from "../../../core/event/Turn"
 import type { BaseEvent } from "../../../core/event/base_event";
-import type { BuffEvent, DamageEvent, SnapshotEvent } from "../../../core/event/core_events";
+import type { SnapshotEvent } from "../../../core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";

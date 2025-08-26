@@ -1,0 +1,7 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./extensions/visualiser" },
+    { "path": "./extensions/cli-tester" }
+  ]
+}

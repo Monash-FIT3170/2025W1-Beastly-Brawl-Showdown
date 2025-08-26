@@ -1,7 +1,5 @@
-import React from 'react';
+import React from "react";
 
 export const DarkBrownBtn = () => {
-    return (
-        <button className="btn btn-dark-brown">Button</button>
-    )    
-}
+  return <button className="btn btn-dark-brown">Button</button>;
+};

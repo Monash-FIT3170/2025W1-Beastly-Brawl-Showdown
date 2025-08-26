@@ -15,7 +15,7 @@ export const HostRoomRequestPage = () => {
       "requestHostRoom",
       (
         error: any,
-        result: { serverUrl: string; roomId: number; joinCode: string }
+        result: { serverUrl: string; roomId: number; joinCode: string },
       ) => {
         if (error) {
           console.error("Error creating room:", error);
@@ -29,7 +29,7 @@ export const HostRoomRequestPage = () => {
         sessionStorage.setItem("joinCode", result.joinCode);
 
         navigate(`/room/`);
-      }
+      },
     );
   };
 

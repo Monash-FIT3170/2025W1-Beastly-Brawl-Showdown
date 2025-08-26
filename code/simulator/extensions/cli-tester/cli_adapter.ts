@@ -1,10 +1,10 @@
 import * as readline from "readline";
-import { Notice, NoticeKind } from "../../core/notice/notice";
-import { NoticeBoard } from "../../core/notice/notice_board";
-import { SideId } from "../../core/side";
-import { EventHistory } from "../../core/event/event_history";
-import { EntryID } from "../../core/types";
-import { commonMovePool } from "../../data/common_move_pool";
+import { Notice, NoticeKind } from "@beastly-brawl-showdown/sim-core/notice/notice";
+import { NoticeBoard } from "@beastly-brawl-showdown/sim-core/notice/notice_board";
+import { SideId } from "@beastly-brawl-showdown/sim-core/side";
+import { EventHistory } from "@beastly-brawl-showdown/sim-core/event/event_history";
+import { EntryID } from "@beastly-brawl-showdown/sim-core/utils";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
 
 export class CliAdapter {
   noticeBoard: NoticeBoard;
@@ -62,7 +62,7 @@ export class CliAdapter {
               break;
             }
 
-            switch (commonMovePool[args[0].toLowerCase() as EntryID].targetingMethod) {
+            switch (COMMON_MOVE_POOL[args[0].toLowerCase() as COMMON_MOVE_NAMES].targetingMethod) {
               case "self": {
                 notice.callback(args[0].toLowerCase() as EntryID, {
                   targetingMethod: "self",
