@@ -9,7 +9,7 @@ import { OrderedEvent } from "@sim/core/event/event_history";
 import { SideId } from "@sim/core/side";
 import { PlayerToServerEvents, ServerToPlayerEvents } from "./api";
 import { COMMON_MONSTER_POOL } from "@sim/data/common/common_monster_pool";
-import { commonMovePool } from "@sim/data/common/common_move_pool";
+import { COMMON_MOVE_POOL } from "@sim/data/common/common_move_pool";
 
 type Player = {
   name: string;
@@ -114,7 +114,7 @@ function startSimulator() {
   const battle: Battle = new Battle({
     seed: 0,
     monsterPool: COMMON_MONSTER_POOL,
-    movePool: commonMovePool,
+    movePool: COMMON_MOVE_POOL,
     playerOptionSet: players.map((player) => {
       const playerOptions: PlayerOptions = {
         monsterId: player.monsterId,

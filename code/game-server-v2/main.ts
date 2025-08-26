@@ -11,8 +11,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
 import { SideId } from "../simulator/core/side";
-import { MonsterPool } from "../simulator/data/monster_pool";
-
+import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 
 type ServerConfig = {
   serverIp: string;
@@ -286,6 +285,12 @@ async function main(config: ServerConfig) {
 
       const room = gameServer.rooms.get(player.roomId);
       if (!room) return;
+
+      const monsterKey = data.data as keyof typeof COMMON_MONSTER_POOL.monsters;
+      if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
+        socket.emit("error", "Invalid monster selection");
+        return;
+      }
 
       // Store selected monster template name directly
       player.setMonsterTemplate(data.data);

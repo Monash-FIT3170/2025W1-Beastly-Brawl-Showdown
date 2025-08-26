@@ -3,86 +3,75 @@ import { BattleTop } from './BattleTop';
 import { BattleMiddle } from './BattleMiddle';
 import { BattleBottom } from './BattleBottom';
 import { usePlayerSocket } from '../player/game/PlayerPage';
-import { Monster, MonsterTemplate } from '/imports/simulator/core/monster/monster';
+import { MonsterTemplate } from '../../../../simulator/core/monster/monster_template';
 
 interface BattleScreenProps {
   matchData: {
-    myMonster: Monster;
-    enemyMonster: Monster;
+    myMonster: { template: MonsterTemplate; currentHp: number };
+    enemyMonster: { template: MonsterTemplate; currentHp: number };
   };
 }
 
+type MonsterState = {
+  template: MonsterTemplate;
+  currentHp: number;
+  playerId: string;
+};
+
 export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
-
-  // #region Variable initialisation
-  // Establish connection to existing socket
   const { socket } = usePlayerSocket();
-
-  // Initialise the 2 monsters with the monsterdata class 
-  const [myMonster, setMyMonster] = useState<Monster>();
-  const [enemyMonster, setEnemyMonster] = useState<Monster>();
+  const [myMonster, setMyMonster] = useState<MonsterState>();
+  const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
   const [hasSubmittedMove, setHasSubmittedMove] = useState(false);
-
-  // State to trigger animation showing or not
   const [showAnimation] = useState(false);
-  // #endregion
 
-  // #region Socket Methods
+  // Initialize monsters when matchData changes
   useEffect(() => {
-    setMyMonster(matchData.myMonster);
-    setEnemyMonster(matchData.enemyMonster);
+    setMyMonster({
+      template: matchData.myMonster.template,
+      currentHp: matchData.myMonster.currentHp,
+      playerId: 'player1'
+    });
+    setEnemyMonster({
+      template: matchData.enemyMonster.template,
+      currentHp: matchData.enemyMonster.currentHp,
+      playerId: 'player2'
+    });
   }, [matchData]);
 
-  // Socket methods to communicate with server (main.ts) go here
+  // Listen for 'match-started' socket event
   useEffect(() => {
-    // Error checking for null socket
-    if (!socket) return;
+    if (!socket) return undefined;
 
-
-    const handleMatchStarted = (data: { myMonster: MonsterTemplate; enemyMonster: MonsterTemplate }) => {
+    const handleMatchStarted = (data: any) => {
       console.log("Match started:", data);
-
-      setMyMonster(new Monster(data.myMonster));
-      setEnemyMonster(new Monster(data.enemyMonster));
-      setHasSubmittedMove(false);
     };
 
     socket.on("match-started", handleMatchStarted);
-  });
-  //#endregion
 
-  //#region Actions
+    return () => {
+      socket.off("match-started", handleMatchStarted);
+    };
+  }, [socket]);
 
+  // Handle player action
   const handleAction = (action: 'attack' | 'defend' | 'ability') => {
     if (!socket) return;
-
-    socket.emit('RequestSubmitMove', {
-      playerSocket: socket.id, // your socket ID
-      action: action,          // the move id
-      targetSide: 1,           // or 0 depending on who you target
-    });
-
+    socket.emit('RequestSubmitMove', { action });
     setHasSubmittedMove(true);
   };
-  //#endregion
 
-  // HTML to show each monster and the animations
-  if (!myMonster || !enemyMonster) {
-    return <div>Loading battle...</div>;
-  }
+  if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
   return (
     <div className="canvas-body" id="battle-screen-body">
       <BattleTop />
       <BattleMiddle
         showAnimation={showAnimation}
-        player1Monster={myMonster}
-        player2Monster={enemyMonster}
-        playerId1="player1-id"
-        playerId2="player2-id"
+        player1={myMonster}
+        player2={enemyMonster}
       />
       <BattleBottom onAction={handleAction} disabled={hasSubmittedMove} />
     </div>
   );
-
 };

@@ -2,9 +2,11 @@ import { Player } from "./player";
 import { AccountId } from "../shared/types";
 import { Battle, BattleOptions, PlayerOptions } from "../simulator/core/battle"
 import { SideId } from "../simulator/core/side";
-import { MonsterTemplate, Monster } from "../simulator/core/monster/monster";
-import { MonsterPool } from "../simulator/data/monster_pool"
+import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 import { log_event } from "./utils";
+import { MonsterId } from "../simulator/core/monster/monster_pool";
+import { TargetingData } from "../simulator/core/action/targeting";
 
 enum MatchType {
     DUEL,
@@ -43,8 +45,10 @@ export class Match {
         }
 
         // Instantiate monsters from server-side template
-        const p1Template = MonsterPool.find(t => t.name === this.player1.selectedMonsterTemplateName);
-        const p2Template = MonsterPool.find(t => t.name === this.player2?.selectedMonsterTemplateName);
+        const p1Template = COMMON_MONSTER_POOL.monsters[this.player1.selectedMonsterTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+        const p2Template = this.player2
+            ? COMMON_MONSTER_POOL.monsters[this.player2.selectedMonsterTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters]
+            : undefined;
 
         if (!p1Template || !p2Template) {
             throw new Error(`Match ${this.matchID}: Could not find template for one or both players.`);
@@ -53,7 +57,7 @@ export class Match {
         // Assign templates to players (keep server-side type consistency)
         this.player1.setMonster(p1Template);
         this.player2?.setMonster(p2Template);
-        
+
         log_event(`Player 1 (${this.player1.displayName}) monster template:\n${JSON.stringify(this.player1.monster, null, 2)}`);
         if (this.player2) {
             log_event(`Player 2 (${this.player2.displayName}) monster template:\n${JSON.stringify(this.player2.monster, null, 2)}`);
@@ -61,18 +65,18 @@ export class Match {
 
         const options: BattleOptions = {
             seed: Math.floor(Math.random() * 10000),
+            monsterPool: COMMON_MONSTER_POOL, // must provide a MonsterPool instance
+            movePool: COMMON_MOVE_POOL,       // must provide a MovePool instance
             playerOptionSet: [
                 {
-                    name: this.player1.displayName,
-                    monsterTemplate: this.player1.monster!,
+                    monsterId: this.player1.monster!.templateId as MonsterId,
                 },
                 {
-                    name: this.player2!.displayName,
-                    monsterTemplate: this.player2!.monster!,
+                    monsterId: this.player2!.monster!.templateId as MonsterId,
                 },
             ],
-            player_option_timeout: 30,
         };
+
 
         this.battle = new Battle(options);
     }
@@ -104,8 +108,15 @@ export class Match {
             throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no chooseMove notice.`);
         }
 
-        chooseMoveNotice.callback(moveId, targetSide);
+        // Wrap SideId in a TargetingData object with the correct targetingMethod
+        const targetData: TargetingData = {
+            targetingMethod: "single-enemy",
+            target: targetSide,
+        };
+
+        chooseMoveNotice.callback(moveId, targetData);
     }
+
 
     /**
      * Called by tournament_manager when all matches are ready to commence.

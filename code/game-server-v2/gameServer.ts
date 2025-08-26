@@ -39,36 +39,6 @@ export class GameServer {
     this.maxCapacity = maxCapacity;
   }
 
-  // /** Attempt to write this to the database */
-  // private async registerServer(overrideExisting: boolean) {
-  //   /// Does this already exist in the records
-  //   const existingRecord = await GameServerRecords.findOneAsync({
-  //     serverNo: this.serverId,
-  //   });
-  //   if (existingRecord) {
-  //     log_warning("There is a server registered with the same number.");
-  //     if (!overrideExisting) {
-  //       throw new Error(
-  //         "Server registration failed. Cannot override existing record."
-  //       );
-  //     }
-  //     log_warning(
-  //       `Overriding existing record: ${JSON.stringify(existingRecord)}`
-  //     );
-  //   }
-
-  //   const noOfUpdatedRecords = await GameServerRecords.updateAsync(
-  //     { serverNo: this.serverId },
-  //     { $set: { serverUrl: process.env.ROOT_URL } },
-  //     { upsert: true } /// Update or insert (if does not exist)
-  //   );
-
-  //   assert(
-  //     noOfUpdatedRecords <= 1,
-  //     "Unexpected behaviour. Multiple records overwritten when there should be one."
-  //   );
-  // }
-
   private peekNextRoomId(): RoomId {
     return this.lastAssignedRoomId + 1;
   }
@@ -109,19 +79,6 @@ export class GameServer {
 
     return { roomId: newRoom.roomId, joinCode: newRoom.joinCode };
   }
-
-  // // TODO AUTH
-  // deleteRoom(roomId: RoomId) {
-  //   if (this.countActiveRooms() == 0) {
-  //     throw new Error("Deletion failed, there are no rooms in this server");
-  //   }
-
-  //   if (!this.hasRoom(roomId)) {
-  //     throw new Error(`A room with ID = ${roomId} does not exist.`);
-  //   }
-
-  //   this.rooms.delete(roomId);
-  // }
 
   translateJoinCodeToRoomId(joinCode: JoinCode) {
     return this.sqids.decode(joinCode)[1]; /// We already know the server id (of this)
