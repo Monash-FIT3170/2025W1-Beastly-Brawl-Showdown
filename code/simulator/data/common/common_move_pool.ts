@@ -1,12 +1,12 @@
-import { MoveData } from "@sim/core/action/move/move";
-import { MovePool } from "@sim/core/action/move/move_pool";
-import { default_attack } from "@sim/core/action/move/move_utils";
-import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "@sim/core/action/targeting";
-import { Battle } from "@sim/core/battle";
-import { BlockedEvent, BuffEvent, DamageEvent, MoveEvadedEvent, MoveFailedEvent, MoveSuccessEvent, RerollEvent, RollEvent, StartMoveEvent } from "@sim/core/event/core_events";
-import { AbilityChargeStunComponent, DefendComponent, DodgeChargeComponent, DodgeStateComponent, RerollChargeComponent, StunnedStateComponent } from "@sim/core/monster/component/core_components";
-import { getComponent, getStat, Monster } from "@sim/core/monster/monster";
-import { SideId } from "@sim/core/side";
+import { MoveData } from "@beastly-brawl-showdown/sim-core/action/move/move";
+import { MovePool } from "@beastly-brawl-showdown/sim-core/action/move/move_pool";
+import { default_attack } from "@beastly-brawl-showdown/sim-core/action/move/move_utils";
+import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "@beastly-brawl-showdown/sim-core/action/targeting";
+import { Battle } from "@beastly-brawl-showdown/sim-core/battle";
+import { BlockedEvent, BuffEvent, DamageEvent, MoveEvadedEvent, MoveFailedEvent, MoveSuccessEvent, RerollEvent, RollEvent, StartMoveEvent } from "@beastly-brawl-showdown/sim-core/event/core_events";
+import { AbilityChargeStunComponent, DefendComponent, DodgeChargeComponent, DodgeStateComponent, RerollChargeComponent, StunnedStateComponent } from "@beastly-brawl-showdown/sim-core/monster/component/core_components";
+import { getComponent, getStat, Monster } from "@beastly-brawl-showdown/sim-core/monster/monster";
+import { SideId } from "@beastly-brawl-showdown/sim-core/side";
 
 type MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun";
 export const COMMON_MOVE_POOL: MovePool<MOVE_NAMES> = {

@@ -4,9 +4,4 @@
     "composite": true,
     "rootDir": ".",
   },
-  "references": [
-    {
-      "path": "../core"
-    }
-  ]
 }

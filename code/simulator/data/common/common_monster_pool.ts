@@ -1,7 +1,7 @@
-import { Battle } from "@sim/core/battle";
-import { RerollChargeComponent, DodgeChargeComponent } from "@sim/core/monster/component/core_components";
-import { MonsterPool } from "@sim/core/monster/monster_pool";
-import { SideId } from "@sim/core/side";
+import { Battle } from "@beastly-brawl-showdown/sim-core/battle";
+import { RerollChargeComponent, DodgeChargeComponent } from "@beastly-brawl-showdown/sim-core/monster/component/core_components";
+import { MonsterPool } from "@beastly-brawl-showdown/sim-core/monster/monster_pool";
+import { SideId } from "@beastly-brawl-showdown/sim-core/side";
 
 type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
