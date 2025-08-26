@@ -1,7 +1,6 @@
-import React, { useState,useMemo } from "react";
-import { Turn } from "../../../core/event/Turn"
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { BaseEvent } from "../../../core/event/base_event";
-import type { SnapshotEvent } from "../../../core/event/core_events";
+import type { BuffEvent, DamageEvent } from "../../../core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
@@ -9,7 +8,8 @@ import { clamp } from "./utils/clamp";
 interface BattleSceneProps {
   events: BaseEvent[];
   turnIndex: number;
-  autoplay?: boolean; // play subsequent turns automatically
+  isPlaying: boolean;
+  autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
 }
 
@@ -18,7 +18,8 @@ console.log("BattleScene loaded");
 const BattleScene: React.FC<BattleSceneProps> = ({
   events,
   turnIndex,
-  autoplay,
+  isPlaying,
+  autoAdvance,
   onAdvanceTurn,
 }) => {
   // Build turns from raw events
@@ -37,37 +38,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   // Parsed snapshot at the start of the selected turn
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
-    [selectedTurnIndex] // <- stable driver
+    [currentSnapshot] // <- stable driver
   );
-
-  // Build the game log
-  const gameLog = useMemo(() => {
-    const logEntries: { key: string; text: string }[] = [];
-    if (!turns.length) return logEntries;
-
-    // Keeps the turn index at greater than 0
-    const lastTurnIndex = Math.max(0, turns.length - 1);
-
-    // Pushing turns to the log
-    for (let turnNumber = 0; turnNumber <= lastTurnIndex; turnNumber++) {
-      const t = turns[turnNumber];
-
-      logEntries.push({
-        key: `turn-${turnNumber}-start`,
-        text: `Turn ${turnNumber + 1} started`,
-      });
-
-      // For each turn, push events to the log
-      for (let eventIndex = 0; eventIndex < t.turnEvents.length; eventIndex++) {
-        const ev = t.turnEvents[eventIndex];
-        logEntries.push({
-          key: `turn-${turnNumber}-event-${eventIndex}`,
-          text: t.printEventString(ev) ?? "Unknown event",
-        });
-      }
-    }
-    return logEntries;
-  }, [turns]);
 
   // What the panels currently show as events are applied
   const [visibleState, setVisibleState] = useState(initialTurnState);
@@ -75,19 +47,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   // Keep a ref to avoid stale closures inside the async loop
   const latestVisibleRef = useRef(initialTurnState);
 
+  // This is to prevent replaying the turn when autoplay is toggled
+  const onAdvanceRef = useRef(onAdvanceTurn);
+  useEffect(() => { onAdvanceRef.current = onAdvanceTurn; }, [onAdvanceTurn]);
+  const autoAdvanceRef = useRef(autoAdvance);
+  useEffect(() => { autoAdvanceRef.current = autoAdvance; }, [autoAdvance]);
+
   // When the base snapshot changes (different selected turn), reset visible state
   useEffect(() => {
     setVisibleState(initialTurnState);
     latestVisibleRef.current = initialTurnState;
-  }, [initialTurnState]);
-
-  // Utility: simple deep copy
-  const deepCopy = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
+  }, [initialTurnState, isPlaying]);
 
   // Updates the visible state based on the event
   function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
-    // Check for defense charges
-    if (ev.name == "buff") {
+    switch (ev.name) {
+      case "buff": {
       // Cast the event to a BuffEvent
       let buffEvent = ev as BuffEvent;
       // Get the id of the player who used the buff
@@ -95,58 +70,110 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's defense charges
       state[playerId].defendActionCharge -= 1;
+      break;
+      }
 
-    } else if (ev.name == "damage") {
-      // Cast the event to a DamageEvent
+      case "damage": {
+        // Cast the event to a DamageEvent
       let damageEvent = ev as DamageEvent;
       // Get the id of the player who was damaged
       let playerId = Number(damageEvent.target);
 
       // Decrease the player's health
       state[playerId].health -= damageEvent.amount;
+      break;
+      }
+
+      case "battleOver": {
+        // TODO
+        break;
+      }
+      case "roll": {
+        // TODO
+        break;
+      }
+      case "reroll": {
+        // TODO
+        break;
+      }
+      case "blocked": {
+        // TODO
+        break;
+      }
+      case "startMove": {
+        // TODO
+        break;
+      }
+      case "moveSuccess": {
+        // TODO
+        break;
+      }
+      case "evaded": {
+        // TODO
+        break;
+      }
+      case "moveFailed": {
+        // TODO
+        break;
+      }
+
+      default: {
+        // TODO: unhandled event type
+        break;
+      }
     }
 
-    // Check for health
     return state; // placeholder
+  }
+
+  function cloneState(state: ReturnType<typeof parseSnapshot>): ReturnType<typeof parseSnapshot> {
+    // Check if this built in function exists
+    if (typeof structuredClone === "function") {
+      return structuredClone(state);
+    } else {
+      return JSON.parse(JSON.stringify(state));
+    }
   }
 
   // Step through events of the selected turn and update the panels live
   useEffect(() => {
     if (!currentTurn) return;
 
+    // Check if is playing
+    if (!isPlaying) return;
+
+    // Make cancel false at the start of each turn's playthrough
     let cancelled = false;
     const perEventDelayMs = 600;
 
-    // reset for this run
-    setVisibleState(initialTurnState);
-    latestVisibleRef.current = initialTurnState;
-
+    // Play out events
     (async () => {
       for (const ev of currentTurn.turnEvents) {
+        // Check for cancel
         if (cancelled) return;
 
-        const nextState = applyEventToVisible(
-          // use structuredClone if available; otherwise keep your deepCopy
-          typeof structuredClone === "function"
-            ? structuredClone(latestVisibleRef.current as any)
-            : JSON.parse(JSON.stringify(latestVisibleRef.current)),
-          ev
-        );
+        // Make copy to update
+        const stateCopy = cloneState(latestVisibleRef.current);
+        const nextState = applyEventToVisible(stateCopy, ev)
 
-        setVisibleState(nextState);           // <- triggers the live UI update
-        latestVisibleRef.current = nextState; // keep ref fresh
+        // Update live
+        setVisibleState(nextState);
+        // Update ref
+        latestVisibleRef.current = nextState;
 
+        // Delay between events (Could be to put animations or this could be done in applyEventToVisible)
         await new Promise(r => setTimeout(r, perEventDelayMs));
         if (cancelled) return;
       }
 
-      if (!cancelled && autoplay && onAdvanceTurn && selectedTurnIndex < turns.length - 1) {
-        onAdvanceTurn(selectedTurnIndex + 1);
+      // What to do after this turn's playthrough is done
+      if (!cancelled && autoAdvanceRef.current && onAdvanceRef.current && selectedTurnIndex < turns.length - 1) {
+        onAdvanceRef.current(selectedTurnIndex + 1);
       }
     })();
 
     return () => { cancelled = true; };
-  }, [selectedTurnIndex, currentTurn, autoplay, onAdvanceTurn]);
+  }, [selectedTurnIndex, currentTurn, isPlaying]);
 
 
   // Check if there are 2 players
@@ -177,29 +204,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         <p>HP: {visiblePlayer1.health}</p>
         <p>Defend Charges: {visiblePlayer1.defendActionCharge}</p>
         {/* <img src={visiblePlayer1.image} /> */}
-      </div>
-
-      {/* Middle Panel (Log of ALL turns — unchanged) */}
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: "#f77a7aff",
-          padding: "20px",
-          textAlign: "left",
-          overflowY: "auto",
-          maxHeight: "135px",
-          border: "1px solid black",
-        }}
-      >
-        {gameLog.length === 0 ? (
-          <p>No events yet.</p>
-        ) : (
-          gameLog.map(({ key, text }) => (
-            <p key={key} style={{ margin: "5px 0" }}>
-              {text}
-            </p>
-          ))
-        )}
       </div>
 
       {/* Right Panel (PLAYER 2) */}
