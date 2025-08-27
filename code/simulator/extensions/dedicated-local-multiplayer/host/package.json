@@ -1,7 +1,26 @@
 {
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+      "dist"
+  ],
+  "exports": {
+      ".": {
+          "import": "./dist/index.js",
+          "types": "./dist/index.d.ts"
+      },
+      "./*": {
+          "import": "./dist/*.js",
+          "types": "./dist/*.d.ts"
+      }
+  },
+  "scripts": {
+      "build": "tsc",
+      "prepublishOnly": "npm run build"
+  },
   "dependencies": {
-    "@beastly-brawl-showdown/sim-core": "^0.1.1",
-    "@beastly-brawl-showdown/sim-data": "^0.1.0",
+    "@beastly-brawl-showdown/sim-core": "latest",
+    "@beastly-brawl-showdown/sim-data": "latest",
     "express": "^5.1.0",
     "socket.io": "^4.8.1"
   },
