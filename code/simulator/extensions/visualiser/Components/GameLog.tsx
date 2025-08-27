@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import type { BaseEvent } from "../../../core/event/base_event";
+import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
 import { parseTurns } from "./turns_array_maker";
 
 interface GameLogProps {
@@ -30,7 +30,7 @@ const GameLog: React.FC<GameLogProps> = ({ isOpen, onClose, events }) => {
         const ev = t.turnEvents[eventIndex];
         entries.push({
           key: `turn-${turnNumber}-event-${eventIndex}`,
-          text: t.printEventString(ev) ?? "Unknown event",
+          text: t.printEventString(ev).toString() ?? "Unknown event",
         });
       }
     }
