@@ -6,7 +6,7 @@ interface BattleMessageProps {
 useEffect
 
 const BattleMessage: React.FC<BattleMessageProps> = ({ message }) => {
-  
+    //shows message for 3 seconds before hiding 
     useEffect(() => {
     if (!message) return;
 

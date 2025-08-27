@@ -7,7 +7,6 @@ import { clamp } from "./utils/clamp";
 import { BattleMiddle } from "../BattleScreen/BattleMiddle";
 import BattleMessage from "../BattleScreen/BattleMessage";
 import "../BattleScreencss/main.css"
-import BattleBar from "./battle_bar";
 
 interface BattleSceneProps {
   events: BaseEvent[];
@@ -26,6 +25,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   autoAdvance,
   onAdvanceTurn,
 }) => {
+  //setup the battle messages
   const [currentMessage, setcurrentMessage] = useState("");
 
   // Build turns from raw events
@@ -189,18 +189,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   if (visibleState.length < 2) {
     return <p>Waiting for game data...</p>;
   }
-
+  
+  //have to get maxhp to pass to battlemiddle
   const player1MaxHp = currentSnapshot.sides[0].monster.base.baseStats.health;
   const player2MaxHp = currentSnapshot.sides[1].monster.base.baseStats.health;
 
   // Clear names for what the UI reads:
   const visiblePlayer1 = visibleState[0];
   const visiblePlayer2 = visibleState[1];
-  console.log(visiblePlayer1);
-  console.log(visiblePlayer2);
 
   // console.log(visiblePlayer1.image);
-  console.log(player2MaxHp)
   return (
     <div className="canvas-body" id="battle-screen-body">
       <BattleMiddle
