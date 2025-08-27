@@ -1,5 +1,5 @@
-import { DefaultEventsMap, Server, Socket } from "socket.io";
-import { MonsterId, MonsterPool } from "@beastly-brawl-showdown/sim-core/monster/monster_pool";
+import { Server, Socket } from "socket.io";
+import { MonsterId } from "@beastly-brawl-showdown/sim-core/monster/monster_pool";
 import { Battle, PlayerOptions } from "@beastly-brawl-showdown/sim-core/battle";
 import express from "express";
 import { createServer } from "node:http";
@@ -51,14 +51,14 @@ io.use((socket, next) => {
     next(new Error("Authentication error"));
     return;
   }
-  if (!auth.name) {
+  if (!auth["name"]) {
     next(new Error("Authentication error: no name provided"));
     return;
   }
 
   /// Valid connection
   const newPlayer: Player = {
-    name: auth.name, //`P${players.length + 1}`,
+    name: auth["name"], //`P${players.length + 1}`,
     sideId: players.length as SideId,
     socket: socket,
     monsterId: "mystic_wryven",
