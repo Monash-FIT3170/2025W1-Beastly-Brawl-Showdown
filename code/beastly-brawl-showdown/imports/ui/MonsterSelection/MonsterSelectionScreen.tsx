@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MonsterContainer } from "./MonsterContainer";
 import { useNavigate } from "react-router-dom";
-import { MonsterPool } from "/imports/simulator/data/monster_pool";
+import { COMMON_MONSTER_POOL } from "/imports/simulator/data/common/common_monster_pool";
 
 interface MonsterSelectionScreenProps {
   setSelectedMonsterCallback?: (value: string) => void;
@@ -61,14 +61,16 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
         Monster!
       </h1>
       <div className="monster-selection-grid">
-        {MonsterPool.filter((m) => m.name !== "BlankMon").map((monster) => (
-          <MonsterContainer
-            key={monster.name}
-            name={monster.name}          
-            type={monster.description}      
-            currentlySelectedMonster={highlightAndShowConfirm}
-          />
-        ))}
+        {Object.values(COMMON_MONSTER_POOL.monsters)
+          .filter((m) => m.name !== "BlankMon")
+          .map((monster) => (
+            <MonsterContainer
+              key={monster.name}
+              name={monster.name}
+              type={monster.description}
+              currentlySelectedMonster={highlightAndShowConfirm}
+            />
+          ))}
 
         <button
           className="glb-btn"

@@ -1,12 +1,12 @@
 import { Player } from "./player";
 import { AccountId } from "../shared/types";
-import { Battle, BattleOptions, PlayerOptions } from "../simulator/core/battle"
+import { Battle, BattleOptions, PlayerOptions } from "../beastly-brawl-showdown/imports/simulator/core/battle";
 import { SideId } from "../simulator/core/side";
-import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
-import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
+import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_move_pool";
 import { log_event } from "./utils";
-import { MonsterId } from "../simulator/core/monster/monster_pool";
-import { TargetingData } from "../simulator/core/action/targeting";
+import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
+import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
 enum MatchType {
     DUEL,

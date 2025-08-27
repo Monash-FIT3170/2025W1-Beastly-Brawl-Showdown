@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BattleMonster } from './BattleMonster';
-import { MonsterTemplate } from '../../../../simulator/core/monster/monster_template';
+import { MonsterTemplate } from '../../simulator/core/monster/monster_template';
 
 type BattleMiddleProps = {
   showAnimation: boolean;

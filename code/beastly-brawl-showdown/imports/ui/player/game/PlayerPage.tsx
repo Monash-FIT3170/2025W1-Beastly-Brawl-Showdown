@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
-import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
-import { MonsterTemplate } from "../../../../../simulator/core/monster/monster";
+import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
+import { MonsterTemplate } from "../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 
 //#region Socket Context Definition
@@ -88,8 +88,11 @@ const PlayerContent = () => {
       console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
 
       // Create Monster instances for BattleScreen
-      const myMonster = COMMON_MONSTER_POOL.find((m: { name: any; }) => m.name === myTemplateName)!;
-      const enemyMonster = new COMMON_MONSTER_POOL.find((m: { name: any; }) => m.name === enemyTemplateName)!;
+      const myMonster = Object.values(COMMON_MONSTER_POOL.monsters)
+        .find((m) => m.name === myTemplateName)!;
+
+      const enemyMonster = Object.values(COMMON_MONSTER_POOL.monsters)
+        .find((m) => m.name === enemyTemplateName)!;
 
       setMatchData({
         myMonster: { template: myMonster, currentHp: data.myHp },
@@ -130,10 +133,11 @@ const PlayerContent = () => {
   }, [isConnected]);
 
   const handleMonsterSelection = (monsterName: string) => {
-    if (!COMMON_MONSTER_POOL.find((m: { name: string; }) => m.name === monsterName)) {
+    if (!Object.values(COMMON_MONSTER_POOL.monsters).find((m) => m.name === monsterName)) {
       console.error("Invalid monster selected:", monsterName);
       return;
     }
+
 
     if (socket) {
       // Only send the template name string now
