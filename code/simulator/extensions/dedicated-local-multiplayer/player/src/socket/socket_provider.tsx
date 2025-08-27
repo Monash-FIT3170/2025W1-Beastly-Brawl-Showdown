@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import type { Socket } from "socket.io-client";
 import { SocketContext } from "./socket_context";
 

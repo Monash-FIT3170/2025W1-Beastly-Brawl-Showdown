@@ -9,8 +9,8 @@
         "outDir": "dist",
         "rootDir": "src",
         "sourceMap": true,
-        "skipLibCheck": false,
-        "jsx": "react"
+        "jsx": "react",
+        "exactOptionalPropertyTypes": false // react router needs this
     },
     "include": [
         "src"

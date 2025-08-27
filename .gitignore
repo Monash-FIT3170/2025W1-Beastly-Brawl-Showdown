@@ -3,3 +3,7 @@
 
 # Ignore macOS system files
 .DS_Store
+
+# Ignore typescript artifacts
+**/dist/
+tsconfig.tsbuildinfo

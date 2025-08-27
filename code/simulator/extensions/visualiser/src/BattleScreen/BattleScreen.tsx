@@ -6,7 +6,7 @@ import { BattleBottom } from "./BattleBottom";
 export const BattleScreen: React.FC = () => {
   const [showAnimation, setShowAnimation] = useState<boolean>(false);
   const [enemyHp, setEnemyHp] = useState(100);
-  const [playerHp, setPlayerHp] = useState(100);
+  const [playerHp] = useState(100);
 
   // Function to trigger the rolling animation
   const triggerAnimation = (): void => {

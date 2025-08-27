@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BattleMonster } from "./BattleMonster";
-import MonsterHealthRing from "../MonsterHealthRing";
+import MonsterHealthRing from "./MonsterHealthRing";
 
 // Define the props type
 type BattleMiddleProps = {

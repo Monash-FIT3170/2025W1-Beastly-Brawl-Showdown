@@ -1,5 +1,5 @@
 import React from "react";
-import BattleVisualiser from "../../../visualiser/BattleVisualiser"
+import BattleVisualiser from "../../../visualiser/src/BattleVisualiser"
 
 // export default App;
 
