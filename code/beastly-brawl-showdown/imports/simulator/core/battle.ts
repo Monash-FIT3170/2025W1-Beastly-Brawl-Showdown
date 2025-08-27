@@ -42,6 +42,7 @@ export class Battle {
     this.movePool = options.movePool;
 
     this.sides = options.playerOptionSet.map((playerOptions, idx) => {
+      const base = this.monsterPool.monsters[playerOptions.monsterId];
       if (!this.monsterPool.monsters[playerOptions.monsterId]) {
         throw new RangeError(`Key out of range: [key=${playerOptions.monsterId}] does not exist in the monster pool ${this.monsterPool.name}`);
       }
@@ -49,9 +50,9 @@ export class Battle {
       const side: Side = {
         id: idx as SideId,
         monster: {
-          baseID: playerOptions.monsterId,
-          health: 0,
-          defendActionCharges: 0,
+          baseID: base.templateId,
+          health: base.baseStats.health,
+          defendActionCharges: base.baseDefendActionCharges,
           components: [],
         },
         pendingActions: null,
@@ -98,6 +99,11 @@ export class Battle {
             // TODO validate move
 
             const chosenMove: MoveData = this.movePool[moveId];
+            if (!chosenMove) {
+              console.error(`Invalid moveId=${moveId}. Available keys:`, Object.keys(this.movePool));
+              return;
+            }
+
             if (chosenMove.targetingMethod != targetingData.targetingMethod) {
               console.error(`Error: Targeting method mismatch. [moveId=${moveId} ${chosenMove.name}] expects ${chosenMove.targetingMethod} but ${targetingData.targetingMethod} was recieved.`);
               return;

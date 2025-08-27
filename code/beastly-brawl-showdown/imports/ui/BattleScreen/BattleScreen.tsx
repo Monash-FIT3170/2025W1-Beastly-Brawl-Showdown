@@ -55,11 +55,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   }, [socket]);
 
   // Handle player action
-  const handleAction = (action: 'attack' | 'defend' | 'ability') => {
+  const handleAction = (moveId: number, targetSide: number) => {
     if (!socket) return;
-    socket.emit('RequestSubmitMove', { action });
+
+    // Send moveId to the server
+    socket.emit('RequestSubmitMove', { moveId, targetSide });
     setHasSubmittedMove(true);
   };
+
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
@@ -71,7 +74,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         player1={myMonster}
         player2={enemyMonster}
       />
-      <BattleBottom onAction={handleAction} disabled={hasSubmittedMove} />
+      <BattleBottom
+        onAction={handleAction}
+        disabled={hasSubmittedMove}
+        myMonsterMoves={{
+          attack: Number(myMonster.template.attackActionId),
+          defend: Number(myMonster.template.defendActionId),
+          ability: myMonster.template.abilityActionId ? Number(myMonster.template.abilityActionId) : undefined,
+        }}
+      />
+
+
     </div>
   );
 };

@@ -1,12 +1,14 @@
 import { Player } from "./player";
 import { AccountId } from "../shared/types";
-import { Battle, BattleOptions, PlayerOptions } from "../beastly-brawl-showdown/imports/simulator/core/battle";
+import { Battle, BattleOptions } from "../beastly-brawl-showdown/imports/simulator/core/battle";
 import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
 import { COMMON_MOVE_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_move_pool";
 import { log_event } from "./utils";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
 import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
+import { ChooseMove } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 
 enum MatchType {
     DUEL,
@@ -65,8 +67,8 @@ export class Match {
 
         const options: BattleOptions = {
             seed: Math.floor(Math.random() * 10000),
-            monsterPool: COMMON_MONSTER_POOL, // must provide a MonsterPool instance
-            movePool: COMMON_MOVE_POOL,       // must provide a MovePool instance
+            monsterPool: COMMON_MONSTER_POOL,
+            movePool: COMMON_MOVE_POOL,
             playerOptionSet: [
                 {
                     monsterId: this.player1.monster!.templateId as MonsterId,
@@ -95,14 +97,14 @@ export class Match {
     }
 
     // Called by main when a player submits a move
-    submitMove(player: Player, moveId: never, targetSide: SideId): void {
+    submitMove(player: Player, moveId: EntryID, targetSide: SideId): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
 
         const sideIndex = this.getSideForPlayer(player);
-        const noticeMap = this.battle.noticeBoard.noticeMaps[sideIndex];
-        const chooseMoveNotice = noticeMap.get("chooseMove");
+        const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
+        const chooseMoveNotice = noticeMap.get("chooseMove") as ChooseMove | undefined;
 
         if (!chooseMoveNotice) {
             throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no chooseMove notice.`);

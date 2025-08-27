@@ -12,6 +12,8 @@ import * as path from "path";
 import { Player } from "./player";
 import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
+import { log } from "console";
+import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 
 type ServerConfig = {
   serverIp: string;
@@ -280,23 +282,25 @@ async function main(config: ServerConfig) {
 
     // #region Select Monster
     socket.on("RequestSubmitMonster", (data: any) => {
+      log_event("Player selecting monster template: " + data.data);
       const player = socket.data.player as Player;
       if (!player) return;
 
       const room = gameServer.rooms.get(player.roomId);
       if (!room) return;
 
+      // Expect the client to send the monster templateId (key)
       const monsterKey = data.data as keyof typeof COMMON_MONSTER_POOL.monsters;
+      log_event("Player selected monster key: " + monsterKey);
       if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
         socket.emit("error", "Invalid monster selection");
         return;
       }
-
       // Store selected monster template name directly
-      player.setMonsterTemplate(data.data);
+      player.setMonsterTemplate(monsterKey);
       player.isReady = true;
 
-      log_event(`Player ${player.displayName} selected monster template: ${data.data}`);
+      log_event(`Player ${player} selected monster template: ${data.data}`);
 
       // Check if all players are ready
       const allReady = Array.from(room.players.values()).every((p) => p.isReady);
@@ -324,7 +328,7 @@ async function main(config: ServerConfig) {
 
 
     // #region Submit Move
-    socket.on("RequestSubmitMove", (msg) => {
+    socket.on("RequestSubmitMove", (msg: { moveId: EntryID; targetSide: number }) => {
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
@@ -334,8 +338,13 @@ async function main(config: ServerConfig) {
       );
       if (!match) return;
 
-      match.submitMove(player, msg.action as never, msg.targetSide as SideId);
+      const moveId = msg.moveId; // already number
+      const targetSide = msg.targetSide as SideId;
+
+      match.submitMove(player, moveId, targetSide);
     });
+
+
   });
 
   httpServer.listen(config.serverPort, () => {

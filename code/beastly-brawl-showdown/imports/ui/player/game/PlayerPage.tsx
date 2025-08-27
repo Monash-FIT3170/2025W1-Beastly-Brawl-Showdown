@@ -88,11 +88,8 @@ const PlayerContent = () => {
       console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
 
       // Create Monster instances for BattleScreen
-      const myMonster = Object.values(COMMON_MONSTER_POOL.monsters)
-        .find((m) => m.name === myTemplateName)!;
-
-      const enemyMonster = Object.values(COMMON_MONSTER_POOL.monsters)
-        .find((m) => m.name === enemyTemplateName)!;
+      const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
 
       setMatchData({
         myMonster: { template: myMonster, currentHp: data.myHp },
@@ -133,17 +130,21 @@ const PlayerContent = () => {
   }, [isConnected]);
 
   const handleMonsterSelection = (monsterName: string) => {
-    if (!Object.values(COMMON_MONSTER_POOL.monsters).find((m) => m.name === monsterName)) {
+    // Find the monster in COMMON_MONSTER_POOL by name
+    const monster = Object.values(COMMON_MONSTER_POOL.monsters).find(
+      (m) => m.name === monsterName
+    );
+
+    if (!monster) {
       console.error("Invalid monster selected:", monsterName);
       return;
     }
 
-
     if (socket) {
-      // Only send the template name string now
-      socket.emit("RequestSubmitMonster", { data: monsterName });
+      // Send the templateId instead of the name
+      socket.emit("RequestSubmitMonster", { data: monster.templateId });
       setMonsterSelected(true);
-      console.log("Monster selected:", monsterName);
+      console.log("Monster selected:", monster.templateId);
     } else {
       console.warn("No socket connection available");
     }
