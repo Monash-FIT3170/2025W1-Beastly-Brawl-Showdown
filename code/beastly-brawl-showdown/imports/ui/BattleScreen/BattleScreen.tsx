@@ -3,7 +3,7 @@ import { BattleTop } from './BattleTop';
 import { BattleMiddle } from './BattleMiddle';
 import { BattleBottom } from './BattleBottom';
 import { usePlayerSocket } from '../player/game/PlayerPage';
-import { MonsterTemplate } from '../../../../simulator/core/monster/monster_template';
+import { MonsterTemplate } from '@beastly-brawl-showdown/sim-core/dist/monster/monster_template';
 
 interface BattleScreenProps {
   matchData: {

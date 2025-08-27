@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
-import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
-import { MonsterTemplate } from "../../../../../simulator/core/monster/monster";
+import { COMMON_MONSTER_POOL } from "@beastly-brawl-showdown/sim-data/dist/common/common_monster_pool";
+import { MonsterTemplate } from "@beastly-brawl-showdown/sim-core/dist/monster/monster_template";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 
 //#region Socket Context Definition

@@ -10,8 +10,8 @@ import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
-import { SideId } from "../simulator/core/side";
-import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
+import { SideId } from "@beastly-brawl-showdown/sim-core/side";
+import { COMMON_MONSTER_POOL } from "@beastly-brawl-showdown/sim-data/common/common_monster_pool";
 
 type ServerConfig = {
   serverIp: string;
