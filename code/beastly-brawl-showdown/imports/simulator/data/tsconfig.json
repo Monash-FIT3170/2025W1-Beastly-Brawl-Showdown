@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../../.config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "../"
+    // remove any "paths" entry for @sim
+  },
+  "references": [
+    {
+      "path": "../core"
+    }
+  ]
+}
