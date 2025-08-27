@@ -26,7 +26,7 @@ export const BattleMonster: React.FC<BattleMonsterProps> = ({ template, currentH
 
     socket.on('update-hp', handler);
 
-    // ✅ Cleanup function
+    // Cleanup function
     return () => {
       socket.off('update-hp', handler);
     };

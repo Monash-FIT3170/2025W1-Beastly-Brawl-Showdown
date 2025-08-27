@@ -65,7 +65,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
           .filter((m) => m.name !== "BlankMon")
           .map((monster) => (
             <MonsterContainer
-              key={monster.name}
+              key={monster.templateId}
               name={monster.name}
               type={monster.description}
               currentlySelectedMonster={highlightAndShowConfirm}
