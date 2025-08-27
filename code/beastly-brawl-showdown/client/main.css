@@ -1724,7 +1724,6 @@ input[type="range"] {
     font-size: 0.6rem;
   }
 
-
   .battleScreenBottom {
     flex-direction: row;
     gap: 45px;
@@ -1767,11 +1766,10 @@ input[type="range"] {
     font-size: 2rem;
     top: 50%;
 
-  .winner-screen {
-    width: 90vw;
-    height: auto;
-    padding: 1.2rem;
-
+    .winner-screen {
+      width: 90vw;
+      height: auto;
+      padding: 1.2rem;
+    }
   }
-}
 }
