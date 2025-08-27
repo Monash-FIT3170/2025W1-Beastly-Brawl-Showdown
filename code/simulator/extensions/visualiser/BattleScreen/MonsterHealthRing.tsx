@@ -11,8 +11,8 @@ const MonsterHealthRing: React.FC<Props> = ({
   maxHealth,
   imageSrc,
 }) => {
-  const size = 140; // circle diameter in px
-  const stroke = 20; // thickness of ring
+  const size = 200; // circle diameter
+  const stroke = 20; // thickness of ring (approximate 8-10% of size)
   const radius = size / 2 - stroke / 2;
   const circumference = 2 * Math.PI * radius;
 
@@ -28,6 +28,7 @@ const MonsterHealthRing: React.FC<Props> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
+          strokeWidth={stroke}
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
         />

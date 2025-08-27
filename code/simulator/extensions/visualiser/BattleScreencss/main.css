@@ -1774,3 +1774,16 @@ input[type="range"] {
 
   }
 }
+
+/* BattleBar.css */
+
+.battle-bar {
+  position:absolute;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+  gap: 10px;
+}
+
+}
