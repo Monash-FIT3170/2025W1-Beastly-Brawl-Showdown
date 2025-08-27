@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Turn } from "@beastly-brawl-showdown/sim-core/event/Turn";
 
 interface EventTextBoxProps {
   onEventsSubmit: (events: string) => void;
