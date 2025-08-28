@@ -283,7 +283,6 @@ async function main(config: ServerConfig) {
 
     // #region Select Monster
     socket.on("RequestSubmitMonster", (data: any) => {
-      log_event("Player selecting monster template: " + data.data);
       const player = socket.data.player as Player;
       if (!player) return;
 
@@ -301,8 +300,6 @@ async function main(config: ServerConfig) {
       player.setMonsterTemplate(monsterKey);
       player.isReady = true;
 
-      log_event(`Player ${player} selected monster template: ${data.data}`);
-
       // Check if all players are ready
       const allReady = Array.from(room.players.values()).every((p) => p.isReady);
       if (!allReady) {
@@ -317,8 +314,6 @@ async function main(config: ServerConfig) {
         const opponent = Array.from(room.players.values()).find((p) => p !== player);
         if (!opponent) return;
 
-        log_event(`Player ${player.selectedMonsterTemplateName} vs Opponent ${opponent.selectedMonsterTemplateName}`);
-
         room.playerChannel.to(player.socketId).emit("round-start", {
           myMonster: player.selectedMonsterTemplateName,
           enemyMonster: opponent.selectedMonsterTemplateName,
@@ -330,7 +325,7 @@ async function main(config: ServerConfig) {
 
     // #region Submit Move
     socket.on("RequestSubmitMove", (msg: { data: any }) => {
-      const { moveId, targetMethod, targetSide } = msg.data; 
+      const { moveId, targetMethod, targetSide } = msg.data;
 
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -341,7 +336,18 @@ async function main(config: ServerConfig) {
       );
       if (!match) return;
 
+      player.submittedMove = true;
       match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+
+      const [player1, player2] = [match.player1, match.player2];
+      const allSubmitted = player1.submittedMove && player2?.submittedMove;
+
+      if (allSubmitted) {
+        [player1.submittedMove, player2.submittedMove] = [false, false];
+        playerChannel.to(player1.socketId).emit("UnlockButton");
+        playerChannel.to(player2.socketId).emit("UnlockButton");
+      }
+
     });
 
 
