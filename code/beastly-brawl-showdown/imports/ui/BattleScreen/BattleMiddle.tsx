@@ -1,84 +1,65 @@
-import React, { useState, useEffect } from "react";
-import MonsterHealthRing from "./MonsterHealthRing";
+import React, { useEffect, useState } from 'react';
+import { BattleMonster } from './BattleMonster';
+import { MonsterTemplate } from '../../simulator/core/monster/monster_template';
+import MonsterHealthRing from './MonsterHealthRing';
 
-// Define the props type
 type BattleMiddleProps = {
   showAnimation: boolean;
-  enemyHp: number;
-  playerHp: number;
-  enemyImgSrc: string;
-  playerImgSrc: string;
+  player1: { template: MonsterTemplate; currentHp: number; playerId: string };
+  player2: { template: MonsterTemplate; currentHp: number; playerId: string };
+
   enemySlashVisible?: boolean;
   onEnemySlashComplete?: () => void;
   playerSlashVisible?: boolean;
   onPlayerSlashComplete?: () => void;
 };
-//takes a boolean when initialized
-export const BattleMiddle: React.FC<BattleMiddleProps> = ({
-  showAnimation,
-  enemyHp,
-  playerHp,
-  enemyImgSrc,
-  playerImgSrc,
-  enemySlashVisible,
-  onEnemySlashComplete,
-  playerSlashVisible,
-  onPlayerSlashComplete,
-}) => {
+
+export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation, player1, player2, enemySlashVisible, onEnemySlashComplete, playerSlashVisible, onPlayerSlashComplete}) => {
   const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
 
-  //if the showwanimation is true then show thtet animation
   useEffect(() => {
     let interval: NodeJS.Timeout;
     let timeout: NodeJS.Timeout;
 
     if (showAnimation) {
       let i = 0;
-      const rollDuration = 1000; // total roll duration in ms
-      const intervalSpeed = 100; // time between number updates
-
-      const finalResult = 20; // eventually will replace with dice roll utility
-      const totalSteps = rollDuration / intervalSpeed; //ge the ammount of times it gets swaped out
+      const rollDuration = 1000;
+      const intervalSpeed = 100;
+      const totalSteps = rollDuration / intervalSpeed;
+      const finalResult = 20; // replace with real dice roll later
 
       interval = setInterval(() => {
         if (i < totalSteps) {
-          setDisplayedNumber(Math.floor(Math.random() * 20) + 1); // roll 1-20
+          setDisplayedNumber(Math.floor(Math.random() * 20) + 1);
           i++;
         } else {
           clearInterval(interval);
           setDisplayedNumber(finalResult);
 
-          timeout = setTimeout(() => {
-            console.log("Final result displayed for 3 seconds");
-          }, 3000);
+          timeout = setTimeout(() => console.log('Final result shown'), 3000);
         }
       }, intervalSpeed);
     }
 
-    // Clean up interval and timeout
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
   }, [showAnimation]);
 
-  // const attackAnimation = () => {
-  //   // Placeholder for future animation logic
-  //   console.log("Attack");
-  // };
   return (
     <div className="combat-arena">
       <MonsterHealthRing
-        currentHealth={enemyHp}
+        currentHealth={player2.currentHp}
         maxHealth={100}
-        imageSrc={enemyImgSrc}
+        imageSrc={player2.template.imageUrl}
         showSlash={enemySlashVisible}
         onSlashComplete={onEnemySlashComplete}
       />
       <MonsterHealthRing
-        currentHealth={playerHp}
+        currentHealth={player1.currentHp}
         maxHealth={100}
-        imageSrc={playerImgSrc}
+        imageSrc={player1.template.imageUrl}
         showSlash={playerSlashVisible}
         onSlashComplete={onPlayerSlashComplete}
       />

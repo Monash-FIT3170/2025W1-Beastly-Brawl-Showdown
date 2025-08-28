@@ -1,4 +1,4 @@
-import { GameServer } from "./GameServer";
+import { GameServer } from "./gameServer";
 import * as readline from "readline";
 import cors from "cors";
 import express from "express";
@@ -9,6 +9,12 @@ import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
+import { Player } from "./player";
+import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
+import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
+import { log } from "console";
+import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
+import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
 type ServerConfig = {
   serverIp: string;
@@ -101,6 +107,7 @@ async function main(config: ServerConfig) {
     */
   });
 
+  // #region Host Channel
   type HostChannelAuth = {
     // hostName: string;
   };
@@ -126,12 +133,14 @@ async function main(config: ServerConfig) {
       log_event("Host disconnected.");
     });
 
+    // #region New Room
     socket.on("request-room", async () => {
       log_event("Room requested.");
       // TODO prevent multiple rooms at the same time
       try {
         const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
           socket.id,
+          playerChannel
         );
 
         socket.emit("request-room_response", {
@@ -144,16 +153,22 @@ async function main(config: ServerConfig) {
       }
     });
 
-    socket.on("start-game", async (msg) => {
-      log_event(`Requested to start game: ${msg}`);
+    // #region Start Game
+    socket.on("start-game", (msg: { roomId: number }) => {
+      log_event(`Host requested start-game for room ${msg.roomId}`);
 
-      // Notify everyone in this room
-      gameServer.rooms
-        .get(gameServer.hostIdToRoomIdLookup.get(socket.id)!)!
-        .players.forEach((player) => {
-          playerChannel.to(player.socketId).emit("game-started"); // TODO modify as needed
-        });
-      log_notice("All players informed of start.");
+      const room = gameServer.rooms.get(msg.roomId);
+      if (!room) {
+        socket.emit("error", "Room not found");
+        return;
+      }
+
+      // Relay to all players in this room
+      room.players.forEach((player) => {
+        playerChannel.to(player.socketId).emit("game-started"); // Clients can now start monster selection
+      });
+
+      log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
     });
   });
 
@@ -202,6 +217,7 @@ async function main(config: ServerConfig) {
     log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
     res.send(checkResult);
   });
+
   playerChannel.use((socket, next) => {
     log_event(
       `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`,
@@ -224,8 +240,16 @@ async function main(config: ServerConfig) {
       return;
     }
 
+
     try {
       gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
+
+      // Attach the actual player instance to the socket
+      const room = gameServer.rooms.get(roomId);
+      const player = room?.getPlayer(auth.displayName);
+      if (player) {
+        socket.data.player = player;
+      }
     } catch (err) {
       if (err instanceof Error) {
         log_warning("Join room failed unexpectedly.\n" + err.message);
@@ -236,24 +260,20 @@ async function main(config: ServerConfig) {
       next(new Error("Invalid credentials"));
     }
 
-    log_event(
-      `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`,
-    );
-    const playerNameList = [
-      ...gameServer.rooms.get(roomId)?.players.values()!,
-    ].map((player) => player.displayName);
-    console.log(
-      "Update player list",
-      playerNameList,
-      "to",
-      gameServer.rooms.get(roomId)!.hostSocketId,
-    );
-    hostChannel
-      .to(gameServer.rooms.get(roomId)!.hostSocketId)
-      .emit("player-set-changed", playerNameList);
+    log_event(`Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`);
+
+    const playerNameList = gameServer.rooms.get(roomId)?.players.map(
+      (player) => player.displayName
+    ) ?? [];
+
+    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId);
+    console.log("Player socket: ", socket.data);
+
+    hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("player-set-changed", playerNameList);
     next();
   });
 
+  // #region Player Channel
   playerChannel.on("connection", async (socket: Socket) => {
     log_event(`Player connected: ${socket.id}`);
 
@@ -261,26 +281,82 @@ async function main(config: ServerConfig) {
       log_event("Player disconnected.");
     });
 
-    socket.on("submit-move", async (msg) => {
-      console.log("Move submitted: ", JSON.stringify(msg));
+    // #region Select Monster
+    socket.on("RequestSubmitMonster", (data: any) => {
+      const player = socket.data.player as Player;
+      if (!player) return;
 
-      // TODO turn stuff
+      const room = gameServer.rooms.get(player.roomId);
+      if (!room) return;
 
-      // TODO if all users submitted and a turn can be processed
-      if (false) {
-        const TEMP_playerSocketId = "sdfgrdfgrdgfrdfg";
-        playerChannel
-          .to(TEMP_playerSocketId)
-          .emit("turn-result", "PLACEHOLDER RESULT");
+      // Expect the client to send the monster templateId (key)
+      const monsterKey = data.data as keyof typeof COMMON_MONSTER_POOL.monsters;
+      log_event("Player selected monster key: " + monsterKey);
+      if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
+        socket.emit("error", "Invalid monster selection");
+        return;
       }
+      // Store selected monster template name directly
+      player.setMonsterTemplate(monsterKey);
+      player.isReady = true;
+
+      // Check if all players are ready
+      const allReady = Array.from(room.players.values()).every((p) => p.isReady);
+      if (!allReady) {
+        log_notice("Waiting for all players to submit their monsters...");
+        return;
+      }
+
+      // All players ready, start tournament
+      room.tournamentManager.startTournament(Array.from(room.players.values()));
+
+      room.players.forEach((player) => {
+        const opponent = Array.from(room.players.values()).find((p) => p !== player);
+        if (!opponent) return;
+
+        room.playerChannel.to(player.socketId).emit("round-start", {
+          myMonster: player.selectedMonsterTemplateName,
+          enemyMonster: opponent.selectedMonsterTemplateName,
+        });
+      });
     });
+
+
+
+    // #region Submit Move
+    socket.on("RequestSubmitMove", (msg: { data: any }) => {
+      const { moveId, targetMethod, targetSide } = msg.data;
+
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
+
+      const match = room.tournamentManager.matches.find(
+        m => m.player1 === player || m.player2 === player
+      );
+      if (!match) return;
+
+      player.submittedMove = true;
+      match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+
+      const [player1, player2] = [match.player1, match.player2];
+      const allSubmitted = player1.submittedMove && player2?.submittedMove;
+
+      if (allSubmitted) {
+        [player1.submittedMove, player2.submittedMove] = [false, false];
+        playerChannel.to(player1.socketId).emit("UnlockButton");
+        playerChannel.to(player2.socketId).emit("UnlockButton");
+      }
+
+    });
+
+
   });
 
   httpServer.listen(config.serverPort, () => {
     log_notice(
-      `Socket.IO server running on ${
-        config.serverIp.toString() + ":" + config.serverPort.toString()
-      }. <CTRL+C> to shutdown.`,
+      `Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()
+      }. <CTRL+C> to shutdown.`
     );
     //#endregion
 

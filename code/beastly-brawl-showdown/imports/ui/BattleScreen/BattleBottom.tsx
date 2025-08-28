@@ -1,46 +1,41 @@
 import React from "react";
+import { EntryID } from "/imports/simulator/core/utils";
+import { TargetingMethod } from "/imports/simulator/core/action/targeting";
+import { SideId } from "/imports/simulator/core/side";
 
 type BattleBottomProps = {
-  onAttack: () => void;
-  onAbility: () => void;
-  onDefend: () => void;
-  shieldUsesLeft?: number;
+  onAction: (moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId ) => void;
+  disabled?: boolean;
+  myMonsterMoves: { attack: EntryID; defend: EntryID; ability?: EntryID };
 };
 
-export const BattleBottom: React.FC<BattleBottomProps> = ({
-  onAttack,
-  onAbility,
-  onDefend,
-  shieldUsesLeft = 3,
-}) => {
-  // const handleRoll = () => {
-  //   onRoll();
-  //   //basically just clals whatever function is given to this as a parameter
-  // };
+export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction, disabled, myMonsterMoves }) => {
   return (
     <div className="battleScreenBottom">
-      <button className="glb-btn" id="attack" onClick={onAttack}>
-        <img
-          className="battleScreenBottomButtonImage"
-          src="/img/sword3.png"
-          alt="Sword"
-        />
+      <button
+        className="battleScreenBottomButton"
+        onClick={() => onAction(myMonsterMoves.attack, "single-enemy" as TargetingMethod, 1 as SideId)}
+        disabled={disabled}
+      >
+        <img src="/img/sword.png" alt="Sword" className="battleScreenBottomButtonImage" />
       </button>
-      <button className="glb-btn" id="ability" onClick={onAbility}>
-        <img
-          className="battleScreenBottomButtonImage"
-          src="/img/ability2.png"
-          alt="Ability"
-        />
+      {myMonsterMoves.ability && (
+        <button
+          className="battleScreenBottomButton"
+          onClick={() => onAction(myMonsterMoves.ability!, "single-enemy" as TargetingMethod, 1 as SideId)}
+          disabled={disabled}
+        >
+          <img src="/img/ability.jpg" alt="Ability" className="battleScreenBottomButtonImage" />
+        </button>
+      )}
+      <button
+        className="battleScreenBottomButton"
+        onClick={() => onAction(myMonsterMoves.defend, "self" as TargetingMethod, 0 as SideId)}
+        disabled={disabled}
+      >
+        <img src="/img/shield.png" alt="Shield" className="battleScreenBottomButtonImage" />
       </button>
-      <button className="glb-btn" id="defend" onClick={onDefend}>
-        <img
-          className="battleScreenBottomButtonImage"
-          src="/img/shield2.png"
-          alt="Shield"
-        />
-      </button>
-      <div className="shield-uses">{shieldUsesLeft}</div>
+      <div className="shield-uses"></div>
     </div>
   );
 };

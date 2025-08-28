@@ -1,9 +1,9 @@
 name: Prettier Check & Fix
 
-on:
-  push:
-    branches:
-      - "**"
+on: 
+  pull_request:
+    paths:
+      - '**'
 
 permissions:
   contents: write

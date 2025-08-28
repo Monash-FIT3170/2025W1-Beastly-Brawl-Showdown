@@ -660,7 +660,8 @@ input:focus {
 .textbox {
   display: block;
   margin: 10px auto;
-  padding: 10px 20px; /* Adjust based on where the text should sit */
+  padding: 10px 20px;
+  /* Adjust based on where the text should sit */
   font-size: 16px;
   background-image: url("/Textbox.png");
   background-size: contain;
@@ -1260,7 +1261,18 @@ input:focus {
   height: 100vh;
 }
 
-#battleScreenTop-btn {
+.battleScreenTop {
+  position: relative;
+  display: block;
+  background-color: red;
+  width: 100%;
+  height: 8%;
+  top: 0px;
+}
+
+.battleMiddle {
+  position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1296,7 +1308,7 @@ input:focus {
   padding: 1rem;
 }
 
-/* .battleScreenTopButton{
+.battleScreenTopButton {
   position: relative;
   left: 0.5rem;
   display: inline-flex;
@@ -1308,7 +1320,21 @@ input:focus {
   border: none;
   font-size: 1rem;
   color: black;
-} */
+}
+
+.monster1 {
+  margin: 2rem;
+  position: absolute;
+  right: 10rem;
+
+}
+
+.monster2 {
+  margin: 2rem;
+  position: absolute;
+  bottom: 1rem;
+  left: 10rem;
+}
 
 .progressContainer {
   position: relative;
@@ -1349,6 +1375,7 @@ progress::-moz-progress-bar {
   object-fit: fill;
 }
 
+
 .topBackIcon {
   position: absolute;
   height: 1.5rem;
@@ -1361,13 +1388,12 @@ progress::-moz-progress-bar {
   position: absolute;
   font-size: 3rem;
   z-index: 1000;
-  left: 35rem;
-  top: 14rem;
+  top: 17rem;
+  left: 77.5rem;
 }
 
 .diceAnimation {
   z-index: 900;
-  position: absolute;
   left: 20rem;
 }
 .btn:active {
@@ -1556,9 +1582,11 @@ input[type="range"] {
 }
 
 .toggle-btn.off {
-  background-color: #e57373; /* Light red */
+  background-color: #e57373;
+  /* Light red */
   color: white;
 }
+
 
 .topBackIcon {
   position: absolute;
@@ -1826,11 +1854,11 @@ input[type="range"] {
     transform: translate(-50%, -50%);
     font-size: 2rem;
     top: 50%;
+  }
 
-    .winner-screen {
-      width: 90vw;
-      height: auto;
-      padding: 1.2rem;
-    }
+  .winner-screen {
+    width: 90vw;
+    height: auto;
+    padding: 1.2rem;
   }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MonsterContainer } from "./MonsterContainer";
 import { useNavigate } from "react-router-dom";
+import { COMMON_MONSTER_POOL } from "/imports/simulator/data/common/common_monster_pool";
 
 interface MonsterSelectionScreenProps {
   setSelectedMonsterCallback?: (value: string) => void;
@@ -39,8 +40,6 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
     setConfirmEnabled(true);
   }
 
-  // Called when the confirm button is clicked
-
   function handleConfirm() {
     if (selectedMonster) {
       console.log("Confirmed monster:", selectedMonster);
@@ -49,7 +48,6 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
     }
   }
 
-  // Notify parent after confirmation
   useEffect(() => {
     if (isConfirmed && selectedMonster && setSelectedMonsterCallback) {
       setSelectedMonsterCallback(selectedMonster);
@@ -63,21 +61,16 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
         Monster!
       </h1>
       <div className="monster-selection-grid">
-        <MonsterContainer
-          name="wolf"
-          type="Attacker"
-          currentlySelectedMonster={highlightAndShowConfirm}
-        />
-        <MonsterContainer
-          name="turtle"
-          type="Defender"
-          currentlySelectedMonster={highlightAndShowConfirm}
-        />
-        <MonsterContainer
-          name="dragon"
-          type="Balanced"
-          currentlySelectedMonster={highlightAndShowConfirm}
-        />
+        {Object.values(COMMON_MONSTER_POOL.monsters)
+          .filter((m) => m.name !== "BlankMon")
+          .map((monster) => (
+            <MonsterContainer
+              key={monster.templateId}
+              name={monster.name}
+              type={monster.description}
+              currentlySelectedMonster={highlightAndShowConfirm}
+            />
+          ))}
 
         <button
           className="glb-btn"

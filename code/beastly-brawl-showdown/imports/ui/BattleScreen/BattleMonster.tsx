@@ -1,34 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { MonsterTemplate } from '../../simulator/core/monster/monster_template';
+import { usePlayerSocket } from '../player/game/PlayerPage';
 
-// Define props for the BattleMonster component
 type BattleMonsterProps = {
-  image: string;
-  alt: string;
-  position: string; // e.g., "monster1" or "monster2"
+  template: MonsterTemplate;
+  currentHp: number;
+  playerId: string;
+  position: string;
 };
 
-//when making, give it an image, an alt for the blind and which monster position it is in, 1 for left, 2 for right
-export const BattleMonster: React.FC<BattleMonsterProps> = ({
-  image,
-  alt,
-  position,
-}) => {
-  // const [hp, setHp] = useState<number>(100);
-  const [hp] = useState<number>(100);
+export const BattleMonster: React.FC<BattleMonsterProps> = ({ template, currentHp, playerId, position }) => {
+  const { socket } = usePlayerSocket();
+  const [hp, setHp] = useState<number>(100);
 
-  // //just updates the hp bar, doesn't really work noww but no monsters now anyway
-  // const updateHp = (newHp: number): void => {
-  //   setHp(newHp);
-  // };
-  //right now the hp is commented out since its not being used yet
+  useEffect(() => {
+    setHp(currentHp);
+  }, [currentHp]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handler = ({ playerId: targetId, newHp }: { playerId: string; newHp: number }) => {
+      if (targetId === playerId) setHp(newHp);
+    };
+
+    socket.on('update-hp', handler);
+
+    // Cleanup function
+    return () => {
+      socket.off('update-hp', handler);
+    };
+  }, [socket, playerId]);
+
   return (
     <div className={position}>
       <div className="progressContainer">
-        {/* hp bar */}
-        <progress value={hp} max={100} className="hpBar"></progress>
-        <span className="hpLabel">HP</span>
+        <progress value={hp} max={template.baseStats.health} className="hpBar" />
+        <span className="hpLabel">{hp} HP</span>
       </div>
-      <img className="battleMonsterImg" src={image} alt={alt} />
+      <img className="battleMonsterImg" src={template.imageUrl} alt={template.name} />
     </div>
   );
 };
