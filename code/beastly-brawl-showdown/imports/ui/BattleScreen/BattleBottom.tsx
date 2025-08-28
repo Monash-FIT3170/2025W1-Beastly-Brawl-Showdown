@@ -6,7 +6,7 @@ import { SideId } from "/imports/simulator/core/side";
 type BattleBottomProps = {
   onAction: (moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId ) => void;
   disabled?: boolean;
-  myMonsterMoves: { attack: EntryID; defend: EntryID; ability?: EntryID }; // pass move IDs from parent
+  myMonsterMoves: { attack: EntryID; defend: EntryID; ability?: EntryID };
 };
 
 export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction, disabled, myMonsterMoves }) => {
