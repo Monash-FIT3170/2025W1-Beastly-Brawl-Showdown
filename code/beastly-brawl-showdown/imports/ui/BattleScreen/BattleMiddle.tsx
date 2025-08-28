@@ -8,6 +8,10 @@ type BattleMiddleProps = {
   playerHp: number;
   enemyImgSrc: string;
   playerImgSrc: string;
+  enemySlashVisible?: boolean;
+  onEnemySlashComplete?: () => void;
+  playerSlashVisible?: boolean;
+  onPlayerSlashComplete?: () => void;
 };
 //takes a boolean when initialized
 export const BattleMiddle: React.FC<BattleMiddleProps> = ({
@@ -16,6 +20,10 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   playerHp,
   enemyImgSrc,
   playerImgSrc,
+  enemySlashVisible,
+  onEnemySlashComplete,
+  playerSlashVisible,
+  onPlayerSlashComplete,
 }) => {
   const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
 
@@ -64,11 +72,15 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         currentHealth={enemyHp}
         maxHealth={100}
         imageSrc={enemyImgSrc}
+        showSlash={enemySlashVisible}
+        onSlashComplete={onEnemySlashComplete}
       />
       <MonsterHealthRing
         currentHealth={playerHp}
         maxHealth={100}
         imageSrc={playerImgSrc}
+        showSlash={playerSlashVisible}
+        onSlashComplete={onPlayerSlashComplete}
       />
     </div>
   );

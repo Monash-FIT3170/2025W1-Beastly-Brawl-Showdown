@@ -18,6 +18,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [enemyHp, setEnemyHp] = useState(100);
   const [playerHp, setPlayerHp] = useState(100);
 
+  const [enemySlash, setEnemySlash] = useState(false);
+  const [playerSlash, setPlayerSlash] = useState(false);
+
   // Function to trigger the rolling animation
   const triggerAnimation = (): void => {
     if (!showAnimation) {
@@ -28,6 +31,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   const handleRoll = () => {
     triggerAnimation();
+    setEnemySlash(true);
     const dmg = 15;
     setEnemyHp((hp) => Math.max(0, hp - dmg));
     const messageEl = document.querySelector(".battle-message");
@@ -46,6 +50,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         playerHp={playerHp}
         enemyImgSrc={enemyImageSrc}
         playerImgSrc={playerImageSrc}
+        enemySlashVisible={enemySlash}
+        onEnemySlashComplete={() => setEnemySlash(false)}
+        playerSlashVisible={playerSlash}
+        onPlayerSlashComplete={() => setPlayerSlash(false)}
       />
       <BattleBottom
         onAttack={handleRoll}

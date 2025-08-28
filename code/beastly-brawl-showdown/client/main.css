@@ -1687,6 +1687,49 @@ input[type="range"] {
     /* left edge */ 0 -4px 0 #c26130; /* top edge */
 }
 
+/* Slash Animation */
+.slash-animation {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10;
+}
+
+.slash-animation.active {
+  opacity: 1;
+  animation: slashAppear 0.5s ease-out forwards;
+}
+
+.slash-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.slash-animation.active .slash-image {
+  animation: slashImageStrike 0.6s ease-out forwards;
+}
+
+@keyframes slashAppear {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes slashImageStrike {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+  20%  { transform: translate(-50%, -50%) scale(1.2) rotate(0deg);  opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(1)   rotate(5deg);  opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.8) rotate(10deg); opacity: 0; }
+}
+
 /* #################################################################### */
 /* Mobile View Specific Styles */
 @media screen and (max-width: 768px) {
