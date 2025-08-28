@@ -14,6 +14,7 @@ import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
 import { log } from "console";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
+import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
 type ServerConfig = {
   serverIp: string;
@@ -328,7 +329,9 @@ async function main(config: ServerConfig) {
 
 
     // #region Submit Move
-    socket.on("RequestSubmitMove", (msg: { moveId: EntryID; targetSide: number }) => {
+    socket.on("RequestSubmitMove", (msg: { data: any }) => {
+      const { moveId, targetMethod, targetSide } = msg.data; 
+
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
@@ -338,10 +341,7 @@ async function main(config: ServerConfig) {
       );
       if (!match) return;
 
-      const moveId = msg.moveId; // already number
-      const targetSide = msg.targetSide as SideId;
-
-      match.submitMove(player, moveId, targetSide);
+      match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
     });
 
 

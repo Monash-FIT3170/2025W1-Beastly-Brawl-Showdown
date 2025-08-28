@@ -4,6 +4,9 @@ import { BattleMiddle } from './BattleMiddle';
 import { BattleBottom } from './BattleBottom';
 import { usePlayerSocket } from '../player/game/PlayerPage';
 import { MonsterTemplate } from '../../simulator/core/monster/monster_template';
+import { EntryID } from '/imports/simulator/core/utils';
+import { TargetingMethod } from '/imports/simulator/core/action/targeting';
+import { SideId } from '/imports/simulator/core/side';
 
 interface BattleScreenProps {
   matchData: {
@@ -55,14 +58,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   }, [socket]);
 
   // Handle player action
-  const handleAction = (moveId: number, targetSide: number) => {
+  const handleAction = (moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId) => {
     if (!socket) return;
 
-    // Send moveId to the server
-    socket.emit('RequestSubmitMove', { moveId, targetSide });
+    const data = { moveId, targetMethod, targetSide };
+
+    // Send as one `data` object
+    socket.emit("RequestSubmitMove", { data });
     setHasSubmittedMove(true);
   };
-
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
@@ -78,13 +82,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         onAction={handleAction}
         disabled={hasSubmittedMove}
         myMonsterMoves={{
-          attack: Number(myMonster.template.attackActionId),
-          defend: Number(myMonster.template.defendActionId),
-          ability: myMonster.template.abilityActionId ? Number(myMonster.template.abilityActionId) : undefined,
+          attack: myMonster.template.attackActionId,
+          defend: myMonster.template.defendActionId,
+          ability: myMonster.template.abilityActionId,
         }}
       />
-
-
     </div>
   );
 };

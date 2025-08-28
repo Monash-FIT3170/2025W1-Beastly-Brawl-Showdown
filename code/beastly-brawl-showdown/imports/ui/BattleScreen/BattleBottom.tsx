@@ -1,9 +1,12 @@
 import React from "react";
+import { EntryID } from "/imports/simulator/core/utils";
+import { TargetingMethod } from "/imports/simulator/core/action/targeting";
+import { SideId } from "/imports/simulator/core/side";
 
 type BattleBottomProps = {
-  onAction: (moveId: number, targetSide: number) => void;
+  onAction: (moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId ) => void;
   disabled?: boolean;
-  myMonsterMoves: { attack: number; defend: number; ability?: number }; // pass move IDs from parent
+  myMonsterMoves: { attack: EntryID; defend: EntryID; ability?: EntryID }; // pass move IDs from parent
 };
 
 export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction, disabled, myMonsterMoves }) => {
@@ -11,7 +14,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction, disabled, 
     <div className="battleScreenBottom">
       <button
         className="battleScreenBottomButton"
-        onClick={() => onAction(myMonsterMoves.attack, 1)}
+        onClick={() => onAction(myMonsterMoves.attack, "single-enemy" as TargetingMethod, 1 as SideId)}
         disabled={disabled}
       >
         <img src="/img/sword.png" alt="Sword" className="battleScreenBottomButtonImage" />
@@ -19,7 +22,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction, disabled, 
       {myMonsterMoves.ability && (
         <button
           className="battleScreenBottomButton"
-          onClick={() => onAction(myMonsterMoves.ability!, 1)}
+          onClick={() => onAction(myMonsterMoves.ability!, "single-enemy" as TargetingMethod, 1 as SideId)}
           disabled={disabled}
         >
           <img src="/img/ability.jpg" alt="Ability" className="battleScreenBottomButtonImage" />
@@ -27,7 +30,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction, disabled, 
       )}
       <button
         className="battleScreenBottomButton"
-        onClick={() => onAction(myMonsterMoves.defend, 0)}
+        onClick={() => onAction(myMonsterMoves.defend, "self" as TargetingMethod, 0 as SideId)}
         disabled={disabled}
       >
         <img src="/img/shield.png" alt="Shield" className="battleScreenBottomButtonImage" />

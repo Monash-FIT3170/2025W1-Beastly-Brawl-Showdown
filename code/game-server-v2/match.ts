@@ -1,7 +1,7 @@
 import { Player } from "./player";
 import { AccountId } from "../shared/types";
 import { Battle, BattleOptions } from "../beastly-brawl-showdown/imports/simulator/core/battle";
-import { SideId } from "../simulator/core/side";
+import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
 import { COMMON_MOVE_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_move_pool";
 import { log_event } from "./utils";
@@ -9,6 +9,7 @@ import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/mons
 import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { ChooseMove } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
 enum MatchType {
     DUEL,
@@ -97,7 +98,7 @@ export class Match {
     }
 
     // Called by main when a player submits a move
-    submitMove(player: Player, moveId: EntryID, targetSide: SideId): void {
+    submitMove(player: Player, moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
@@ -112,9 +113,9 @@ export class Match {
 
         // Wrap SideId in a TargetingData object with the correct targetingMethod
         const targetData: TargetingData = {
-            targetingMethod: "single-enemy",
+            targetingMethod: targetMethod,
             target: targetSide,
-        };
+        };  
 
         chooseMoveNotice.callback(moveId, targetData);
     }
