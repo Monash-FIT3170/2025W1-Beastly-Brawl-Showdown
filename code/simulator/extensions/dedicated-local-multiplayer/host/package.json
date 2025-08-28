@@ -21,6 +21,7 @@
   "dependencies": {
     "@beastly-brawl-showdown/sim-core": "latest",
     "@beastly-brawl-showdown/sim-data": "latest",
+    "@types/react": "^19.1.12",
     "express": "^5.1.0",
     "socket.io": "^4.8.1"
   },

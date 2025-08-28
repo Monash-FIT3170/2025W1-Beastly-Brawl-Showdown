@@ -7,6 +7,8 @@ import { clamp } from "./utils/clamp";
 import { BattleMiddle } from "../BattleScreen/BattleMiddle";
 import BattleMessage from "../BattleScreen/BattleMessage";
 import "../BattleScreencss/main.css"
+import { getBaseStat } from "@beastly-brawl-showdown/sim-core/monster/monster";
+import { COMMON_MONSTER_POOL } from "@beastly-brawl-showdown/sim-data/common/common_monster_pool";
 
 interface BattleSceneProps {
   events: BaseEvent[];
@@ -195,8 +197,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   }
 
   //have to get maxhp to pass to battlemiddle
-  const player1MaxHp = currentSnapshot.sides[0].monster.base.baseStats.health;
-  const player2MaxHp = currentSnapshot.sides[1].monster.base.baseStats.health;
+  //key of type of I hate this
+  const template = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[0].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
+  const player1MaxHp = template ? getBaseStat("health", template) : 0;
+
+  const template2 = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[1].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
+  const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
   // Clear names for what the UI reads:
   const visiblePlayer1 = visibleState[0];
