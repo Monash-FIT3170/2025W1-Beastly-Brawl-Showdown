@@ -1,7 +1,7 @@
 import React from "react";
-import type { ChooseMove } from "../../../../../core/notice/notice";
-import type { EntryID } from "../../../../../core/types";
-import { commonMovePool } from "../../../../../data/common_move_pool";
+import type { ChooseMove } from "@beastly-brawl-showdown/sim-core/notice/notice";
+import type { EntryID } from "@beastly-brawl-showdown/sim-core/utils";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
 
 interface BattleControlsProps {
   chooseMove: ChooseMove;
@@ -19,7 +19,7 @@ const BattleControls: React.FC<BattleControlsProps> = ({ chooseMove, onSelectedM
       }}
     >
       {chooseMove.data.moveIdOptions.map((moveId) => {
-        const action = commonMovePool[moveId];
+        const action = COMMON_MOVE_POOL[moveId as COMMON_MOVE_NAMES];
         if (!action) {
           console.error(`Invalid action ID (${moveId})`);
           return;
