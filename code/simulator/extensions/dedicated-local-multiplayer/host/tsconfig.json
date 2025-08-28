@@ -1,17 +1,17 @@
 {
-  "extends": "@beastly-brawl-showdown/configs/tsconfig",
+  "extends": [
+    "@beastly-brawl-showdown/configs/typecheck"
+  ],
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2020",
-    "moduleResolution": "Bundler",
-    "declaration": true,
-    "emitDeclarationOnly": false,
+    "composite": true,
+    "target": "es2020",
+    "module": "es2020",
+    "moduleResolution": "bundler",
+    "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "rootDir": "src",
-    "skipLibCheck": true,
-    "sourceMap": true
   },
   "include": [
-    "src",
+    "src"
   ]
 }
