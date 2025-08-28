@@ -10,6 +10,7 @@ export class Player {
   monster?: MonsterTemplate;
   selectedMonsterTemplateName?: string;
   isReady: boolean = false;
+  submittedMove: boolean = false;
 
   constructor(roomId: RoomId, socketId: string, displayName: string, linkedAccountId: string | undefined) {
     this.roomId = roomId;

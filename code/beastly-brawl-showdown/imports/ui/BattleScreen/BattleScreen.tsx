@@ -68,6 +68,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setHasSubmittedMove(true);
   };
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUnlock = () => {
+      setHasSubmittedMove(false);
+    };
+
+    socket.on("UnlockButton", handleUnlock);
+
+    return () => {
+      socket.off("UnlockButton", handleUnlock);
+    };
+  }, [socket]);
+  
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
   return (
