@@ -14,6 +14,6 @@ Meteor.startup(() => {
   root.render(
     <BrowserRouter>
       <BattleScreen />
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 });

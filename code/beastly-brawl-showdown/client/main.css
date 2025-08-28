@@ -1718,16 +1718,34 @@ input[type="range"] {
 }
 
 @keyframes slashAppear {
-  0% { opacity: 0; }
-  20% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes slashImageStrike {
-  0%   { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
-  20%  { transform: translate(-50%, -50%) scale(1.2) rotate(0deg);  opacity: 1; }
-  60%  { transform: translate(-50%, -50%) scale(1)   rotate(5deg);  opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(0.8) rotate(10deg); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.2) rotate(0deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.8) rotate(10deg);
+    opacity: 0;
+  }
 }
 
 /* #################################################################### */
