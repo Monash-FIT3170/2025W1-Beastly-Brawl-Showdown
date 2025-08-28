@@ -190,6 +190,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     return <p>Waiting for game data...</p>;
   }
   
+  if (!currentSnapshot) {
+  return null; // or a loading/fallback state
+  }
+
   //have to get maxhp to pass to battlemiddle
   const player1MaxHp = currentSnapshot.sides[0].monster.base.baseStats.health;
   const player2MaxHp = currentSnapshot.sides[1].monster.base.baseStats.health;
@@ -206,7 +210,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         enemyHp={visiblePlayer2.health ?? 0}
         enemyMaxHp = {player2MaxHp}
         playerHp={visiblePlayer1.health ?? 0}
-        player1MaxHp = {player1MaxHp}
+        playerMaxHp = {player1MaxHp}
         enemyImgSrc={visiblePlayer2.image}
         playerImgSrc={visiblePlayer1.image}
       />

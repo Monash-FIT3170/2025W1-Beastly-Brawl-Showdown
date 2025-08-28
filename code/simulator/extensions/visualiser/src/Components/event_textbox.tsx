@@ -1,7 +1,8 @@
+import { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
 import React, { useState } from "react";
 
 interface EventTextBoxProps {
-  onEventsSubmit: (events: string) => void;
+  onEventsSubmit: (events: BaseEvent[]) => void;
 }
 
 const EventTextBox: React.FC<EventTextBoxProps> = ({ onEventsSubmit }) => {

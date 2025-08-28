@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import MonsterHealthRing from "./MonsterHealthRing";
 
 // Define the props type
@@ -21,7 +21,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   enemyMaxHp,
   playerMaxHp,
 }) => {
-  const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
+  // const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
 
   // //if the showwanimation is true then show thtet animation
   // useEffect(() => {
