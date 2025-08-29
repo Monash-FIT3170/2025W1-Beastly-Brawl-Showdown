@@ -44,7 +44,7 @@ GAME_SERVER_DIR="$BASE_DIR/game-server-v2"
 echo "[launcher] Starting game server in $GAME_SERVER_DIR..."
 (
   cd "$GAME_SERVER_DIR"
-  ts-node main.ts
+  npx ts-node main.ts
 ) &
 
 # Wait for server readiness signal
