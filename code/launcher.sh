@@ -44,6 +44,13 @@ GAME_SERVER_DIR="$BASE_DIR/game-server-v2"
 echo "[launcher] Starting game server in $GAME_SERVER_DIR..."
 (
   cd "$GAME_SERVER_DIR"
+  # Check if ts-node is installed
+  if [ ! -f "./node_modules/.bin/ts-node" ]; then
+    echo "ts-node not found locally. Installing..."
+    npm install --save-dev ts-node typescript
+else
+    echo "ts-node is already installed locally."
+fi
   npx ts-node main.ts
 ) &
 
