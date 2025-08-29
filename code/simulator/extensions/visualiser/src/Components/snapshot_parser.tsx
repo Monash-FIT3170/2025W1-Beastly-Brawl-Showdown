@@ -1,4 +1,4 @@
-import { SnapshotEvent } from "@beastly-brawl-showdown/sim-core/event/core_events"
+import { SnapshotEvent } from "../../../../../core/event/core_events"
 
 console.log("snapshot parser loaded")
 export function parseSnapshot(snapshot: SnapshotEvent) {

@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.typecheck.json",
+  "compilerOptions": {
+    "skipLibCheck": false,
+    "composite": true
+  },
+  "include": [
+    "src"
+  ]
+}

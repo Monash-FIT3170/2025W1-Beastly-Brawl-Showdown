@@ -2,12 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SocketContext } from "../socket/socket_context";
 import BattleControls from "../components/battle_controls";
-import type { Notice } from "@beastly-brawl-showdown/sim-core/notice/notice";
+import type { Notice } from "../../../../../core/notice/notice";
 import { useRef } from "react";
-import type { SideId } from "@beastly-brawl-showdown/sim-core/side";
-import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "@beastly-brawl-showdown/sim-core/action/targeting";
-import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
-import type { OrderedEvent } from "@beastly-brawl-showdown/sim-core/event/event_history";
+import type { SideId } from "../../../../../core/side";
+import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../../../../core/action/targeting";
+import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../../../../data/common/common_move_pool";
+import type { OrderedEvent } from "../../../../../core/event/event_history";
 
 const GamePage: React.FC = () => {
   const navigate = useNavigate();

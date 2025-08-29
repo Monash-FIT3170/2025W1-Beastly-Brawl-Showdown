@@ -1,5 +1,5 @@
-import { SnapshotEvent, StartMoveEvent, BuffEvent, RollEvent, DamageEvent, BlockedEvent } from "@beastly-brawl-showdown/sim-core/event/core_events"
-import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event"
+import { SnapshotEvent, StartMoveEvent, BuffEvent, RollEvent, DamageEvent, BlockedEvent } from "../../../../../core/event/core_events"
+import type { BaseEvent } from "../../../../../core/event/base_event"
 
 export class Turn {
     turnEvents: BaseEvent[] = [];

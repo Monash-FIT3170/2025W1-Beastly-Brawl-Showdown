@@ -1,10 +1,23 @@
 import React from "react";
-import BattleVisualiser from "../../../visualiser/src/BattleVisualiser"
+// import BattleVisualiser from "../../../visualiser/src/BattleVisualiser"
+// import { SocketContext } from "./socket/socket_context";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { SocketProvider } from "./socket/socket_provider";
+import PlayerConnectionPage from "./pages/player_connection_page";
+import GamePage from "./pages/game_page";
 
 // export default App;
 
 const App: React.FC = () => (
-  <BattleVisualiser />
+  <SocketProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/join" element={<PlayerConnectionPage />} />
+        <Route path="/" element={<GamePage />} />
+      </Routes>
+    </BrowserRouter>
+  </SocketProvider>
+  // <BattleVisualiser />
 );
 
 export default App;
