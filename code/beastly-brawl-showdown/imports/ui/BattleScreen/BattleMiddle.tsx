@@ -1,14 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { BattleMonster } from './BattleMonster';
-import { MonsterTemplate } from '../../simulator/core/monster/monster_template';
+import React, { useEffect, useState } from "react";
+import { BattleMonster } from "./BattleMonster";
+import { MonsterTemplate } from "../../simulator/core/monster/monster_template";
+import MonsterHealthRing from "./MonsterHealthRing";
 
 type BattleMiddleProps = {
   showAnimation: boolean;
   player1: { template: MonsterTemplate; currentHp: number; playerId: string };
   player2: { template: MonsterTemplate; currentHp: number; playerId: string };
+  enemySlashVisible?: boolean;
+  onEnemySlashComplete?: () => void;
+  playerSlashVisible?: boolean;
+  onPlayerSlashComplete?: () => void;
 };
 
-export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation, player1, player2 }) => {
+export const BattleMiddle: React.FC<BattleMiddleProps> = ({
+  showAnimation,
+  player1,
+  player2,
+  enemySlashVisible,
+  onEnemySlashComplete,
+  playerSlashVisible,
+  onPlayerSlashComplete,
+}) => {
   const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
 
   useEffect(() => {
@@ -30,7 +43,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation, playe
           clearInterval(interval);
           setDisplayedNumber(finalResult);
 
-          timeout = setTimeout(() => console.log('Final result shown'), 3000);
+          timeout = setTimeout(() => console.log("Final result shown"), 3000);
         }
       }, intervalSpeed);
     }
@@ -42,15 +55,48 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({ showAnimation, playe
   }, [showAnimation]);
 
   return (
-    <div className="battleMiddle">
-      <BattleMonster {...player1} position="monster1" />
+    // <div className="battleMiddle">
+    //   <BattleMonster {...player1} position="monster1" />
+    //   {showAnimation && (
+    //     <div className="diceAnimation">
+    //       <img
+    //         src="/img/d20.png"
+    //         alt="Rolling animation"
+    //         className="diceAnimation"
+    //       />
+    //       <span className="diceResult">{displayedNumber}</span>
+    //     </div>
+    //   )}
+    //   <BattleMonster {...player2} position="monster2" />
+    // </div>
+
+    <div className="combat-arena">
+      <MonsterHealthRing
+        currentHealth={player2.currentHp}
+        maxHealth={player2.template.baseStats.health}
+        imageSrc={player2.template.imageUrl}
+        showSlash={enemySlashVisible}
+        onSlashComplete={onEnemySlashComplete}
+      />
+
       {showAnimation && (
         <div className="diceAnimation">
-          <img src="/img/d20.png" alt="Rolling animation" className="diceAnimation" />
+          <img
+            src="/img/d20.png"
+            alt="Rolling dice"
+            className="diceAnimation"
+          />
           <span className="diceResult">{displayedNumber}</span>
         </div>
       )}
-      <BattleMonster {...player2} position="monster2" />
+
+      <MonsterHealthRing
+        currentHealth={player1.currentHp}
+        maxHealth={player1.template.baseStats.health}
+        imageSrc={player1.template.imageUrl}
+        showSlash={playerSlashVisible}
+        onSlashComplete={onPlayerSlashComplete}
+      />
     </div>
   );
 };
