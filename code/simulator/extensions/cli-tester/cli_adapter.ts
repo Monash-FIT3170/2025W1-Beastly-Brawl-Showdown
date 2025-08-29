@@ -1,10 +1,10 @@
 import * as readline from "readline";
-import { Notice, NoticeKind } from "@beastly-brawl-showdown/sim-core/notice/notice";
-import { NoticeBoard } from "@beastly-brawl-showdown/sim-core/notice/notice_board";
-import { SideId } from "@beastly-brawl-showdown/sim-core/side";
-import { EventHistory } from "@beastly-brawl-showdown/sim-core/event/event_history";
-import { EntryID } from "@beastly-brawl-showdown/sim-core/utils";
-import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
+import { Notice, NoticeKind } from "../../core/notice/notice";
+import { NoticeBoard } from "../../core/notice/notice_board";
+import { SideId } from "../../core/side";
+import { EventHistory } from "../../core/event/event_history";
+import { EntryID } from "../../core/utils";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../data/common/common_move_pool";
 
 export class CliAdapter {
   noticeBoard: NoticeBoard;

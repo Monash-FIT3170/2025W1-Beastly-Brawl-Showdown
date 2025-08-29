@@ -1,16 +1,7 @@
 {
+  // See: https://www.typescriptlang.org/tsconfig/#Type_Checking_6248
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2020",
-    "moduleResolution": "Bundler",
-    "declaration": true,
-    "emitDeclarationOnly": false,
-    "outDir": "dist",
-    "rootDir": "src",
-    "skipLibCheck": true,
-    "sourceMap": true,
-
-        /* Type Checking */
+    /* Type Checking */
     "strict": true, /* Enable all strict type-checking options. */
     // "strictNullChecks": true,                           /* When type checking, take into account 'null' and 'undefined'. */
     // "strictBindCallApply": true,                        /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function. */
@@ -31,9 +22,5 @@
     // "noUncheckedIndexedAccess": true, /* Add 'undefined' to a type when accessed using an index. */
     "noUnusedLocals": true, /* Enable error reporting when local variables aren't read. */
     // "noUnusedParameters": true, /* Raise an error when a function parameter isn't read. */
-
-  },
-  "include": [
-    "src",
-  ]
+  }
 }

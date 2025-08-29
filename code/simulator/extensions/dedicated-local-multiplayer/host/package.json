@@ -4,6 +4,7 @@
   "files": [
     "dist"
   ],
+  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -28,6 +29,7 @@
     "@beastly-brawl-showdown/configs": "latest",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.10",
-    "typescript": "^5.8.3"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }
