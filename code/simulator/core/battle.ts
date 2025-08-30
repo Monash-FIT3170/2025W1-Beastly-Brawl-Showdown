@@ -49,7 +49,7 @@ export class Battle {
         id: idx as SideId,
         monster: {
           baseID: playerOptions.monsterId,
-          health: 0,
+          health: this.monsterPool.monsters[playerOptions.monsterId].baseStats.health,
           defendActionCharges: 0,
           components: [],
         },
