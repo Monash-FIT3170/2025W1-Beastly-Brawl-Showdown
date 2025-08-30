@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SocketContext } from "../socket/socket_context";
-import BattleControls from "../components/battle_controls";
+import BattleControls from "../../../../visualiser/src/Components/battle_controls";
 import type { Notice } from "../../../../../core/notice/notice";
 import { useRef } from "react";
 import type { SideId } from "../../../../../core/side";
 import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../../../../core/action/targeting";
 import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../../../../data/common/common_move_pool";
 import type { OrderedEvent } from "../../../../../core/event/event_history";
+import { MoveId } from "../../../../../core/action/move/move_pool";
 
 const GamePage: React.FC = () => {
   const navigate = useNavigate();
@@ -111,7 +112,7 @@ const GamePage: React.FC = () => {
         return (
           <>
             <BattleControls
-              onSelectedMoveId={(moveId) => {
+              onSelectedMoveId={(moveId: MoveId) => {
                 console.log(`Action pressed: ${moveId}`);
                 let targeting: TargetingData;
                 switch (COMMON_MOVE_POOL[moveId as COMMON_MOVE_NAMES].targetingMethod) {

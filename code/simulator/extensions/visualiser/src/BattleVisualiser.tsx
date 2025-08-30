@@ -2,12 +2,12 @@ import React, { useCallback, useState } from "react";
 import EventTextBox from "./Components/event_textbox";
 import BattleScene from "./Components/battle_scene";
 import BattleBar from "./Components/battle_bar";
-import type { BaseEvent } from "../../../../../core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
 import GameLog from "./Components/GameLog";
+import { OrderedEvent } from "../../../core/event/event_history";
 
 const BattleVisualizerDemo: React.FC = () => {
-  const [events, setEvents] = useState<BaseEvent[]>([]);
+  const [events, setEvents] = useState<OrderedEvent[]>([]);
   const [turnInput, setTurnInput] = useState(0);
 
   const [isAutoplay, setIsAutoplay] = useState(false);

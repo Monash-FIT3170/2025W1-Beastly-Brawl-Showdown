@@ -16,7 +16,7 @@
       "path": "../../../data"
     },
     {
-      "path": "../host"
+      "path": "../api"
     },
     {
       "path": "../../visualiser"

@@ -1,10 +1,7 @@
 {
   "extends": "./tsconfig.typecheck.json",
   "compilerOptions": {
-    "skipLibCheck": false,
-    "composite": true
-  },
-  "include": [
-    "src"
-  ]
+    "composite": true,
+    "target": "es2019"
+  }
 }

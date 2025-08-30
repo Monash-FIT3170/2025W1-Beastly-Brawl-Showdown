@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { BaseEvent } from "../../../../../core/event/base_event";
-import type { BuffEvent, DamageEvent } from "../../../../../core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
+import { BaseEvent } from "../../../../core/event/base_event";
+import { BuffEvent, DamageEvent } from "../../../../core/event/core_events";
 
 interface BattleSceneProps {
   events: BaseEvent[];

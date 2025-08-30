@@ -1,5 +1,5 @@
-import { SnapshotEvent, StartMoveEvent, BuffEvent, RollEvent, DamageEvent, BlockedEvent } from "../../../../../core/event/core_events"
-import type { BaseEvent } from "../../../../../core/event/base_event"
+import { BaseEvent } from "../../../core/event/base_event";
+import { SnapshotEvent, StartMoveEvent, BuffEvent, RollEvent, DamageEvent, BlockedEvent } from "../../../core/event/core_events";
 
 export class Turn {
     turnEvents: BaseEvent[] = [];
