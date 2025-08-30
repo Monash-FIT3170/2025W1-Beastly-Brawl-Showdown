@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { BattleMonster } from "./BattleMonster";
 import { MonsterTemplate } from "../../simulator/core/monster/monster_template";
 import MonsterHealthRing from "./MonsterHealthRing";
 
@@ -79,7 +78,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         onSlashComplete={onEnemySlashComplete}
       />
 
-      {showAnimation && (
+      {/* {showAnimation && (
         <div className="diceAnimation">
           <img
             src="/img/d20.png"
@@ -88,7 +87,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
           />
           <span className="diceResult">{displayedNumber}</span>
         </div>
-      )}
+      )} */}
 
       <MonsterHealthRing
         currentHealth={player1.currentHp}
