@@ -19,7 +19,12 @@ const handleSubmit = (e: React.FormEvent) => {
   }
 };
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}
+        style={{
+          position: "absolute",
+          bottom: "50px",
+          left: "20px",
+    }}>
       <h3>Enter Battle Events</h3>
       <textarea
         value={input}
