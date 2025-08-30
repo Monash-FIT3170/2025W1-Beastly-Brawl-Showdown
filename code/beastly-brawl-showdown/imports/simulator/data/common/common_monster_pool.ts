@@ -30,7 +30,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "mystic_wryven",
       name: "Mystic Wyvern",
       description: "A mystical creature of the skies. A Balanced Monster.",
-      imageUrl: "/img/monster-selection-images/placeholder_monster_1.png",
+      imageUrl: "/monsters/dragon.png",
       baseStats: {
         health: 25,
         armour: 14,
@@ -56,7 +56,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "shadow_fang",
       name: "Shadow Fang Predator",
       description: "A stealthy and cunning beast. An Attack Monster.",
-      imageUrl: "/img/monster-selection-images/placeholder_monster_2.png",
+      imageUrl: "/monsters/wolf.png",
       baseStats: {
         health: 20,
         armour: 12,
@@ -83,7 +83,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "stone_hide",
       name: "Stone Hide Guardian",
       description: "A sturdy and resilient protector. A Defense Monster.",
-      imageUrl: "/img/monster-selection-images/placeholder_monster_3.png",
+      imageUrl: "/monsters/turtle.png",
       baseStats: {
         health: 30,
         armour: 16,
