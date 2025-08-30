@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { OrderedEvent } from "../../../../core/event/event_history";
 
 interface EventTextBoxProps {
-  onEventsSubmit: (events: string) => void;
+  onEventsSubmit: (events: OrderedEvent[]) => void;
 }
 
 const EventTextBox: React.FC<EventTextBoxProps> = ({ onEventsSubmit }) => {

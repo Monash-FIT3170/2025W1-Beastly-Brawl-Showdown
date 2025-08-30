@@ -1,6 +1,5 @@
 import React from "react";
 // import BattleVisualiser from "../../../visualiser/src/BattleVisualiser"
-// import { SocketContext } from "./socket/socket_context";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { SocketProvider } from "./socket/socket_provider";
 import PlayerConnectionPage from "./pages/player_connection_page";
