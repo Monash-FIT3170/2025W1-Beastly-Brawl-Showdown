@@ -5,6 +5,7 @@ import BattleBar from "./Components/battle_bar";
 import { parseTurns } from "./Components/turns_array_maker";
 import GameLog from "./Components/GameLog";
 import { OrderedEvent } from "../../../core/event/event_history";
+import "./BattleScreencss/main.css";
 
 const BattleVisualizerDemo: React.FC = () => {
   const [events, setEvents] = useState<OrderedEvent[]>([]);
@@ -21,7 +22,7 @@ const BattleVisualizerDemo: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div>
       <EventTextBox onEventsSubmit={setEvents} />
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 16px" }}>
