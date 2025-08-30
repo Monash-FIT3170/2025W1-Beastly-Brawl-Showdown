@@ -25,7 +25,7 @@ const BattleVisualizerDemo: React.FC = () => {
     <div>
       <EventTextBox onEventsSubmit={setEvents} />
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 16px", position:"absolute", bottom:"20px",left: "15rem" }}>
         <button onClick={() => setIsPlaying(p => !p)}>
           {isPlaying ? "Pause" : "Play"}
         </button>
