@@ -14,7 +14,12 @@ const BattleBar: React.FC<BattleBarProps> = ({
   maxTurns,
 }) => {
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div
+        style={{
+          position: "absolute",
+          bottom: "15rem",
+          left: "20px",
+    }}>
       <label htmlFor="turn">Turn:</label>
       <input
         type="range"
