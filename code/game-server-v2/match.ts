@@ -26,6 +26,9 @@ export class Match {
     battle?: Battle;
     playerChannel: any;
 
+    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
+
+
     /**
      * Constructor.
      * 
@@ -103,6 +106,9 @@ export class Match {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
 
+        // Store move
+        this.submittedMoves.set(player, { moveId, targetSide, targetMethod });
+
         const sideIndex = this.getSideForPlayer(player);
         const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
         const chooseMoveNotice = noticeMap.get("chooseMove") as ChooseMove | undefined;
@@ -115,9 +121,13 @@ export class Match {
         const targetData: TargetingData = {
             targetingMethod: targetMethod,
             target: targetSide,
-        };  
+        };
 
         chooseMoveNotice.callback(moveId, targetData);
+    }
+
+    getPlayerMove(player: Player) {
+        return this.submittedMoves.get(player);
     }
 
 
