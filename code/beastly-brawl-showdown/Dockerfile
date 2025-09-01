@@ -1,9 +1,9 @@
 # Build stage (Meteor app build)
-FROM node:18-alpine AS builder
+FROM node:18-bullseye AS builder
 WORKDIR /app
 
 # Install Meteor
-RUN apk add --no-cache curl bash \
+RUN apt-get update && apt-get install -y curl bash \
   && curl https://install.meteor.com/ | sh
 
 # Copy source
@@ -14,7 +14,7 @@ RUN meteor npm install \
   && meteor build --directory /app/build --server-only
 
 # Production stage
-FROM node:18-alpine AS runner
+FROM node:18-bullseye AS runner
 WORKDIR /app
 
 # Copy built bundle
