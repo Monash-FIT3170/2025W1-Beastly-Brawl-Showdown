@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import EventTextBox from "./Components/event_textbox";
+// import EventTextBox from "./Components/event_textbox";
 import BattleScene from "./Components/battle_scene";
 import BattleBar from "./Components/battle_bar";
 import { parseTurns } from "./Components/turns_array_maker";
 import GameLog from "./Components/GameLog";
 import { OrderedEvent } from "../../../core/event/event_history";
 import "./BattleScreencss/main.css";
-import { BaseEvent } from "../../../core/event/base_event";
 
 interface BattleVisualiserProps {
   rawEvents : OrderedEvent[] | null;
