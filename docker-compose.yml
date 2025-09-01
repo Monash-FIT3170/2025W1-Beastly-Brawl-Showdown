@@ -21,6 +21,7 @@ services:
       context: ./code/beastly-brawl-showdown
     depends_on:
       - game-server
+      - mongo
     ports:
       - "3000:3000"
     environment:
