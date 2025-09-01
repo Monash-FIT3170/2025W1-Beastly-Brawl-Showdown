@@ -11,6 +11,11 @@ import { MoveId } from "../../../../../core/action/move/move_pool";
 import BattleVisualiser from "../../../../visualiser/src/BattleVisualiser";
 import {} from "../../../api/src/api";
 
+/**
+ * Duration for timeouts before they should be counted as dropped
+ */
+const ACK_TIMEOUT = 10000;
+
 const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const [showRedirectToLogin, setShowRedirectToLogin] = useState(false);
@@ -38,7 +43,7 @@ const GamePage: React.FC = () => {
 
       const timer = setTimeout(() => {
         navigate("/join");
-      }, 5000);
+      }, ACK_TIMEOUT);
 
       return () => clearTimeout(timer);
     }
@@ -64,60 +69,56 @@ const GamePage: React.FC = () => {
       console.log(`Queued notice (length=${pendingNotices.length}): ${JSON.stringify(notice)}`);
     });
 
-    console.warn(`SELF INFO START`);
+    console.log("Fetching self info");
     try {
       await socketContext.socket
-        .timeout(5000)
+        .timeout(ACK_TIMEOUT)
         .emitWithAck("getSelfInfo")
-        .then((sideInfo) => {
-          setSelfInfo(sideInfo);
+        .then((fetchedSelfInfo) => {
+          console.log(`Self info recieved: ${fetchedSelfInfo}`);
+          if (!selfInfo) {
+            console.error("Did not receive SelfInfo");
+            return;
+          }
+          setSelfInfo(fetchedSelfInfo);
         });
-      console.warn(`SELF INFO 2`);
-      if (!selfInfo) {
-        console.error("Did not receive SelfInfo");
-        return;
-      }
     } catch (err) {
       console.error("ERR: " + err);
     }
-    console.warn(`SELF INFO END`);
 
-    console.warn(`TURN HIST START`);
+    console.warn(`Fetching turn history`);
     try {
       await socketContext.socket
-        .timeout(5000)
+        .timeout(ACK_TIMEOUT)
         .emitWithAck("getHistory")
-        .then((history) => {
-          setTurnHistory(history);
+        .then((fetchedHistory) => {
+          console.log(`History recieved: ${fetchedHistory}`);
+          if (!turnHistory) {
+            console.error("Did not receive TurnHistory");
+            return;
+          }
+          setTurnHistory(fetchedHistory);
         });
-      console.warn(`TURN HIST 2`);
-      if (!turnHistory) {
-        console.error("Did not receive TurnHistory");
-        return;
-      }
     } catch (err) {
       console.error("ERR: " + err);
     }
-    console.warn(`TURN HIST END`);
 
-    console.warn(`TURN NOTICE START`);
+    console.warn(`Fetching turn notices`);
     try {
       await socketContext.socket
-        .timeout(5000)
+        .timeout(ACK_TIMEOUT)
         .emitWithAck("getNotices")
         .then((notices) => {
+          console.log(`Notices recieved: ${notices}`);
+          if (!pendingNotices) {
+            console.error("Did not receive PendingNotices");
+            return;
+          }
           setPendngNotices(notices);
         });
-      console.warn(`TURN NOTICE 2`);
-      if (!pendingNotices) {
-        console.error("Did not receive PendingNotices");
-        return;
-      }
     } catch (err) {
       console.error("ERR: " + err);
     }
-    console.warn(`TURN NOTICE END`);
-
     return () => {
       if (!socketContext.socket) {
         return;
