@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "ts-node main.ts"
+  },
   "dependencies": {
     "@types/cors": "^2.8.19",
     "@types/socket.io": "^3.0.1",

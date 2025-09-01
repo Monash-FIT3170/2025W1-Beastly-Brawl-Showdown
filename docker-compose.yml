@@ -1,41 +1,32 @@
 version: "3.8"
-
 services:
   mongo:
     image: mongo:latest
-    ports:
-      - "27017:27017"
+    restart: always
     volumes:
       - mongo-data:/data/db
+    ports:
+      - "27017:27017"
 
-  beastlybrawl:
+  meteor-app:
     build:
-      context: ./code
-      dockerfile: beastly-brawl-showdown/Dockerfile
+      context: ./code/beastly-brawl-showdown
+    depends_on:
+      - mongo
     ports:
       - "3000:3000"
-    volumes:
-      - ./code/beastly-brawl-showdown:/app
-      - ./code/shared:/app/shared
     environment:
-      - MONGO_URL=mongodb://mongo:27017/beastlybrawl
-      - ROOT_URL=http://localhost:3000
-    depends_on:
-      - mongo
+      - MONGO_URL=mongodb://mongo:27017/beastly
+      - ROOT_URL=http://localhost
+      - PORT=3000
 
-  gameserver:
+  game-server:
     build:
-      context: ./code
-      dockerfile: game-server-v2/Dockerfile
-    ports:
-      - "4000:4000"
-    volumes:
-      - ./code/game-server-v2:/app
-      - ./code/shared:/app/shared
-    environment:
-      - MONGO_URL=mongodb://mongo:27017/gameserver
+      context: ./code/game-server-v2
     depends_on:
-      - mongo
+      - meteor-app
+    ports:
+      - "8080:8080"
 
 volumes:
   mongo-data:

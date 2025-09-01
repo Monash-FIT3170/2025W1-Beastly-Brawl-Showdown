@@ -1,16 +1,34 @@
-FROM node:18-alpine
-
+# Build stage (Meteor app build)
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Install dependencies
-COPY beastly-brawl-showdown/package*.json ./
-RUN npm install
+# Install Meteor
+RUN apk add --no-cache curl bash \
+  && curl https://install.meteor.com/ | sh
 
-# Copy app code & shared folder
-COPY beastly-brawl-showdown/ ./
-COPY shared/ ./shared/
+# Copy source
+COPY . .
 
+# Install dependencies & build
+RUN meteor npm install \
+  && meteor build --directory /app/build --server-only
+
+# Production stage
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+# Copy built bundle
+COPY --from=builder /app/build/bundle /app/bundle
+
+# Install server dependencies
+WORKDIR /app/bundle/programs/server
+RUN npm install --production
+
+# Set environment
+ENV MONGO_URL=mongodb://mongo:27017/beastly
+ENV ROOT_URL=http://localhost
+ENV PORT=3000
+
+# Expose and run
 EXPOSE 3000
-
-# Adjust this if your start command differs
-CMD ["npm", "start"]
+CMD ["node", "/app/bundle/main.js"]

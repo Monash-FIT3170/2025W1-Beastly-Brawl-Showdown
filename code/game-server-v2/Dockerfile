@@ -1,15 +1,17 @@
 FROM node:18-alpine
-
 WORKDIR /app
 
-# Install dependencies
-COPY game-server-v2/package*.json ./
+# Install ts-node and typescript
+RUN npm install -g ts-node typescript
+
+# Copy everything
+COPY . .
+
+# Install project dependencies
 RUN npm install
 
-# Copy app code & shared folder
-COPY game-server-v2/ ./
-COPY shared/ ./shared/
+# Expose port
+EXPOSE 8080
 
-EXPOSE 4000
-
-CMD ["npx", "ts-node", "main.ts"]
+# Run with ts-node
+CMD ["npm", "start"]
