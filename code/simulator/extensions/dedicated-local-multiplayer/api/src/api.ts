@@ -9,7 +9,7 @@ export interface ServerToPlayerEvents {
 export interface PlayerToServerEvents {
   /// Extract the notice type that matches the kind=K requirement, then get the callback Params
   resolveNotice<K extends NoticeKind>(kind: K, params: Parameters<Extract<Notice, { kind: K }>["callback"]>): void;
-  getHistory(): OrderedEvent[];
-  getSelfInfo(): SideId;
-  getNotices(): Notice[];
+  getHistory: (res: (history: OrderedEvent[]) => void) => void;
+  getSelfInfo: (res: (sideId: SideId) => void) => void;
+  getNotices: (res: (notices: Notice[]) => void) => void;
 }

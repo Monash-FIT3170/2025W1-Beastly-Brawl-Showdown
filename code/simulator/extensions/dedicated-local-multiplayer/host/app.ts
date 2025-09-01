@@ -134,15 +134,17 @@ function startSimulator() {
     },
   });
   players.map((player, index) => {
-    player.socket.on("getSelfInfo", () => {
-      return player.sideId;
+    player.socket.on("getSelfInfo", (res) => {
+      console.log("Returning self info.");
+      res(player.sideId);
     });
 
-    player.socket.on("getHistory", () => {
-      return battle.eventHistory.events;
+    player.socket.on("getHistory", (res) => {
+      res(battle.eventHistory.events);
     });
-    player.socket.on("getNotices", () => {
-      return Array.from(battle.noticeBoard.noticeMaps[player.sideId].values());
+    player.socket.on("getNotices", (res) => {
+      console.log(`Player ${player.sideId} requested its notices.`);
+      res(Array.from(battle.noticeBoard.noticeMaps[player.sideId].values()));
     });
 
     player.socket.on("resolveNotice", (noticeKind, params) => {

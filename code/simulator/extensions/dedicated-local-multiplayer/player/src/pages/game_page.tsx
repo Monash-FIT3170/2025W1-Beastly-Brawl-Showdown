@@ -1,14 +1,15 @@
-import React, { useContext, useEffect, useState , useRef } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { SocketContext } from "../socket/socket_context";
-import BattleControls from "../../../../../extensions/visualiser/src/Components/battle_controls"
+import BattleControls from "../../../../../extensions/visualiser/src/Components/battle_controls";
 import type { Notice } from "../../../../../core/notice/notice";
 import type { SideId } from "../../../../../core/side";
 import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../../../../core/action/targeting";
-import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../../../../data/common/common_move_pool";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../../../../data/common/common_move_pool";
 import type { OrderedEvent } from "../../../../../core/event/event_history";
 import { MoveId } from "../../../../../core/action/move/move_pool";
-import BattleVisualiser from "../../../../visualiser/src/BattleVisualiser"
+import BattleVisualiser from "../../../../visualiser/src/BattleVisualiser";
+import {} from "../../../api/src/api";
 
 const GamePage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,7 +19,6 @@ const GamePage: React.FC = () => {
   const [selfInfo, setSelfInfo] = useState<SideId | null>(null);
   const [turnHistory, setTurnHistory] = useState<OrderedEvent[] | null>(null);
   const [pendingNotices, setPendngNotices] = useState<Notice[] | null>(null);
-
 
   const hasListeners = useRef(false);
 
@@ -45,33 +45,78 @@ const GamePage: React.FC = () => {
 
     socketContext.socket.onAny((event, args) => console.log(`Message recieved:\n${event}\n${JSON.stringify(args)}`));
 
-    setSelfInfo(await socketContext.socket.emitWithAck("getSelfInfo"));
-    if (!selfInfo) {
-      console.error("Did not recieve SelfInfo");
-      return;
-    }
-    setTurnHistory(await socketContext.socket.emitWithAck("getHistory"));
-    if (!turnHistory) {
-      console.error("Did not recieve TurnHistory");
-      return;
-    }
-    setPendngNotices(await socketContext.socket.emitWithAck("getNotices"));
-    if (!pendingNotices) {
-      console.error("Did not recieve PendingNotices");
-      return;
-    }
-
     // TODO block / display loading until all data recieved
 
     socketContext.socket.on("newEvent", (event: OrderedEvent) => {
       console.log(`New event recorded: ${JSON.stringify(event)}`);
+      if (!turnHistory) {
+        setTurnHistory([event]);
+      }
       setTurnHistory((prev) => [...prev!, event]);
     });
     socketContext.socket.on("newNotice", (notice: Notice) => {
       console.log(`New notice recieved: ${JSON.stringify(notice)}`);
-      setPendngNotices((prev) => [...prev!, notice]);
+      setPendngNotices((prev) => [...(prev ?? [notice]), notice]);
+      if (!pendingNotices) {
+        console.error("ERR: Pending notices is still not initialised.");
+        return;
+      }
       console.log(`Queued notice (length=${pendingNotices.length}): ${JSON.stringify(notice)}`);
     });
+
+    console.warn(`SELF INFO START`);
+    try {
+      await socketContext.socket
+        .timeout(5000)
+        .emitWithAck("getSelfInfo")
+        .then((sideInfo) => {
+          setSelfInfo(sideInfo);
+        });
+      console.warn(`SELF INFO 2`);
+      if (!selfInfo) {
+        console.error("Did not receive SelfInfo");
+        return;
+      }
+    } catch (err) {
+      console.error("ERR: " + err);
+    }
+    console.warn(`SELF INFO END`);
+
+    console.warn(`TURN HIST START`);
+    try {
+      await socketContext.socket
+        .timeout(5000)
+        .emitWithAck("getHistory")
+        .then((history) => {
+          setTurnHistory(history);
+        });
+      console.warn(`TURN HIST 2`);
+      if (!turnHistory) {
+        console.error("Did not receive TurnHistory");
+        return;
+      }
+    } catch (err) {
+      console.error("ERR: " + err);
+    }
+    console.warn(`TURN HIST END`);
+
+    console.warn(`TURN NOTICE START`);
+    try {
+      await socketContext.socket
+        .timeout(5000)
+        .emitWithAck("getNotices")
+        .then((notices) => {
+          setPendngNotices(notices);
+        });
+      console.warn(`TURN NOTICE 2`);
+      if (!pendingNotices) {
+        console.error("Did not receive PendingNotices");
+        return;
+      }
+    } catch (err) {
+      console.error("ERR: " + err);
+    }
+    console.warn(`TURN NOTICE END`);
 
     return () => {
       if (!socketContext.socket) {
@@ -101,7 +146,7 @@ const GamePage: React.FC = () => {
   }
 
   function actionPanel() {
-    console.log(pendingNotices)
+    console.log(pendingNotices);
     if (!pendingNotices || pendingNotices.length == 0) {
       return <p>No pending action</p>;
     }
@@ -189,9 +234,7 @@ const GamePage: React.FC = () => {
     <>
       <h1>WIP - GAME</h1>
       <div>
-        <BattleVisualiser 
-          rawEvents={turnHistory}
-        />
+        <BattleVisualiser rawEvents={turnHistory} />
         {/* <textarea disabled value={JSON.stringify(turnHistory)} /> */}
         <br />
         {actionPanel()}
