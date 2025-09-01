@@ -8,6 +8,7 @@ import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../.
 import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../../../../data/common/common_move_pool";
 import type { OrderedEvent } from "../../../../../core/event/event_history";
 import { MoveId } from "../../../../../core/action/move/move_pool";
+import BattleVisualiser from "../../../../visualiser/src/BattleVisualiser"
 
 const GamePage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,7 +45,6 @@ const GamePage: React.FC = () => {
 
     socketContext.socket.onAny((event, args) => console.log(`Message recieved:\n${event}\n${JSON.stringify(args)}`));
 
-    /// Request game data
     setSelfInfo(await socketContext.socket.emitWithAck("getSelfInfo"));
     if (!selfInfo) {
       console.error("Did not recieve SelfInfo");
@@ -101,6 +101,7 @@ const GamePage: React.FC = () => {
   }
 
   function actionPanel() {
+    console.log(pendingNotices)
     if (!pendingNotices || pendingNotices.length == 0) {
       return <p>No pending action</p>;
     }
@@ -188,8 +189,10 @@ const GamePage: React.FC = () => {
     <>
       <h1>WIP - GAME</h1>
       <div>
-        {/* <BattleVisualizer /> */}
-        <textarea disabled value={JSON.stringify(turnHistory)} />
+        <BattleVisualiser 
+          rawEvents={turnHistory}
+        />
+        {/* <textarea disabled value={JSON.stringify(turnHistory)} /> */}
         <br />
         {actionPanel()}
       </div>
