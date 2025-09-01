@@ -10,7 +10,7 @@ type BattleBottomProps = {
     targetSide: SideId
   ) => void;
   disabled?: boolean;
-  myMonsterMoves: { attack: EntryID; defend: EntryID; ability?: EntryID };
+  myMonsterMoves: { attack: EntryID; ability?: EntryID; defend: EntryID };
 };
 
 export const BattleBottom: React.FC<BattleBottomProps> = ({

@@ -70,17 +70,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!myMonster || !enemyMonster) return;
 
     let message = "";
-    if (actor === "player1") setPlayerSlash(true);
-    else setEnemySlash(true);
-
     const template = actor === "player1" ? myMonster.template : enemyMonster.template;
 
     if (moveId === template.attackActionId) {
-      message = "Attack!";
+      message = actor === "player1" ? "You attack!" : "Enemy attacks!";
+      if (actor === "player1") setPlayerSlash(true);
+      else setEnemySlash(true);
     } else if (moveId === template.defendActionId) {
-      message = "Defend!";
+      message = actor === "player1" ? "You defend!" : "Enemy defends!";
     } else if (moveId === template.abilityActionId) {
-      message = "Ability!";
+      message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
     }
 
     setBattleMessage(message);
@@ -92,10 +91,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setShowAnimation(false);
     setShowMessage(false);
 
+    // Only clear slashes if they were set
     if (actor === "player1") setPlayerSlash(false);
     else setEnemySlash(false);
   };
-
   // Handle player action (submit move to server)
   const handleAction = (
     moveId: EntryID,
@@ -161,8 +160,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
 
     socket.on("ExecuteTurn", handleExecuteTurn);
-    return () => { 
-      socket.off("ExecuteTurn", handleExecuteTurn) 
+    return () => {
+      socket.off("ExecuteTurn", handleExecuteTurn)
     };
   }, [socket, myMonster, enemyMonster]);
 
@@ -186,8 +185,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         disabled={hasSubmittedMove}
         myMonsterMoves={{
           attack: myMonster.template.attackActionId,
-          defend: myMonster.template.defendActionId,
           ability: myMonster.template.abilityActionId,
+          defend: myMonster.template.defendActionId,
         }}
       />
     </div>
