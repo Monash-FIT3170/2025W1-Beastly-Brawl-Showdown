@@ -1,6 +1,6 @@
 import React from "react";
 import type { ChooseMove } from "../../../../core/notice/notice"
-import type { EntryID } from "./utils/utils";
+import type { EntryID } from "../../../../core/utils";
 import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../../../data/common/common_move_pool"
 
 interface BattleControlsProps {
