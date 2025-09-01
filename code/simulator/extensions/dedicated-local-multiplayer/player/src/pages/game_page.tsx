@@ -57,7 +57,9 @@ const GamePage: React.FC = () => {
       if (!turnHistory) {
         setTurnHistory([event]);
       }
+      else{
       setTurnHistory((prev) => [...prev!, event]);
+      }
     });
     socketContext.socket.on("newNotice", (notice: Notice) => {
       console.log(`New notice recieved: ${JSON.stringify(notice)}`);
@@ -233,7 +235,6 @@ const GamePage: React.FC = () => {
 
   return (
     <>
-      <h1>WIP - GAME</h1>
       <div>
         <BattleVisualiser rawEvents={turnHistory} />
         {/* <textarea disabled value={JSON.stringify(turnHistory)} /> */}

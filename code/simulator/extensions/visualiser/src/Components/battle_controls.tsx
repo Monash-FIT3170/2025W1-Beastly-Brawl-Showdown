@@ -16,6 +16,9 @@ const BattleControls: React.FC<BattleControlsProps> = ({ chooseMove, onSelectedM
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        minHeight: "200px",
+        position: "absolute",
+        bottom:"0px",
       }}
     >
       {chooseMove.data.moveIdOptions.map((moveId) => {
@@ -26,6 +29,7 @@ const BattleControls: React.FC<BattleControlsProps> = ({ chooseMove, onSelectedM
         }
         return (
           <img
+            key={moveId}
             src={`src/assets/${action.icon}`}
             onClick={() => onSelectedMoveId(moveId)}
             style={{

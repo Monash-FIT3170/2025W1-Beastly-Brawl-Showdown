@@ -10,7 +10,7 @@ export function parseSnapshot(snapshot: SnapshotEvent) {
     const template = COMMON_MONSTER_POOL.monsters[
       side.monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
-    console.log("Monster template for", side.monster.baseID, template);
+    // console.log("Monster template for", side.monster.baseID, template);
     return {
       id: side.id,
       name: template.name,
