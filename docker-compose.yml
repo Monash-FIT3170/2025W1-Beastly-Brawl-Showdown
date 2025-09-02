@@ -10,7 +10,8 @@ services:
 
   game-server:
     build:
-      context: ./code/game-server-v2
+      context: ./code
+      dockerfile: ./game-server-v2/Dockerfile
     depends_on:
       - mongo
     ports:
