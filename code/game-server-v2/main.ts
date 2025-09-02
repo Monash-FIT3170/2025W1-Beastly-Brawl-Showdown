@@ -10,11 +10,11 @@ import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
-import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
-import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
+import { SideId } from "/app/simulator/core/side";
+import { COMMON_MONSTER_POOL } from "/app/simulator/data/common/common_monster_pool";
 import { log } from "console";
-import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
-import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { EntryID } from "/app/simulator/core/utils";
+import { TargetingMethod } from "/app/simulator/core/action/targeting";
 
 type ServerConfig = {
   serverIp: string;

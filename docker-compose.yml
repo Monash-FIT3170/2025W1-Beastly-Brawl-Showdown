@@ -12,6 +12,8 @@ services:
     build:
       context: ./code
       dockerfile: ./game-server-v2/Dockerfile
+    volumes:
+      - ./code/beastly-brawl-showdown/imports/simulator:/app/simulator
     depends_on:
       - mongo
     ports:
