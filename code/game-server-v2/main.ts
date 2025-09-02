@@ -344,6 +344,21 @@ async function main(config: ServerConfig) {
 
       if (allSubmitted) {
         [player1.submittedMove, player2.submittedMove] = [false, false];
+
+        // Prepare move data for client
+        const player1Move = match.getPlayerMove(player1); // or store last submitted move somewhere
+        const player2Move = match.getPlayerMove(player2);
+
+        // Send both moves to the clients
+        playerChannel.to(player1.socketId).emit("ExecuteTurn", {
+          playerMove: player1Move,
+          enemyMove: player2Move,
+        });
+        playerChannel.to(player2.socketId).emit("ExecuteTurn", {
+          playerMove: player2Move,
+          enemyMove: player1Move,
+        });
+        
         playerChannel.to(player1.socketId).emit("UnlockButton");
         playerChannel.to(player2.socketId).emit("UnlockButton");
       }
