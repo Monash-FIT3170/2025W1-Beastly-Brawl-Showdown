@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { log_notice } from "../utils";
 
 const MONGO_URI = "mongodb://localhost:27017/test";
+// const MONGO_URI = "mongodb://localhost:27017/test?tls=true&tlsCertificateKeyFile=../certs/client.pem&tlsCAFile=../certs/ca.crt";
 
 export default async function connectDb() {
   try {
