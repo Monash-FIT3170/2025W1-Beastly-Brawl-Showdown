@@ -1,5 +1,7 @@
 import React from "react";
 import SlashAnimation from "./SlashAnimation";
+import ShieldAnimation from "./ShieldAnimation";
+import AbilityAnimation from "./AbilityAnimation";
 
 type Props = {
   currentHealth: number;
@@ -7,6 +9,10 @@ type Props = {
   imageSrc?: string;
   showSlash?: boolean;
   onSlashComplete?: () => void;
+  showShield?: boolean;
+  onShieldComplete?: () => void;
+  showAbility?: boolean;
+  onAbilityComplete?: () => void;
 };
 
 const MonsterHealthRing: React.FC<Props> = ({
@@ -15,6 +21,10 @@ const MonsterHealthRing: React.FC<Props> = ({
   imageSrc,
   showSlash = false,
   onSlashComplete,
+  showShield = false,
+  onShieldComplete,
+  showAbility = false,
+  onAbilityComplete,
 }) => {
   const size = 200; // circle diameter
   const stroke = 20; // thickness of ring (approximate 8-10% of size)
@@ -42,6 +52,14 @@ const MonsterHealthRing: React.FC<Props> = ({
       <SlashAnimation
         isVisible={showSlash}
         onComplete={onSlashComplete ?? (() => {})}
+      />
+      <ShieldAnimation
+        isVisible={showShield}
+        onComplete={onShieldComplete ?? (() => {})}
+      />
+      <AbilityAnimation
+        isVisible={showAbility}
+        onComplete={onAbilityComplete ?? (() => {})}
       />
     </div>
   );

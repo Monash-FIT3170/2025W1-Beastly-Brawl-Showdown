@@ -33,19 +33,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [showMessage, setShowMessage] = useState(false);
   const [enemySlash, setEnemySlash] = useState(false);
   const [playerSlash, setPlayerSlash] = useState(false);
+  const [enemyShield, setEnemyShield] = useState(false);
+  const [playerShield, setPlayerShield] = useState(false);
+  const [enemyAbility, setEnemyAbility] = useState(false);
+  const [playerAbility, setPlayerAbility] = useState(false);
 
   // Initialize monsters when matchData changes
   useEffect(() => {
     setMyMonster({
       template: matchData.myMonster.template,
       currentHp:
-        matchData.myMonster.currentHp ?? matchData.myMonster.template.baseStats.health,
+        matchData.myMonster.currentHp ??
+        matchData.myMonster.template.baseStats.health,
       playerId: "player1",
     });
     setEnemyMonster({
       template: matchData.enemyMonster.template,
       currentHp:
-        matchData.enemyMonster.currentHp ?? matchData.enemyMonster.template.baseStats.health,
+        matchData.enemyMonster.currentHp ??
+        matchData.enemyMonster.template.baseStats.health,
       playerId: "player2",
     });
   }, [matchData]);
@@ -70,16 +76,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!myMonster || !enemyMonster) return;
 
     let message = "";
-    const template = actor === "player1" ? myMonster.template : enemyMonster.template;
+    const template =
+      actor === "player1" ? myMonster.template : enemyMonster.template;
 
     if (moveId === template.attackActionId) {
       message = actor === "player1" ? "You attack!" : "Enemy attacks!";
-      if (actor === "player1") setPlayerSlash(true);
-      else setEnemySlash(true);
+      if (actor === "player1") setEnemySlash(true);
+      else setPlayerSlash(true);
     } else if (moveId === template.defendActionId) {
       message = actor === "player1" ? "You defend!" : "Enemy defends!";
+      if (actor === "player1") setPlayerShield(true);
+      else setEnemyShield(true);
     } else if (moveId === template.abilityActionId) {
-      message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
+      message =
+        actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
+      if (actor === "player1") setPlayerAbility(true);
+      else setEnemyAbility(true);
     }
 
     setBattleMessage(message);
@@ -92,8 +104,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setShowMessage(false);
 
     // Only clear slashes if they were set
-    if (actor === "player1") setPlayerSlash(false);
-    else setEnemySlash(false);
+    if (actor === "player1") {
+      setPlayerSlash(false);
+      setPlayerShield(false);
+      setPlayerAbility(false);
+    } else {
+      setEnemySlash(false);
+      setEnemyShield(false);
+      setEnemyAbility(false);
+    }
   };
   // Handle player action (submit move to server)
   const handleAction = (
@@ -115,7 +134,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     socket.on("UnlockButton", handleUnlock);
     return () => {
       socket.off("UnlockButton", handleUnlock);
-    }
+    };
   }, [socket]);
 
   // Update HP from server events
@@ -138,9 +157,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
     socket.on("update-hp", handleHealthUpdate);
     return () => {
-      socket.off("update-hp", handleHealthUpdate)
-    }
-      ;
+      socket.off("update-hp", handleHealthUpdate);
+    };
   }, [socket, myMonster?.playerId, enemyMonster?.playerId]);
 
   // Sequentially play animations after both players submit moves
@@ -161,7 +179,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
     socket.on("ExecuteTurn", handleExecuteTurn);
     return () => {
-      socket.off("ExecuteTurn", handleExecuteTurn)
+      socket.off("ExecuteTurn", handleExecuteTurn);
     };
   }, [socket, myMonster, enemyMonster]);
 
@@ -179,6 +197,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         onEnemySlashComplete={() => setEnemySlash(false)}
         playerSlashVisible={playerSlash}
         onPlayerSlashComplete={() => setPlayerSlash(false)}
+        enemyShieldVisible={enemyShield}
+        onEnemyShieldComplete={() => setEnemyShield(false)}
+        playerShieldVisible={playerShield}
+        onPlayerShieldComplete={() => setPlayerShield(false)}
+        enemyAbilityVisible={enemyAbility}
+        onEnemyAbilityComplete={() => setEnemyAbility(false)}
+        playerAbilityVisible={playerAbility}
+        onPlayerAbilityComplete={() => setPlayerAbility(false)}
       />
       <BattleBottom
         onAction={handleAction}
