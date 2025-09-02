@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
-import { MonsterPool } from "/imports/simulator/data/monster_pool";
-import { Monster } from "/imports/simulator/core/monster/monster";
+import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
+import { MonsterTemplate } from "../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 
 //#region Socket Context Definition
@@ -62,15 +62,48 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<any | null>(null);
+  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number }; enemyMonster: { template: MonsterTemplate; currentHp: number } } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
 
-  // Animation ref
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
-  // Restart bounce animation loop
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("game-started", () => setStartSelection(true));
+
+    socket.on("round-start", (data) => {
+      log_event("Received round-start data:", data);
+
+      const myTemplateName = data?.myMonster;
+      const enemyTemplateName = data?.enemyMonster;
+
+      if (!myTemplateName || !enemyTemplateName) {
+        console.warn("Incomplete round-start data:", data);
+        return;
+      }
+
+      console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
+
+      // Create Monster instances for BattleScreen
+      const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+
+      setMatchData({
+        myMonster: { template: myMonster, currentHp: data.myHp },
+        enemyMonster: { template: enemyMonster, currentHp: data.enemyHp },
+      });
+      setAllReady(true);
+    });
+
+    return () => {
+      socket.off("game-started");
+      socket.off("round-start");
+    };
+  }, [socket]);
+
   useEffect(() => {
     if (!isConnected) return;
 
@@ -96,48 +129,28 @@ const PlayerContent = () => {
     };
   }, [isConnected]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("game-started", () => setStartSelection(true));
-
-    socket.on("round-start", (data) => {
-      if (!data?.myMonster || !data?.enemyMonster) {
-        console.warn("Received incomplete round-start data:", data);
-        return;
-      }
-      setMatchData(data);
-      setAllReady(true);
-    });
-
-    return () => {
-      socket.off("game-started");
-      socket.off("round-start");
-    };
-  }, [socket]);
-
   const handleMonsterSelection = (monsterName: string) => {
-    const template = MonsterPool.find((m) => m.name === monsterName);
-    if (!template) {
+    // Find the monster in COMMON_MONSTER_POOL by name
+    const monster = Object.values(COMMON_MONSTER_POOL.monsters).find(
+      (m) => m.name === monsterName
+    );
+
+    if (!monster) {
       console.error("Invalid monster selected:", monsterName);
       return;
     }
 
-    const monsterInstance = new Monster(template);
-
     if (socket) {
-      socket.emit("RequestSubmitMonster", { data: monsterInstance });
+      // Send the templateId instead of the name
+      socket.emit("RequestSubmitMonster", { data: monster.templateId });
       setMonsterSelected(true);
-      console.log("Monster selected:", monsterName);
+      console.log("Monster selected:", monster.templateId);
     } else {
       console.warn("No socket connection available");
     }
   };
 
-  // GUI flow
-  if (!isConnected) {
-    return <p>Connecting to server...</p>;
-  }
+  if (!isConnected) return <p>Connecting to server...</p>;
 
   const WaitingScreen = () => (
     <div className="waiting-screen">
@@ -161,19 +174,11 @@ const PlayerContent = () => {
     </div>
   );
 
-  if (!startSelection) {
-    return <WaitingScreen />;
-  }
+  if (!startSelection) return <WaitingScreen />;
+  if (!monsterSelected) return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
+  if (!allReady) return <WaitingScreen />;
 
-  if (!monsterSelected) {
-    return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
-  }
-
-  if (!allReady) {
-    return <WaitingScreen />;
-  }
-
-  return <BattleScreen />;
+  return <BattleScreen matchData={matchData!} />;
 };
 //#endregion
 
@@ -183,4 +188,8 @@ export const Player = () => (
     <PlayerContent />
   </PlayerSocketProvider>
 );
+
+function log_event(message: string, data?: any) {
+  console.log(message, data);
+}
 //#endregion

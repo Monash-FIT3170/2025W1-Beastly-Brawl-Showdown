@@ -1,15 +1,20 @@
 import React from "react";
+import SlashAnimation from "./SlashAnimation";
 
 type Props = {
   currentHealth: number;
   maxHealth: number;
   imageSrc?: string;
+  showSlash?: boolean;
+  onSlashComplete?: () => void;
 };
 
 const MonsterHealthRing: React.FC<Props> = ({
   currentHealth,
   maxHealth,
   imageSrc,
+  showSlash = false,
+  onSlashComplete,
 }) => {
   const size = 200; // circle diameter
   const stroke = 20; // thickness of ring (approximate 8-10% of size)
@@ -34,6 +39,10 @@ const MonsterHealthRing: React.FC<Props> = ({
         />
       </svg>
       <img src={imageSrc} alt="monster" className="monster-img" />
+      <SlashAnimation
+        isVisible={showSlash}
+        onComplete={onSlashComplete ?? (() => {})}
+      />
     </div>
   );
 };

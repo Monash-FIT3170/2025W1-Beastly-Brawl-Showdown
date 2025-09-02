@@ -1,33 +1,79 @@
 import React from "react";
+import { EntryID } from "/imports/simulator/core/utils";
+import { TargetingMethod } from "/imports/simulator/core/action/targeting";
+import { SideId } from "/imports/simulator/core/side";
 
-import React from 'react';
 type BattleBottomProps = {
-  onAction: (action: 'attack' | 'defend' | 'ability') => void;
+  onAction: (
+    moveId: EntryID,
+    targetMethod: TargetingMethod,
+    targetSide: SideId
+  ) => void;
+  disabled?: boolean;
+  myMonsterMoves: { attack: EntryID; defend: EntryID; ability?: EntryID };
 };
 
-export const BattleBottom: React.FC<BattleBottomProps> = ({ onAction }) => {
+export const BattleBottom: React.FC<BattleBottomProps> = ({
+  onAction,
+  disabled,
+  myMonsterMoves,
+}) => {
   return (
     <div className="battleScreenBottom">
       <button
-        className="battleScreenBottomButton"
-        onClick={() => onAction('attack')}
+        className="glb-btn"
+        onClick={() =>
+          onAction(
+            myMonsterMoves.attack,
+            "single-enemy" as TargetingMethod,
+            1 as SideId
+          )
+        }
+        disabled={disabled}
       >
-        <img src="/img/sword.png" alt="Sword" className="battleScreenBottomButtonImage" />
+        <img
+          src="/img/sword3.png"
+          alt="Sword"
+          className="battleScreenBottomButtonImage"
+        />
       </button>
+      {myMonsterMoves.ability && (
+        <button
+          className="glb-btn"
+          onClick={() =>
+            onAction(
+              myMonsterMoves.ability!,
+              "single-enemy" as TargetingMethod,
+              1 as SideId
+            )
+          }
+          disabled={disabled}
+        >
+          <img
+            src="/img/ability2.png"
+            alt="Ability"
+            className="battleScreenBottomButtonImage"
+          />
+        </button>
+      )}
       <button
-        className="battleScreenBottomButton"
-        onClick={() => onAction('ability')}
+        className="glb-btn"
+        onClick={() =>
+          onAction(
+            myMonsterMoves.defend,
+            "self" as TargetingMethod,
+            0 as SideId
+          )
+        }
+        disabled={disabled}
       >
-        <img src="/img/ability.jpg" alt="Ability" className="battleScreenBottomButtonImage" />
+        <img
+          src="/img/shield2.png"
+          alt="Shield"
+          className="battleScreenBottomButtonImage"
+        />
       </button>
-      <button
-        className="battleScreenBottomButton"
-        onClick={() => onAction('defend')}
-      >
-        <img src="/img/shield.png" alt="Shield" className="battleScreenBottomButtonImage" />
-      </button>
-      <div className="shield-uses">{shieldUsesLeft}</div>
+      <div className="shield-uses"></div>
     </div>
   );
 };
-

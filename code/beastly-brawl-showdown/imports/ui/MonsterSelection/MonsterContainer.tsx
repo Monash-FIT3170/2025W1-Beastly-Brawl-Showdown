@@ -1,5 +1,5 @@
 import React from "react";
-import { MonsterPool } from "/imports/simulator/data/monster_pool";
+import { COMMON_MONSTER_POOL } from "../../simulator/data/common/common_monster_pool";
 
 export const MonsterContainer = ({
   name,
@@ -15,7 +15,9 @@ export const MonsterContainer = ({
   }
 
   // Find the monster data by name (fallback if not found)
-  const monster = MonsterPool.find((m) => m.name === name);
+  const monster = Object.values(COMMON_MONSTER_POOL.monsters).find(
+    (m) => m.name === name
+  );
 
   return (
     <div className="monster-selection-card" id={name} onClick={onClick}>

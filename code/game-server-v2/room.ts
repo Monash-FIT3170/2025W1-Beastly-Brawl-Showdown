@@ -15,21 +15,30 @@ export class Room {
 
   players: Player[] = [];
   gameState: any = undefined;
+  playerChannel: any;
+  tournamentManager: TournamentManager;
 
-  tournamentManager: TournamentManager = new TournamentManager()
-
-  constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode) {
+  constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode, playerChannel: any) {
     this.hostSocketId = hostSocketId;
     this.roomId = roomId;
     this.joinCode = joinCode;
+    this.playerChannel = playerChannel;
+    this.tournamentManager = new TournamentManager(this.playerChannel);
   }
 
-hasPlayer(displayName: string): boolean {
-  return this.players.some(player => player.displayName === displayName);
-}
+  hasPlayer(displayName: string): boolean {
+    return this.players.some(player => player.displayName === displayName);
+  }
 
-getPlayer(displayName: string): Player | undefined {
-  return this.players.find(player => player.displayName === displayName);
-}
+  getPlayer(displayName: string): Player | undefined {
+    return this.players.find(player => player.displayName === displayName);
+  }
+
+  getMatchByPlayer(displayName: string) {
+    return this.tournamentManager.matches.find(match => 
+      match.player1.displayName === displayName || 
+      (match.player2 && match.player2.displayName === displayName)
+    );
+  }
 
 }

@@ -10,8 +10,11 @@ import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
-import { TournamentManager } from "./tournament_manager";
-
+import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
+import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
+import { log } from "console";
+import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
+import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
 type ServerConfig = {
   serverIp: string;
@@ -137,6 +140,7 @@ async function main(config: ServerConfig) {
       try {
         const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
           socket.id,
+          playerChannel
         );
 
         socket.emit("request-room_response", {
@@ -279,26 +283,22 @@ async function main(config: ServerConfig) {
 
     // #region Select Monster
     socket.on("RequestSubmitMonster", (data: any) => {
-      log_event(`Monster submission signal received: ${JSON.stringify(data)}`);
-
       const player = socket.data.player as Player;
-      log_event(`Player: ${JSON.stringify(player)}`);
-      if (!player) {
-        socket.emit("error", "This player has not been initiated.");
-        return;
-      }
+      if (!player) return;
 
       const room = gameServer.rooms.get(player.roomId);
-      if (!room) {
-        socket.emit("error", "500 Internal Server Error");
+      if (!room) return;
+
+      // Expect the client to send the monster templateId (key)
+      const monsterKey = data.data as keyof typeof COMMON_MONSTER_POOL.monsters;
+      log_event("Player selected monster key: " + monsterKey);
+      if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
+        socket.emit("error", "Invalid monster selection");
         return;
       }
-
-      player.setMonster(data.data);
+      // Store selected monster template name directly
+      player.setMonsterTemplate(monsterKey);
       player.isReady = true;
-
-      log_event(`Player ${player.displayName} is ready`);
-      log_event(`Monster selected: ${JSON.stringify(data.data)}`);
 
       // Check if all players are ready
       const allReady = Array.from(room.players.values()).every((p) => p.isReady);
@@ -307,30 +307,50 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      // TODO: trigger round start
-      // Loop through every room in the game server
-      for (const room of gameServer.rooms.values()) {
-        // Trigger start from each room's tournament manager
-        room.tournamentManager.startTournament(room.players);
-      }
+      // All players ready, start tournament
+      room.tournamentManager.startTournament(Array.from(room.players.values()));
+
+      room.players.forEach((player) => {
+        const opponent = Array.from(room.players.values()).find((p) => p !== player);
+        if (!opponent) return;
+
+        room.playerChannel.to(player.socketId).emit("round-start", {
+          myMonster: player.selectedMonsterTemplateName,
+          enemyMonster: opponent.selectedMonsterTemplateName,
+        });
+      });
     });
+
 
 
     // #region Submit Move
+    socket.on("RequestSubmitMove", (msg: { data: any }) => {
+      const { moveId, targetMethod, targetSide } = msg.data;
 
-    socket.on("submit-move", async (msg) => {
-      console.log("Move submitted: ", JSON.stringify(msg));
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
 
-      // TODO turn stuff
+      const match = room.tournamentManager.matches.find(
+        m => m.player1 === player || m.player2 === player
+      );
+      if (!match) return;
 
-      // TODO if all users submitted and a turn can be processed
-      if (false) {
-        const TEMP_playerSocketId = "sdfgrdfgrdgfrdfg";
-        playerChannel
-          .to(TEMP_playerSocketId)
-          .emit("turn-result", "PLACEHOLDER RESULT");
+      player.submittedMove = true;
+      match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+
+      const [player1, player2] = [match.player1, match.player2];
+      const allSubmitted = player1.submittedMove && player2?.submittedMove;
+
+      if (allSubmitted) {
+        [player1.submittedMove, player2.submittedMove] = [false, false];
+        playerChannel.to(player1.socketId).emit("UnlockButton");
+        playerChannel.to(player2.socketId).emit("UnlockButton");
       }
+
     });
+
+
   });
 
   httpServer.listen(config.serverPort, () => {
