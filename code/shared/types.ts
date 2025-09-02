@@ -1,4 +1,4 @@
-import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move"
+import { MoveRequest } from "/app/simulator/core/action/move/move"
 export type Result<T> = { success: true; value: T } | { success: false; error: Error };
 export type MonsterName = string & { __brand: "MonsterName" };
 

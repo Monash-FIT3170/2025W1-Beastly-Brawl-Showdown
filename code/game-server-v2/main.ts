@@ -47,24 +47,20 @@ async function main(config: ServerConfig) {
     serverNumber: config.serverNumber,
   });
   if (existingRecordCount > 0) {
-    console.log(
-      `Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`,
-    );
+    console.log(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
     if (!config.overrideExistingRecordOnStartup) {
       throw new Error("A record already exists, room could not be registered.");
     }
   }
-  const updatedRecord =
-    await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
-      { serverNumber: config.serverNumber },
-      {
-        serverNumber: config.serverNumber,
-        serverUrl:
-          config.serverIp.toString() + ":" + config.serverPort.toString(),
-        lastUpdated: new Date(),
-      },
-      { upsert: true, new: true },
-    );
+  const updatedRecord = await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
+    { serverNumber: config.serverNumber },
+    {
+      serverNumber: config.serverNumber,
+      serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
+      lastUpdated: new Date(),
+    },
+    { upsert: true, new: true }
+  );
   log_notice("New Record:\n" + JSON.stringify(updatedRecord));
   log_notice("Registered to records.");
 
@@ -112,9 +108,7 @@ async function main(config: ServerConfig) {
     // hostName: string;
   };
   hostChannel.use((socket, next) => {
-    log_event(
-      `Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`,
-    );
+    log_event(`Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as HostChannelAuth;
     /// for now always accept the host name
     // if (!auth.hostName) {
@@ -138,10 +132,7 @@ async function main(config: ServerConfig) {
       log_event("Room requested.");
       // TODO prevent multiple rooms at the same time
       try {
-        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
-          socket.id,
-          playerChannel
-        );
+        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(socket.id, playerChannel);
 
         socket.emit("request-room_response", {
           roomId: roomId,
@@ -210,18 +201,14 @@ async function main(config: ServerConfig) {
       res.send(checkResult);
       return;
     }
-    checkResult.isDisplayNameValid = !gameServer.rooms
-      .get(roomId)
-      ?.hasPlayer(req.body.displayName);
+    checkResult.isDisplayNameValid = !gameServer.rooms.get(roomId)?.hasPlayer(req.body.displayName);
 
     log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
     res.send(checkResult);
   });
 
   playerChannel.use((socket, next) => {
-    log_event(
-      `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`,
-    );
+    log_event(`Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as PlayerChannelAuth;
 
     if (!auth.joinCode) {
@@ -239,7 +226,6 @@ async function main(config: ServerConfig) {
       next(new Error("Invalid credentials"));
       return;
     }
-
 
     try {
       gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
@@ -262,9 +248,7 @@ async function main(config: ServerConfig) {
 
     log_event(`Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`);
 
-    const playerNameList = gameServer.rooms.get(roomId)?.players.map(
-      (player) => player.displayName
-    ) ?? [];
+    const playerNameList = gameServer.rooms.get(roomId)?.players.map((player) => player.displayName) ?? [];
 
     console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId);
     console.log("Player socket: ", socket.data);
@@ -321,8 +305,6 @@ async function main(config: ServerConfig) {
       });
     });
 
-
-
     // #region Submit Move
     socket.on("RequestSubmitMove", (msg: { data: any }) => {
       const { moveId, targetMethod, targetSide } = msg.data;
@@ -331,9 +313,7 @@ async function main(config: ServerConfig) {
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
 
-      const match = room.tournamentManager.matches.find(
-        m => m.player1 === player || m.player2 === player
-      );
+      const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
       if (!match) return;
 
       player.submittedMove = true;
@@ -347,15 +327,13 @@ async function main(config: ServerConfig) {
         playerChannel.to(player1.socketId).emit("UnlockButton");
         playerChannel.to(player2.socketId).emit("UnlockButton");
       }
-
     });
-
-
   });
 
   httpServer.listen(config.serverPort, () => {
     log_notice(
-      `Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()
+      `Socket.IO server running on ${
+        config.serverIp.toString() + ":" + config.serverPort.toString()
       }. <CTRL+C> to shutdown.`
     );
     //#endregion

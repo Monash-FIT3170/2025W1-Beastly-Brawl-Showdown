@@ -37,7 +37,7 @@ COPY --from=builder /app/build/bundle /app/bundle
 
 # Install server dependencies for production
 WORKDIR /app/bundle/programs/server
-RUN npm install --production
+RUN npm install
 
 # Set environment variables
 ENV MONGO_URL=mongodb://mongo:27017/beastly
