@@ -1,4 +1,3 @@
-import { MoveId } from "../action/move/move_pool";
 import { LookupTable } from "../utils";
 import { MonsterTemplate } from "./monster_template";
 

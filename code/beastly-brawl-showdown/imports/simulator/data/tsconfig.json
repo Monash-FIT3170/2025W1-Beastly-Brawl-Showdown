@@ -1,13 +1,12 @@
 {
-  "extends": "../../../../../.config/tsconfig.base.json",
+  "extends": "./tsconfig.typecheck.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "../"
-    // remove any "paths" entry for @sim
+    "target": "es2015"
   },
   "references": [
     {
       "path": "../core"
-    }
+    },
   ]
 }
