@@ -4,7 +4,7 @@ import cors from "cors";
 import express from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import connectDb from "./db/db";
+import connectDb, { MONGO_URI } from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
@@ -15,6 +15,23 @@ import { COMMON_MONSTER_POOL } from "/app/simulator/data/common/common_monster_p
 import { log } from "console";
 import { EntryID } from "/app/simulator/core/utils";
 import { TargetingMethod } from "/app/simulator/core/action/targeting";
+import mongoose from "mongoose";
+
+export async function checkCollectionExists(collectionName: string): Promise<boolean> {
+  await mongoose.connect("mongodb://localhost:27017/game_server_register");
+
+  if (!mongoose.connection.readyState) {
+    throw new Error("MongoDB connection is not ready");
+  }
+
+  const db = mongoose.connection.db;
+  if (!db) {
+    throw new Error("MongoDB native database object is undefined");
+  }
+
+  const collections = await db.listCollections({ name: collectionName }).toArray();
+  return collections.length > 0;
+}
 
 type ServerConfig = {
   serverIp: string;
@@ -43,25 +60,57 @@ async function main(config: ServerConfig) {
   log_notice("Connect to database...");
   await connectDb();
   log_notice("Register to global records...");
-  const existingRecordCount = await GameServerRegisterModel.countDocuments({
-    serverNumber: config.serverNumber,
-  });
-  if (existingRecordCount > 0) {
-    console.log(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
-    if (!config.overrideExistingRecordOnStartup) {
-      throw new Error("A record already exists, room could not be registered.");
+  log_attention(`MONGO ENV ${MONGO_URI}`); // TODO TESTING
+  /*
+  The code fails here, inspecting the mongo collection shows that there is no documents
+  */
+
+  try {
+    const db = mongoose.connection.db;
+    if (!db) throw new Error("MongoDB native database object is undefined");
+
+    const collectionName = GameServerRegisterModel.collection.name;
+    const collections = await db.listCollections({ name: collectionName }).toArray();
+
+    let existingRecordCount = 0;
+
+    if (collections.length > 0) {
+      existingRecordCount = await GameServerRegisterModel.countDocuments({
+        serverNumber: config.serverNumber,
+      });
+
+      if (existingRecordCount > 0) {
+        console.log(`Existing records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
+        if (!config.overrideExistingRecordOnStartup) {
+          throw new Error("A record already exists, room could not be registered.");
+        }
+      }
+    } else {
+      console.log(`Collection '${collectionName}' does not exist yet. Proceeding with registration.`);
     }
-  }
-  const updatedRecord = await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
-    { serverNumber: config.serverNumber },
-    {
+
+    const updatedRecord = await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
+      { serverNumber: config.serverNumber },
+      {
+        serverNumber: config.serverNumber,
+        serverUrl: `${config.serverIp}:${config.serverPort}`,
+        lastUpdated: new Date(),
+      },
+      { upsert: true, new: true }
+    );
+
+    log_notice("Updated Record:\n" + JSON.stringify(updatedRecord));
+  } catch (err) {
+    log_attention("Failed to find or update records (collection may be missing or query failed): " + err);
+    log_attention("Using fallback - Creating new record.");
+    const newRecord = new GameServerRegisterModel({
       serverNumber: config.serverNumber,
-      serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
+      serverUrl: `${config.serverIp}:${config.serverPort}`,
       lastUpdated: new Date(),
-    },
-    { upsert: true, new: true }
-  );
-  log_notice("New Record:\n" + JSON.stringify(updatedRecord));
+    });
+
+    await newRecord.save();
+  }
   log_notice("Registered to records.");
 
   log_notice("Starting game service...");
@@ -331,11 +380,7 @@ async function main(config: ServerConfig) {
   });
 
   httpServer.listen(config.serverPort, () => {
-    log_notice(
-      `Socket.IO server running on ${
-        config.serverIp.toString() + ":" + config.serverPort.toString()
-      }. <CTRL+C> to shutdown.`
-    );
+    log_notice(`Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()}. <CTRL+C> to shutdown.`);
     //#endregion
 
     //#region IO

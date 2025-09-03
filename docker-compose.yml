@@ -1,45 +1,46 @@
 services:
+# confirmed to run
+# - `docker ps` gives the right output
+# - `mongosh "mongodb://localhost:27017"` is sucessful
   mongo:
     image: mongo:latest
-    restart: always
-    volumes:
-      - mongo-data:/data/db
-      - ./certs/mongo:/etc/ssl/mongo
+    container_name: mongo-game_locator
     ports:
       - "27017:27017"
-    command: >
-      mongod --tlsMode requireTLS
-             --tlsCertificateKeyFile /etc/ssl/mongo/server.pem
-             --tlsCAFile /etc/ssl/mongo/ca.crt
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ""
+      MONGO_INITDB_ROOT_PASSWORD: ""
+    command: mongod --noauth --tlsMode disabled
+
+
+# Check status
+# `dockercompose logs game-server`
   game-server:
     build:
       context: ./code
       dockerfile: ./game-server-v2/Dockerfile
     volumes:
       - ./code/beastly-brawl-showdown/imports/simulator:/app/simulator
-      - ./certs/server:/etc/ssl/server
-    depends_on:
-      - mongo
     ports:
       - "8080:8080"
+    depends_on:
+      - mongo
     environment:
-      MONGO_URI: "mongodb://mongo:27017/test?tls=true&tlsCertificateKeyFile=/etc/ssl/server/client.pem&tlsCAFile=/etc/ssl/server/ca.crt"
+      MONGO_URI: "mongodb://mongo:27017/game_server_register"
+
+
+
 
   meteor-app:
     build:
       context: ./code/beastly-brawl-showdown
-    volumes:
-      - ./certs/server:/etc/ssl/server
     depends_on:
       - game-server
       - mongo
     ports:
       - "3000:3000"
     environment:
-      - MONGO_URL="mongodb://mongo:27017/beastly?tls=true&tlsCertificateKeyFile=/etc/ssl/server/client.pem&tlsCAFile=/etc/ssl/server/ca.crt"
+      - MONGO_URL="mongodb://mongo:27017/game_server_register"
       - ROOT_URL="http://localhost"
       - ROOT_URL=http://localhost
       - PORT=3000
-
-volumes:
-  mongo-data:
