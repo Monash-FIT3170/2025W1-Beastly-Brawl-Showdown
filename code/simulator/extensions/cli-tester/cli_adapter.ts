@@ -7,8 +7,8 @@ import { EntryID } from "../../core/utils";
 import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../data/common/common_move_pool";
 
 export class CliAdapter {
-  noticeBoard: NoticeBoard;
-  eventHistory: EventHistory;
+  readonly noticeBoard: NoticeBoard;
+  readonly eventHistory: EventHistory;
 
   constructor(noticeBoard: NoticeBoard, eventHistory: EventHistory) {
     this.noticeBoard = noticeBoard;
