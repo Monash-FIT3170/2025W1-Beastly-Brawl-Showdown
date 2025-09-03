@@ -18,7 +18,7 @@ import { TargetingMethod } from "/app/simulator/core/action/targeting";
 import mongoose from "mongoose";
 
 export async function checkCollectionExists(collectionName: string): Promise<boolean> {
-  await mongoose.connect("mongodb://localhost:27017/game_server_register");
+  await mongoose.connect("mongodb://mongo:27017/game_server_register");
 
   if (!mongoose.connection.readyState) {
     throw new Error("MongoDB connection is not ready");
