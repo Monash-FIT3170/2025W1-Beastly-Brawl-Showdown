@@ -8,6 +8,7 @@ import { EntryID } from "/imports/simulator/core/utils";
 import { TargetingMethod } from "/imports/simulator/core/action/targeting";
 import { SideId } from "/imports/simulator/core/side";
 import BattleMessage from "./BattleMessage";
+import { DamageEvent } from "/imports/simulator/core/event/core_events";
 
 interface BattleScreenProps {
   matchData: {
@@ -91,7 +92,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setShowAnimation(false);
     setShowMessage(false);
 
-    // Only clear slashes if they were set
     if (actor === "player1") setPlayerSlash(false);
     else setEnemySlash(false);
   };
@@ -118,30 +118,28 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     }
   }, [socket]);
 
-  // Update HP from server events
+  // Listen for new battle events from server (only DamageEvent for now)
   useEffect(() => {
     if (!socket) return;
-    const handleHealthUpdate = ({
-      playerId: targetId,
-      newHp,
-    }: {
-      playerId: string;
-      newHp: number;
-    }) => {
-      if (targetId === "player1" && myMonster) {
-        setMyMonster((prev) => (prev ? { ...prev, currentHp: newHp } : prev));
-      } else if (targetId === "player2" && enemyMonster) {
-        setEnemyMonster((prev) =>
-          prev ? { ...prev, currentHp: newHp } : prev
-        );
+    const handleNewEvent = (event: any) => {
+      if (!myMonster || !enemyMonster) return;
+
+      if (event.name === "damage") {
+        const damageEvent = event as DamageEvent;
+        if (damageEvent.target === 0) {
+          // player1 took damage
+          setMyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
+        } else if (damageEvent.target === 1) {
+          // player2 took damage
+          setEnemyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
+        }
       }
     };
-    socket.on("update-hp", handleHealthUpdate);
+    socket.on("newEvent", handleNewEvent);
     return () => {
-      socket.off("update-hp", handleHealthUpdate)
-    }
-      ;
-  }, [socket, myMonster?.playerId, enemyMonster?.playerId]);
+      socket.off("newEvent", handleNewEvent);
+    };
+  }, [socket, myMonster, enemyMonster]);
 
   // Sequentially play animations after both players submit moves
   useEffect(() => {

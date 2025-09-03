@@ -21,7 +21,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   playerSlashVisible,
   onPlayerSlashComplete,
 }) => {
-  const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
+  const [_ , setDisplayedNumber] = useState<number | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

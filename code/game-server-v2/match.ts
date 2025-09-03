@@ -155,16 +155,35 @@ export class Match {
         this.battle.noticeBoard.subscribeListener({
             onPostNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
+                log_event(`[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`);
                 this.playerChannel.to(player.socketId).emit("newNotice", notice);
             },
             onRemoveNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
+                log_event(`[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`);
                 this.playerChannel.to(player.socketId).emit("removeNotice", notice);
             }
         });
 
+        // Subscribe to event history (damage, heals, rolls, etc.)
+        this.battle.eventHistory.subscribeListener({
+            onNewEvent: (event) => {
+                log_event(`[EVENT] New event emitted: ${JSON.stringify(event)}`);
 
+                // Broadcast event to both players
+                log_event(`[EVENT] Sending event to player 1 (${this.player1.displayName})`);
+                playerChannel.to(this.player1.socketId).emit("newEvent", event);
+
+                if (this.player2) {
+                    log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
+                    playerChannel.to(this.player2.socketId).emit("newEvent", event);
+                }
+            },
+        });
+
+        log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
+        log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
@@ -176,7 +195,8 @@ export class Match {
             if (loser.linkedAccountId) {
                 this.winner?.addSpectator(loser.linkedAccountId);
             }
-            console.log(`Match ${this.matchID}: Player ${loser.displayName} has been defeated.`);
+            log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
     }
+
 }
