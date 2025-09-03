@@ -16,6 +16,7 @@ import { log } from "console";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import { match } from "assert";
 
 type ServerConfig = {
   serverIp: string;
@@ -322,45 +323,20 @@ async function main(config: ServerConfig) {
       });
     });
     
-    socket.on("resolveNotice", (noticeKind, params) => {
-      log_event("received resolving notice: " + noticeKind as string)
-
-      //boilerplate code I copied from the below function UwU
+    function handleRollNotice() {
+      log_notice("Roll notice is being handled")
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
-
       const match = room.tournamentManager.matches.find(
         m => m.player1 === player || m.player2 === player
       );
       if (!match) return;
 
-      if (!match.battle) return;
+      match.submitRoll(player)
+    }
 
-      let battle = match.battle;
-      
-      // switch (noticeKind) {
-      //   // TODO make generic
-      //   case "chooseMove": {
-      //     const chooseMove = battle.noticeBoard.noticeMaps[index].get(noticeKind)! as ChooseMove;
-      //     const chooseMoveParams = params as Parameters<ChooseMove["callback"]>;
-      //     chooseMove.callback(...chooseMoveParams);
-      //     break;
-      //   }
-
-      //   case "roll": {
-      //     const roll = battle.noticeBoard.noticeMaps[index].get(noticeKind)! as Roll;
-      //     const rollParams = params as Parameters<Roll["callback"]>;
-      //     roll.callback(...rollParams);
-      //     break;
-      //   }
-
-      //   // TODO Reroll
-      //   default:
-      //     console.error(`Notice resolution [noticeKind=${noticeKind}] not implmeneted.`);
-      //     break;
-      // }
-    });
+    socket.on("requestRoll", handleRollNotice)
 
     // #region Submit Move
     socket.on("RequestSubmitMove", (msg: { data: any }) => {

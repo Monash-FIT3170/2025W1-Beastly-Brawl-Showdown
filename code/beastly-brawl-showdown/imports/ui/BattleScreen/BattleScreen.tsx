@@ -64,32 +64,23 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
-  //just copying your event handler code but repurposing for notices?
+  //just copying your event handler code but repurposing for roll
   useEffect(() => {
     if (!socket) return;
 
     const handleNewNotice = (notice: Notice) => {
       console.log("Notice received:", notice);
-      if (!myMonster || !enemyMonster) return;
-      console.log("received" + notice.kind);
-      console.log("this is reached")
       if (notice.kind === "roll") {
         const params: Parameters<typeof notice.callback> = [];
-        socket?.emit("resolveNotice", notice.kind, params);
+        socket.emit("requestRoll", notice.kind, params);
         console.log("attmpted to send back roll notice resolve")
-      }
-      if(notice.kind === "chooseMove"){
-        const params: Parameters<typeof notice.callback> = ["attack-normal", {"targetingMethod":"single-enemy","target": 1 as SideId}];
-        socket?.emit("resolveNotice", notice.kind, params);
-        console.log("attmpted to send back choosemove notice resolve")
-
       }
     };
     socket.on("newNotice", handleNewNotice);
     return () => {
       socket.off("newNotice", handleNewNotice);
     };
-  }, []);
+  }, [socket]);
 
 
   // Function to trigger move animations

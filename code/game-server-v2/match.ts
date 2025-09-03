@@ -8,7 +8,7 @@ import { log_event } from "./utils";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
 import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
-import { ChooseMove } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
 enum MatchType {
@@ -125,6 +125,23 @@ export class Match {
 
         chooseMoveNotice.callback(moveId, targetData);
     }
+
+    // Called by main when a player submits a move
+    submitRoll(player: Player): void {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to submit rolls to.`);
+        }
+
+        const sideIndex = this.getSideForPlayer(player);
+        const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
+        const rollNotice = noticeMap.get("roll") as Roll | undefined;
+
+        if (!rollNotice) {
+            throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no roll notice.`);
+        }
+        rollNotice.callback();
+    }
+
 
     getPlayerMove(player: Player) {
         return this.submittedMoves.get(player);
