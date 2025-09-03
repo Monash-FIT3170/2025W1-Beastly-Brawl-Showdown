@@ -10,6 +10,7 @@ import { ChooseMove, Notice, Roll } from "../../../core/notice/notice";
 import { OrderedEvent } from "../../../core/event/event_history";
 import { COMMON_MONSTER_POOL } from "../../../data/common/common_monster_pool";
 import { COMMON_MOVE_POOL } from "../../../data/common/common_move_pool";
+import { log_event } from "../../../core/utils";
 
 type Player = {
   name: string;
@@ -148,6 +149,7 @@ function startSimulator() {
     });
 
     player.socket.on("resolveNotice", (noticeKind, params) => {
+      log_event("received resolving notice: " + noticeKind as string)
       switch (noticeKind) {
         // TODO make generic
         case "chooseMove": {

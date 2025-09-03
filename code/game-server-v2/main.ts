@@ -15,6 +15,7 @@ import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator
 import { log } from "console";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 
 type ServerConfig = {
   serverIp: string;
@@ -320,11 +321,50 @@ async function main(config: ServerConfig) {
         });
       });
     });
+    
+    socket.on("resolveNotice", (noticeKind, params) => {
+      log_event("received resolving notice: " + noticeKind as string)
 
+      //boilerplate code I copied from the below function UwU
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
 
+      const match = room.tournamentManager.matches.find(
+        m => m.player1 === player || m.player2 === player
+      );
+      if (!match) return;
+
+      if (!match.battle) return;
+
+      let battle = match.battle;
+      
+      // switch (noticeKind) {
+      //   // TODO make generic
+      //   case "chooseMove": {
+      //     const chooseMove = battle.noticeBoard.noticeMaps[index].get(noticeKind)! as ChooseMove;
+      //     const chooseMoveParams = params as Parameters<ChooseMove["callback"]>;
+      //     chooseMove.callback(...chooseMoveParams);
+      //     break;
+      //   }
+
+      //   case "roll": {
+      //     const roll = battle.noticeBoard.noticeMaps[index].get(noticeKind)! as Roll;
+      //     const rollParams = params as Parameters<Roll["callback"]>;
+      //     roll.callback(...rollParams);
+      //     break;
+      //   }
+
+      //   // TODO Reroll
+      //   default:
+      //     console.error(`Notice resolution [noticeKind=${noticeKind}] not implmeneted.`);
+      //     break;
+      // }
+    });
 
     // #region Submit Move
     socket.on("RequestSubmitMove", (msg: { data: any }) => {
+      log_event("Test move submission log")
       const { moveId, targetMethod, targetSide } = msg.data;
 
       const player = socket.data.player as Player;

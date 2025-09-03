@@ -9,6 +9,7 @@ import { TargetingMethod } from "/imports/simulator/core/action/targeting";
 import { SideId } from "/imports/simulator/core/side";
 import BattleMessage from "./BattleMessage";
 import { DamageEvent } from "/imports/simulator/core/event/core_events";
+import { Notice } from "/imports/simulator/core/notice/notice";
 
 interface BattleScreenProps {
   matchData: {
@@ -63,6 +64,34 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
+  //just copying your event handler code but repurposing for notices?
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewNotice = (notice: Notice) => {
+      console.log("Notice received:", notice);
+      if (!myMonster || !enemyMonster) return;
+      console.log("received" + notice.kind);
+      console.log("this is reached")
+      if (notice.kind === "roll") {
+        const params: Parameters<typeof notice.callback> = [];
+        socket?.emit("resolveNotice", notice.kind, params);
+        console.log("attmpted to send back roll notice resolve")
+      }
+      if(notice.kind === "chooseMove"){
+        const params: Parameters<typeof notice.callback> = ["attack-normal", {"targetingMethod":"single-enemy","target": 1 as SideId}];
+        socket?.emit("resolveNotice", notice.kind, params);
+        console.log("attmpted to send back choosemove notice resolve")
+
+      }
+    };
+    socket.on("newNotice", handleNewNotice);
+    return () => {
+      socket.off("newNotice", handleNewNotice);
+    };
+  }, []);
+
+
   // Function to trigger move animations
   const performMoveAnimation = async (
     moveId: EntryID,
@@ -105,6 +134,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
     const data = { moveId, targetMethod, targetSide };
     socket.emit("RequestSubmitMove", { data });
+    console.log("Attempted to submit move")
     setHasSubmittedMove(true);
   };
 
@@ -123,6 +153,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!socket) return;
     const handleNewEvent = (event: any) => {
       if (!myMonster || !enemyMonster) return;
+      console.log("received" + event.name)
 
       if (event.name === "damage") {
         const damageEvent = event as DamageEvent;
@@ -152,6 +183,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       playerMove: { moveId: EntryID };
       enemyMove: { moveId: EntryID };
     }) => {
+      console.log("handle execution is reahced, meaning taht execute turn was received")
       performMoveAnimation(playerMove.moveId, "player1").then(() =>
         performMoveAnimation(enemyMove.moveId, "player2")
       );
