@@ -113,18 +113,24 @@ const PlayerContent = () => {
         COMMON_MONSTER_POOL.monsters[
         enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
+      
+      // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
+      const mySide = data.sideID;
+      const enemySide = data.sideID === 0 ? 1 : 0;
 
-      // Assign sideIds: player is always bottom (0), enemy is top (1)
+      console.log(`My side is ${mySide} || Enemy side is ${enemySide}`);
+
+
       setMatchData({
         myMonster: {
           template: myMonster,
           currentHp: data.myHp,
-          sideId: 0
+          sideId: mySide
         },
         enemyMonster: {
           template: enemyMonster,
           currentHp: data.enemyHp,
-          sideId: 1
+          sideId: enemySide
         },
       });
 
