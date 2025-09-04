@@ -24,9 +24,7 @@ export class Match {
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
-
-    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
-
+    playerChannel: any;
 
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
@@ -38,12 +36,13 @@ export class Match {
      * @param matchID Unique integer created in tournament_manager
      * @param player2 Optional second player in the match (the match is a bye if left empty)
      */
-    constructor(player1: Player, player2: Player | undefined, matchID: number) {
+    constructor(player1: Player, player2: Player | undefined, matchID: number, playerChannel: any) {
         this.player1 = player1;
         this.player2 = player2;
         this.spectators = player1.spectators.concat(player2?.spectators ?? []);
         this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
         this.matchID = matchID;
+        this.playerChannel = playerChannel;
     }
 
     createBattle(): void {
@@ -143,6 +142,7 @@ export class Match {
         rollNotice.callback();
     }
 
+
     getPlayerMove(player: Player) {
         return this.submittedMoves.get(player);
     }
@@ -172,7 +172,6 @@ export class Match {
         this.battle.noticeBoard.subscribeListener({
             onPostNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
-
                 log_event(`[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`);
                 this.playerChannel.to(player.socketId).emit("newNotice", notice);
             },

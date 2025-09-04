@@ -94,17 +94,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!myMonster || !enemyMonster) return;
 
     let message = "";
-    
-    const template = actor === "player1" ? myMonster.template : enemyMonster.template;
+    const template =
+      actor === "player1" ? myMonster.template : enemyMonster.template;
 
     if (moveId === template.attackActionId) {
       message = actor === "player1" ? "You attack!" : "Enemy attacks!";
-      if (actor === "player1") setPlayerSlash(true);
-      else setEnemySlash(true);
+      if (actor === "player1") setEnemySlash(true);
+      else setPlayerSlash(true);
     } else if (moveId === template.defendActionId) {
       message = actor === "player1" ? "You defend!" : "Enemy defends!";
+      if (actor === "player1") setPlayerShield(true);
+      else setEnemyShield(true);
     } else if (moveId === template.abilityActionId) {
-      message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
+      message =
+        actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
+      if (actor === "player1") setPlayerAbility(true);
+      else setEnemyAbility(true);
     }
 
     setBattleMessage(message);
@@ -116,9 +121,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setShowAnimation(false);
     setShowMessage(false);
 
-    if (actor === "player1") setPlayerSlash(false);
-    else setEnemySlash(false);
-
+    // Only clear slashes if they were set
+    if (actor === "player1") {
+      setPlayerSlash(false);
+      setPlayerShield(false);
+      setPlayerAbility(false);
+    } else {
+      setEnemySlash(false);
+      setEnemyShield(false);
+      setEnemyAbility(false);
+    }
   };
   // Handle player action (submit move to server)
   const handleAction = (
