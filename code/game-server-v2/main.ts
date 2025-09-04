@@ -306,12 +306,14 @@ async function main(config: ServerConfig) {
         room.playerChannel.to(match.player1.socketId).emit("round-start", {
           myMonster: match.player1.selectedMonsterTemplateName,
           enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
+          sideID: 0,
         });
 
         //P2: send a copy/start (invert sides?)
-        room.playerChannel.to(match.player2?.socketId).emit("round-start", {
+        room.playerChannel.to(match.player2?.socketId).emit("round-start", {  
           myMonster: match.player2?.selectedMonsterTemplateName,
           enemyMonster: match.player1.selectedMonsterTemplateName,
+          sideID: 1,
         });
       });
     });

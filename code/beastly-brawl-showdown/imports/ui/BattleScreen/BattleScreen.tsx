@@ -12,8 +12,8 @@ import { Notice } from "/imports/simulator/core/notice/notice";
 
 interface BattleScreenProps {
   matchData: {
-    myMonster: { template: MonsterTemplate; currentHp: number };
-    enemyMonster: { template: MonsterTemplate; currentHp: number };
+    myMonster: { template: MonsterTemplate; currentHp: number; sideId: number };
+    enemyMonster: { template: MonsterTemplate; currentHp: number; sideId: number };
   };
 }
 
@@ -21,6 +21,7 @@ type MonsterState = {
   template: MonsterTemplate;
   currentHp: number;
   playerId: string;
+  sideId: number;
 };
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
@@ -43,15 +44,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   useEffect(() => {
     setMyMonster({
       template: matchData.myMonster.template,
-      currentHp:
-        matchData.myMonster.currentHp ?? matchData.myMonster.template.baseStats.health,
+      currentHp: matchData.myMonster.currentHp ?? matchData.myMonster.template.baseStats.health,
       playerId: "player1",
+      sideId: matchData.myMonster.sideId,
     });
     setEnemyMonster({
       template: matchData.enemyMonster.template,
-      currentHp:
-        matchData.enemyMonster.currentHp ?? matchData.enemyMonster.template.baseStats.health,
+      currentHp: matchData.enemyMonster.currentHp ?? matchData.enemyMonster.template.baseStats.health,
       playerId: "player2",
+      sideId: matchData.enemyMonster.sideId,
     });
   }, [matchData]);
 
@@ -67,7 +68,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
-  //just copying your event handler code but repurposing for roll
+  // Repurpose for roll notices
   useEffect(() => {
     if (!socket) return;
 
@@ -76,7 +77,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       if (notice.kind === "roll") {
         const params: Parameters<typeof notice.callback> = [];
         socket.emit("requestRoll", notice.kind, params);
-        console.log("attmpted to send back roll notice resolve")
+        console.log("Attempted to send back roll notice resolve");
       }
     };
     socket.on("newNotice", handleNewNotice);
@@ -86,15 +87,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   }, [socket]);
 
   // Function to trigger move animations
-  const performMoveAnimation = async (
-    moveId: EntryID,
-    actor: "player1" | "player2"
-  ) => {
+  const performMoveAnimation = async (moveId: EntryID, actor: "player1" | "player2") => {
     if (!myMonster || !enemyMonster) return;
 
     let message = "";
-    const template =
-      actor === "player1" ? myMonster.template : enemyMonster.template;
+    const template = actor === "player1" ? myMonster.template : enemyMonster.template;
 
     if (moveId === template.attackActionId) {
       message = actor === "player1" ? "You attack!" : "Enemy attacks!";
@@ -105,8 +102,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       if (actor === "player1") setPlayerShield(true);
       else setEnemyShield(true);
     } else if (moveId === template.abilityActionId) {
-      message =
-        actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
+      message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
       if (actor === "player1") setPlayerAbility(true);
       else setEnemyAbility(true);
     }
@@ -120,7 +116,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setShowAnimation(false);
     setShowMessage(false);
 
-    // Only clear slashes if they were set
     if (actor === "player1") {
       setPlayerSlash(false);
       setPlayerShield(false);
@@ -131,16 +126,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       setEnemyAbility(false);
     }
   };
+
   // Handle player action (submit move to server)
-  const handleAction = (
-    moveId: EntryID,
-    targetMethod: TargetingMethod
-  ) => {
+  const handleAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!socket || !myMonster) return;
 
     const data = { moveId, targetMethod };
     socket.emit("RequestSubmitMove", { data });
-    console.log("Attempted to submit move")
+    console.log("Attempted to submit move");
     setHasSubmittedMove(true);
   };
 
@@ -151,24 +144,28 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     socket.on("UnlockButton", handleUnlock);
     return () => {
       socket.off("UnlockButton", handleUnlock);
-    }
+    };
   }, [socket]);
 
-  // Listen for new battle events from server (only DamageEvent for now)
+  // Listen for new battle events from server (DamageEvent)
   useEffect(() => {
     if (!socket) return;
     const handleNewEvent = (event: any) => {
       if (!myMonster || !enemyMonster) return;
-      console.log("received" + event.name)
+      console.log("received", event.name);
 
       if (event.name === "damage") {
         const damageEvent = event as DamageEvent;
-        if (damageEvent.target === 0) {
-          // player1 took damage
-          setMyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
-        } else if (damageEvent.target === 1) {
-          // player2 took damage
-          setEnemyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
+
+        // Use sideId instead of hard-coded 0/1
+        if (damageEvent.target === myMonster.sideId) {
+          setMyMonster((prev) =>
+            prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev
+          );
+        } else if (damageEvent.target === enemyMonster.sideId) {
+          setEnemyMonster((prev) =>
+            prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev
+          );
         }
       }
     };
@@ -185,35 +182,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleExecuteTurn = ({
       playerMove,
       enemyMove,
-
     }: {
       playerMove: { moveId: EntryID };
       enemyMove: { moveId: EntryID };
     }) => {
-      console.log("handle execution is reahced, meaning taht execute turn was received")
-      performMoveAnimation(playerMove.moveId, "player1").then(() =>
-        performMoveAnimation(enemyMove.moveId, "player2")
-      );
-    };
-
-    socket.on("ExecuteTurn", handleExecuteTurn);
-
-    return () => {
-      socket.off("ExecuteTurn", handleExecuteTurn)
-    };
-  }, [socket, myMonster, enemyMonster]);
-
-  // Sequentially play animations after both players submit moves
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleExecuteTurn = ({
-      playerMove,
-      enemyMove,
-    }: {
-      playerMove: { moveId: EntryID };
-      enemyMove: { moveId: EntryID };
-    }) => {
+      console.log("handle execution reached, ExecuteTurn received");
       performMoveAnimation(playerMove.moveId, "player1").then(() =>
         performMoveAnimation(enemyMove.moveId, "player2")
       );
