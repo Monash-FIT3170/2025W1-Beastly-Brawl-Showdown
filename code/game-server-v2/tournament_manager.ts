@@ -17,6 +17,7 @@ export class TournamentManager {
     // function over and over again to simulate a tournament.
 
     this.creatematchs(remainingPlayers);
+    this.matches.forEach(match => match.createBattle());
 
     // run all battles in parallel
     await Promise.all(this.matches.map(match => match.runBattle(this.playerChannel)));
