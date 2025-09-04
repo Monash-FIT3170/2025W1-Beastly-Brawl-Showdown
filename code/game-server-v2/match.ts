@@ -28,9 +28,6 @@ export class Match {
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
 
-    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
-
-
     /**
      * Constructor.
      * 
@@ -143,6 +140,7 @@ export class Match {
         rollNotice.callback();
     }
 
+
     getPlayerMove(player: Player) {
         return this.submittedMoves.get(player);
     }
@@ -172,14 +170,13 @@ export class Match {
         this.battle.noticeBoard.subscribeListener({
             onPostNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
-
                 log_event(`[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`);
-                this.playerChannel.to(player.socketId).emit("newNotice", notice);
+                playerChannel.to(player.socketId).emit("newNotice", notice);
             },
             onRemoveNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
                 log_event(`[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`);
-                this.playerChannel.to(player.socketId).emit("removeNotice", notice);
+                playerChannel.to(player.socketId).emit("removeNotice", notice);
             }
         });
 
