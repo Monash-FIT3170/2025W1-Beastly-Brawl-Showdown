@@ -44,3 +44,4 @@ services:
       # - ROOT_URL="http://localhost"
       - ROOT_URL=http://localhost
       - PORT=3000
+      - METEOR_DISABLE_OPTIMISTIC_CACHING=1
