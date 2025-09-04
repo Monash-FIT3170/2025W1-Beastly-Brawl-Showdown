@@ -360,9 +360,11 @@ async function main(config: ServerConfig) {
       switch (moveId) {
         case "defend":
           match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
+          break;
         case "attack-normal":
           const targetSide = sourceSide === 1 ? 0 : 1;
           match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+          break;
       }
 
       const allSubmitted = player1.submittedMove && player2?.submittedMove;

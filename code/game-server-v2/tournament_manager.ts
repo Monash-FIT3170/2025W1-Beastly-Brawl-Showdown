@@ -29,7 +29,7 @@ export class TournamentManager {
     for (let i = 0; i < playerList.length; i += 2) {
       const matchID = i / 2 + 1;
       const player2 = playerList[i + 1] ?? undefined; // keep optional
-      this.matches.push(new Match(playerList[i], player2, matchID, this.playerChannel));
+      this.matches.push(new Match(playerList[i], player2, matchID));
     }
     console.log(`Created ${this.matches.length} matchs for this round.`);
   }
