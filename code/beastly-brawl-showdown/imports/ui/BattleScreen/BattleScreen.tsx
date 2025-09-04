@@ -6,7 +6,6 @@ import { usePlayerSocket } from "../player/game/PlayerPage";
 import { MonsterTemplate } from "../../simulator/core/monster/monster_template";
 import { EntryID } from "/imports/simulator/core/utils";
 import { TargetingMethod } from "/imports/simulator/core/action/targeting";
-import { SideId } from "/imports/simulator/core/side";
 import BattleMessage from "./BattleMessage";
 import { DamageEvent } from "/imports/simulator/core/event/core_events";
 import { Notice } from "/imports/simulator/core/notice/notice";
