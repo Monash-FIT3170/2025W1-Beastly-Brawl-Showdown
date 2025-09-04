@@ -1,12 +1,7 @@
 {
-  "extends": "../../../../../.config/tsconfig.base.json",
+  "extends": "./tsconfig.typecheck.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "../",
-    "declaration": true,
-    "declarationMap": true,
-  },
-  "include": [
-    "**/*.ts"
-  ]
+    "target": "es2019"
+  }
 }

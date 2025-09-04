@@ -31,23 +31,21 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     return (COMMON_MOVE_POOL as Record<string, typeof COMMON_MOVE_POOL[keyof typeof COMMON_MOVE_POOL]>)[moveId];
   };
 
-  const buildButton = (moveId: EntryID, fallbackIcon: string, targetSide: SideId) => {
+  const buildButton = (moveId: EntryID, fallbackIcon: string) => {
     return {
       id: moveId,
       icon: fallbackIcon,
-      targetMethod: getMove(moveId)?.targetingMethod ?? "self",
-      targetSide,
+      targetMethod: getMove(moveId)?.targetingMethod ?? "self"
     } as MoveButton;
   };
 
   // Build button configs dynamically
-  const attackBtn = buildButton(myMonsterMoves.attack, "/img/sword3.png", 1 as SideId);
-  const defendBtn = buildButton(myMonsterMoves.defend, "/img/shield2.png", 0 as SideId);
+  const attackBtn = buildButton(myMonsterMoves.attack, "/img/sword3.png");
+  const defendBtn = buildButton(myMonsterMoves.defend, "/img/shield2.png");
   const abilityBtn = myMonsterMoves.ability
     ? buildButton(
       myMonsterMoves.ability,
-      "/img/ability2.png",
-      getMove(myMonsterMoves.ability)?.targetingMethod === "self" ? 0 as SideId : 1 as SideId
+      "/img/ability2.png"
     )
     : null;
 

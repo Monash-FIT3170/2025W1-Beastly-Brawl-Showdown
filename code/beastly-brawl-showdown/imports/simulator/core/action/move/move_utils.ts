@@ -1,8 +1,8 @@
-import { Battle } from "../../../core/battle";
+import { Battle } from "../../battle";
 import { StartMoveEvent, MoveEvadedEvent, RollEvent, RerollEvent, BlockedEvent, MoveSuccessEvent, DamageEvent } from "../../event/core_events";
 import { DodgeStateComponent, RerollChargeComponent } from "../../monster/component/core_components";
 import { Monster, getComponent, getStat } from "../../monster/monster";
-import { roll } from "../../../core/roll";
+import { roll } from "../../roll";
 import { SideId } from "../../side";
 import { MoveData } from "./move";
 

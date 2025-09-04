@@ -15,6 +15,8 @@ import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator
 import { log } from "console";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import { match } from "assert";
 
 type ServerConfig = {
   serverIp: string;
@@ -321,11 +323,25 @@ async function main(config: ServerConfig) {
       });
     });
 
+    function handleRollNotice() {
+      log_notice("Roll notice is being handled")
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
+      const match = room.tournamentManager.matches.find(
+        m => m.player1 === player || m.player2 === player
+      );
+      if (!match) return;
 
+      match.submitRoll(player)
+    }
+
+    socket.on("requestRoll", handleRollNotice)
 
     // #region Submit Move
     socket.on("RequestSubmitMove", (msg: { data: any }) => {
-      const { moveId, targetMethod, targetSide } = msg.data;
+      log_event("Test move submission log")
+      const { moveId, targetMethod } = msg.data;
 
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -335,11 +351,20 @@ async function main(config: ServerConfig) {
         m => m.player1 === player || m.player2 === player
       );
       if (!match) return;
-
-      player.submittedMove = true;
-      match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
-
       const [player1, player2] = [match.player1, match.player2];
+
+      const sourceSide = match.getSideForPlayer(player);
+      log_attention(`Player submitting move is side ${sourceSide}`);
+      player.submittedMove = true;
+
+      switch (moveId) {
+        case "defend":
+          match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
+        case "attack-normal":
+          const targetSide = sourceSide === 1 ? 0 : 1;
+          match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+      }
+
       const allSubmitted = player1.submittedMove && player2?.submittedMove;
 
       if (allSubmitted) {
@@ -358,7 +383,7 @@ async function main(config: ServerConfig) {
           playerMove: player2Move,
           enemyMove: player1Move,
         });
-        
+
         playerChannel.to(player1.socketId).emit("UnlockButton");
         playerChannel.to(player2.socketId).emit("UnlockButton");
       }

@@ -2,13 +2,13 @@ import { MovePool } from "../../core/action/move/move_pool";
 import { default_attack } from "../../core/action/move/move_utils";
 import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../core/action/targeting";
 import { Battle } from "../../core/battle";
-import { BlockedEvent, BuffEvent, DamageEvent, MoveEvadedEvent, MoveFailedEvent, MoveSuccessEvent, RerollEvent, RollEvent, StartMoveEvent  } from "../../core/event/core_events";
-import { AbilityChargeStunComponent, DefendComponent, DodgeChargeComponent, DodgeStateComponent, RerollChargeComponent, StunnedStateComponent } from "../../core/monster/component/core_components";
-import { getComponent, getStat, Monster } from "../../core/monster/monster";
+import { BuffEvent, MoveFailedEvent } from "../../core/event/core_events";
+import { AbilityChargeStunComponent, DefendComponent, DodgeChargeComponent, DodgeStateComponent, StunnedStateComponent } from "../../core/monster/component/core_components";
+import { getComponent, Monster } from "../../core/monster/monster";
 import { SideId } from "../../core/side";
 
-type MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun";
-export const COMMON_MOVE_POOL: MovePool<MOVE_NAMES> = {
+export type COMMON_MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun";
+export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
   nothing: {
     moveId: "nothing",
     type: "move",
@@ -37,7 +37,7 @@ export const COMMON_MOVE_POOL: MovePool<MOVE_NAMES> = {
     perform: async function (battle: Battle, source: SideId, targetingData: SingleEnemyTargeting) {
       const target: SideId = targetingData.target;
 
-      default_attack(this, battle, source, target);
+      await default_attack(this, battle, source, target);
     },
     onHit: async function (battle: Battle, source: SideId, target: SideId): Promise<void> {
       // TODO

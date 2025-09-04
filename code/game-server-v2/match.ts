@@ -8,7 +8,7 @@ import { log_event } from "./utils";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
 import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
-import { ChooseMove } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
 enum MatchType {
@@ -24,6 +24,9 @@ export class Match {
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
+
+    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
+
 
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
@@ -124,6 +127,22 @@ export class Match {
         chooseMoveNotice.callback(moveId, targetData);
     }
 
+    // Called by main when a player submits a move
+    submitRoll(player: Player): void {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to submit rolls to.`);
+        }
+
+        const sideIndex = this.getSideForPlayer(player);
+        const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
+        const rollNotice = noticeMap.get("roll") as Roll | undefined;
+
+        if (!rollNotice) {
+            throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no roll notice.`);
+        }
+        rollNotice.callback();
+    }
+
     getPlayerMove(player: Player) {
         return this.submittedMoves.get(player);
     }
@@ -153,16 +172,36 @@ export class Match {
         this.battle.noticeBoard.subscribeListener({
             onPostNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
-                playerChannel.to(player.socketId).emit("newNotice", notice);
+
+                log_event(`[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`);
+                this.playerChannel.to(player.socketId).emit("newNotice", notice);
             },
             onRemoveNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
-                playerChannel.to(player.socketId).emit("removeNotice", notice);
+                log_event(`[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`);
+                this.playerChannel.to(player.socketId).emit("removeNotice", notice);
             }
         });
 
+        // Subscribe to event history (damage, heals, rolls, etc.)
+        this.battle.eventHistory.subscribeListener({
+            onNewEvent: (event) => {
+                log_event(`[EVENT] New event emitted: ${JSON.stringify(event)}`);
 
+                // Broadcast event to both players
+                log_event(`[EVENT] Sending event to player 1 (${this.player1.displayName})`);
+                playerChannel.to(this.player1.socketId).emit("newEvent", event);
+
+                if (this.player2) {
+                    log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
+                    playerChannel.to(this.player2.socketId).emit("newEvent", event);
+                }
+            },
+        });
+
+        log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
+        log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
@@ -174,7 +213,8 @@ export class Match {
             if (loser.linkedAccountId) {
                 this.winner?.addSpectator(loser.linkedAccountId);
             }
-            console.log(`Match ${this.matchID}: Player ${loser.displayName} has been defeated.`);
+            log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
     }
+
 }

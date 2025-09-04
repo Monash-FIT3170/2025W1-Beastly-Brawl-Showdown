@@ -1,8 +1,8 @@
 import { EntryID } from "../utils";
 import { BaseComponent } from "./component/component";
 import { ComponentKindMap } from "./component/core_components";
-import { MonsterStatType } from "./monster_stats";
-import { MonsterTemplate } from "./monster_template";
+import type { MonsterStatType } from "./monster_stats";
+import type { MonsterTemplate } from "./monster_template";
 
 export interface Monster {
   //# Template

@@ -16,3 +16,21 @@ export type EntryID = Lowercase<string>;
 export type LookupTable<ACCEPTED_KEYS extends PropertyKey, DISCRIMINANT_NAME extends PropertyKey, VALUE extends { [K in DISCRIMINANT_NAME]: PropertyKey }> = {
   [ROW_KEY in ACCEPTED_KEYS]: VALUE & { [K in DISCRIMINANT_NAME]: ROW_KEY };
 };
+
+
+/// See: https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
+export function log_notice(val: any) {
+  console.log("\x1b[38;5;0m[Notice]\x1b[0m", val);
+}
+
+export function log_warning(val: any) {
+  console.log("\x1b[38;5;3m[Warning]\x1b[0m", val);
+}
+
+export function log_attention(val: any) {
+  console.log("\x1b[4;38;5;9m[Attention]\x1b[0m", val);
+}
+
+export function log_event(val: any) {
+  console.log("\x1b[38;5;6m[Event]\x1b[0m", val);
+}
