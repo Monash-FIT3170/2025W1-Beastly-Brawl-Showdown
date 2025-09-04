@@ -11,7 +11,7 @@ import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils"
 import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
-enum MatchType {
+export enum MatchType {
     DUEL,
     BYE
 }
