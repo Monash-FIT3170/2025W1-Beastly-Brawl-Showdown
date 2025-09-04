@@ -29,7 +29,7 @@ export class TournamentManager {
     for (let i = 0; i < playerList.length; i += 2) {
       const matchID = i / 2 + 1;
       const player2 = playerList[i + 1] ?? undefined; // keep optional
-      this.matches.push(new Match(playerList[i], player2, matchID, this.playerChannel));
+      this.matches.push(new Match(playerList[i], player2, matchID));
     }
     console.log(`Created ${this.matches.length} matchs for this round.`);
   }
@@ -41,7 +41,6 @@ export class TournamentManager {
     const winners = this.matches.map(m => m.winner!).filter(Boolean);
     if (winners.length === 1) {
       console.log(`Tournament Winner: ${winners[0].displayName}`);
-      // Optionally notify host:
       this.playerChannel.emit("tournament-finished", winners[0].displayName);
       return;
     }
@@ -57,7 +56,8 @@ export class TournamentManager {
     this.matches.forEach(match => match.createBattle());
 
     // Now run battles
-    await Promise.all(this.matches.map(match => match.runBattle(this.playerChannel)));
+    // await Promise.all(this.matches.map(match => match.runBattle(this.playerChannel)));
+    await(2000);
 
     // Check and start next round if needed
     this.checkRoundCompletion();

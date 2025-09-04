@@ -37,7 +37,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     perform: async function (battle: Battle, source: SideId, targetingData: SingleEnemyTargeting) {
       const target: SideId = targetingData.target;
 
-      default_attack(this, battle, source, target);
+      await default_attack(this, battle, source, target);
     },
     onHit: async function (battle: Battle, source: SideId, target: SideId): Promise<void> {
       // TODO

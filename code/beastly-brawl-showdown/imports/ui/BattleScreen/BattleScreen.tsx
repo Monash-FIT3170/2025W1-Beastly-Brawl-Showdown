@@ -35,6 +35,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [showMessage, setShowMessage] = useState(false);
   const [enemySlash, setEnemySlash] = useState(false);
   const [playerSlash, setPlayerSlash] = useState(false);
+  const [enemyShield, setEnemyShield] = useState(false);
+  const [playerShield, setPlayerShield] = useState(false);
+  const [enemyAbility, setEnemyAbility] = useState(false);
+  const [playerAbility, setPlayerAbility] = useState(false);
 
   // Initialize monsters when matchData changes
   useEffect(() => {
@@ -82,7 +86,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
-
   // Function to trigger move animations
   const performMoveAnimation = async (
     moveId: EntryID,
@@ -91,6 +94,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!myMonster || !enemyMonster) return;
 
     let message = "";
+    
     const template = actor === "player1" ? myMonster.template : enemyMonster.template;
 
     if (moveId === template.attackActionId) {
@@ -114,6 +118,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
     if (actor === "player1") setPlayerSlash(false);
     else setEnemySlash(false);
+
   };
   // Handle player action (submit move to server)
   const handleAction = (
@@ -169,6 +174,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleExecuteTurn = ({
       playerMove,
       enemyMove,
+
     }: {
       playerMove: { moveId: EntryID };
       enemyMove: { moveId: EntryID };
@@ -180,8 +186,31 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
 
     socket.on("ExecuteTurn", handleExecuteTurn);
+
     return () => {
       socket.off("ExecuteTurn", handleExecuteTurn)
+    };
+  }, [socket, myMonster, enemyMonster]);
+
+  // Sequentially play animations after both players submit moves
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleExecuteTurn = ({
+      playerMove,
+      enemyMove,
+    }: {
+      playerMove: { moveId: EntryID };
+      enemyMove: { moveId: EntryID };
+    }) => {
+      performMoveAnimation(playerMove.moveId, "player1").then(() =>
+        performMoveAnimation(enemyMove.moveId, "player2")
+      );
+    };
+
+    socket.on("ExecuteTurn", handleExecuteTurn);
+    return () => {
+      socket.off("ExecuteTurn", handleExecuteTurn);
     };
   }, [socket, myMonster, enemyMonster]);
 
@@ -199,6 +228,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         onEnemySlashComplete={() => setEnemySlash(false)}
         playerSlashVisible={playerSlash}
         onPlayerSlashComplete={() => setPlayerSlash(false)}
+        enemyShieldVisible={enemyShield}
+        onEnemyShieldComplete={() => setEnemyShield(false)}
+        playerShieldVisible={playerShield}
+        onPlayerShieldComplete={() => setPlayerShield(false)}
+        enemyAbilityVisible={enemyAbility}
+        onEnemyAbilityComplete={() => setEnemyAbility(false)}
+        playerAbilityVisible={playerAbility}
+        onPlayerAbilityComplete={() => setPlayerAbility(false)}
       />
       <BattleBottom
         onAction={handleAction}

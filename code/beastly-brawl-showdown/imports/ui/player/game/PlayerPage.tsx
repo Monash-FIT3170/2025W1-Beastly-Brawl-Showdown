@@ -4,6 +4,7 @@ import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionS
 import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
 import { MonsterTemplate } from "../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
+import WinnerScreen from "../../host/projector/WinnerScreen";
 
 //#region Socket Context Definition
 interface PlayerSocketContextType {
@@ -66,6 +67,7 @@ const PlayerContent = () => {
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
+  const [winner, setWinner] = useState();
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
@@ -98,9 +100,15 @@ const PlayerContent = () => {
       setAllReady(true);
     });
 
+    socket.on("tournament-finished", (data) => {
+      setWinner(data);
+      console.log(`Winner is: ${winner}`);
+    });
+
     return () => {
       socket.off("game-started");
       socket.off("round-start");
+      socket.off("tournament-finished");
     };
   }, [socket]);
 
@@ -177,6 +185,7 @@ const PlayerContent = () => {
   if (!startSelection) return <WaitingScreen />;
   if (!monsterSelected) return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
   if (!allReady) return <WaitingScreen />;
+  if (winner) return <WinnerScreen winnerName={winner}/>
 
   return <BattleScreen matchData={matchData!} />;
 };
