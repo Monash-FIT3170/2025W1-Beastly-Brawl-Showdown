@@ -63,7 +63,7 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number }; enemyMonster: { template: MonsterTemplate; currentHp: number } } | null>(null);
+  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number; sideId: number }; enemyMonster: { template: MonsterTemplate; currentHp: number; sideId: number } } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
@@ -93,10 +93,20 @@ const PlayerContent = () => {
       const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
       const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
 
+      // Assign sideIds: player is always bottom (0), enemy is top (1)
       setMatchData({
-        myMonster: { template: myMonster, currentHp: data.myHp },
-        enemyMonster: { template: enemyMonster, currentHp: data.enemyHp },
+        myMonster: {
+          template: myMonster,
+          currentHp: data.myHp,
+          sideId: 0
+        },
+        enemyMonster: {
+          template: enemyMonster,
+          currentHp: data.enemyHp,
+          sideId: 1
+        },
       });
+
       setAllReady(true);
     });
 
@@ -185,7 +195,7 @@ const PlayerContent = () => {
   if (!startSelection) return <WaitingScreen />;
   if (!monsterSelected) return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
   if (!allReady) return <WaitingScreen />;
-  if (winner) return <WinnerScreen winnerName={winner}/>
+  if (winner) return <WinnerScreen winnerName={winner} />
 
   return <BattleScreen matchData={matchData!} />;
 };

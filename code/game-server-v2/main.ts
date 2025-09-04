@@ -316,9 +316,15 @@ async function main(config: ServerConfig) {
         const opponent = Array.from(room.players.values()).find((p) => p !== player);
         if (!opponent) return;
 
+        // From this player's perspective, they are always bottom
+        const mySideId = 0;
+        const enemySideId = 1;
+
         room.playerChannel.to(player.socketId).emit("round-start", {
           myMonster: player.selectedMonsterTemplateName,
           enemyMonster: opponent.selectedMonsterTemplateName,
+          mySideId,
+          enemySideId,
         });
       });
     });
