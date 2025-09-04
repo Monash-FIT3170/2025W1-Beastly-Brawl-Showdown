@@ -212,6 +212,10 @@ export class Match {
             }
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
+        
+        const textMsg = "Message received by: ";
+        playerChannel.to(this.winner?.socketId).emit("sendToWaiting", textMsg);
+        playerChannel.to(loser?.socketId).emit("sendToWaiting", textMsg);
     }
 
 }
