@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
@@ -17,7 +23,9 @@ const PlayerSocketContext = createContext<PlayerSocketContextType>({
   isConnected: false,
 });
 
-const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
@@ -27,7 +35,9 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     if (!socketRef.current && serverUrl) {
-      socketRef.current = io(serverUrl + "/player", { auth: { joinCode, displayName } });
+      socketRef.current = io(serverUrl + "/player", {
+        auth: { joinCode, displayName },
+      });
 
       socketRef.current.on("connect", () => {
         console.log("Connected to server");
@@ -50,7 +60,9 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [serverUrl, joinCode, displayName]);
 
   return (
-    <PlayerSocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+    <PlayerSocketContext.Provider
+      value={{ socket: socketRef.current, isConnected }}
+    >
       {children}
     </PlayerSocketContext.Provider>
   );
@@ -68,6 +80,7 @@ const PlayerContent = () => {
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
   const [winner, setWinner] = useState();
+  const [waiting, setWaiting] = useState(false);
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
@@ -87,11 +100,19 @@ const PlayerContent = () => {
         return;
       }
 
-      console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
+      console.log(
+        `Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`
+      );
 
       // Create Monster instances for BattleScreen
-      const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
-      const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const myMonster =
+        COMMON_MONSTER_POOL.monsters[
+        myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        ];
+      const enemyMonster =
+        COMMON_MONSTER_POOL.monsters[
+        enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        ];
 
       // Assign sideIds: player is always bottom (0), enemy is top (1)
       setMatchData({
@@ -110,14 +131,20 @@ const PlayerContent = () => {
       setAllReady(true);
     });
 
+    socket.on("sendToWaiting", (msg) => {
+      console.log(`${msg} me!`);
+      setWaiting(true);
+      console.log("Now waiting for other matches to finish");
+    });
+
     socket.on("tournament-finished", (data) => {
       setWinner(data);
-      console.log(`Winner is: ${winner}`);
     });
 
     return () => {
       socket.off("game-started");
       socket.off("round-start");
+      socket.off("sendToWaiting");
       socket.off("tournament-finished");
     };
   }, [socket]);
@@ -127,12 +154,14 @@ const PlayerContent = () => {
 
     const restartAnimation = () => {
       if (waitingTextRef.current) {
-        const letters = waitingTextRef.current.querySelectorAll(".bounce-letter");
+        const letters =
+          waitingTextRef.current.querySelectorAll(".bounce-letter");
         letters.forEach((letter, index) => {
           const element = letter as HTMLElement;
           element.style.animation = "none";
           requestAnimationFrame(() => {
-            element.style.animation = `bounce 0.6s ease-in-out ${index * 0.1}s both`;
+            element.style.animation = `bounce 0.6s ease-in-out ${index * 0.1
+              }s both`;
           });
         });
       }
@@ -193,9 +222,14 @@ const PlayerContent = () => {
   );
 
   if (!startSelection) return <WaitingScreen />;
-  if (!monsterSelected) return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
-  if (!allReady) return <WaitingScreen />;
-  if (winner) return <WinnerScreen winnerName={winner} />
+  if (!monsterSelected)
+    return (
+      <MonsterSelectionScreen
+        setSelectedMonsterCallback={handleMonsterSelection}
+      />
+    );
+  if (!allReady || waiting) return <WaitingScreen />; // TODO: add additional check for new match_complete state
+  if (winner) return <WinnerScreen winnerName={winner} />;
 
   return <BattleScreen matchData={matchData!} />;
 };
