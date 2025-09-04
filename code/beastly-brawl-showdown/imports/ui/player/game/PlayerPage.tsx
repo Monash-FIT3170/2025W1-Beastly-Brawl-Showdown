@@ -131,11 +131,11 @@ const PlayerContent = () => {
       setAllReady(true);
     });
 
-    socket.on("sendToWaiting", (msg) => {
-      console.log(`${msg} me!`);
+    socket.on("send-to-waiting", () => {
       setWaiting(true);
-      console.log("Now waiting for other matches to finish");
     });
+
+    socket.on("return-from-waiting", () => { setWaiting(false) })
 
     socket.on("tournament-finished", (data) => {
       setWinner(data);
@@ -144,7 +144,8 @@ const PlayerContent = () => {
     return () => {
       socket.off("game-started");
       socket.off("round-start");
-      socket.off("sendToWaiting");
+      socket.off("send-to-waiting");
+      socket.off("return-from-waiting");
       socket.off("tournament-finished");
     };
   }, [socket]);
@@ -228,7 +229,8 @@ const PlayerContent = () => {
         setSelectedMonsterCallback={handleMonsterSelection}
       />
     );
-  if (!allReady || waiting) return <WaitingScreen />; // TODO: add additional check for new match_complete state
+  if (!allReady || waiting) return <WaitingScreen />;
+  // TODO: Create a spectator page for losers to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
 
   return <BattleScreen matchData={matchData!} />;
