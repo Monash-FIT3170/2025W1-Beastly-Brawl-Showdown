@@ -354,7 +354,6 @@ async function main(config: ServerConfig) {
       const [player1, player2] = [match.player1, match.player2];
 
       const sourceSide = match.getSideForPlayer(player);
-      log_attention(`Player submitting move is side ${sourceSide}`);
       player.submittedMove = true;
 
       switch (moveId) {

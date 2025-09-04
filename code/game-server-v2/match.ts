@@ -155,7 +155,6 @@ export class Match {
      * @returns None
      */
     async runBattle(playerChannel: any): Promise<void> {
-
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
             console.log(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
@@ -195,6 +194,10 @@ export class Match {
                 }
             },
         });
+        
+        // switch displayed page to battle screen
+        playerChannel.to(this.player1.socketId).emit("return-from-waiting");
+        playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
@@ -212,6 +215,9 @@ export class Match {
             }
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
+        
+        playerChannel.to(this.winner?.socketId).emit("send-to-waiting");
+        playerChannel.to(loser?.socketId).emit("send-to-waiting");
     }
 
 }
