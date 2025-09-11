@@ -6,10 +6,10 @@ import { usePlayerSocket } from "../player/game/PlayerPage";
 import { MonsterTemplate } from "../../simulator/core/monster/monster_template";
 import { EntryID } from "/imports/simulator/core/utils";
 import { TargetingMethod } from "/imports/simulator/core/action/targeting";
-import { SideId } from "/imports/simulator/core/side";
 import BattleMessage from "./BattleMessage";
 import { DamageEvent } from "/imports/simulator/core/event/core_events";
-import { Notice } from "/imports/simulator/core/notice/notice";
+import { Notice, Roll } from "/imports/simulator/core/notice/notice";
+import { roll } from "/imports/simulator/core/roll";
 
 interface BattleScreenProps {
   matchData: {
@@ -39,6 +39,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [playerShield, setPlayerShield] = useState(false);
   const [enemyAbility, setEnemyAbility] = useState(false);
   const [playerAbility, setPlayerAbility] = useState(false);
+
+  const[rollNotice, setRollNotice] = useState<Roll | null>(null);
+
+  function rollBABY(rollNotice : Roll): void {
+    if (!socket) return;
+    const params: Parameters<typeof rollNotice.callback> = [];
+    socket.emit("requestRoll", rollNotice.kind, params);
+    console.log("attmpted to send back roll notice resolve")
+  }
 
   // Initialize monsters when matchData changes
   useEffect(() => {
@@ -75,9 +84,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleNewNotice = (notice: Notice) => {
       console.log("Notice received:", notice);
       if (notice.kind === "roll") {
-        const params: Parameters<typeof notice.callback> = [];
-        socket.emit("requestRoll", notice.kind, params);
-        console.log("attmpted to send back roll notice resolve")
+        setRollNotice(notice)
       }
     };
     socket.on("newNotice", handleNewNotice);
@@ -120,6 +127,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     else setEnemySlash(false);
 
   };
+
   // Handle player action (submit move to server)
   const handleAction = (
     moveId: EntryID,
@@ -239,12 +247,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       />
       <BattleBottom
         onAction={handleAction}
+        onRoll={() => rollNotice && rollBABY(rollNotice)}
         disabled={hasSubmittedMove}
         myMonsterMoves={{
           attack: myMonster.template.attackActionId,
           ability: myMonster.template.abilityActionId,
           defend: myMonster.template.defendActionId,
         }}
+        mode={rollNotice ? "roll" : "combat"}
       />
     </div>
   );
