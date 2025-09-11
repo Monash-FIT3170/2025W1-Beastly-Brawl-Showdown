@@ -11,7 +11,7 @@ import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils"
 import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 
-enum MatchType {
+export enum MatchType {
     DUEL,
     BYE
 }
@@ -24,9 +24,6 @@ export class Match {
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
-
-    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
-
 
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
@@ -143,6 +140,7 @@ export class Match {
         rollNotice.callback();
     }
 
+
     getPlayerMove(player: Player) {
         return this.submittedMoves.get(player);
     }
@@ -157,7 +155,6 @@ export class Match {
      * @returns None
      */
     async runBattle(playerChannel: any): Promise<void> {
-
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
             console.log(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
@@ -172,14 +169,13 @@ export class Match {
         this.battle.noticeBoard.subscribeListener({
             onPostNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
-
                 log_event(`[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`);
-                this.playerChannel.to(player.socketId).emit("newNotice", notice);
+                playerChannel.to(player.socketId).emit("newNotice", notice);
             },
             onRemoveNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
                 log_event(`[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`);
-                this.playerChannel.to(player.socketId).emit("removeNotice", notice);
+                playerChannel.to(player.socketId).emit("removeNotice", notice);
             }
         });
 
@@ -198,6 +194,10 @@ export class Match {
                 }
             },
         });
+        
+        // switch displayed page to battle screen
+        playerChannel.to(this.player1.socketId).emit("return-from-waiting");
+        playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
@@ -215,6 +215,9 @@ export class Match {
             }
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
+        
+        playerChannel.to(this.winner?.socketId).emit("send-to-waiting");
+        playerChannel.to(loser?.socketId).emit("send-to-waiting");
     }
 
 }

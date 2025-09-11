@@ -33,7 +33,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       imageUrl: "/monsters/dragon.png",
       baseStats: {
         health: 25,
-        armour: 14,
+        armour: 8,
         attack: 2,
         speed: 5,
         crit_chance: 5,

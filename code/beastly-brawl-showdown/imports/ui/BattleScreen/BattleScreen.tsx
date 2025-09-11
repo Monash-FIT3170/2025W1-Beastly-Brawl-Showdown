@@ -47,6 +47,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const params: Parameters<typeof rollNotice.callback> = [];
     socket.emit("requestRoll", rollNotice.kind, params);
     console.log("attmpted to send back roll notice resolve")
+    setRollNotice(null)
   }
 
   // Initialize monsters when matchData changes
