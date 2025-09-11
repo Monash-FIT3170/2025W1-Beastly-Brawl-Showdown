@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io('/api');
+const socket = io('http://game-server:8080');
 
 socket.on("echo", (msg) => {
   console.log(`Server says: ${msg}`);
@@ -48,7 +48,7 @@ const main = async () => {
   const _hostName = "Mr Host";
 
   await requestInput("start host join?");
-  const hostChannel = io("/api/host", {
+  const hostChannel = io("http://game-server:8080/host", {
     auth: { hostName: _hostName },
   });
   hostChannel.emit("request-room");

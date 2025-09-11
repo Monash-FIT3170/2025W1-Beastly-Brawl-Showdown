@@ -379,7 +379,7 @@ async function main(config: ServerConfig) {
     });
   });
 
-  httpServer.listen(config.serverPort, () => {
+  httpServer.listen(config.serverPort,"0.0.0.0", () => {
     log_notice(`Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()}. <CTRL+C> to shutdown.`);
     //#endregion
 

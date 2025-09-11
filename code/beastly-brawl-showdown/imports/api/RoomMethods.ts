@@ -12,6 +12,7 @@ Meteor.methods({
   async getBestServerUrl(): Promise<string> {
     /// Lookup the server info from the global db
     const serverUrl = await locateServerBest();
+    // const serverUrl = 'http://localhost:8080';
     /// Attempt to connect to the specified server
     console.log(`Testing connection to game server @ <${serverUrl}>.`);
 

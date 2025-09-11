@@ -29,7 +29,7 @@ const PlayerConnectionPage: React.FC = () => {
       console.log("Replacing socket...");
     }
 
-    const newSocket = io("/api", {
+    const newSocket = io("http://game-server:8080", {
       auth: { name: playerName, monsterTemplate: 1 },
       transports: ["websocket"],
     });

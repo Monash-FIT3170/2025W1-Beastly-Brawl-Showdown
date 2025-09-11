@@ -47,6 +47,7 @@ services:
       - ROOT_URL=http://localhost
       - PORT=3000
       - METEOR_DISABLE_OPTIMISTIC_CACHING=1
+      - GAME_SERVER_URL=http://game-server:8080
     # expose:
     #   - "3000"
 
