@@ -11,32 +11,36 @@ Meteor.methods({
 
   async getBestServerUrl(): Promise<string> {
     /// Lookup the server info from the global db
-    const serverUrl = await locateServerBest();
+    const serverUrl ="http://localhost:8080"//TODO this is a HACK //await locateServerBest();
     /// Attempt to connect to the specified server
     console.log(`Testing connection to game server @ <${serverUrl}>.`);
 
-    /// Check with server if join code leads to an active room if not error
+        /// Check with server if join code leads to an active room if not error
     return new Promise((resolve, reject) => {
-      const socket = io(serverUrl);
-      /// If said server is not responding then error
-      const echoMsg = "Test echo msg";
-      socket.on("connect", () => {
-        console.log("Connected to server");
-
-        // Send a test message
-        console.log("Test connection to server (echo)");
-        socket.emit("echo", echoMsg);
-      });
-      socket.on("echo", async (msg) => {
-        console.log("Echo sent:", echoMsg, " | Echo response:", msg);
         resolve(serverUrl);
-      });
-
-      socket.on("connect_error", (err) => {
-        console.error(`Connection failed: ${err.message}`);
-        reject(new Error("Room is not joinable."));
-      });
     });
+    // /// Check with server if join code leads to an active room if not error
+    // return new Promise((resolve, reject) => {
+    //   const socket = io(serverUrl);
+    //   /// If said server is not responding then error
+    //   const echoMsg = "Test echo msg";
+    //   socket.on("connect", () => {
+    //     console.log("Connected to server");
+
+    //     // Send a test message
+    //     console.log("Test connection to server (echo)");
+    //     socket.emit("echo", echoMsg);
+    //   });
+    //   socket.on("echo", async (msg) => {
+    //     console.log("Echo sent:", echoMsg, " | Echo response:", msg);
+    //     resolve(serverUrl);
+    //   });
+
+    //   socket.on("connect_error", (err) => {
+    //     console.error(`Connection failed: ${err.message}`);
+    //     reject(new Error("Room is not joinable."));
+    //   });
+    // });
   },
 
   // /**

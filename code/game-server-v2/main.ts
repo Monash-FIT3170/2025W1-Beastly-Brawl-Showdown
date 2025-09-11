@@ -93,7 +93,7 @@ async function main(config: ServerConfig) {
       { serverNumber: config.serverNumber },
       {
         serverNumber: config.serverNumber,
-        serverUrl: `${config.serverIp}:${config.serverPort}`,
+        serverUrl:  `${config.serverIp}:${config.serverPort}`,
         lastUpdated: new Date(),
       },
       { upsert: true, new: true }

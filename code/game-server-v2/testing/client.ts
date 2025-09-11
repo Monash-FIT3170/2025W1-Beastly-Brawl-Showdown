@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:8080/");
+const socket = io('http://localhost');
 
 socket.on("echo", (msg) => {
   console.log(`Server says: ${msg}`);
@@ -48,13 +48,13 @@ const main = async () => {
   const _hostName = "Mr Host";
 
   await requestInput("start host join?");
-  const hostChannel = io("http://localhost:8080/host", {
+  const hostChannel = io(process.env.GAME_SERVER_URL + "/host", {
     auth: { hostName: _hostName },
   });
   hostChannel.emit("request-room");
 
   await requestInput("start player join?");
-  const playerChannel = io("http://localhost:8080/player", {
+  const playerChannel = io(process.env.GAME_SERVER_URL + "/player", {
     auth: { joinCode: _joinCode, displayName: _displayName },
   });
   playerChannel.on("game-started", () => {
