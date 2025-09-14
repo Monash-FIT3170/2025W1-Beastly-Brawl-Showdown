@@ -7,3 +7,4 @@
 # Ignore typescript artifacts
 **/dist/
 tsconfig.tsbuildinfo
+.vscode/settings.json

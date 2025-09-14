@@ -346,10 +346,11 @@ async function main(config: ServerConfig) {
 
       const sourceSide = match.getSideForPlayer(player);
       player.submittedMove = true;
-      if (player1.submittedMove)
-        playerChannel.to(player2?.socketId).emit("EnemySubmitted")
-      if (player2.submittedMove)  
-        playerChannel.to(player1?.socketId).emit("EnemySubmitted")
+
+      if (player1 && player1.submittedMove && player2?.socketId)
+        playerChannel.to(player2.socketId).emit("EnemySubmitted")
+      if (player2 && player2.submittedMove && player1?.socketId)
+        playerChannel.to(player1.socketId).emit("EnemySubmitted")
 
       switch (moveId) {
         case "defend":

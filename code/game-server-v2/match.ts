@@ -99,26 +99,6 @@ export class Match {
         }
     }
 
-    getPlayerbyId(id: number): Player {
-        if (this.matchType === MatchType.BYE || !this.battle) {
-            throw new Error(`Match ${this.matchID} has no sides available.`);
-        }
-        switch(player.displayName){
-            case this.player1.displayName:{
-
-                break;
-            }
-        }
-
-        if (this.player1.displayName === player.displayName) {
-            return 0;
-        } else if (this.player2?.displayName === player.displayName) {
-            return 1;
-        } else {
-            throw new Error(`Player ${player.displayName} is not in this match.`);
-        }
-    }
-
     // Called by main when a player submits a move
     submitMove(player: Player, moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
@@ -131,8 +111,6 @@ export class Match {
         const sideIndex = this.getSideForPlayer(player);
         const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
         const chooseMoveNotice = noticeMap.get("chooseMove") as ChooseMove | undefined;
-        const enemyindex = targetSide as Player
-        targetSide as pl
 
         if (!chooseMoveNotice) {
             throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no chooseMove notice.`);

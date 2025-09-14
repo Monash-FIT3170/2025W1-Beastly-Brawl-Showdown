@@ -40,7 +40,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [enemyAbility, setEnemyAbility] = useState(false);
   const [playerAbility, setPlayerAbility] = useState(false);
 
-  const[rollNotice, setRollNotice] = useState<Roll | null>(null);
+  const [rollNotice, setRollNotice] = useState<Roll | null>(null);
+  const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
+  const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
 
   function rollBABY(rollNotice : Roll): void {
     if (!socket) return;
@@ -49,6 +51,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     console.log("attmpted to send back roll notice resolve")
     setRollNotice(null)
   }
+
+    useEffect(() => {
+    if (!socket) return;
+
+    const handleEnemySubmitted = () => {
+      setshowEnemySubmittedMessage(true)
+      console.log("Enemy submitted event received");
+    };
+
+    socket.on("EnemySubmitted", handleEnemySubmitted);
+    return () => {
+      socket.off("EnemySubmitted", handleEnemySubmitted);
+    }
+  }, [socket]);
 
   // Initialize monsters when matchData changes
   useEffect(() => {
@@ -85,6 +101,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleNewNotice = (notice: Notice) => {
       console.log("Notice received:", notice);
       if (notice.kind === "roll") {
+        setShowMessage(true)
+        setBattleMessage("Time To Roll!")
         setRollNotice(notice)
       }
     };
@@ -138,6 +156,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
     const data = { moveId, targetMethod };
     socket.emit("RequestSubmitMove", { data });
+    setshowSubmittedMoveMessage(true)
     console.log("Attempted to submit move")
     setHasSubmittedMove(true);
   };
@@ -145,11 +164,18 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   // Unlock buttons when server allows next turn
   useEffect(() => {
     if (!socket) return;
-    const handleUnlock = () => setHasSubmittedMove(false);
+
+    const handleUnlock = () => {
+      setHasSubmittedMove(false);
+      setShowMessage(false);
+      setshowSubmittedMoveMessage(false);
+      setshowEnemySubmittedMessage(false)
+    };
+
     socket.on("UnlockButton", handleUnlock);
     return () => {
       socket.off("UnlockButton", handleUnlock);
-    }
+    };
   }, [socket]);
 
   // Listen for new battle events from server (only DamageEvent for now)
@@ -246,6 +272,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         playerAbilityVisible={playerAbility}
         onPlayerAbilityComplete={() => setPlayerAbility(false)}
       />
+      {showEnemySubmittedMessage && <BattleMessage message={"Enemy Has Submitted"} />}
+      {showSubmittedMoveMessage && <BattleMessage message={"Your Move Has Been Submitted"} />}
       <BattleBottom
         onAction={handleAction}
         onRoll={() => rollNotice && rollBABY(rollNotice)}
