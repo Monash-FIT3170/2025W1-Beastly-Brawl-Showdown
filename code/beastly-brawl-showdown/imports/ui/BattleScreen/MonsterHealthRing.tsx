@@ -37,7 +37,7 @@ const MonsterHealthRing: React.FC<Props> = ({
   const dashOffset = circumference * (1 - percent);
 
   const healthClass =
-    percent >= 0.8
+    percent >= 0.7
       ? "health-green"
       : percent >= 0.4
       ? "health-yellow"
@@ -57,7 +57,7 @@ const MonsterHealthRing: React.FC<Props> = ({
       <svg className="health-ring" width={size} height={size}>
         <circle className="ring-bg" cx={size / 2} cy={size / 2} r={radius} />
         <circle
-          className="ring-fg"
+          className={`ring-fg ${healthClass}`}
           cx={size / 2}
           cy={size / 2}
           r={radius}

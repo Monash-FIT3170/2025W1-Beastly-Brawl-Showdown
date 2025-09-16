@@ -1651,9 +1651,13 @@ input[type="range"] {
 }
 
 .ring-fg {
-  stroke: rgb(212, 7, 7);
   transition: stroke-dashoffset 0.3s ease; /* smooth health change */
 }
+
+/* Health color variations based on percentage */
+.ring-fg.health-green { stroke: #147017; }
+.ring-fg.health-yellow { stroke: #e6b010; }
+.ring-fg.health-red { stroke: #c71c1c; }
 
 .monster-img {
   position: absolute;
