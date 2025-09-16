@@ -18,6 +18,7 @@ import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/cor
 import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { match } from "assert";
 import { Match, MatchType } from "./match";
+import { TournamentType } from "./tournament_manager";
 
 type ServerConfig = {
   serverIp: string;
@@ -283,39 +284,40 @@ async function main(config: ServerConfig) {
         socket.emit("error", "Invalid monster selection");
         return;
       }
-      // Store selected monster template name directly
-      player.setMonsterTemplate(monsterKey);
-      player.isReady = true;
 
-      // Check if all players are ready
-      const allReady = Array.from(room.players.values()).every((p) => p.isReady);
-      if (!allReady) {
-        log_notice("Waiting for all players to submit their monsters...");
-        return;
-      }
+      // standard first-round logic
+      if (room.tournamentManager.tournamentType === TournamentType.Standard) {
+        player.setMonsterTemplate(monsterKey);
+        player.isReady = true;
 
-      // All players ready, start tournament
-      room.tournamentManager.startTournament(Array.from(room.players.values()));
-
-      room.tournamentManager.matches.forEach((match: Match) => {
-        if (match.matchType == MatchType.BYE) {
-          return; //TODO HANDLE BYE
+        const allReady = Array.from(room.players.values()).every((p) => p.isReady);
+        if (!allReady) {
+          log_notice("Waiting for all players to submit their monsters...");
+          return;
         }
 
-        // P1: send a copy/start
-        room.playerChannel.to(match.player1.socketId).emit("round-start", {
-          myMonster: match.player1.selectedMonsterTemplateName,
-          enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
-          sideID: 0,
-        });
+        // All players ready, start tournament
+        room.tournamentManager.startTournament(Array.from(room.players.values()));
 
-        //P2: send a copy/start (invert sides?)
-        room.playerChannel.to(match.player2?.socketId).emit("round-start", {  
-          myMonster: match.player2?.selectedMonsterTemplateName,
-          enemyMonster: match.player1.selectedMonsterTemplateName,
-          sideID: 1,
+        // Send round-start notifications as before
+        room.tournamentManager.matches.forEach((match: Match) => {
+          if (match.matchType == MatchType.BYE) {
+            return; //TODO HANDLE BYE
+          }
+
+          room.playerChannel.to(match.player1.socketId).emit("round-start", {
+            myMonster: match.player1.selectedMonsterTemplateName,
+            enemyMonster: match.player2?.selectedMonsterTemplateName,
+            sideID: 0,
+          });
+
+          room.playerChannel.to(match.player2?.socketId).emit("round-start", {
+            myMonster: match.player2?.selectedMonsterTemplateName,
+            enemyMonster: match.player1.selectedMonsterTemplateName,
+            sideID: 1,
+          });
         });
-      });
+      }
     });
 
     function handleRollNotice() {

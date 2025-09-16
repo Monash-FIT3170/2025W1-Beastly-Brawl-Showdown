@@ -14,7 +14,7 @@ export class TournamentManager {
   playerChannel: any;
   tournamentType: TournamentType
 
-  constructor(playerChannel: any, type: TournamentType = TournamentType.Standard) {
+  constructor(playerChannel: any, type: TournamentType) {
     this.playerChannel = playerChannel;
     this.tournamentType = type;
   }
