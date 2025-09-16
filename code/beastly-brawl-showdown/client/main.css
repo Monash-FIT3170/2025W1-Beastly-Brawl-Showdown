@@ -1859,6 +1859,80 @@ input[type="range"] {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
 }
 
+/* Health status Styles */
+.health-ring-container:active {
+  transform: scale(0.98);
+}
+
+.health-status {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+  animation: statusFadeIn 0.2s ease-out;
+}
+
+.status-content {
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.health-text {
+  display: block;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.status-health-bar {
+  width: 60px;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.status-health-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+/* Health color variations based on percentage */
+.status-health-fill.health-green { background-color: #4CAF50; }
+.status-health-fill.health-yellow { background-color: #FFC107; }
+.status-health-fill.health-red { background-color: #ff4444; }
+
+.status-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+@keyframes statusFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* #################################################################### */
 /* Mobile View Specific Styles */
 @media screen and (max-width: 768px) {
@@ -1951,5 +2025,24 @@ input[type="range"] {
     left: 0.6rem;
     transform: scale(0.9);
     transform-origin: top left;
+  }
+
+  .health-status {
+    top: -60px; 
+  }
+
+  .status-content {
+    padding: 10px 14px; 
+    font-size: 16px;    
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .status-health-bar {
+    width: 80px;
+    height: 8px;
+  }
+
+  .health-ring-container:active {
+    transform: scale(0.95);
   }
 }
