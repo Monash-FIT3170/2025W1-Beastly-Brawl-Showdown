@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import SlashAnimation from "./SlashAnimation";
 import ShieldAnimation from "./ShieldAnimation";
 import AbilityAnimation from "./AbilityAnimation";
@@ -26,6 +26,8 @@ const MonsterHealthRing: React.FC<Props> = ({
   showAbility = false,
   onAbilityComplete,
 }) => {
+  const [showStatus, setShowStatus] = useState(false);
+
   const size = 200; // circle diameter
   const stroke = 20; // thickness of ring (approximate 8-10% of size)
   const radius = size / 2 - stroke / 2;
@@ -34,8 +36,24 @@ const MonsterHealthRing: React.FC<Props> = ({
   const percent = Math.max(0, Math.min(1, currentHealth / maxHealth));
   const dashOffset = circumference * (1 - percent);
 
+  const healthClass =
+    percent >= 0.8
+      ? "health-green"
+      : percent >= 0.4
+      ? "health-yellow"
+      : "health-red";
+
   return (
-    <div className="health-ring-container">
+    <div
+      className="health-ring-container"
+      //desktop uses hover
+      onMouseEnter={() => setShowStatus(true)}
+      onMouseLeave={() => setShowStatus(false)}
+      //mobile uses press and hold
+      onTouchStart={() => setShowStatus(true)}
+      onTouchEnd={() => setShowStatus(false)}
+      onTouchCancel={() => setShowStatus(false)}
+    >
       <svg className="health-ring" width={size} height={size}>
         <circle className="ring-bg" cx={size / 2} cy={size / 2} r={radius} />
         <circle
@@ -49,6 +67,23 @@ const MonsterHealthRing: React.FC<Props> = ({
         />
       </svg>
       <img src={imageSrc} alt="monster" className="monster-img" />
+
+      {showStatus && (
+        <div className="health-status">
+          <div className="status-content">
+            <span className="health-text">
+              {Math.max(0, currentHealth)} / {maxHealth}
+            </span>
+            <div className="status-health-bar">
+              <div
+                className={`status-health-fill ${healthClass}`}
+                style={{ width: `${percent * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <SlashAnimation
         isVisible={showSlash}
         onComplete={onSlashComplete ?? (() => {})}
