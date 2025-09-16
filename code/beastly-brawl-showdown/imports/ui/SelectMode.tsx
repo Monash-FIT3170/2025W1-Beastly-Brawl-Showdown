@@ -10,8 +10,8 @@ interface SelectModeProps {
 export const SelectMode: React.FC<SelectModeProps> = ({
   open,
   onClose,
-  onType1: onNormal,
-  onType2: onMedium,
+  onType1: standard,
+  onType2: random,
 }) => {
   if (!open) return null;
 
@@ -19,10 +19,10 @@ export const SelectMode: React.FC<SelectModeProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
         <h2>Select Game Mode</h2>
-        <button className="glb-btn" onClick={onNormal}>
+        <button className="glb-btn" onClick={standard}>
           Standard
         </button>
-        <button className="glb-btn" onClick={onMedium}>
+        <button className="glb-btn" onClick={random}>
           Random
         </button>
         <button className="glb-btn" onClick={onClose}>

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { SelectMode } from "../SelectMode";
+import { SelectMode } from "./SelectMode";
 
 export const HomePage = () => {
   const navigate = useNavigate();
