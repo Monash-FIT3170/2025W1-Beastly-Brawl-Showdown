@@ -44,6 +44,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
   const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
 
+  //#region Test States
+  const [events, setEvents] = useState<any[]>([]);
+  const [turnIndex, setTurnIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+
   function rollBABY(rollNotice : Roll): void {
     if (!socket) return;
     const params: Parameters<typeof rollNotice.callback> = [];
@@ -202,6 +207,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket, myMonster, enemyMonster]);
 
+  //#region Test Handle Event
+  // Change to make it keep the new events in an array
+  // useEffect(() => {
+  //   if (!socket) return;
+
+  //   const handleNewEvent = (ev: any) => {
+  //     console.log("New event received:", ev.name);
+  //     setEvents(prev => [...prev, ev]);
+  //   };
+
+  //   socket.on("newEvent", handleNewEvent);
+  //   return () => {
+  //     socket.off("newEvent", handleNewEvent);
+  //   }
+  // }, [socket]);
+
   // Sequentially play animations after both players submit moves
   useEffect(() => {
     if (!socket) return;
@@ -272,6 +293,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         playerAbilityVisible={playerAbility}
         onPlayerAbilityComplete={() => setPlayerAbility(false)}
       />
+      {/*<BattleScene
+        events={events}
+        turnIndex={turnIndex}
+        isPlaying={isPlaying}
+        autoAdvance={false}  // default: no autoplay
+        onAdvanceTurn={(next) => setTurnIndex(next)}
+      />*/}
       {showEnemySubmittedMessage && <BattleMessage message={"Enemy Has Submitted"} />}
       {showSubmittedMoveMessage && <BattleMessage message={"Your Move Has Been Submitted"} />}
       <BattleBottom

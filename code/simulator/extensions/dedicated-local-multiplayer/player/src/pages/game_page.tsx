@@ -233,10 +233,12 @@ const GamePage: React.FC = () => {
     }
   }
 
+  const rawData = [{"name":"snapshot","sides":[{"id":0,"monster":{"baseID":"mystic_wryven","health":25,"defendActionCharges":0,"components":[]},"pendingActions":null},{"id":1,"monster":{"baseID":"mystic_wryven","health":25,"defendActionCharges":0,"components":[]},"pendingActions":null}],"index":0}]
   return (
     <>
       <div>
-        <BattleVisualiser rawEvents={turnHistory} />
+        <BattleVisualiser rawEvents = {rawData} />
+        {/* <BattleVisualiser rawEvents={turnHistory} /> */}
         {/* <textarea disabled value={JSON.stringify(turnHistory)} /> */}
         <br />
         {actionPanel()}

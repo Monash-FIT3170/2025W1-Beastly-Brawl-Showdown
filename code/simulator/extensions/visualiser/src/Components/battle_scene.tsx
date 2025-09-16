@@ -19,7 +19,7 @@ interface BattleSceneProps {
 
 console.log("BattleScene loaded");
 
-const BattleScene: React.FC<BattleSceneProps> = ({
+export const BattleScene: React.FC<BattleSceneProps> = ({
   events,
   turnIndex,
   isPlaying,
