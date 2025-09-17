@@ -17,7 +17,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -45,7 +45,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -125,7 +125,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -153,7 +153,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -220,7 +220,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -248,7 +248,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -315,7 +315,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -343,7 +343,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -423,7 +423,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -451,7 +451,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -518,7 +518,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"
@@ -546,7 +546,7 @@
                         },
                         "attackActionId": "attack-normal",
                         "defendActionId": "defend",
-                        "baseDefendActionCharges": 3,
+                        "maxAttackCharges": 3,
                         "onSpawnActions": [
                             {
                                 "type": "spawnAction"

@@ -50,7 +50,7 @@ export class Battle {
         monster: {
           baseID: playerOptions.monsterId,
           health: this.monsterPool.monsters[playerOptions.monsterId].baseStats.health,
-          defendActionCharges: 0,
+          attackCharges: this.monsterPool.monsters[playerOptions.monsterId].maxAttackCharges,
           components: [],
         },
         pendingActions: null,
