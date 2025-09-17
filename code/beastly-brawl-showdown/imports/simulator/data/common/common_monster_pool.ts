@@ -3,7 +3,8 @@ import { RerollChargeComponent, DodgeChargeComponent } from "../../core/monster/
 import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
-type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide";
+type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide" | "fleet_foot" | 
+"knight" | "sea_urchin" | "lion" | "bear" | "shield";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
   name: "common_monster_pool",
   monsters: {
@@ -32,8 +33,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A mystical creature of the skies. A Balanced Monster.",
       imageUrl: "/monsters/dragon.png",
       baseStats: {
-        health: 25,
-        armour: 14,
+        health: 50,
+        armour: 2,
         attack: 2,
         speed: 5,
         crit_chance: 5,
@@ -58,8 +59,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A stealthy and cunning beast. An Attack Monster.",
       imageUrl: "/monsters/wolf.png",
       baseStats: {
-        health: 20,
-        armour: 12,
+        health: 40,
+        armour: 1,
         attack: 4,
         speed: 7,
         crit_chance: 7,
@@ -85,8 +86,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A sturdy and resilient protector. A Defense Monster.",
       imageUrl: "/monsters/turtle.png",
       baseStats: {
-        health: 30,
-        armour: 16,
+        health: 60,
+        armour: 4,
         attack: 1,
         speed: 3,
         crit_chance: 2,
@@ -96,6 +97,120 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       baseDefendActionCharges: 4,
       abilityActionId: "stun",
+      onSpawnActions: [],
+    },
+
+    fleet_foot: {
+      templateId: "fleet_foot",
+      name: "Fleet Foot Stalker",
+      description: "A swift and elusive hunter. Excels in dealing multi-hit damage.",
+      imageUrl: "",
+      baseStats: {
+        health: 32,
+        armour: 1,
+        attack: 3,
+        speed: 4,
+        crit_chance: 7,
+        crit_damage: 7,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    knight: {
+      templateId: "knight",
+      name: "Knight",
+      description: "A brave and noble warrior. A Balanced Monster.",
+      imageUrl: "",
+      baseStats: {
+        health: 50,
+        armour: 2,
+        attack: 2,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    sea_urchin: {
+      templateId: "sea_urchin",
+      name: "Sea Urchin",
+      description: "A prickly marine creature. A Defense Monster that deals damage back when hit.",
+      imageUrl: "",
+      baseStats: {
+        health: 60,
+        armour: 2,
+        attack: 0,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    lion: {
+      templateId: "lion",
+      name: "Lion",
+      description: "A fierce and majestic predator. An Attack Monster that excels in hitting hard.",
+      imageUrl: "",
+      baseStats: {
+        health: 36,
+        armour: 1,
+        attack: 5,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    bear: {
+      templateId: "bear",
+      name: "Bear",
+      description: "A strong and resilient creature. A Balanced Monster that goes berserk.",
+      imageUrl: "",
+      baseStats: {
+        health: 50,
+        armour: 2,
+        attack: 2,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    shield: {
+      templateId: "shield",
+      name: "Sheild",
+      description: "A shield that once belonged to a knight gained sentience. A defender monster with inate damage reduction.",
+      imageUrl: "",
+      baseStats: {
+        health: 60,
+        armour: 5,
+        attack: 1,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
       onSpawnActions: [],
     },
   },
