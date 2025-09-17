@@ -32,8 +32,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A mystical creature of the skies. A Balanced Monster.",
       imageUrl: "/monsters/dragon.png",
       baseStats: {
-        health: 25,
-        armour: 14,
+        health: 50,
+        armour: 2,
         attack: 2,
         speed: 5,
         crit_chance: 5,
@@ -58,8 +58,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A stealthy and cunning beast. An Attack Monster.",
       imageUrl: "/monsters/wolf.png",
       baseStats: {
-        health: 20,
-        armour: 12,
+        health: 40,
+        armour: 1,
         attack: 4,
         speed: 7,
         crit_chance: 7,
@@ -85,8 +85,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A sturdy and resilient protector. A Defense Monster.",
       imageUrl: "/monsters/turtle.png",
       baseStats: {
-        health: 30,
-        armour: 16,
+        health: 60,
+        armour: 4,
         attack: 1,
         speed: 3,
         crit_chance: 2,
