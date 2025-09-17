@@ -12,7 +12,7 @@ export enum TournamentType {
 export class TournamentManager {
   matches: Match[] = [];
   playerChannel: any;
-  tournamentType: TournamentType
+  tournamentType: TournamentType;
 
   constructor(playerChannel: any, type: TournamentType) {
     this.playerChannel = playerChannel;
@@ -21,7 +21,6 @@ export class TournamentManager {
 
   // Track waiting players during random re-pick
   private pendingResolves: Map<string, (monsterKey: string) => void> = new Map();
-
 
   // Called when player submits monster (via RequestSubmitMonster)
   onMonsterSelected(player: Player, monsterKey: string) {
@@ -68,12 +67,12 @@ export class TournamentManager {
     return result;
   }
 
+  // 🔧 Updated: integrate random picks between rounds
   async runRounds(remainingPlayers: Player[]) {
-    // After the Host presses start and begins the tournament through RequestSubmitMonster in "main", 
-    // "startTournament(players: Player[])" (in this file) will initiate and the match will begin 
-    // as startTournament runs its first match using creatematchs (this file) and checks the results 
-    // using checkRoundCompletion (this file) before checkRoundCompletion pingpongs this 
-    // function over and over again to simulate a tournament.
+    if (this.tournamentType === TournamentType.Random) {
+      // force players to re-pick each round
+      await this.assignRandomMonsters(remainingPlayers);
+    }
 
     this.creatematchs(remainingPlayers);
     this.matches.forEach(match => match.createBattle());
@@ -91,7 +90,7 @@ export class TournamentManager {
       const player2 = playerList[i + 1] ?? undefined; // keep optional
       this.matches.push(new Match(playerList[i], player2, matchID));
     }
-    console.log(`Created ${this.matches.length} matchs for this round.`);
+    console.log(`Created ${this.matches.length} matches for this round.`);
   }
 
   checkRoundCompletion() {
@@ -111,6 +110,11 @@ export class TournamentManager {
   }
 
   async startTournament(players: Player[]): Promise<void> {
+    if (this.tournamentType === TournamentType.Random) {
+      // first round random selection
+      await this.assignRandomMonsters(players);
+    }
+
     this.creatematchs(players);
 
     // Create battles for each match

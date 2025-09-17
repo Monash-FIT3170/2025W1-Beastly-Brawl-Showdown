@@ -81,13 +81,19 @@ const PlayerContent = () => {
   const [allReady, setAllReady] = useState(false);
   const [winner, setWinner] = useState();
   const [waiting, setWaiting] = useState(false);
+  const [randomMonsterPool, setMonsterPool] = useState<string[]>();
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("game-started", () => setStartSelection(true));
+    socket.on("game-started", (data) => {
+      if (data?.monsterPool) {
+        setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
+      }
+      setStartSelection(true)
+    });
 
     socket.on("round-start", (data) => {
       log_event("Received round-start data:", data);
@@ -113,7 +119,7 @@ const PlayerContent = () => {
         COMMON_MONSTER_POOL.monsters[
         enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
-      
+
       // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
       const mySide = data.sideID;
       const enemySide = data.sideID === 0 ? 1 : 0;
@@ -232,6 +238,7 @@ const PlayerContent = () => {
   if (!monsterSelected)
     return (
       <MonsterSelectionScreen
+        monsterPool={randomMonsterPool}
         setSelectedMonsterCallback={handleMonsterSelection}
       />
     );
