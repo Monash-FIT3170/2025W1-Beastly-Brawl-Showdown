@@ -13,6 +13,11 @@ import { Player } from "./player";
 import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import {
+  ChooseMove,
+  Roll,
+} from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import { match } from "assert";
 import { Match, MatchType } from "./match";
 import {
   PlayerClientToServerEvents, 
@@ -70,20 +75,24 @@ async function main(config: ServerConfig) {
     serverNumber: config.serverNumber,
   });
   if (existingRecordCount > 0) {
-    console.log(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
+    console.log(
+      `Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`
+    );
     if (!config.overrideExistingRecordOnStartup) {
       throw new Error("A record already exists, room could not be registered.");
     }
   }
-  const updatedRecord = await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
-    { serverNumber: config.serverNumber },
-    {
-      serverNumber: config.serverNumber,
-      serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
-      lastUpdated: new Date(),
-    },
-    { upsert: true, new: true }
-  );
+  const updatedRecord =
+    await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
+      { serverNumber: config.serverNumber },
+      {
+        serverNumber: config.serverNumber,
+        serverUrl:
+          config.serverIp.toString() + ":" + config.serverPort.toString(),
+        lastUpdated: new Date(),
+      },
+      { upsert: true, new: true }
+    );
   log_notice("New Record:\n" + JSON.stringify(updatedRecord));
   log_notice("Registered to records.");
 
@@ -131,7 +140,9 @@ async function main(config: ServerConfig) {
     // hostName: string;
   };
   hostChannel.use((socket, next) => {
-    log_event(`Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
+    log_event(
+      `Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`
+    );
     const auth = socket.handshake.auth as HostChannelAuth;
     /// for now always accept the host name
     // if (!auth.hostName) {
@@ -155,7 +166,10 @@ async function main(config: ServerConfig) {
       log_event("Room requested.");
       // TODO prevent multiple rooms at the same time
       try {
-        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(socket.id, playerChannel);
+        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
+          socket.id,
+          playerChannel
+        );
 
         socket.emit("requestRoomResponse", {
           roomId: roomId,
@@ -182,7 +196,9 @@ async function main(config: ServerConfig) {
         playerChannel.to(player.socketId).emit("gameStarted"); // Clients can now start monster selection
       });
 
-      log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
+      log_notice(
+        `All players in room ${msg.roomId} have been notified to start the game.`
+      );
     });
   });
 
@@ -224,14 +240,18 @@ async function main(config: ServerConfig) {
       res.send(checkResult);
       return;
     }
-    checkResult.isDisplayNameValid = !gameServer.rooms.get(roomId)?.hasPlayer(req.body.displayName);
+    checkResult.isDisplayNameValid = !gameServer.rooms
+      .get(roomId)
+      ?.hasPlayer(req.body.displayName);
 
     log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
     res.send(checkResult);
   });
 
   playerChannel.use((socket, next) => {
-    log_event(`Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
+    log_event(
+      `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`
+    );
     const auth = socket.handshake.auth as PlayerChannelAuth;
 
     if (!auth.joinCode) {
@@ -269,14 +289,26 @@ async function main(config: ServerConfig) {
       next(new Error("Invalid credentials"));
     }
 
-    log_event(`Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`);
+    log_event(
+      `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`
+    );
 
-    const playerNameList = gameServer.rooms.get(roomId)?.players.map((player) => player.displayName) ?? [];
+    const playerNameList =
+      gameServer.rooms
+        .get(roomId)
+        ?.players.map((player) => player.displayName) ?? [];
 
-    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId);
+    console.log(
+      "Update player list",
+      playerNameList,
+      "to",
+      gameServer.rooms.get(roomId)!.hostSocketId
+    );
     console.log("Player socket: ", socket.data);
 
-    hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("refreshPlayerList", playerNameList);
+    hostChannel
+      .to(gameServer.rooms.get(roomId)!.hostSocketId)
+      .emit("player-set-changed", playerNameList);
     next();
   });
 
@@ -308,7 +340,9 @@ async function main(config: ServerConfig) {
       player.isReady = true;
 
       // Check if all players are ready
-      const allReady = Array.from(room.players.values()).every((p) => p.isReady);
+      const allReady = Array.from(room.players.values()).every(
+        (p) => p.isReady
+      );
       if (!allReady) {
         log_notice("Waiting for all players to submit their monsters...");
         return;
@@ -319,6 +353,7 @@ async function main(config: ServerConfig) {
 
       room.tournamentManager.matches.forEach((match: Match) => {
         if (match.matchType == MatchType.BYE) {
+          room.playerChannel.to(match.player1.socketId).emit("send-to-waiting");
           return; //TODO HANDLE BYE
         }
 
@@ -330,7 +365,7 @@ async function main(config: ServerConfig) {
         });
 
         //P2: send a copy/start (invert sides?)
-        room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
+        room.playerChannel.to(match.player2?.socketId).emit("round-start", {
           myMonster: match.player2?.selectedMonsterTemplateName,
           enemyMonster: match.player1.selectedMonsterTemplateName,
           sideID: 1,
@@ -343,7 +378,9 @@ async function main(config: ServerConfig) {
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
-      const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
+      const match = room.tournamentManager.matches.find(
+        (m) => m.player1 === player || m.player2 === player
+      );
       if (!match) return;
 
       match.submitRoll(player);
@@ -360,7 +397,9 @@ async function main(config: ServerConfig) {
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
 
-      const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
+      const match = room.tournamentManager.matches.find(
+        (m) => m.player1 === player || m.player2 === player
+      );
       if (!match) return;
       const [player1, player2] = [match.player1, match.player2];
 
@@ -369,11 +408,21 @@ async function main(config: ServerConfig) {
 
       switch (moveId) {
         case "defend":
-          match.submitMove(player, move);
+          match.submitMove(
+            player,
+            moveId,
+            targetMethod as TargetingMethod,
+            sourceSide as SideId
+          );
           break;
         case "attack-normal":
           const targetSide = sourceSide === 1 ? 0 : 1;
-          match.submitMove(player, move);
+          match.submitMove(
+            player,
+            moveId,
+            targetMethod as TargetingMethod,
+            targetSide as SideId
+          );
           break;
       }
 
@@ -408,7 +457,11 @@ async function main(config: ServerConfig) {
   });
 
   httpServer.listen(config.serverPort, () => {
-    log_notice(`Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()}. <CTRL+C> to shutdown.`);
+    log_notice(
+      `Socket.IO server running on ${
+        config.serverIp.toString() + ":" + config.serverPort.toString()
+      }. <CTRL+C> to shutdown.`
+    );
     //#endregion
 
     //#region IO
