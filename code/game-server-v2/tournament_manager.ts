@@ -58,24 +58,14 @@ export class TournamentManager {
   /**
    * Starts the tournament with a list of players
    */
-  async startTournament(players: Player[]): Promise<void> {
+async startTournamentFromReady(players: Player[]) {
     if (!players.length) return;
 
-    console.log("[Notice] Starting tournament with players:", players.map(p => p.displayName));
+    console.log("[Notice] Starting tournament from ready players:", players.map(p => p.displayName));
 
-    // If random tournament, assign initial pools
-    if (this.tournamentType === TournamentType.Random) {
-      players.forEach(player => {
-        player.currentMonsterPool = this.getRandomPool(3);
-      });
-
-      // Wait for initial selection
-      await this.waitForAllPlayersToPick(players);
-    }
-
-    // Run first round
+    // Just run rounds immediately, skip initial monster selection
     await this.runRounds(players);
-  }
+}
 
   /**
    * Runs rounds recursively until a winner is determined

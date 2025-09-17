@@ -330,8 +330,8 @@ async function main(config: ServerConfig) {
 
       // All players ready, start tournament
       log_notice("All players ready. Starting tournament...");
-      room.tournamentManager.startTournament(Array.from(room.players.values()));
-
+      room.tournamentManager.startTournamentFromReady(Array.from(room.players.values()));
+      
       // Emit round-start
       room.tournamentManager.matches.forEach((match: Match) => {
         if (match.matchType === MatchType.BYE) return;
