@@ -141,13 +141,12 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     sea_urchin: {
       templateId: "sea_urchin",
       name: "Sea Urchin",
-      description: "A prickly marine creature. A" + 
-      "Defense Monster that deals damage back when hit.",
+      description: "A prickly marine creature. A Defense Monster that deals damage back when hit.",
       imageUrl: "",
       baseStats: {
-        health: 25,
-        armour: 15,
-        attack: 2,
+        health: 60,
+        armour: 2,
+        attack: 0,
         speed: 4,
         crit_chance: 5,
         crit_damage: 2,
