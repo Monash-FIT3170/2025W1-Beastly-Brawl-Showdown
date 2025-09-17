@@ -4,7 +4,7 @@ import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
 type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide" | "fleet_foot" | 
-"knight" | "sea_urchin" | "lion" | "bear";
+"knight" | "sea_urchin" | "lion" | "bear" | "shield";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
   name: "common_monster_pool",
   monsters: {
@@ -185,6 +185,25 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
         health: 50,
         armour: 2,
         attack: 2,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    shield: {
+      templateId: "shield",
+      name: "Sheild",
+      description: "A shield that once belonged to a knight gained sentience. A defender monster with inate damage reduction.",
+      imageUrl: "",
+      baseStats: {
+        health: 60,
+        armour: 5,
+        attack: 1,
         speed: 4,
         crit_chance: 5,
         crit_damage: 2,
