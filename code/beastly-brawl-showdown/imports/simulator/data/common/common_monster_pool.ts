@@ -4,7 +4,7 @@ import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
 type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide" | "fleet_foot" | 
-"knight";
+"knight" | "sea_urchin";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
   name: "common_monster_pool",
   monsters: {
@@ -103,7 +103,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     fleet_foot: {
       templateId: "fleet_foot",
       name: "Fleet Foot Stalker",
-      description: "A swift and elusive hunter. Excels in dealing multi-hit.",
+      description: "A swift and elusive hunter. Excels in dealing multi-hit damage.",
       imageUrl: "",
       baseStats: {
         health: 32,
@@ -122,11 +122,31 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     knight: {
       templateId: "knight",
       name: "Knight",
-      description: "Desc for Blank",
+      description: "A brave and noble warrior. A Balanced Monster.",
       imageUrl: "",
       baseStats: {
         health: 50,
         armour: 2,
+        attack: 2,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    sea_urchin: {
+      templateId: "sea_urchin",
+      name: "Sea Urchin",
+      description: "A prickly marine creature. A" + 
+      "Defense Monster that deals damage back when hit.",
+      imageUrl: "",
+      baseStats: {
+        health: 25,
+        armour: 15,
         attack: 2,
         speed: 4,
         crit_chance: 5,
