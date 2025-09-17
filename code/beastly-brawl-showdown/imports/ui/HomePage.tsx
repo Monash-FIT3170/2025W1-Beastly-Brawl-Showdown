@@ -11,7 +11,7 @@ export const HomePage = () => {
   const handleHost = (type: "standard" | "random") => {
     // Tell the server to create a room with this mode
     if (socket) {
-      socket.emit("host-create-room", { type }); 
+      socket.emit("request-room", { type }); 
       // Server will respond with room code / confirmation
     }
 

@@ -161,9 +161,29 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      // Relay to all players in this room
+      // Generate individual random pools if it's a random tournament
       room.players.forEach((player) => {
-        playerChannel.to(player.socketId).emit("game-started"); // Clients can now start monster selection
+        let pool: string[];
+        if (room.tournamentManager.tournamentType === TournamentType.Random) {
+          const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter(k => k !== "blank");
+
+          // Proper shuffle per player
+          const shuffled = [...allKeys];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+
+          pool = shuffled.slice(0, 3); // Pick 3 random monsters for this player
+        } else {
+          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(k => k !== "blank"); // Standard mode, exclude BlankMon
+        }
+
+        player.currentMonsterPool = pool;
+
+        // Send each player their own pool
+        playerChannel.to(player.socketId).emit("game-started", { monsterPool: pool });
+
       });
 
       log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
@@ -280,18 +300,19 @@ async function main(config: ServerConfig) {
       const room = gameServer.rooms.get(player.roomId);
       if (!room) return;
 
-      // Expect the client to send the monster templateId (key)
       const monsterKey = data.data as keyof typeof COMMON_MONSTER_POOL.monsters;
-      log_event("Player selected monster key: " + monsterKey);
+      log_event(`Player selected monster key: ${monsterKey}`);
 
-      // Validate monster selection against allowed pool
+      // Validate selection
       if (room.tournamentManager.tournamentType === TournamentType.Random) {
         if (!player.currentMonsterPool?.includes(monsterKey)) {
+          log_warning(`Invalid monster selection by ${player.displayName}`);
           socket.emit("error", "Invalid monster selection");
           return;
         }
       } else {
         if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
+          log_warning(`Invalid monster selection by ${player.displayName}`);
           socket.emit("error", "Invalid monster selection");
           return;
         }
@@ -299,6 +320,7 @@ async function main(config: ServerConfig) {
 
       player.setMonsterTemplate(monsterKey);
       player.isReady = true;
+      log_event(`${player.displayName} is ready.`);
 
       const allReady = Array.from(room.players.values()).every((p) => p.isReady);
       if (!allReady) {
@@ -306,21 +328,19 @@ async function main(config: ServerConfig) {
         return;
       }
 
-      // All players ready, start tournament or round
+      // All players ready, start tournament
+      log_notice("All players ready. Starting tournament...");
       room.tournamentManager.startTournament(Array.from(room.players.values()));
 
-      // Send round-start notifications with monster pools
+      // Emit round-start
       room.tournamentManager.matches.forEach((match: Match) => {
-        if (match.matchType == MatchType.BYE) return;
+        if (match.matchType === MatchType.BYE) return;
 
-        // Generate 3 random monsters for each player for the next round
         const player1Pool = getRandomMonsterPool(3);
         const player2Pool = getRandomMonsterPool(3);
 
         match.player1.currentMonsterPool = player1Pool;
-        if (match.player2) {
-          match.player2.currentMonsterPool = player2Pool;
-        }
+        if (match.player2) match.player2.currentMonsterPool = player2Pool;
 
         room.playerChannel.to(match.player1.socketId).emit("round-start", {
           myMonster: match.player1.selectedMonsterTemplateName,
@@ -329,21 +349,21 @@ async function main(config: ServerConfig) {
           monsterPool: player1Pool,
         });
 
-        room.playerChannel.to(match.player2?.socketId).emit("round-start", {
-          myMonster: match.player2?.selectedMonsterTemplateName,
-          enemyMonster: match.player1.selectedMonsterTemplateName,
-          sideID: 1,
-          monsterPool: player2Pool,
-        });
+        if (match.player2) {
+          room.playerChannel.to(match.player2.socketId).emit("round-start", {
+            myMonster: match.player2.selectedMonsterTemplateName,
+            enemyMonster: match.player1.selectedMonsterTemplateName,
+            sideID: 1,
+            monsterPool: player2Pool,
+          });
+        }
       });
 
-      // Helper to pick N random monsters
       function getRandomMonsterPool(n: number): string[] {
-        const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter(k => k !== "BlankMon");
+        const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter((k) => k !== "BlankMon");
         const shuffled = allKeys.sort(() => 0.5 - Math.random());
         return shuffled.slice(0, n);
       }
-
     });
 
     function handleRollNotice() {
