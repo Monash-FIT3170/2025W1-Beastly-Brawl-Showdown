@@ -2,6 +2,14 @@ import React, { useState } from "react";
 import SlashAnimation from "./SlashAnimation";
 import ShieldAnimation from "./ShieldAnimation";
 import AbilityAnimation from "./AbilityAnimation";
+import MonsterTooltip from "../MonsterToolTip";
+
+type BaseStats = {
+  attack: number;
+  defense: number;
+  speed: number;
+  health: number;
+};
 
 type Props = {
   currentHealth: number;
@@ -13,6 +21,9 @@ type Props = {
   onShieldComplete?: () => void;
   showAbility?: boolean;
   onAbilityComplete?: () => void;
+  monsterName: string;
+  baseStats: BaseStats;
+  abilityName?: string;
 };
 
 const MonsterHealthRing: React.FC<Props> = ({
@@ -25,8 +36,11 @@ const MonsterHealthRing: React.FC<Props> = ({
   onShieldComplete,
   showAbility = false,
   onAbilityComplete,
+  monsterName,
+  baseStats,
+  abilityName,
 }) => {
-  const [showStatus, setShowStatus] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const size = 200; // circle diameter
   const stroke = 20; // thickness of ring (approximate 8-10% of size)
@@ -47,12 +61,12 @@ const MonsterHealthRing: React.FC<Props> = ({
     <div
       className="health-ring-container"
       //desktop uses hover
-      onMouseEnter={() => setShowStatus(true)}
-      onMouseLeave={() => setShowStatus(false)}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
       //mobile uses press and hold
-      onTouchStart={() => setShowStatus(true)}
-      onTouchEnd={() => setShowStatus(false)}
-      onTouchCancel={() => setShowStatus(false)}
+      onTouchStart={() => setShowTooltip(true)}
+      onTouchEnd={() => setShowTooltip(false)}
+      onTouchCancel={() => setShowTooltip(false)}
     >
       <svg className="health-ring" width={size} height={size}>
         <circle className="ring-bg" cx={size / 2} cy={size / 2} r={radius} />
@@ -68,20 +82,14 @@ const MonsterHealthRing: React.FC<Props> = ({
       </svg>
       <img src={imageSrc} alt="monster" className="monster-img" />
 
-      {showStatus && (
-        <div className="health-status">
-          <div className="status-content">
-            <span className="health-text">
-              {Math.max(0, currentHealth)} / {maxHealth}
-            </span>
-            <div className="status-health-bar">
-              <div
-                className={`status-health-fill ${healthClass}`}
-                style={{ width: `${percent * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
+      {showTooltip && (
+        <MonsterTooltip
+          currentHealth={currentHealth}
+          maxHealth={maxHealth}
+          monsterName={monsterName}
+          baseStats={baseStats}
+          abilityName={abilityName}
+        />
       )}
 
       <SlashAnimation

@@ -1729,9 +1729,9 @@ input[type="range"] {
 
   box-shadow:
     0 4px 0 #773519,
-    /* bottom edge */ 4px 0 0 #773519,
-    /* right edge */ -4px 0 0 #773519,
-    /* left edge */ 0 -4px 0 #c26130; /* top edge */
+    4px 0 0 #773519,
+    -4px 0 0 #773519,
+    0 -4px 0 #c26130;
 }
 
 /* Slash Animation */
@@ -1863,14 +1863,11 @@ input[type="range"] {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
 }
 
-/* Health status Styles */
-.health-ring-container:active {
-  transform: scale(0.98);
-}
+.health-ring-container:active { transform: scale(0.98); }
 
-.health-status {
+.health-tooltip {
   position: absolute;
-  top: -50px;
+  top: -60px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -1878,64 +1875,112 @@ input[type="range"] {
   animation: statusFadeIn 0.2s ease-out;
 }
 
-.status-content {
-  background-color: rgba(0, 0, 0, 0.9);
+.tooltip-content {
+  position: relative;
+  background-color: rgb(30, 30, 30);
   color: white;
-  padding: 8px 12px;
+  padding: 12px 16px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 200px;
+}
+
+@keyframes statusFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.monster-tooltip-name {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #FFD700; 
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  padding-bottom: 4px;
 }
 
 .health-text {
   display: block;
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.tooltip-health-bar {
+  width: 100%;
+  height: 6px;
+  background-color: rgba(255,255,255,0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.tooltip-health-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* HP colors by percentage class */
+.tooltip-health-fill.health-green  { background-color: #4CAF50; }
+.tooltip-health-fill.health-yellow { background-color: #FFC107; }
+.tooltip-health-fill.health-red    { background-color: #ff4444; }
+
+/* --- Base stats --- */
+.base-stats {
+  margin: 8px 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.stats-title {
+  font-size: 12px;
+  font-weight: bold;
   margin-bottom: 4px;
+  color: #CCC;
   text-align: center;
 }
 
-.status-health-bar {
-  width: 100%;
-  height: 6px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-  overflow: hidden;
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 8px;
+  font-size: 11px;
 }
 
-.status-health-fill {
-  height: 100%;
-  transition: width 0.3s ease;
-  border-radius: 3px;
+.stat-item { display: flex; justify-content: space-between; align-items: center; }
+.stat-label { color: #AAA; font-weight: normal; }
+.stat-value { color: #FFF; font-weight: bold; }
+
+/* --- Ability --- */
+.ability-info {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.2);
 }
 
-/* Health color variations based on percentage */
-.status-health-fill.health-green { background-color: #4CAF50; }
-.status-health-fill.health-yellow { background-color: #FFC107; }
-.status-health-fill.health-red { background-color: #ff4444; }
-
-.status-content::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+.ability-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: #87CEEB;
+  margin-bottom: 3px;
+  text-align: center;
 }
 
-@keyframes statusFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+.ability-description {
+  font-size: 10px;
+  color: #CCC;
+  line-height: 1.3;
+  white-space: normal;
+  max-width: 220px;
+  text-align: center;
 }
+
 
 /* #################################################################### */
 /* Mobile View Specific Styles */
@@ -2031,19 +2076,41 @@ input[type="range"] {
     transform-origin: top left;
   }
 
-  .health-status {
+  .health-tooltip {
     top: -60px; 
   }
 
-  .status-content {
+  .tooltip-content {
     padding: 10px 14px; 
     font-size: 16px;    
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   }
 
-  .status-health-bar {
+  .monster-name {
+    font-size: 18px;
+  }
+  
+  .health-text {
+    font-size: 16px;
+  }
+
+  .tooltip-health-bar {
     width: 100%;
     height: 8px;
+  }
+
+  stats-grid {
+    font-size: 12px;
+    gap: 4px 10px;
+  }
+  
+  .ability-name {
+    font-size: 14px;
+  }
+  
+  .ability-description {
+    font-size: 11px;
+    max-width: 240px;
   }
 
   .health-ring-container:active {

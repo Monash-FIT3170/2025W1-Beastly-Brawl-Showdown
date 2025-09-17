@@ -37,7 +37,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   playerAbilityVisible,
   onPlayerAbilityComplete,
 }) => {
-  const [_ , setDisplayedNumber] = useState<number | null>(null);
+  const [_, setDisplayedNumber] = useState<number | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -90,6 +90,14 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         currentHealth={player2.currentHp}
         maxHealth={player2.template.baseStats.health}
         imageSrc={player2.template.imageUrl}
+        monsterName={player2.template.name}
+        baseStats={{
+          attack: player2.template.baseStats.attack,
+          defense: player2.template.baseStats.armour,
+          speed: player2.template.baseStats.speed,
+          health: player2.template.baseStats.health,
+        }}
+        abilityName={player2.template.abilityActionId}
         showSlash={enemySlashVisible}
         onSlashComplete={onEnemySlashComplete}
         showShield={enemyShieldVisible}
@@ -113,6 +121,14 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         currentHealth={player1.currentHp}
         maxHealth={player1.template.baseStats.health}
         imageSrc={player1.template.imageUrl}
+        monsterName={player1.template.name}
+        baseStats={{
+          attack: player1.template.baseStats.attack,
+          defense: player1.template.baseStats.armour,
+          speed: player1.template.baseStats.speed,
+          health: player1.template.baseStats.health,
+        }}
+        abilityName={player1.template.abilityActionId}
         showSlash={playerSlashVisible}
         onSlashComplete={onPlayerSlashComplete}
         showShield={playerShieldVisible}
