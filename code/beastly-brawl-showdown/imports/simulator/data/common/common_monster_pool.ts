@@ -4,7 +4,7 @@ import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
 type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide" | "fleet_foot" | 
-"knight" | "sea_urchin";
+"knight" | "sea_urchin" | "lion";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
   name: "common_monster_pool",
   monsters: {
@@ -147,6 +147,25 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
         health: 60,
         armour: 2,
         attack: 0,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    lion: {
+      templateId: "lion",
+      name: "Lion",
+      description: "A fierce and majestic predator. An Attack Monster that excels in hitting hard.",
+      imageUrl: "",
+      baseStats: {
+        health: 36,
+        armour: 1,
+        attack: 5,
         speed: 4,
         crit_chance: 5,
         crit_damage: 2,
