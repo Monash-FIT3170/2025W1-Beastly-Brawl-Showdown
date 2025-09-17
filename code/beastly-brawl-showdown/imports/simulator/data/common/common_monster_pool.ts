@@ -4,7 +4,7 @@ import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
 type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide" | "fleet_foot" | 
-"knight" | "sea_urchin" | "lion";
+"knight" | "sea_urchin" | "lion" | "bear";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
   name: "common_monster_pool",
   monsters: {
@@ -166,6 +166,25 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
         health: 36,
         armour: 1,
         attack: 5,
+        speed: 4,
+        crit_chance: 5,
+        crit_damage: 2,
+      },
+      attackActionId: "attack-normal",
+      defendActionId: "defend",
+      baseDefendActionCharges: 3,
+      onSpawnActions: [],
+    },
+
+    bear: {
+      templateId: "bear",
+      name: "Bear",
+      description: "A strong and resilient creature. A Balanced Monster that goes berserk.",
+      imageUrl: "",
+      baseStats: {
+        health: 50,
+        armour: 2,
+        attack: 2,
         speed: 4,
         crit_chance: 5,
         crit_damage: 2,
