@@ -94,8 +94,6 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         baseStats={{
           attack: player2.template.baseStats.attack,
           defense: player2.template.baseStats.armour,
-          speed: player2.template.baseStats.speed,
-          health: player2.template.baseStats.health,
         }}
         abilityName={player2.template.abilityActionId}
         showSlash={enemySlashVisible}
@@ -125,8 +123,6 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         baseStats={{
           attack: player1.template.baseStats.attack,
           defense: player1.template.baseStats.armour,
-          speed: player1.template.baseStats.speed,
-          health: player1.template.baseStats.health,
         }}
         abilityName={player1.template.abilityActionId}
         showSlash={playerSlashVisible}

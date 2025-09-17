@@ -7,8 +7,6 @@ type MonsterTooltipProps = {
   baseStats: {
     attack: number;
     defense: number;
-    speed: number;
-    health: number;
   };
   abilityName?: string;
 };
@@ -54,14 +52,6 @@ const MonsterTooltip: React.FC<MonsterTooltipProps> = ({
             <div className="stat-item">
               <span className="stat-label">DEF:</span>
               <span className="stat-value">{baseStats.defense}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">SPD:</span>
-              <span className="stat-value">{baseStats.speed}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">HP:</span>
-              <span className="stat-value">{baseStats.health}</span>
             </div>
           </div>
         </div>

@@ -7,8 +7,6 @@ import MonsterTooltip from "../MonsterToolTip";
 type BaseStats = {
   attack: number;
   defense: number;
-  speed: number;
-  health: number;
 };
 
 type Props = {
