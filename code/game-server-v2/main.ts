@@ -10,11 +10,11 @@ import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
-import { SideId } from "app/simulator/core/side";
-import { COMMON_MONSTER_POOL } from "app/simulator/data/common/common_monster_pool";
+import { SideId } from "./simulator/core/side";
+import { COMMON_MONSTER_POOL } from "./simulator/data/common/common_monster_pool";
 import { log } from "console";
-import { EntryID } from "app/simulator/core/utils";
-import { TargetingMethod } from "app/simulator/core/action/targeting";
+import { EntryID } from "./simulator/core/utils";
+import { TargetingMethod } from "./simulator/core/action/targeting";
 import mongoose from "mongoose";
 
 export async function checkCollectionExists(collectionName: string): Promise<boolean> {
@@ -46,7 +46,7 @@ log_notice("Loading config...");
 log_attention("Config not implemented yet. Using placeholder.");
 const config: ServerConfig = {
   serverIp: process.env.SERVER_IP || "https://two025w1-beastly-brawl-showdown.onrender.com",
-  serverPort: parseInt(process.env.SERVER_PORT || 8080),
+  serverPort: parseInt(process.env.SERVER_PORT || "8080"),
   serverNumber: 7,
   maxCapcity: 12,
   overrideExistingRecordOnStartup: true,
@@ -337,13 +337,13 @@ async function main() {
 
       // Expect the client to send the monster templateId (key)
       const monsterKey = data.data as keyof typeof COMMON_MONSTER_POOL.monsters;
-      log_event("Player selected monster key: " + monsterKey);
+      log_event("Player selected monster key: " + monsterKey.toString());
       if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
         socket.emit("error", "Invalid monster selection");
         return;
       }
       // Store selected monster template name directly
-      player.setMonsterTemplate(monsterKey);
+      player.setMonsterTemplate(monsterKey.toString());
       player.isReady = true;
 
       // Check if all players are ready
