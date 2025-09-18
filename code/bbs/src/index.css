@@ -1989,16 +1989,6 @@ input[type="range"] {
   text-align: center;
 }
 
-.ability-description {
-  font-size: 10px;
-  color: #CCC;
-  line-height: 1.3;
-  white-space: normal;
-  max-width: 220px;
-  text-align: center;
-}
-
-
 /* #################################################################### */
 /* Mobile View Specific Styles */
 @media screen and (max-width: 768px) {
@@ -2123,11 +2113,6 @@ input[type="range"] {
   
   .ability-name {
     font-size: 14px;
-  }
-  
-  .ability-description {
-    font-size: 11px;
-    max-width: 240px;
   }
 
   .health-ring-container:active {
