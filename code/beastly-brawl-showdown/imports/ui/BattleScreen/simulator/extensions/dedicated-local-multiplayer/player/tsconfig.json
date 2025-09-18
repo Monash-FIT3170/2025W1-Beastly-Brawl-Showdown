@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.typecheck.json",
+  "compilerOptions": {
+    "composite": true,
+    "esModuleInterop": true,
+    "jsx": "react"
+  },
+  "include": [
+    "src",
+  ],
+  "references": [
+    {
+      "path": "../../../core"
+    },
+    {
+      "path": "../../../data"
+    },
+    {
+      "path": "../api"
+    },
+    {
+      "path": "../../visualiser"
+    },
+  ]
+}

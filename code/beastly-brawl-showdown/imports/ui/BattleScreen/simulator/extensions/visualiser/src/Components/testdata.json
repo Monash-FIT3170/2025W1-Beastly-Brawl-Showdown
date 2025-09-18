@@ -1,0 +1,564 @@
+[
+    {
+        "name": "snapshot",
+        "sides": [
+            {
+                "id": 0,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 25,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            },
+            {
+                "id": 1,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 1,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            }
+        ]
+    },
+    {
+        "name": "startMove",
+        "source": 0,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 0,
+        "faces": 20,
+        "result": 17
+    },
+    {
+        "name": "moveSuccess",
+        "source": 0,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 0,
+        "faces": 20,
+        "result": 18
+    },
+    {
+        "name": "damage",
+        "source": 0,
+        "target": 1,
+        "amount": 8
+    },
+    {
+        "name": "startMove",
+        "source": 1,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 1,
+        "faces": 20,
+        "result": 3
+    },
+    {
+        "name": "blocked",
+        "source": 1,
+        "target": 1
+    },
+    {
+        "name": "snapshot",
+        "sides": [
+            {
+                "id": 0,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 25,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            },
+            {
+                "id": 1,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 2,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            }
+        ]
+    },
+    {
+        "name": "startMove",
+        "source": 0,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 0,
+        "faces": 20,
+        "result": 3
+    },
+    {
+        "name": "blocked",
+        "source": 0,
+        "target": 1
+    },
+    {
+        "name": "startMove",
+        "source": 1,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 1,
+        "faces": 20,
+        "result": 7
+    },
+    {
+        "name": "blocked",
+        "source": 1,
+        "target": 1
+    },
+    {
+        "name": "snapshot",
+        "sides": [
+            {
+                "id": 0,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 25,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            },
+            {
+                "id": 1,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 3,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            }
+        ]
+    },
+    {
+        "name": "startMove",
+        "source": 0,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 0,
+        "faces": 20,
+        "result": 11
+    },
+    {
+        "name": "blocked",
+        "source": 0,
+        "target": 1
+    },
+    {
+        "name": "startMove",
+        "source": 1,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 1,
+        "faces": 20,
+        "result": 1
+    },
+    {
+        "name": "blocked",
+        "source": 1,
+        "target": 1
+    },
+    {
+        "name": "snapshot",
+        "sides": [
+            {
+                "id": 0,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 25,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            },
+            {
+                "id": 1,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 4,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            }
+        ]
+    },
+    {
+        "name": "startMove",
+        "source": 0,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 0,
+        "faces": 20,
+        "result": 19
+    },
+    {
+        "name": "moveSuccess",
+        "source": 0,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 0,
+        "faces": 20,
+        "result": 12
+    },
+    {
+        "name": "damage",
+        "source": 0,
+        "target": 1,
+        "amount": 10
+    },
+    {
+        "name": "startMove",
+        "source": 1,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 1,
+        "faces": 20,
+        "result": 1
+    },
+    {
+        "name": "blocked",
+        "source": 1,
+        "target": 1
+    },
+    {
+        "name": "snapshot",
+        "sides": [
+            {
+                "id": 0,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 25,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            },
+            {
+                "id": 1,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 5,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            }
+        ]
+    },
+    {
+        "name": "startMove",
+        "source": 0,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 0,
+        "faces": 20,
+        "result": 8
+    },
+    {
+        "name": "blocked",
+        "source": 0,
+        "target": 1
+    },
+    {
+        "name": "startMove",
+        "source": 1,
+        "target": 1,
+        "moveId": "attack-normal"
+    },
+    {
+        "name": "roll",
+        "source": 1,
+        "faces": 20,
+        "result": 5
+    },
+    {
+        "name": "blocked",
+        "source": 1,
+        "target": 1
+    },
+    {
+        "name": "snapshot",
+        "sides": [
+            {
+                "id": 0,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 25,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            },
+            {
+                "id": 1,
+                "monster": {
+                    "base": {
+                        "name": "Mystic Wyvern",
+                        "description": "A mystical creature of the skies. A Balanced Monster.",
+                        "imageUrl": "/img/monster-selection-images/placeholder_monster_1.png",
+                        "baseStats": {
+                            "health": 25,
+                            "armour": 14,
+                            "attack": 2,
+                            "speed": 5
+                        },
+                        "attackActionId": "attack-normal",
+                        "defendActionId": "defend",
+                        "baseDefendActionCharges": 3,
+                        "onSpawnActions": [
+                            {
+                                "type": "spawnAction"
+                            }
+                        ]
+                    },
+                    "health": 6,
+                    "components": [],
+                    "defendActionCharges": 3
+                },
+                "pendingActions": null
+            }
+        ]
+    }
+]

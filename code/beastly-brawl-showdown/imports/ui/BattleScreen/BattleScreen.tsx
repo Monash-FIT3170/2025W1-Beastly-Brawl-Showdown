@@ -10,6 +10,7 @@ import BattleMessage from "./BattleMessage";
 import { DamageEvent } from "/imports/simulator/core/event/core_events";
 import { Notice, Roll } from "/imports/simulator/core/notice/notice";
 import { roll } from "/imports/simulator/core/roll";
+import { BattleScene } from "./simulator/extensions/visualiser/src/Components/battle_scene"
 
 interface BattleScreenProps {
   matchData: {
@@ -184,44 +185,44 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   }, [socket]);
 
   // Listen for new battle events from server (only DamageEvent for now)
-  useEffect(() => {
-    if (!socket) return;
-    const handleNewEvent = (event: any) => {
-      if (!myMonster || !enemyMonster) return;
-      console.log("received" + event.name)
-
-      if (event.name === "damage") {
-        const damageEvent = event as DamageEvent;
-        if (damageEvent.target === 0) {
-          // player1 took damage
-          setMyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
-        } else if (damageEvent.target === 1) {
-          // player2 took damage
-          setEnemyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
-        }
-      }
-    };
-    socket.on("newEvent", handleNewEvent);
-    return () => {
-      socket.off("newEvent", handleNewEvent);
-    };
-  }, [socket, myMonster, enemyMonster]);
-
-  //#region Test Handle Event
-  // Change to make it keep the new events in an array
   // useEffect(() => {
   //   if (!socket) return;
+  //   const handleNewEvent = (event: any) => {
+  //     if (!myMonster || !enemyMonster) return;
+  //     console.log("received" + event.name)
 
-  //   const handleNewEvent = (ev: any) => {
-  //     console.log("New event received:", ev.name);
-  //     setEvents(prev => [...prev, ev]);
+  //     if (event.name === "damage") {
+  //       const damageEvent = event as DamageEvent;
+  //       if (damageEvent.target === 0) {
+  //         // player1 took damage
+  //         setMyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
+  //       } else if (damageEvent.target === 1) {
+  //         // player2 took damage
+  //         setEnemyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
+  //       }
+  //     }
   //   };
-
   //   socket.on("newEvent", handleNewEvent);
   //   return () => {
   //     socket.off("newEvent", handleNewEvent);
-  //   }
-  // }, [socket]);
+  //   };
+  // }, [socket, myMonster, enemyMonster]);
+
+  //#region Test Handle Event
+  // Change to make it keep the new events in an array
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewEvent = (ev: any) => {
+      console.log("New event received:", ev.name);
+      setEvents(prev => [...prev, ev]);
+    };
+
+    socket.on("newEvent", handleNewEvent);
+    return () => {
+      socket.off("newEvent", handleNewEvent);
+    }
+  }, [socket]);
 
   // Sequentially play animations after both players submit moves
   useEffect(() => {
@@ -276,7 +277,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     <div className="canvas-body" id="battle-screen-body">
       <BattleTop />
       {showMessage && <BattleMessage message={battleMessage} />}
-      <BattleMiddle
+      {/*}BattleMiddle
         showAnimation={showAnimation}
         player1={myMonster}
         player2={enemyMonster}
@@ -292,14 +293,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         onEnemyAbilityComplete={() => setEnemyAbility(false)}
         playerAbilityVisible={playerAbility}
         onPlayerAbilityComplete={() => setPlayerAbility(false)}
-      />
-      {/*<BattleScene
+      />*/}
+      <BattleScene
         events={events}
         turnIndex={turnIndex}
         isPlaying={isPlaying}
         autoAdvance={false}  // default: no autoplay
         onAdvanceTurn={(next) => setTurnIndex(next)}
-      />*/}
+      />
       {showEnemySubmittedMessage && <BattleMessage message={"Enemy Has Submitted"} />}
       {showSubmittedMoveMessage && <BattleMessage message={"Your Move Has Been Submitted"} />}
       <BattleBottom

@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.typecheck.json",
+  "compilerOptions": {
+    "composite": true,
+    "target": "es2019"
+  }
+}
