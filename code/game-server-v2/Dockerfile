@@ -1,32 +1,23 @@
 FROM node:18-bullseye
 
+# Set the root workdir
 WORKDIR /app
 
-# Copy the game-server-v2 files
-COPY game-server-v2/package*.json ./
+# Copy package files and install deps
+COPY game-server-v2/package*.json ./game-server-v2/
+WORKDIR /app/game-server-v2
 RUN npm install
 
-# Copy the source code and shared dependencies
+# Copy required code and dependencies
 COPY game-server-v2/ /app/game-server-v2/
 COPY shared/ /app/shared/
 COPY simulator/ /app/simulator/
 
-ls -R /app
-
-# Set the final working directory to the game-server code
-WORKDIR /app/game-server-v2
-
-# Install ts-node and typescript
+# Install global tools
 RUN npm install -g ts-node typescript
-
-# Copy everything
-COPY . .
-
-# Install project dependencies
-RUN npm install
 
 # Expose port
 EXPOSE 8080
 
-# Run with ts-node
+# Start server
 CMD ["npm", "start"]
