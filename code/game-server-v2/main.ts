@@ -10,11 +10,11 @@ import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
-import { SideId } from "/../simulator/core/side";
-import { COMMON_MONSTER_POOL } from "/../simulator/data/common/common_monster_pool";
+import { SideId } from "../simulator/core/side";
+import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 import { log } from "console";
-import { EntryID } from "/../simulator/core/utils";
-import { TargetingMethod } from "/../simulator/core/action/targeting";
+import { EntryID } from "../simulator/core/utils";
+import { TargetingMethod } from "../simulator/core/action/targeting";
 import mongoose from "mongoose";
 
 export async function checkCollectionExists(collectionName: string): Promise<boolean> {
@@ -94,7 +94,7 @@ async function main(config: ServerConfig) {
       { serverNumber: config.serverNumber },
       {
         serverNumber: config.serverNumber,
-        serverUrl:  `${config.serverIp}:${config.serverPort}`,
+        serverUrl: `${config.serverIp}:${config.serverPort.toString()}`,
         lastUpdated: new Date(),
       },
       { upsert: true, new: true }
@@ -106,7 +106,7 @@ async function main(config: ServerConfig) {
     log_attention("Using fallback - Creating new record.");
     const newRecord = new GameServerRegisterModel({
       serverNumber: config.serverNumber,
-      serverUrl: `${config.serverIp}:${config.serverPort}`,
+      serverUrl: `${config.serverIp}:${config.serverPort.toString()}`,
       lastUpdated: new Date(),
     });
 
@@ -381,7 +381,8 @@ async function main(config: ServerConfig) {
   });
 
   httpServer.listen(config.serverPort, () => {
-    log_notice(`Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()}. <CTRL+C> to shutdown.`);
+    httpServer.listen(config.serverPort, () => {
+    log_notice(`Socket.IO server running on ${config.serverIp}:${config.serverPort}. <CTRL+C> to shutdown.`);
     //#endregion
 
     //#region IO
