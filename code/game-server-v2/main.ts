@@ -18,7 +18,8 @@ import { TargetingMethod } from "/app/simulator/core/action/targeting";
 import mongoose from "mongoose";
 
 export async function checkCollectionExists(collectionName: string): Promise<boolean> {
-  await mongoose.connect("mongodb://mongo:27017/game_server_register");
+  const MONGO_URI = process.env.MONGO_URI || "mongodb://mongo:27017/game_server_register";
+  await mongoose.connect(MONGO_URI);
 
   if (!mongoose.connection.readyState) {
     throw new Error("MongoDB connection is not ready");
@@ -420,8 +421,8 @@ async function main(config: ServerConfig) {
 log_notice("Loading config...");
 log_attention("Config not implemented yet. Using placeholder.");
 const config: ServerConfig = {
-  serverIp: "http://localhost",
-  serverPort: 8080,
+  serverIp: process.env.SERVER_IP || "https://two025w1-beastly-brawl-showdown.onrender.com",
+  serverPort: parseInt(process.env.SERVER_PORT || 8080),
   serverNumber: 7,
   maxCapcity: 12,
   overrideExistingRecordOnStartup: true,

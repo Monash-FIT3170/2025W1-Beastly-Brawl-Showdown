@@ -1,6 +1,8 @@
 import { io } from "socket.io-client";
 
-const socket = io('http://localhost');
+const SERVER_URL = process.env.GAME_SERVER_URL || "http://localhost:3000";
+const socket = io(SERVER_URL);
+
 
 socket.on("echo", (msg) => {
   console.log(`Server says: ${msg}`);
