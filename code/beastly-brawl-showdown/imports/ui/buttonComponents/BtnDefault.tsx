@@ -1,7 +1,5 @@
-import React from 'react';
+import React from "react";
 
 export const BtnDefault = () => {
-    return (
-        <button className="btn btn-default">Button</button>
-    )    
-}
+  return <button className="btn btn-default">Button</button>;
+};

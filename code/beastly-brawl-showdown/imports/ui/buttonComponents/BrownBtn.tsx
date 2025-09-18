@@ -1,7 +1,5 @@
-import React from 'react';
+import React from "react";
 
 export const BrownBtn = () => {
-    return (
-        <button className="btn btn-brown">Button</button>
-    )    
-}
+  return <button className="btn btn-brown">Button</button>;
+};

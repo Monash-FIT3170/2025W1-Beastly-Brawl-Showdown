@@ -1,19 +1,21 @@
-import { DefaultEventsMap, Server, Socket } from "socket.io";
-import { MonsterPool } from "../../../data/monster_pool";
-import { Battle, PlayerOptions } from "../../../core/battle";
+import { Server, Socket } from "socket.io";
 import express from "express";
 import { createServer } from "node:http";
 import * as readline from "readline";
-import { MonsterTemplate } from "../../../core/monster/monster";
+import { PlayerToServerEvents, ServerToPlayerEvents } from "../api/src/api";
+import { MonsterId } from "../../../core/monster/monster_pool";
+import { SideId } from "../../../core/side";
+import { Battle, PlayerOptions } from "../../../core/battle";
 import { ChooseMove, Notice, Roll } from "../../../core/notice/notice";
 import { OrderedEvent } from "../../../core/event/event_history";
-import { SideId } from "../../../core/side";
-import { PlayerToServerEvents, ServerToPlayerEvents } from "./api";
+import { COMMON_MONSTER_POOL } from "../../../data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "../../../data/common/common_move_pool";
+import { log_event } from "../../../core/utils";
 
 type Player = {
   name: string;
   sideId: SideId;
-  monsterTemplate: MonsterTemplate;
+  monsterId: MonsterId;
   socket: Socket<PlayerToServerEvents, ServerToPlayerEvents, never, PlayerSocketData>;
 };
 
@@ -50,21 +52,21 @@ io.use((socket, next) => {
     next(new Error("Authentication error"));
     return;
   }
-  if (!auth.name) {
+  if (!auth["name"]) {
     next(new Error("Authentication error: no name provided"));
     return;
   }
 
   /// Valid connection
   const newPlayer: Player = {
-    name: auth.name, //`P${players.length + 1}`,
+    name: auth["name"], //`P${players.length + 1}`,
     sideId: players.length as SideId,
     socket: socket,
-    monsterTemplate: MonsterPool[1],
+    monsterId: "mystic_wryven",
   };
 
   players.push(newPlayer);
-  console.log(`New player:\n\t- Name: ${newPlayer.name}\n\t- Monster Template: ${JSON.stringify(newPlayer.monsterTemplate)}`);
+  console.log(`New player:\n\t- Name: ${newPlayer.name}\n\t- Monster Template: ${JSON.stringify(newPlayer.monsterId)}`);
   next();
 });
 
@@ -112,9 +114,11 @@ function startSimulator() {
   /// Create battle
   const battle: Battle = new Battle({
     seed: 0,
+    monsterPool: COMMON_MONSTER_POOL,
+    movePool: COMMON_MOVE_POOL,
     playerOptionSet: players.map((player) => {
       const playerOptions: PlayerOptions = {
-        monsterTemplate: player.monsterTemplate,
+        monsterId: player.monsterId,
       };
       return playerOptions;
     }),
@@ -131,18 +135,21 @@ function startSimulator() {
     },
   });
   players.map((player, index) => {
-    player.socket.on("getSelfInfo", () => {
-      return player.sideId;
+    player.socket.on("getSelfInfo", (res) => {
+      console.log("Returning self info.");
+      res(player.sideId);
     });
 
-    player.socket.on("getHistory", () => {
-      return battle.eventHistory.events;
+    player.socket.on("getHistory", (res) => {
+      res(battle.eventHistory.events);
     });
-    player.socket.on("getNotices", () => {
-      return battle.noticeBoard.noticeMaps[player.sideId];
+    player.socket.on("getNotices", (res) => {
+      console.log(`Player ${player.sideId} requested its notices.`);
+      res(Array.from(battle.noticeBoard.noticeMaps[player.sideId].values()));
     });
 
     player.socket.on("resolveNotice", (noticeKind, params) => {
+      log_event("received resolving notice: " + noticeKind as string)
       switch (noticeKind) {
         // TODO make generic
         case "chooseMove": {

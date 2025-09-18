@@ -1,42 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
-
-const socket: Socket = io(); // Defaults to current host
+import { MonsterTemplate } from '../../simulator/core/monster/monster_template';
+import { usePlayerSocket } from '../player/game/PlayerPage';
 
 type BattleMonsterProps = {
-  image: string;
-  alt: string;
-  position: string; // "monster1" or "monster2"
-  playerId: string; // Who is this monster controlled by
-  initialHp: number; // pass initial HP here
-
+  template: MonsterTemplate;
+  currentHp: number;
+  playerId: string;
+  position: string;
 };
 
-export const BattleMonster: React.FC<BattleMonsterProps> = ({ image, alt, position, playerId }) => {
+export const BattleMonster: React.FC<BattleMonsterProps> = ({ template, currentHp, playerId, position }) => {
+  const { socket } = usePlayerSocket();
   const [hp, setHp] = useState<number>(100);
 
   useEffect(() => {
-    // Update HP when server sends new value
-    socket.on('update-hp', ({ playerId: targetId, newHp }) => {
-      if (targetId === playerId) {
-        setHp(newHp);
-      }
-    });
+    setHp(currentHp);
+  }, [currentHp]);
 
-    return () => {
-      socket.off('update-hp');
+  useEffect(() => {
+    if (!socket) return;
+
+    const handler = ({ playerId: targetId, newHp }: { playerId: string; newHp: number }) => {
+      if (targetId === playerId) setHp(newHp);
     };
-  }, [playerId]);
+
+    socket.on('update-hp', handler);
+
+    // Cleanup function
+    return () => {
+      socket.off('update-hp', handler);
+    };
+  }, [socket, playerId]);
 
   return (
     <div className={position}>
       <div className="progressContainer">
-        <progress value={hp} max={100} className="hpBar"></progress>
+        <progress value={hp} max={template.baseStats.health} className="hpBar" />
         <span className="hpLabel">{hp} HP</span>
       </div>
-      <img className="battleMonsterImg" src={image} alt={alt} />
+      <img className="battleMonsterImg" src={template.imageUrl} alt={template.name} />
     </div>
   );
-
-  //Server side io.emit('update-hp', { playerId: damagedPlayerId, newHp: updatedHp });
 };

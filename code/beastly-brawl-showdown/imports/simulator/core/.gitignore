@@ -1,0 +1,9 @@
+# Ignore node_modules (all Node.js packages, nested)
+**/node_modules/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore build files
+**/dist
+tsconfig.tsbuildinfo

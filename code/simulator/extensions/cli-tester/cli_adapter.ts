@@ -3,11 +3,12 @@ import { Notice, NoticeKind } from "../../core/notice/notice";
 import { NoticeBoard } from "../../core/notice/notice_board";
 import { SideId } from "../../core/side";
 import { EventHistory } from "../../core/event/event_history";
-import { EntryID } from "../../core/types";
+import { EntryID } from "../../core/utils";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../data/common/common_move_pool";
 
 export class CliAdapter {
-  noticeBoard: NoticeBoard;
-  eventHistory: EventHistory;
+  readonly noticeBoard: NoticeBoard;
+  readonly eventHistory: EventHistory;
 
   constructor(noticeBoard: NoticeBoard, eventHistory: EventHistory) {
     this.noticeBoard = noticeBoard;
@@ -56,12 +57,26 @@ export class CliAdapter {
       try {
         switch (notice.kind) {
           case "chooseMove": {
-            if (args.length < 2) {
-              console.log("❌ onChooseMove requires moveId and moveTarget");
+            if (args.length < 1) {
+              console.log("❌ onChooseMove requires moveId (and maybe target)");
               break;
             }
 
-            notice.callback(args[0].toLowerCase() as EntryID, parseInt(args[1], 10) as SideId);
+            switch (COMMON_MOVE_POOL[args[0].toLowerCase() as COMMON_MOVE_NAMES].targetingMethod) {
+              case "self": {
+                notice.callback(args[0].toLowerCase() as EntryID, {
+                  targetingMethod: "self",
+                });
+                break;
+              }
+              case "single-enemy": {
+                notice.callback(args[0].toLowerCase() as EntryID, {
+                  targetingMethod: "single-enemy",
+                  target: parseInt(args[1]) as SideId,
+                });
+                break;
+              }
+            }
             break;
           }
           case "roll": {

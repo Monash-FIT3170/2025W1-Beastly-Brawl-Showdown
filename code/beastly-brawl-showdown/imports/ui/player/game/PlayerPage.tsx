@@ -1,54 +1,49 @@
-import React, { createContext, useContext, useEffect, useRef, useState, } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
+import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
+import { MonsterTemplate } from "../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
-import { monsterData, MonsterName } from "/imports/data/monsters/MonsterData";
-import Monsters from "/imports/data/monsters/Monsters";
+import WinnerScreen from "../../host/projector/WinnerScreen";
 
 //#region Socket Context Definition
-
-// Typing the context and socket for typescript
 interface PlayerSocketContextType {
   socket: Socket | null;
   isConnected: boolean;
 }
 
-// Creates persistent instance of the socket connection
 const PlayerSocketContext = createContext<PlayerSocketContextType>({
   socket: null,
   isConnected: false,
 });
 
-/**
- * Wrapper class to allow the socket to be passed to other components
- * @param children Name of react component (screen) that needs to access the socket connection
- * @returns Blueprint to allow child component to access the socket
- */
-const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Has the player established connection through the socket
+const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isConnected, setIsConnected] = useState(false);
-
-  // Connection to the socket
   const socketRef = useRef<Socket | null>(null);
 
-  // Variables accessed through session storage
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
   const serverUrl = sessionStorage.getItem("serverUrl");
 
   useEffect(() => {
-    if (!socketRef.current) {
-      // Establish connection to the server through channel defined in main.ts
+    if (!socketRef.current && serverUrl) {
       socketRef.current = io(serverUrl + "/player", {
         auth: { joinCode, displayName },
       });
 
-      // Establish connection handshake to server
       socketRef.current.on("connect", () => {
         console.log("Connected to server");
         setIsConnected(true);
       });
-      
+
       socketRef.current.on("disconnect", () => {
         console.log("Disconnected from server");
         setIsConnected(false);
@@ -64,122 +59,198 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, [serverUrl, joinCode, displayName]);
 
-  // Blueprint that allows component wrapped in this class to access the player's socket connection
   return (
-    <PlayerSocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+    <PlayerSocketContext.Provider
+      value={{ socket: socketRef.current, isConnected }}
+    >
       {children}
     </PlayerSocketContext.Provider>
   );
 };
 
-// Export context containing the socket connection to be accessible in other react components
 export const usePlayerSocket = () => useContext(PlayerSocketContext);
 //#endregion
 
 //#region Main Player Component
 const PlayerContent = () => {
-  // Socket established using the exported context function
   const { socket, isConnected } = usePlayerSocket();
 
-  // Session storage variables initialised for this component
-  const joinCode = sessionStorage.getItem("joinCode");
-  const displayName = sessionStorage.getItem("displayName");
-  const serverUrl = sessionStorage.getItem("serverUrl");
-
-  // State triggers to change screens and perform actions
+  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number; sideId: number }; enemyMonster: { template: MonsterTemplate; currentHp: number; sideId: number } } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
-  const [allReady, setReady] = useState(false);
+  const [allReady, setAllReady] = useState(false);
+  const [winner, setWinner] = useState();
+  const [waiting, setWaiting] = useState(false);
+
+  const waitingTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!socket) return;
-    // Listen for game start
-    socket.on("game-started", () => {
-      setStartSelection(true);
+
+    socket.on("game-started", () => setStartSelection(true));
+
+    socket.on("round-start", (data) => {
+      log_event("Received round-start data:", data);
+
+      const myTemplateName = data?.myMonster;
+      const enemyTemplateName = data?.enemyMonster;
+
+      if (!myTemplateName || !enemyTemplateName) {
+        console.warn("Incomplete round-start data:", data);
+        return;
+      }
+
+      console.log(
+        `Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`
+      );
+
+      // Create Monster instances for BattleScreen
+      const myMonster =
+        COMMON_MONSTER_POOL.monsters[
+        myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        ];
+      const enemyMonster =
+        COMMON_MONSTER_POOL.monsters[
+        enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        ];
+      
+      // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
+      const mySide = data.sideID;
+      const enemySide = data.sideID === 0 ? 1 : 0;
+
+      console.log(`My side is ${mySide} || Enemy side is ${enemySide}`);
+
+
+      setMatchData({
+        myMonster: {
+          template: myMonster,
+          currentHp: data.myHp,
+          sideId: mySide
+        },
+        enemyMonster: {
+          template: enemyMonster,
+          currentHp: data.enemyHp,
+          sideId: enemySide
+        },
+      });
+
+      setAllReady(true);
     });
 
-    // Listen for round-start
-    socket.on("round-start", () => {
-      console.log(`Round start command received from server`)
-      setReady(true);
-    })
+    socket.on("send-to-waiting", () => {
+      setWaiting(true);
+    });
+
+    socket.on("return-from-waiting", () => { setWaiting(false) })
+
+    socket.on("tournament-finished", (data) => {
+      setWinner(data);
+    });
 
     return () => {
       socket.off("game-started");
+      socket.off("round-start");
+      socket.off("send-to-waiting");
+      socket.off("return-from-waiting");
+      socket.off("tournament-finished");
     };
   }, [socket]);
 
-  // Screen that displays when player is connecting to server
-  if (!isConnected) {
-    return <p>Connecting to server...</p>;
-  }
+  useEffect(() => {
+    if (!isConnected) return;
 
-  // Once connected, this screen will display
-  if (!startSelection) {
-    return (
-      <div>
-        <h1>PLAYER VIEW</h1>
-        <p>Server URL: {serverUrl}</p>
-        <p>Name: {displayName}</p>
-        <p>Room Code: {joinCode}</p>
-      </div>
-    );
-  }
-
-  // Type checking function converting string to MonsterName union
-  function isMonsterName(name: string): name is MonsterName {
-    return name in monsterData;
-  }
-
-  // Function that takes the result of monster selection and sends it to the server, then switches screen.
-  const handleMonsterSelection = (monster: string) => {
-    // Checking if string is valid monster
-    if (isMonsterName(monster)) {
-      // Create new monster based on string given
-      const data: Monsters = new monsterData[monster]();
-
-      // Check if socket exists
-      if (socket) {
-        console.log(data);
-        socket.emit("RequestSubmitMonster", { data });
-
-        // TODO: Make sure all players select a monster before changing the state below
-        setMonsterSelected(true);
-        console.log("Monster selected:", monster);
-      } else {
-        console.log(`No socket connection available: socket ${socket}`);
+    const restartAnimation = () => {
+      if (waitingTextRef.current) {
+        const letters =
+          waitingTextRef.current.querySelectorAll(".bounce-letter");
+        letters.forEach((letter, index) => {
+          const element = letter as HTMLElement;
+          element.style.animation = "none";
+          requestAnimationFrame(() => {
+            element.style.animation = `bounce 0.6s ease-in-out ${index * 0.1
+              }s both`;
+          });
+        });
       }
+    };
+
+    const initialTimeout = setTimeout(restartAnimation, 100);
+    const interval = setInterval(restartAnimation, 2000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [isConnected]);
+
+  const handleMonsterSelection = (monsterName: string) => {
+    // Find the monster in COMMON_MONSTER_POOL by name
+    const monster = Object.values(COMMON_MONSTER_POOL.monsters).find(
+      (m) => m.name === monsterName
+    );
+
+    if (!monster) {
+      console.error("Invalid monster selected:", monsterName);
+      return;
+    }
+
+    if (socket) {
+      // Send the templateId instead of the name
+      socket.emit("RequestSubmitMonster", { data: monster.templateId });
+      setMonsterSelected(true);
+      console.log("Monster selected:", monster.templateId);
     } else {
-      console.log(`Invalid monster name: ${monster}`);
+      console.warn("No socket connection available");
     }
   };
 
-  // Monster selection is displayed when a monster has not been selected
-  if (!monsterSelected) {
+  if (!isConnected) return <p>Connecting to server...</p>;
+
+  const WaitingScreen = () => (
+    <div className="waiting-screen">
+      <div className="logo" />
+      <div className="waiting-wrapper">
+        <div className="waiting-line" />
+        <div className="waiting-text" ref={waitingTextRef}>
+          <span className="bounce-letter">W</span>
+          <span className="bounce-letter">a</span>
+          <span className="bounce-letter">i</span>
+          <span className="bounce-letter">t</span>
+          <span className="bounce-letter">i</span>
+          <span className="bounce-letter">n</span>
+          <span className="bounce-letter">g</span>
+          <span className="bounce-letter">.</span>
+          <span className="bounce-letter">.</span>
+          <span className="bounce-letter">.</span>
+        </div>
+        <div className="waiting-line" />
+      </div>
+    </div>
+  );
+
+  if (!startSelection) return <WaitingScreen />;
+  if (!monsterSelected)
     return (
       <MonsterSelectionScreen
         setSelectedMonsterCallback={handleMonsterSelection}
       />
     );
-  }
+  if (!allReady || waiting) return <WaitingScreen />;
+  // TODO: Create a spectator page for losers to wait in
+  if (winner) return <WinnerScreen winnerName={winner} />;
 
-  // Waiting screen while players select monsters
-  if (!allReady) {
-    return <p>Waiting for all players to select their monsters...</p>;
-  }
-
-  // Battle screen displays when all checks have been passed
-  // TODO: selectedMonsterName should not exist, battle screen needs some other way to know what monsters to display
-  return <BattleScreen />;
+  return <BattleScreen matchData={matchData!} />;
 };
 //#endregion
 
 //#region Exported Component
-// Wrap the contents of the page to allow original player content to access the socket
 export const Player = () => (
   <PlayerSocketProvider>
     <PlayerContent />
   </PlayerSocketProvider>
 );
-//#endregion
 
+function log_event(message: string, data?: any) {
+  console.log(message, data);
+}
+//#endregion
