@@ -3,7 +3,7 @@ FROM node:18-bullseye
 WORKDIR /app
 
 # Copy the game-server-v2 files
-COPY game-server-v2/package*.json /app/game-server-v2/
+COPY game-server-v2/package*.json ./
 RUN npm install
 
 # Copy the source code and shared dependencies
