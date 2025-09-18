@@ -42,7 +42,18 @@ type ServerConfig = {
   overrideExistingRecordOnStartup: boolean;
 };
 
-async function main(config: ServerConfig) {
+log_notice("Loading config...");
+log_attention("Config not implemented yet. Using placeholder.");
+const config: ServerConfig = {
+  serverIp: process.env.SERVER_IP || "https://two025w1-beastly-brawl-showdown.onrender.com",
+  serverPort: parseInt(process.env.SERVER_PORT || 8080),
+  serverNumber: 7,
+  maxCapcity: 12,
+  overrideExistingRecordOnStartup: true,
+};
+log_notice("Config loaded.");
+
+async function main() {
   //#region Startup
   log_notice("Starting server...");
 
@@ -381,9 +392,7 @@ async function main(config: ServerConfig) {
   });
 
   httpServer.listen(config.serverPort, () => {
-    httpServer.listen(config.serverPort, () => {
     log_notice(`Socket.IO server running on ${config.serverIp}:${config.serverPort}. <CTRL+C> to shutdown.`);
-    //#endregion
 
     //#region IO
     // Readline setup
@@ -401,33 +410,19 @@ async function main(config: ServerConfig) {
     fs.writeFileSync(READY_FILE_PATH, "READY");
 
     // Listen for Ctrl + C (SIGINT)
-    const listenForShutdown = () => {
-      process.on("SIGINT", () => {
-        log_attention("Gracefully shutting down...");
+    process.on("SIGINT", () => {
+      log_attention("Gracefully shutting down...");
 
-        rl.close(); // Close input interface
-        socketServer.close(); // Close Socket.IO
-        httpServer.close(() => {
-          log_attention("Server closed.");
-          process.exit(0); // Exit process
-        });
+      rl.close(); // Close input interface
+      socketServer.close(); // Close Socket.IO
+      httpServer.close(() => {
+        log_attention("Server closed.");
+        process.exit(0); // Exit process
       });
-    };
-
-    // Start listening
-    listenForShutdown();
-  });
-}
-
-log_notice("Loading config...");
-log_attention("Config not implemented yet. Using placeholder.");
-const config: ServerConfig = {
-  serverIp: process.env.SERVER_IP || "https://two025w1-beastly-brawl-showdown.onrender.com",
-  serverPort: parseInt(process.env.SERVER_PORT || 8080),
-  serverNumber: 7,
-  maxCapcity: 12,
-  overrideExistingRecordOnStartup: true,
+    });
+  })
 };
-log_notice("Config loaded.");
 
-main(config);
+
+
+main();
