@@ -11,14 +11,10 @@ import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monst
 import { MonsterTemplate } from "../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
-import {
-  PlayerClientToServerEvents,
-  PlayerServerToClientEvents
-} from "../../../../../shared/types";
 
 //#region Socket Context Definition
 interface PlayerSocketContextType {
-  socket: Socket<PlayerServerToClientEvents, PlayerClientToServerEvents> | null;
+  socket: Socket | null;
   isConnected: boolean;
 }
 
@@ -31,10 +27,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket<
-    PlayerServerToClientEvents,
-    PlayerClientToServerEvents
-  > | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
@@ -101,7 +94,7 @@ const PlayerContent = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("gameStarted", () => setStartSelection(true));
+    socket.on("game-started", () => setStartSelection(true));
 
     socket.on("round-start", (data) => {
       setWaiting(false)
@@ -151,7 +144,7 @@ const PlayerContent = () => {
       setAllReady(true);
     });
 
-    socket.on("startWaiting", () => {
+    socket.on("send-to-waiting", () => {
       setWaiting(true);
     });
 
@@ -214,7 +207,7 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
-      socket.emit("submitMonsterChoice", { data: monster.templateId });
+      socket.emit("RequestSubmitMonster", { data: monster.templateId });
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {
