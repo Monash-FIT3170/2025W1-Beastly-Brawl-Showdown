@@ -11,6 +11,8 @@ COPY game-server-v2/ /app/game-server-v2/
 COPY shared/ /app/shared/
 COPY simulator/ /app/simulator/
 
+ls -R /app
+
 # Set the final working directory to the game-server code
 WORKDIR /app/game-server-v2
 
