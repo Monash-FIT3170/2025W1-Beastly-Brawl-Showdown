@@ -392,7 +392,8 @@ async function main() {
     });
   });
 
-  httpServer.listen(config.serverPort, () => {
+  const port = parseInt(process.env.PORT || "8080", 10);
+  httpServer.listen(port, () => {
     log_notice(`Socket.IO server running on ${config.serverIp}:${config.serverPort}. <CTRL+C> to shutdown.`);
 
     //#region IO
