@@ -72,7 +72,8 @@ async function main() {
   log_notice("Connect to database...");
   await connectDb();
   log_notice("Register to global records...");
-  log_attention(`MONGO ENV ${MONGO_URI}`); // TODO TESTING
+  // log_attention(`MONGO ENV ${MONGO_URI}`); // TODO TESTING
+  log_attention(`MONGO ENV ${MONGO_URI.toString()}`);
   /*
   The code fails here, inspecting the mongo collection shows that there is no documents
   */
