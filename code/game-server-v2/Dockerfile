@@ -9,6 +9,7 @@ WORKDIR /app/game-server-v2
 RUN npm install
 
 # Copy required code and dependencies
+COPY beastly-brawl-showdown/imports/simulator/ /app/beastly-brawl-showdown/imports/simulator/
 COPY game-server-v2/ /app/game-server-v2/
 COPY shared/ /app/shared/
 COPY simulator/ /app/simulator/
