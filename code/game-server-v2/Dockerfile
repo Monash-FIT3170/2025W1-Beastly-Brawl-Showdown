@@ -19,5 +19,7 @@ RUN npm install -g ts-node typescript
 # Expose port
 EXPOSE 8080
 
+RUN ls -l /app/simulator/core/side.ts
+
 # Start server
 CMD ["npm", "start"]
