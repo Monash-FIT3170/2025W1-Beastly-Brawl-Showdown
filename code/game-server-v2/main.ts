@@ -3,7 +3,7 @@ import * as readline from "readline";
 import cors from "cors";
 import express from "express";
 import http from "http";
-import { Server, Socket } from "socket.io";
+import { Server, Socket, Namespace } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
@@ -12,8 +12,6 @@ import * as path from "path";
 import { Player } from "./player";
 import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-import { log } from "console";
-import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import {
   ChooseMove,
@@ -21,6 +19,14 @@ import {
 } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { match } from "assert";
 import { Match, MatchType } from "./match";
+import {
+  PlayerClientToServerEvents, 
+  PlayerServerToClientEvents, 
+  PlayerSocketData, 
+  HostClientToServerEvents, 
+  HostServerToClientEvents
+} from "../shared/types"; // adjust path as needed
+import { MoveRequest } from "../simulator/core/action/move/move";
 
 type ServerConfig = {
   serverIp: string;
@@ -40,10 +46,26 @@ async function main(config: ServerConfig) {
   expressApp.use(express.json()); // Allow cross-origin requests
 
   const httpServer = http.createServer(expressApp);
-  const socketServer = new Server(httpServer, { cors: { origin: "*" } });
+  const socketServer = new Server<
+    never, // Global ClientToServerEvents
+    never, // Global ServerToClientEvents
+    never, // InterServerEvents
+    {}     // Global SocketData
+  >(httpServer, { cors: { origin: "*" } });
 
-  const playerChannel = socketServer.of("/player");
-  const hostChannel = socketServer.of("/host");
+  const playerChannel = socketServer.of("/player") as Namespace<
+    PlayerClientToServerEvents,
+    PlayerServerToClientEvents,
+    {},
+    PlayerSocketData
+  >;
+
+  const hostChannel = socketServer.of("/host") as Namespace<
+    HostClientToServerEvents,
+    HostServerToClientEvents,
+    {},
+    {}
+  >;
 
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
@@ -132,7 +154,7 @@ async function main(config: ServerConfig) {
   });
 
   // TODO use a persistent ID rather than socket ID
-  hostChannel.on("connection", async (socket: Socket) => {
+  hostChannel.on("connection", async (socket) => {
     log_event(`Host connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -140,7 +162,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region New Room
-    socket.on("request-room", async () => {
+    socket.on("requestRoom", async () => {
       log_event("Room requested.");
       // TODO prevent multiple rooms at the same time
       try {
@@ -149,7 +171,7 @@ async function main(config: ServerConfig) {
           playerChannel
         );
 
-        socket.emit("request-room_response", {
+        socket.emit("requestRoomResponse", {
           roomId: roomId,
           joinCode: joinCode,
         });
@@ -160,7 +182,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region Start Game
-    socket.on("start-game", (msg: { roomId: number }) => {
+    socket.on("startGame", (msg: { roomId: number }) => {
       log_event(`Host requested start-game for room ${msg.roomId}`);
 
       const room = gameServer.rooms.get(msg.roomId);
@@ -171,7 +193,7 @@ async function main(config: ServerConfig) {
 
       // Relay to all players in this room
       room.players.forEach((player) => {
-        playerChannel.to(player.socketId).emit("game-started"); // Clients can now start monster selection
+        playerChannel.to(player.socketId).emit("gameStarted"); // Clients can now start monster selection
       });
 
       log_notice(
@@ -284,14 +306,15 @@ async function main(config: ServerConfig) {
     );
     console.log("Player socket: ", socket.data);
 
+
     hostChannel
       .to(gameServer.rooms.get(roomId)!.hostSocketId)
-      .emit("player-set-changed", playerNameList);
+      .emit("refreshPlayerList", playerNameList);
     next();
   });
 
   // #region Player Channel
-  playerChannel.on("connection", async (socket: Socket) => {
+  playerChannel.on("connection", async (socket) => {
     log_event(`Player connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -299,7 +322,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region Select Monster
-    socket.on("RequestSubmitMonster", (data: any) => {
+    socket.on("submitMonsterChoice", (data) => {
       const player = socket.data.player as Player;
       if (!player) return;
 
@@ -336,14 +359,14 @@ async function main(config: ServerConfig) {
         }
 
         // P1: send a copy/start
-        room.playerChannel.to(match.player1.socketId).emit("round-start", {
+        room.playerChannel.to(match.player1.socketId).emit("startRound", {
           myMonster: match.player1.selectedMonsterTemplateName,
           enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
           sideID: 0,
         });
 
         //P2: send a copy/start (invert sides?)
-        room.playerChannel.to(match.player2?.socketId).emit("round-start", {
+        room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
           myMonster: match.player2?.selectedMonsterTemplateName,
           enemyMonster: match.player1.selectedMonsterTemplateName,
           sideID: 1,
@@ -367,9 +390,9 @@ async function main(config: ServerConfig) {
     socket.on("requestRoll", handleRollNotice);
 
     // #region Submit Move
-    socket.on("RequestSubmitMove", (msg: { data: any }) => {
+    socket.on("submitMove", (move: MoveRequest) => {
       log_event("Test move submission log");
-      const { moveId, targetMethod } = msg.data;
+      const moveId = move.moveId;
 
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -386,21 +409,11 @@ async function main(config: ServerConfig) {
 
       switch (moveId) {
         case "defend":
-          match.submitMove(
-            player,
-            moveId,
-            targetMethod as TargetingMethod,
-            sourceSide as SideId
-          );
+          match.submitMove(player, move);
           break;
         case "attack-normal":
           const targetSide = sourceSide === 1 ? 0 : 1;
-          match.submitMove(
-            player,
-            moveId,
-            targetMethod as TargetingMethod,
-            targetSide as SideId
-          );
+          match.submitMove(player, move);
           break;
       }
 
@@ -413,18 +426,23 @@ async function main(config: ServerConfig) {
         const player1Move = match.getPlayerMove(player1); // or store last submitted move somewhere
         const player2Move = match.getPlayerMove(player2);
 
+        if (!player1Move || !player2Move) {
+          throw new Error(`No move submitted for player ${player1.displayName}`);
+        }
+
         // Send both moves to the clients
-        playerChannel.to(player1.socketId).emit("ExecuteTurn", {
+        playerChannel.to(player1.socketId).emit("executeTurn", {
           playerMove: player1Move,
           enemyMove: player2Move,
         });
-        playerChannel.to(player2.socketId).emit("ExecuteTurn", {
+
+        playerChannel.to(player2.socketId).emit("executeTurn", {
           playerMove: player2Move,
           enemyMove: player1Move,
         });
 
-        playerChannel.to(player1.socketId).emit("UnlockButton");
-        playerChannel.to(player2.socketId).emit("UnlockButton");
+        playerChannel.to(player1.socketId).emit("unlockButton");
+        playerChannel.to(player2.socketId).emit("unlockButton");
       }
     });
   });

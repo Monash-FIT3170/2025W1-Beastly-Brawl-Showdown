@@ -3,6 +3,10 @@ import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 import { io, Socket } from "socket.io-client";
 import React, { useState, useRef, useEffect } from "react";
+import {
+  HostClientToServerEvents,
+  HostServerToClientEvents
+} from "../../../../../shared/types";
 
 export default function ProjectorPage() {
   const [serverUrl, setServerUrl] = useState<string>();
@@ -10,7 +14,10 @@ export default function ProjectorPage() {
   const [joinCode, setJoinCode] = useState<string>("");
 
   const [playerList, setPlayerList] = useState<string[]>([]);
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<Socket<
+    HostServerToClientEvents,
+    HostClientToServerEvents
+  > | null>(null);
 
   function getJoinUrl() {
     return Meteor.absoluteUrl() + "join/" + joinCode;
@@ -69,7 +76,7 @@ export default function ProjectorPage() {
 
     //#region Request Room
     socketRef.current.on(
-      "request-room_response",
+      "requestRoomResponse",
       (roomInfo: { roomId: number; joinCode: string }) => {
         console.log("Room request response", roomInfo);
         setRoomId(roomInfo.roomId);
@@ -78,14 +85,14 @@ export default function ProjectorPage() {
     );
 
     //#region Host App events
-    socketRef.current.on("player-set-changed", (newPlayerList: string[]) => {
+    socketRef.current.on("refreshPlayerList", (newPlayerList: string[]) => {
       console.log("New set of players:", newPlayerList.toString());
       setPlayerList(newPlayerList);
     });
 
 
     if (!roomId) {
-      socketRef.current.emit("request-room");
+      socketRef.current.emit("requestRoom");
       return;
     }
     //#endregion
@@ -102,7 +109,7 @@ export default function ProjectorPage() {
 
   function handleStartGame() {
     if (socketRef.current) {
-      socketRef.current.emit("start-game", { roomId }); // Send start-game to server
+      socketRef.current.emit("startGame", { roomId }); // Send start-game to server
       console.log("Start game requested!");
     }
   }
