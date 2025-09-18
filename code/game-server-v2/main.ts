@@ -15,6 +15,12 @@ import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator
 import { log } from "console";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import {
+  ChooseMove,
+  Roll,
+} from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import { match } from "assert";
+import { Match, MatchType } from "./match";
 import mongoose from "mongoose";
 
 export async function checkCollectionExists(collectionName: string): Promise<boolean> {
@@ -221,7 +227,9 @@ async function main() {
         playerChannel.to(player.socketId).emit("game-started"); // Clients can now start monster selection
       });
 
-      log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
+      log_notice(
+        `All players in room ${msg.roomId} have been notified to start the game.`
+      );
     });
   });
 
@@ -308,14 +316,23 @@ async function main() {
       next(new Error("Invalid credentials"));
     }
 
-    log_event(`Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`);
+    log_event(
+      `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`
+    );
 
     const playerNameList = gameServer.rooms.get(roomId)?.players.map((player) => player.displayName) ?? [];
 
-    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId);
+    console.log(
+      "Update player list",
+      playerNameList,
+      "to",
+      gameServer.rooms.get(roomId)!.hostSocketId
+    );
     console.log("Player socket: ", socket.data);
 
-    hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("player-set-changed", playerNameList);
+    hostChannel
+      .to(gameServer.rooms.get(roomId)!.hostSocketId)
+      .emit("player-set-changed", playerNameList);
     next();
   });
 
@@ -347,7 +364,9 @@ async function main() {
       player.isReady = true;
 
       // Check if all players are ready
-      const allReady = Array.from(room.players.values()).every((p) => p.isReady);
+      const allReady = Array.from(room.players.values()).every(
+        (p) => p.isReady
+      );
       if (!allReady) {
         log_notice("Waiting for all players to submit their monsters...");
         return;
@@ -356,20 +375,47 @@ async function main() {
       // All players ready, start tournament
       room.tournamentManager.startTournament(Array.from(room.players.values()));
 
-      room.players.forEach((player) => {
-        const opponent = Array.from(room.players.values()).find((p) => p !== player);
-        if (!opponent) return;
+      room.tournamentManager.matches.forEach((match: Match) => {
+        if (match.matchType == MatchType.BYE) {
+          room.playerChannel.to(match.player1.socketId).emit("send-to-waiting");
+          return; //TODO HANDLE BYE
+        }
 
-        room.playerChannel.to(player.socketId).emit("round-start", {
-          myMonster: player.selectedMonsterTemplateName,
-          enemyMonster: opponent.selectedMonsterTemplateName,
+        // P1: send a copy/start
+        room.playerChannel.to(match.player1.socketId).emit("round-start", {
+          myMonster: match.player1.selectedMonsterTemplateName,
+          enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
+          sideID: 0,
+        });
+
+        //P2: send a copy/start (invert sides?)
+        room.playerChannel.to(match.player2?.socketId).emit("round-start", {
+          myMonster: match.player2?.selectedMonsterTemplateName,
+          enemyMonster: match.player1.selectedMonsterTemplateName,
+          sideID: 1,
         });
       });
     });
 
+    function handleRollNotice() {
+      log_notice("Roll notice is being handled");
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
+      const match = room.tournamentManager.matches.find(
+        (m) => m.player1 === player || m.player2 === player
+      );
+      if (!match) return;
+
+      match.submitRoll(player);
+    }
+
+    socket.on("requestRoll", handleRollNotice);
+
     // #region Submit Move
     socket.on("RequestSubmitMove", (msg: { data: any }) => {
-      const { moveId, targetMethod, targetSide } = msg.data;
+      log_event("Test move submission log");
+      const { moveId, targetMethod } = msg.data;
 
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -377,24 +423,62 @@ async function main() {
 
       const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
       if (!match) return;
-
-      player.submittedMove = true;
-      match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
-
       const [player1, player2] = [match.player1, match.player2];
+
+      const sourceSide = match.getSideForPlayer(player);
+      player.submittedMove = true;
+
+      switch (moveId) {
+        case "defend":
+          match.submitMove(
+            player,
+            moveId,
+            targetMethod as TargetingMethod,
+            sourceSide as SideId
+          );
+          break;
+        case "attack-normal":
+          const targetSide = sourceSide === 1 ? 0 : 1;
+          match.submitMove(
+            player,
+            moveId,
+            targetMethod as TargetingMethod,
+            targetSide as SideId
+          );
+          break;
+      }
+
       const allSubmitted = player1.submittedMove && player2?.submittedMove;
 
       if (allSubmitted) {
         [player1.submittedMove, player2.submittedMove] = [false, false];
+
+        // Prepare move data for client
+        const player1Move = match.getPlayerMove(player1); // or store last submitted move somewhere
+        const player2Move = match.getPlayerMove(player2);
+
+        // Send both moves to the clients
+        playerChannel.to(player1.socketId).emit("ExecuteTurn", {
+          playerMove: player1Move,
+          enemyMove: player2Move,
+        });
+        playerChannel.to(player2.socketId).emit("ExecuteTurn", {
+          playerMove: player2Move,
+          enemyMove: player1Move,
+        });
+
         playerChannel.to(player1.socketId).emit("UnlockButton");
         playerChannel.to(player2.socketId).emit("UnlockButton");
       }
     });
   });
 
-  const port = parseInt(process.env.PORT || "8080", 10);
-  httpServer.listen(port, () => {
-    log_notice(`Socket.IO server running on ${config.serverIp}:${config.serverPort}. <CTRL+C> to shutdown.`);
+  httpServer.listen(config.serverPort, () => {
+    log_notice(
+      `Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()
+      }. <CTRL+C> to shutdown.`
+    );
+    //#endregion
 
     //#region IO
     // Readline setup

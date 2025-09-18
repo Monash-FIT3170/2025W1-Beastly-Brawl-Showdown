@@ -1,5 +1,6 @@
-import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
-import type { SnapshotEvent } from "@beastly-brawl-showdown/sim-core/event/core_events";
+
+import { BaseEvent } from "../../../../core/event/base_event";
+import { SnapshotEvent } from "../../../../core/event/core_events";
 import { Turn } from "../turn";
 
 export function parseTurns(events: BaseEvent[]): Turn[] {

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { OrderedEvent } from "../../../../core/event/event_history";
 
 interface EventTextBoxProps {
-  onEventsSubmit: (events: string) => void;
+  onEventsSubmit: (events: OrderedEvent[]) => void;
 }
 
 const EventTextBox: React.FC<EventTextBoxProps> = ({ onEventsSubmit }) => {
@@ -18,7 +19,12 @@ const handleSubmit = (e: React.FormEvent) => {
   }
 };
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}
+        style={{
+          position: "absolute",
+          bottom: "50px",
+          left: "20px",
+    }}>
       <h3>Enter Battle Events</h3>
       <textarea
         value={input}

@@ -2,7 +2,6 @@
   "name": "vite-project",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -10,15 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@beastly-brawl-showdown/sim-core": "latest",
-    "@beastly-brawl-showdown/sim-data": "latest",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.0",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
-    "@beastly-brawl-showdown/configs": "latest",
     "@types/json-schema": "^7.0.15",
     "@types/react": "^19.1.11",
     "@types/react-dom": "^19.1.7",

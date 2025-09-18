@@ -1,13 +1,18 @@
-import React, { useCallback, useState } from "react";
-import EventTextBox from "./Components/event_textbox";
+import React, { useCallback, useEffect, useState } from "react";
+// import EventTextBox from "./Components/event_textbox";
 import BattleScene from "./Components/battle_scene";
 import BattleBar from "./Components/battle_bar";
-import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
 import GameLog from "./Components/GameLog";
+import { OrderedEvent } from "../../../core/event/event_history";
+import "./BattleScreencss/main.css";
 
-const BattleVisualizerDemo: React.FC = () => {
-  const [events, setEvents] = useState<BaseEvent[]>([]);
+interface BattleVisualiserProps {
+  rawEvents : OrderedEvent[] | null;
+}
+
+const BattleVisualizerDemo: React.FC<BattleVisualiserProps> = ({rawEvents}) => {
+  const [events, setEvents] = useState<OrderedEvent[]>([]);
   const [turnInput, setTurnInput] = useState(0);
 
   const [isAutoplay, setIsAutoplay] = useState(false);
@@ -20,11 +25,18 @@ const BattleVisualizerDemo: React.FC = () => {
     setTurnInput(next);
   }, []);
 
+  useEffect(() => {
+    console.log("rawEvents:", rawEvents);
+    if (rawEvents){
+      setEvents(rawEvents);
+    } else {
+      setEvents([])
+    }
+  }, [rawEvents])
+  
   return (
-    <div style={{ padding: "20px" }}>
-      <EventTextBox onEventsSubmit={setEvents} />
-
-      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 16px" }}>
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 16px", position:"absolute", bottom:"20px",left: "15rem" }}>
         <button onClick={() => setIsPlaying(p => !p)}>
           {isPlaying ? "Pause" : "Play"}
         </button>

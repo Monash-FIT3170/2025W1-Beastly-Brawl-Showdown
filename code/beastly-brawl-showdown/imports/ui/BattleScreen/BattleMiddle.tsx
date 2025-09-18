@@ -10,6 +10,14 @@ type BattleMiddleProps = {
   onEnemySlashComplete?: () => void;
   playerSlashVisible?: boolean;
   onPlayerSlashComplete?: () => void;
+  enemyShieldVisible?: boolean;
+  onEnemyShieldComplete?: () => void;
+  playerShieldVisible?: boolean;
+  onPlayerShieldComplete?: () => void;
+  enemyAbilityVisible?: boolean;
+  onEnemyAbilityComplete?: () => void;
+  playerAbilityVisible?: boolean;
+  onPlayerAbilityComplete?: () => void;
 };
 
 export const BattleMiddle: React.FC<BattleMiddleProps> = ({
@@ -20,8 +28,16 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   onEnemySlashComplete,
   playerSlashVisible,
   onPlayerSlashComplete,
+  enemyShieldVisible,
+  onEnemyShieldComplete,
+  playerShieldVisible,
+  onPlayerShieldComplete,
+  enemyAbilityVisible,
+  onEnemyAbilityComplete,
+  playerAbilityVisible,
+  onPlayerAbilityComplete,
 }) => {
-  const [displayedNumber, setDisplayedNumber] = useState<number | null>(null);
+  const [_ , setDisplayedNumber] = useState<number | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -76,6 +92,10 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         imageSrc={player2.template.imageUrl}
         showSlash={enemySlashVisible}
         onSlashComplete={onEnemySlashComplete}
+        showShield={enemyShieldVisible}
+        onShieldComplete={onEnemyShieldComplete}
+        showAbility={enemyAbilityVisible}
+        onAbilityComplete={onEnemyAbilityComplete}
       />
 
       {/* {showAnimation && (
@@ -95,6 +115,10 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         imageSrc={player1.template.imageUrl}
         showSlash={playerSlashVisible}
         onSlashComplete={onPlayerSlashComplete}
+        showShield={playerShieldVisible}
+        onShieldComplete={onPlayerShieldComplete}
+        showAbility={playerAbilityVisible}
+        onAbilityComplete={onPlayerAbilityComplete}
       />
     </div>
   );
