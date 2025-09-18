@@ -2,8 +2,6 @@ import React from "react";
 import { EntryID } from "/imports/simulator/core/utils";
 import { TargetingMethod } from "/imports/simulator/core/action/targeting";
 import { COMMON_MOVE_POOL } from "/imports/simulator/data/common/common_move_pool";
-import { SideId } from "/imports/simulator/core/side";
-import { MoveRequest } from "/imports/simulator/core/action/move/move";
 
 type MoveButton = {
   id: EntryID;
@@ -12,9 +10,7 @@ type MoveButton = {
 };
 
 type BattleBottomProps = {
-  onAction: (move: MoveRequest) => void;
-  sideId: SideId;
-  enemySideId: SideId;
+  onAction: (moveId: EntryID, targetMethod: TargetingMethod) => void;
   disabled?: boolean;
   myMonsterMoves: {
     attack: EntryID;
@@ -25,8 +21,6 @@ type BattleBottomProps = {
 
 export const BattleBottom: React.FC<BattleBottomProps> = ({
   onAction,
-  sideId,
-  enemySideId,
   disabled,
   myMonsterMoves,
 }) => {
@@ -57,17 +51,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     <button
       key={btn.id}
       className="glb-btn"
-      onClick={() =>
-        onAction({
-          moveId: btn.id.toLowerCase() as Lowercase<string>,
-          source: sideId,
-          targetingData:
-            btn.targetMethod === "self"
-            ? { targetingMethod: "self" }
-            : { targetingMethod: "single-enemy", target: enemySideId },
-        })
-      }
-
+      onClick={() => onAction(btn.id, btn.targetMethod)}
       disabled={disabled}
     >
       <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />

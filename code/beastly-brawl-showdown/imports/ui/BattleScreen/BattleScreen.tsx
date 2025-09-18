@@ -5,11 +5,10 @@ import { BattleBottom } from "./BattleBottom";
 import { usePlayerSocket } from "../player/game/PlayerPage";
 import { MonsterTemplate } from "../../simulator/core/monster/monster_template";
 import { EntryID } from "/imports/simulator/core/utils";
+import { TargetingMethod } from "/imports/simulator/core/action/targeting";
 import BattleMessage from "./BattleMessage";
 import { DamageEvent } from "/imports/simulator/core/event/core_events";
 import { Notice } from "/imports/simulator/core/notice/notice";
-import { MoveRequest } from "/imports/simulator/core/action/move/move";
-import { SideId } from "/imports/simulator/core/side";
 
 interface BattleScreenProps {
   matchData: {
@@ -71,9 +70,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleMatchStarted = (data: any) => {
       console.log("Match started:", data);
     };
-    socket.on("matchStarted", handleMatchStarted);
+    socket.on("match-started", handleMatchStarted);
     return () => {
-      socket.off("matchStarted", handleMatchStarted);
+      socket.off("match-started", handleMatchStarted);
     };
   }, [socket]);
 
@@ -84,7 +83,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleNewNotice = (notice: Notice) => {
       console.log("Notice received:", notice);
       if (notice.kind === "roll") {
-        socket.emit("requestRoll");
+        const params: Parameters<typeof notice.callback> = [];
+        socket.emit("requestRoll", notice.kind, params);
         console.log("Attempted to send back roll notice resolve");
       }
     };
@@ -141,23 +141,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   };
 
   // Handle player action (submit move to server)
-  const handleAction = (move: MoveRequest
-  ) => {
+  const handleAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!socket || !myMonster) return;
 
-    socket.emit("submitMove", move);
+    const data = { moveId, targetMethod };
+    socket.emit("RequestSubmitMove", { data });
     console.log("Attempted to submit move");
     setHasSubmittedMove(true);
   };
-
 
   // Unlock buttons when server allows next turn
   useEffect(() => {
     if (!socket) return;
     const handleUnlock = () => setHasSubmittedMove(false);
-    socket.on("unlockButton", handleUnlock);
+    socket.on("UnlockButton", handleUnlock);
     return () => {
-      socket.off("unlockButton", handleUnlock);
+      socket.off("UnlockButton", handleUnlock);
     };
   }, [socket]);
 
@@ -201,23 +200,18 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       playerMove,
       enemyMove,
     }: {
-      playerMove?: MoveRequest;
-      enemyMove?: MoveRequest;
+      playerMove: { moveId: EntryID };
+      enemyMove: { moveId: EntryID };
     }) => {
-      if (!playerMove || !enemyMove) {
-        console.error("Missing move data:", { playerMove, enemyMove });
-        return;
-      }
-
-      console.log("ExecuteTurn received");
+      console.log("handle execution reached, ExecuteTurn received");
       performMoveAnimation(playerMove.moveId, "player1").then(() =>
         performMoveAnimation(enemyMove.moveId, "player2")
       );
     };
 
-    socket.on("executeTurn", handleExecuteTurn);
+    socket.on("ExecuteTurn", handleExecuteTurn);
     return () => {
-      socket.off("executeTurn", handleExecuteTurn);
+      socket.off("ExecuteTurn", handleExecuteTurn);
     };
   }, [socket, myMonster, enemyMonster]);
 
@@ -247,8 +241,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       <BattleBottom
         onAction={handleAction}
         disabled={hasSubmittedMove}
-        sideId={myMonster.sideId as SideId}
-        enemySideId={enemyMonster.sideId as SideId}
         myMonsterMoves={{
           attack: myMonster.template.attackActionId,
           ability: myMonster.template.abilityActionId,

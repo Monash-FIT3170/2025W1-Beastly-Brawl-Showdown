@@ -11,14 +11,10 @@ import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monst
 import { MonsterTemplate } from "../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
-import {
-  PlayerClientToServerEvents,
-  PlayerServerToClientEvents
-} from "../../../../../shared/types";
 
 //#region Socket Context Definition
 interface PlayerSocketContextType {
-  socket: Socket<PlayerServerToClientEvents, PlayerClientToServerEvents> | null;
+  socket: Socket | null;
   isConnected: boolean;
 }
 
@@ -31,10 +27,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket<
-    PlayerServerToClientEvents,
-    PlayerClientToServerEvents
-  > | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
@@ -101,9 +94,9 @@ const PlayerContent = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("gameStarted", () => setStartSelection(true));
+    socket.on("game-started", () => setStartSelection(true));
 
-    socket.on("startRound", (data) => {
+    socket.on("round-start", (data) => {
       setWaiting(false)
       log_event("Received round-start data:", data);
 
@@ -151,25 +144,25 @@ const PlayerContent = () => {
       setAllReady(true);
     });
 
-    socket.on("startWaiting", () => {
+    socket.on("send-to-waiting", () => {
       setWaiting(true);
     });
 
-    socket.on("endWaiting", () => { 
-      setWaiting(false) 
-    });
+    // socket.on("return-from-waiting", () => {
+    //   setWaiting(false);
+    // });
 
-    socket.on("endTournament", (data) => {
+    socket.on("tournament-finished", (data) => {
       setWaiting(false);
       setWinner(data);
     });
 
     return () => {
-      socket.off("gameStarted");
-      socket.off("startRound");
-      socket.off("startWaiting");
-      socket.off("endWaiting");
-      socket.off("endTournament");
+      socket.off("game-started");
+      socket.off("round-start");
+      socket.off("send-to-waiting");
+      // socket.off("return-from-waiting");
+      socket.off("tournament-finished");
     };
   }, [socket]);
 
@@ -214,7 +207,7 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
-      socket.emit("submitMonsterChoice", { data: monster.templateId });
+      socket.emit("RequestSubmitMonster", { data: monster.templateId });
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {
