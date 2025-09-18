@@ -1,4 +1,4 @@
-import { MonsterTemplate } from "/app/simulator/core/monster/monster_template";
+import { MonsterTemplate } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_template";
 import { RoomId } from "./types";
 
 export class Player {
