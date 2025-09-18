@@ -82,7 +82,14 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number; sideId: number }; enemyMonster: { template: MonsterTemplate; currentHp: number; sideId: number } } | null>(null);
+  const [matchData, setMatchData] = useState<{
+    myMonster: { template: MonsterTemplate; currentHp: number; sideId: number };
+    enemyMonster: {
+      template: MonsterTemplate;
+      currentHp: number;
+      sideId: number;
+    };
+  } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
@@ -97,6 +104,7 @@ const PlayerContent = () => {
     socket.on("gameStarted", () => setStartSelection(true));
 
     socket.on("startRound", (data) => {
+      setWaiting(false)
       log_event("Received round-start data:", data);
 
       const myTemplateName = data?.myMonster;
@@ -114,30 +122,29 @@ const PlayerContent = () => {
       // Create Monster instances for BattleScreen
       const myMonster =
         COMMON_MONSTER_POOL.monsters[
-        myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+          myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
       const enemyMonster =
         COMMON_MONSTER_POOL.monsters[
-        enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+          enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
-      
+
       // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
       const mySide = data.sideID;
       const enemySide = data.sideID === 0 ? 1 : 0;
 
       console.log(`My side is ${mySide} || Enemy side is ${enemySide}`);
 
-
       setMatchData({
         myMonster: {
           template: myMonster,
           currentHp: data.myHp,
-          sideId: mySide
+          sideId: mySide,
         },
         enemyMonster: {
           template: enemyMonster,
           currentHp: data.enemyHp,
-          sideId: enemySide
+          sideId: enemySide,
         },
       });
 
@@ -148,9 +155,12 @@ const PlayerContent = () => {
       setWaiting(true);
     });
 
-    socket.on("endWaiting", () => { setWaiting(false) })
+    socket.on("endWaiting", () => { 
+      setWaiting(false) 
+    });
 
     socket.on("endTournament", (data) => {
+      setWaiting(false);
       setWinner(data);
     });
 
@@ -174,8 +184,9 @@ const PlayerContent = () => {
           const element = letter as HTMLElement;
           element.style.animation = "none";
           requestAnimationFrame(() => {
-            element.style.animation = `bounce 0.6s ease-in-out ${index * 0.1
-              }s both`;
+            element.style.animation = `bounce 0.6s ease-in-out ${
+              index * 0.1
+            }s both`;
           });
         });
       }
@@ -243,7 +254,7 @@ const PlayerContent = () => {
       />
     );
   if (!allReady || waiting) return <WaitingScreen />;
-  // TODO: Create a spectator page for losers to wait in
+  // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
 
   return <BattleScreen matchData={matchData!} />;
