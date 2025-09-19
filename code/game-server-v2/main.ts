@@ -3,7 +3,7 @@ import * as readline from "readline";
 import cors from "cors";
 import express from "express";
 import http from "http";
-import { Server, Socket } from "socket.io";
+import { Namespace, Server, Socket } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { getRandomPool, log_attention, log_event, log_notice, log_warning } from "./utils";
@@ -41,10 +41,22 @@ async function main(config: ServerConfig) {
   expressApp.use(express.json()); // Allow cross-origin requests
 
   const httpServer = http.createServer(expressApp);
-  const socketServer = new Server(httpServer, { cors: { origin: "*" } });
+  const socketServer = new Server<
+    never, // Global ClientToServerEvents
+    never, // Global ServerToClientEvents
+    never, // InterServerEvents
+    {}     // Global SocketData
+  >(httpServer, { cors: { origin: "*" } });
 
-  const playerChannel = socketServer.of("/player");
-  const hostChannel = socketServer.of("/host");
+  const playerChannel: Namespace<
+    PlayerClientToServerEvents, 
+    PlayerServerToClientEvents, 
+    PlayerSocketData
+    > = socketServer.of("/player");
+  const hostChannel: Namespace<
+    HostClientToServerEvents, 
+    HostServerToClientEvents
+    > = socketServer.of("/host");
 
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
