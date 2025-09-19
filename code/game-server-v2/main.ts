@@ -153,11 +153,15 @@ async function main(config: ServerConfig) {
         const room = gameServer.rooms.get(roomId);
         if (room) {
           room.tournamentManager.tournamentType =
-            data.type === "random" ? TournamentType.Random : TournamentType.Standard;
+            data.type === "random"
+              ? TournamentType.Random
+              : TournamentType.Standard;
         }
 
         socket.emit("request-room_response", { roomId, joinCode });
-        log_notice(`Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`);
+        log_notice(
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+        );
       } catch {
         socket.emit("error", "Could not create room.");
       }
@@ -177,7 +181,9 @@ async function main(config: ServerConfig) {
       room.players.forEach((player) => {
         let pool: string[];
         if (room.tournamentManager.tournamentType === TournamentType.Random) {
-          const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter(k => k !== "blank");
+          const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
+            (k) => k !== "blank"
+          );
 
           // Proper shuffle per player
           const shuffled = [...allKeys];
@@ -188,14 +194,17 @@ async function main(config: ServerConfig) {
 
           pool = shuffled.slice(0, 3); // Pick 3 random monsters for this player
         } else {
-          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(k => k !== "blank"); // Standard mode, exclude BlankMon
+          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
+            (k) => k !== "blank"
+          ); // Standard mode, exclude BlankMon
         }
 
         player.currentMonsterPool = pool;
 
         // Send each player their own pool
-        playerChannel.to(player.socketId).emit("game-started", { monsterPool: pool });
-
+        playerChannel
+          .to(player.socketId)
+          .emit("game-started", { monsterPool: pool });
       });
 
       log_notice(
@@ -353,6 +362,7 @@ async function main(config: ServerConfig) {
       log_event(`${player.displayName} is ready.`);
 
       // Check if all players are ready
+      // TODO: Check winners only for tournament type Random
       const allReady = Array.from(room.players.values()).every(
         (p) => p.isReady
       );
@@ -363,8 +373,10 @@ async function main(config: ServerConfig) {
 
       // All players ready, start tournament
       log_notice("All players ready. Starting tournament...");
-      room.tournamentManager.startTournamentFromReady(Array.from(room.players.values()));
-      
+      room.tournamentManager.startTournamentFromReady(
+        Array.from(room.players.values())
+      );
+
       // Emit round-start
       room.tournamentManager.matches.forEach((match: Match) => {
         if (match.matchType === MatchType.BYE) return;
@@ -393,7 +405,9 @@ async function main(config: ServerConfig) {
       });
 
       function getRandomMonsterPool(n: number): string[] {
-        const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter((k) => k !== "BlankMon");
+        const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
+          (k) => k !== "BlankMon"
+        );
         const shuffled = allKeys.sort(() => 0.5 - Math.random());
         return shuffled.slice(0, n);
       }

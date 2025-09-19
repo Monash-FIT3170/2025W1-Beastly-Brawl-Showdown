@@ -1,21 +1,22 @@
 import { Player } from "./player";
 import { Match, MatchType } from "./match";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-
-type MonsterId = Exclude<keyof typeof COMMON_MONSTER_POOL.monsters, "blank">;
+import { log_attention } from "./utils";
 
 export enum TournamentType {
   Standard = "standard",
-  Random = "random"
+  Random = "random",
 }
 
 export class TournamentManager {
   matches: Match[] = [];
+  winners: Player[] = [];
   playerChannel: any;
   tournamentType: TournamentType;
 
   // Track waiting players during random re-pick
-  private pendingResolves: Map<string, (monsterKey: string) => void> = new Map();
+  private pendingResolves: Map<string, (monsterKey: string) => void> =
+    new Map();
 
   constructor(playerChannel: any, type: TournamentType) {
     this.playerChannel = playerChannel;
@@ -37,35 +38,41 @@ export class TournamentManager {
    * Waits for all players in the list to submit their monster
    */
   private async waitForAllPlayersToPick(players: Player[]) {
-    await Promise.all(players.map(player => {
-      return new Promise<void>(resolve => {
-        // Listen for the player's submitted monster
-        this.pendingResolves.set(player.socketId, (monsterKey: string) => {
-          player.setMonsterTemplate(monsterKey);
-          player.isReady = true;
-          this.pendingResolves.delete(player.socketId);
-          resolve();
-        });
+    log_attention("The waitForAllPlayersToPick function has been entered");
+    await Promise.all(
+      players.map((player) => {
+        return new Promise<void>((resolve) => {
+          // Listen for the player's submitted monster
+          this.pendingResolves.set(player.socketId, (monsterKey: string) => {
+            player.setMonsterTemplate(monsterKey);
+            player.isReady = true;
+            this.pendingResolves.delete(player.socketId);
+            resolve();
+          });
 
-        // Send the current pool to client
-        this.playerChannel.to(player.socketId).emit("requestMonsterSelection", {
-          monsterPool: player.currentMonsterPool,
+          // Send the current pool to client
+          this.playerChannel.to(player.socketId).emit("game-started", {
+            monsterPool: player.currentMonsterPool,
+          });
         });
-      });
-    }));
+      })
+    );
   }
 
   /**
    * Starts the tournament with a list of players
    */
-async startTournamentFromReady(players: Player[]) {
+  async startTournamentFromReady(players: Player[]) {
     if (!players.length) return;
 
-    console.log("[Notice] Starting tournament from ready players:", players.map(p => p.displayName));
+    console.log(
+      "[Notice] Starting tournament from ready players:",
+      players.map((p) => p.displayName)
+    );
 
     // Just run rounds immediately, skip initial monster selection
     await this.runRounds(players);
-}
+  }
 
   /**
    * Runs rounds recursively until a winner is determined
@@ -76,23 +83,30 @@ async startTournamentFromReady(players: Player[]) {
       return;
     }
 
-    console.log("[Notice] Starting new round with players:", players.map(p => p.displayName));
+    console.log(
+      "[Notice] Starting new round with players:",
+      players.map((p) => p.displayName)
+    );
 
     // Reset ready states for random tournaments
     if (this.tournamentType === TournamentType.Random) {
-      players.forEach(p => p.isReady = false);
+      players.forEach((p) => (p.isReady = false));
     }
 
     // Create matches for this round
     this.createMatches(players);
-    console.log(`[Notice] Created ${this.matches.length} matches for this round.`);
+    console.log(
+      `[Notice] Created ${this.matches.length} matches for this round.`
+    );
 
     // Run all battles
     for (const match of this.matches) {
       if (match.matchType === MatchType.BYE) {
         // BYE match: auto-advance
         match.winner = match.player1;
-        console.log(`[Notice] Match ${match.matchID} is a BYE. Player ${match.player1.displayName} advances.`);
+        console.log(
+          `[Notice] Match ${match.matchID} is a BYE. Player ${match.player1.displayName} advances.`
+        );
         continue;
       }
 
@@ -102,32 +116,38 @@ async startTournamentFromReady(players: Player[]) {
     }
 
     // Collect winners
-    const winners = this.matches
-      .map(m => m.winner)
+    this.winners = this.matches
+      .map((m) => m.winner)
       .filter(Boolean) as Player[];
 
-    console.log("[Notice] Round completed. Winners:", winners.map(p => p.displayName));
+    console.log(
+      "[Notice] Round completed. Winners:",
+      this.winners.map((p) => p.displayName)
+    );
 
     // If only one winner, tournament is over
-    if (winners.length === 1) {
-      console.log(`[Notice] Tournament Winner: ${winners[0].displayName}`);
-      this.playerChannel.emit("tournament-finished", winners[0].displayName);
+    if (this.winners.length === 1) {
+      console.log(`[Notice] Tournament Winner: ${this.winners[0].displayName}`);
+      this.playerChannel.emit(
+        "tournament-finished",
+        this.winners[0].displayName
+      );
       return;
     }
 
     // For random tournaments, assign new pools for winners
     if (this.tournamentType === TournamentType.Random) {
-      winners.forEach(player => {
+      this.winners.forEach((player) => {
         player.currentMonsterPool = this.getRandomPool(3);
         player.isReady = false;
       });
 
-      // Wait for winners to pick new monsters
-      await this.waitForAllPlayersToPick(winners);
+      // Wait for winners to pick new monsters, set all winners to not ready
+      await this.waitForAllPlayersToPick(this.winners);
     }
 
     // Recursively run next round with winners
-    await this.runRounds(winners);
+    await this.runRounds(this.winners);
   }
 
   /**
@@ -146,7 +166,9 @@ async startTournamentFromReady(players: Player[]) {
    * Utility: generates a random monster pool of size n
    */
   private getRandomPool(n: number): string[] {
-    const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter(k => k !== "blank");
+    const allKeys = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
+      (k) => k !== "blank"
+    );
     const shuffled = allKeys.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, n);
   }

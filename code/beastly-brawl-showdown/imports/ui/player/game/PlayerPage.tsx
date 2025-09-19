@@ -83,11 +83,10 @@ const PlayerContent = () => {
       sideId: number;
     };
   } | null>(null);
-  const [startSelection, setStartSelection] = useState(false);
-  const [monsterSelected, setMonsterSelected] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
   const [allReady, setAllReady] = useState(false);
   const [winner, setWinner] = useState();
-  const [waiting, setWaiting] = useState(false);
+  const [waiting, setWaiting] = useState(true);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
@@ -99,11 +98,13 @@ const PlayerContent = () => {
       if (data?.monsterPool) {
         setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
       }
-      setStartSelection(true)
+      setWaiting(false);
+      setAllReady(false);
+      setGameStarted(true);
     });
 
     socket.on("round-start", (data) => {
-      setWaiting(false)
+      setWaiting(false);
       log_event("Received round-start data:", data);
 
       const myTemplateName = data?.myMonster;
@@ -151,6 +152,7 @@ const PlayerContent = () => {
     });
 
     socket.on("send-to-waiting", () => {
+      setAllReady(false);
       setWaiting(true);
     });
 
@@ -213,8 +215,9 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
+      // TODO: Set second monster selection to go to a different function in tournament manager
       socket.emit("RequestSubmitMonster", { data: monster.templateId });
-      setMonsterSelected(true);
+      setWaiting(true);
       console.log("Monster selected:", monster.templateId);
     } else {
       console.warn("No socket connection available");
@@ -245,15 +248,28 @@ const PlayerContent = () => {
     </div>
   );
 
-  if (!startSelection) return <WaitingScreen />;
-  if (!monsterSelected)
-    return (
-      <MonsterSelectionScreen
-        monsterPool={randomMonsterPool}
-        setSelectedMonsterCallback={handleMonsterSelection}
-      />
-    );
-  if (!allReady || waiting) return <WaitingScreen />;
+  if (!gameStarted) return <WaitingScreen />;
+
+  if (!allReady) {
+    if (!waiting)
+      return (
+        <MonsterSelectionScreen
+          monsterPool={randomMonsterPool}
+          setSelectedMonsterCallback={handleMonsterSelection}
+        />
+      );
+    else return <WaitingScreen />;
+  }
+
+  // if (!startSelection) return <WaitingScreen />;
+  // if (!monsterSelected)
+  //   return (
+  //     <MonsterSelectionScreen
+  //       monsterPool={randomMonsterPool}
+  //       setSelectedMonsterCallback={handleMonsterSelection}
+  //     />
+  //   );
+  // if (!allReady || waiting) return <WaitingScreen />;
   // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
 
