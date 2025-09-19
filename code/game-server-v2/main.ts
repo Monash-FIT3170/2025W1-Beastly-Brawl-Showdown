@@ -42,8 +42,16 @@ async function main(config: ServerConfig) {
   const httpServer = http.createServer(expressApp);
   const socketServer = new Server(httpServer, { cors: { origin: "*" } });
 
-  const playerChannel = socketServer.of("/player");
-  const hostChannel = socketServer.of("/host");
+  const playerChannel = socketServer.of("/player") as Namespace<
+    PlayerClientToServerEvents,
+    PlayerServerToClientEvents,
+    PlayerSocketData
+  >;
+
+  const hostChannel = socketServer.of("/host") as Namespace<
+    HostClientToServerEvents,
+    HostServerToClientEvents
+  >;
 
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
@@ -331,7 +339,7 @@ async function main(config: ServerConfig) {
 
       room.tournamentManager.matches.forEach((match: Match) => {
         if (match.matchType == MatchType.BYE) {
-          room.playerChannel.to(match.player1.socketId).emit("send-to-waiting");
+          room.playerChannel.to(match.player1.socketId).emit("startWaiting");
           return; //TODO HANDLE BYE
         }
 
