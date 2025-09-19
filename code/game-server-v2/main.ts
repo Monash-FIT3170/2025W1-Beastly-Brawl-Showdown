@@ -12,16 +12,16 @@ import * as path from "path";
 import { Player } from "./player";
 import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-import { log } from "console";
-import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
-import {
-  ChooseMove,
-  Roll,
-} from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
-import { match } from "assert";
 import { Match, MatchType } from "./match";
 import { TournamentType } from "./tournament_manager";
+import {
+  PlayerClientToServerEvents, 
+  PlayerServerToClientEvents, 
+  PlayerSocketData, 
+  HostClientToServerEvents, 
+  HostServerToClientEvents
+} from "../shared/types";
 
 type ServerConfig = {
   serverIp: string;
