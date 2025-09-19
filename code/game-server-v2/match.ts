@@ -10,6 +10,7 @@ import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { PlayerNamespace } from "./main";
 
 export enum MatchType {
     DUEL,
@@ -154,7 +155,7 @@ export class Match {
      * @param playersByAccountId Hashmap of players in the tournament
      * @returns None
      */
-    async runBattle(playerChannel: any): Promise<void> {
+    async runBattle(playerChannel: PlayerNamespace): Promise<void> {
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
             log_attention(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);

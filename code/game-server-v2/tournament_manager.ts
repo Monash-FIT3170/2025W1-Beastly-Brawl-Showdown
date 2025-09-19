@@ -7,15 +7,16 @@ export enum TournamentType {
   Standard = "standard",
   Random = "random",
 }
+import { PlayerNamespace } from "./main";
 
 export class TournamentManager {
   matches: Match[] = [];
-  playerChannel: any;
+  playerChannel: PlayerNamespace
   tournamentType: TournamentType;
   winners: Player[] = [];
   private monsterSelectionResolvers: Map<string, (monster: string) => void> = new Map();
 
-  constructor(playerChannel: any, type: TournamentType) {
+  constructor(playerChannel: PlayerNamespace, type: TournamentType) {
     this.playerChannel = playerChannel;
     this.tournamentType = type;
   }

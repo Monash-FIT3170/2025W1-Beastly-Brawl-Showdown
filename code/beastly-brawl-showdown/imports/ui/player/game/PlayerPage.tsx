@@ -11,10 +11,20 @@ import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monst
 import { MonsterTemplate } from "../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
+import type {
+  PlayerClientToServerEvents,
+  PlayerServerToClientEvents,
+  PlayerSocketData
+} from "../../../../../shared/types";
+
+type TypedPlayerSocket = Socket<
+  PlayerServerToClientEvents,
+  PlayerClientToServerEvents
+>;
 
 //#region Socket Context Definition
 interface PlayerSocketContextType {
-  socket: Socket | null;
+  socket: TypedPlayerSocket | null;
   isConnected: boolean;
 }
 
@@ -27,7 +37,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<TypedPlayerSocket | null>(null);
 
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
@@ -37,7 +47,8 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!socketRef.current && serverUrl) {
       socketRef.current = io(serverUrl + "/player", {
         auth: { joinCode, displayName },
-      });
+      }) as TypedPlayerSocket;
+
 
       socketRef.current.on("connect", () => {
         console.log("Connected to server");

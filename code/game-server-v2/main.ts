@@ -23,6 +23,17 @@ import {
   HostServerToClientEvents
 } from "../shared/types";
 
+export type PlayerNamespace = Namespace<
+  PlayerClientToServerEvents,
+  PlayerServerToClientEvents,
+  PlayerSocketData
+>;
+
+export type HostNamespace = Namespace<
+    HostClientToServerEvents, 
+    HostServerToClientEvents
+>;
+
 type ServerConfig = {
   serverIp: string;
   serverPort: number;
@@ -48,15 +59,8 @@ async function main(config: ServerConfig) {
     {}     // Global SocketData
   >(httpServer, { cors: { origin: "*" } });
 
-  const playerChannel: Namespace<
-    PlayerClientToServerEvents, 
-    PlayerServerToClientEvents, 
-    PlayerSocketData
-    > = socketServer.of("/player");
-  const hostChannel: Namespace<
-    HostClientToServerEvents, 
-    HostServerToClientEvents
-    > = socketServer.of("/host");
+  const playerChannel: PlayerNamespace = socketServer.of("/player");
+  const hostChannel: HostNamespace = socketServer.of("/host");
 
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
@@ -145,7 +149,7 @@ async function main(config: ServerConfig) {
   });
 
   // TODO use a persistent ID rather than socket ID
-  hostChannel.on("connection", async (socket: Socket) => {
+  hostChannel.on("connection", async (socket) => {
     log_event(`Host connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -323,7 +327,7 @@ async function main(config: ServerConfig) {
   });
 
   // #region Player Channel
-  playerChannel.on("connection", async (socket: Socket) => {
+  playerChannel.on("connection", async (socket) => {
     log_event(`Player connected: ${socket.id}`);
 
     socket.on("disconnect", () => {

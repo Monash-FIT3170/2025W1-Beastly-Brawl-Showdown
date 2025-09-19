@@ -4,6 +4,7 @@ import { Room } from "./room";
 import { Player } from "./player";
 import { ServerId, RoomId, JoinCode, AccountId } from "./types";
 import { TournamentType } from "./tournament_manager";
+import { PlayerNamespace } from "./main";
 
 export class GameServer {
   readonly CODE_MIN_LENGTH = 6; // TODO move to argv
@@ -59,7 +60,7 @@ export class GameServer {
     return this.countActiveRooms() >= this.maxCapacity;
   }
 
-  createRoom(hostSocketId: string, playerChannel: any, tournamentType: TournamentType = TournamentType.Standard): { roomId: RoomId; joinCode: JoinCode } {
+  createRoom(hostSocketId: string, playerChannel: PlayerNamespace, tournamentType: TournamentType = TournamentType.Standard): { roomId: RoomId; joinCode: JoinCode } {
     if (this.isFull()) {
       throw new Error("Server is full.");
     }
