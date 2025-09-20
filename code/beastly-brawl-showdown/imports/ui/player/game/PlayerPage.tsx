@@ -74,6 +74,8 @@ const PlayerContent = () => {
   useEffect(() => {
     if (!socket) return;
 
+    socket.on("return-from-waiting", () => {console.log("Returned from waiting")})
+
     socket.on("game-started", () => setStartSelection(true));
 
     socket.on("round-start", (data) => {

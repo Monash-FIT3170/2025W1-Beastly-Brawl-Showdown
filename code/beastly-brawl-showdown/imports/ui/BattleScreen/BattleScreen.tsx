@@ -214,8 +214,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!socket) return;
 
     const handleNewEvent = (ev: any) => {
+      setEvents(prev => {
+      const next = [...prev, ev];
+      console.log("EVENTS (next):", JSON.stringify(next));
       console.log("New event received:", ev.name);
-      setEvents(prev => [...prev, ev]);
+      return next;
+    });
     };
 
     socket.on("newEvent", handleNewEvent);
