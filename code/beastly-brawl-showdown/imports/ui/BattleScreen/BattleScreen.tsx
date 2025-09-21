@@ -13,7 +13,11 @@ import { Notice } from "/imports/simulator/core/notice/notice";
 interface BattleScreenProps {
   matchData: {
     myMonster: { template: MonsterTemplate; currentHp: number; sideId: number };
-    enemyMonster: { template: MonsterTemplate; currentHp: number; sideId: number };
+    enemyMonster: {
+      template: MonsterTemplate;
+      currentHp: number;
+      sideId: number;
+    };
   };
 }
 
@@ -44,13 +48,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   useEffect(() => {
     setMyMonster({
       template: matchData.myMonster.template,
-      currentHp: matchData.myMonster.currentHp ?? matchData.myMonster.template.baseStats.health,
+      currentHp:
+        matchData.myMonster.currentHp ??
+        matchData.myMonster.template.baseStats.health,
       playerId: "player1",
       sideId: matchData.myMonster.sideId,
     });
     setEnemyMonster({
       template: matchData.enemyMonster.template,
-      currentHp: matchData.enemyMonster.currentHp ?? matchData.enemyMonster.template.baseStats.health,
+      currentHp:
+        matchData.enemyMonster.currentHp ??
+        matchData.enemyMonster.template.baseStats.health,
       playerId: "player2",
       sideId: matchData.enemyMonster.sideId,
     });
@@ -87,11 +95,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   }, [socket]);
 
   // Function to trigger move animations
-  const performMoveAnimation = async (moveId: EntryID, actor: "player1" | "player2") => {
+  const performMoveAnimation = async (
+    moveId: EntryID,
+    actor: "player1" | "player2"
+  ) => {
     if (!myMonster || !enemyMonster) return;
 
     let message = "";
-    const template = actor === "player1" ? myMonster.template : enemyMonster.template;
+    const template =
+      actor === "player1" ? myMonster.template : enemyMonster.template;
 
     if (moveId === template.attackActionId) {
       message = actor === "player1" ? "You attack!" : "Enemy attacks!";
@@ -102,7 +114,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       if (actor === "player1") setPlayerShield(true);
       else setEnemyShield(true);
     } else if (moveId === template.abilityActionId) {
-      message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
+      message =
+        actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
       if (actor === "player1") setPlayerAbility(true);
       else setEnemyAbility(true);
     }
@@ -160,11 +173,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         // Use sideId instead of hard-coded 0/1
         if (damageEvent.target === myMonster.sideId) {
           setMyMonster((prev) =>
-            prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev
+            prev
+              ? { ...prev, currentHp: prev.currentHp - damageEvent.amount }
+              : prev
           );
         } else if (damageEvent.target === enemyMonster.sideId) {
           setEnemyMonster((prev) =>
-            prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev
+            prev
+              ? { ...prev, currentHp: prev.currentHp - damageEvent.amount }
+              : prev
           );
         }
       }
