@@ -1970,6 +1970,7 @@ input[type="range"] {
   color: #87CEEB;
   margin-bottom: 3px;
   text-align: center;
+}
   
 /* Modal overlay + box for selecting game mode */
 .modal-overlay {
@@ -2147,4 +2148,4 @@ input[type="range"] {
     font-size: 1.25rem;
     text-align: center;
   }
-}
+
