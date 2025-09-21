@@ -16,6 +16,7 @@ interface BattleScreenProps {
   matchData: {
     myMonster: { template: MonsterTemplate; currentHp: number };
     enemyMonster: { template: MonsterTemplate; currentHp: number };
+    myid: number;
   };
 }
 
@@ -29,7 +30,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const { socket } = usePlayerSocket();
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
-  const [hasSubmittedMove, setHasSubmittedMove] = useState(false);
+  const [buttonDisabled, setbuttonDisabled] = useState(false);
 
   const [showAnimation, setShowAnimation] = useState(false);
   const [battleMessage, setBattleMessage] = useState<string>("");
@@ -50,11 +51,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
-  function rollBABY(rollNotice : Roll): void {
+  function rollNow(rollNotice : Roll): void {
     if (!socket) return;
+    setShowMessage(false)
     const params: Parameters<typeof rollNotice.callback> = [];
     socket.emit("requestRoll", rollNotice.kind, params);
-    console.log("attmpted to send back roll notice resolve")
     setRollNotice(null)
   }
 
@@ -63,7 +64,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
     const handleEnemySubmitted = () => {
       setshowEnemySubmittedMessage(true)
-      console.log("Enemy submitted event received");
     };
 
     socket.on("EnemySubmitted", handleEnemySubmitted);
@@ -143,10 +143,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleNewNotice = (notice: Notice) => {
       console.log("Notice received:", notice);
       if (notice.kind === "roll") {
+        setshowEnemySubmittedMessage(false)
+        setshowSubmittedMoveMessage(false)
         setShowMessage(true)
         setBattleMessage("Time To Roll!")
         setRollNotice(notice)
       }
+      if (notice.kind === "chooseMove")
+        setbuttonDisabled(false)
     };
     socket.on("newNotice", handleNewNotice);
     return () => {
@@ -176,13 +180,18 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     }
 
     setBattleMessage(message);
-    setShowMessage(true);
     setShowAnimation(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
+    if (message != ""){    
+      setShowMessage(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setShowMessage(false);
+    }
     setShowAnimation(false);
-    setShowMessage(false);
+    if (showMessage){
+      setShowMessage(false);
+    }
+    
 
     if (actor === "player1") setPlayerSlash(false);
     else setEnemySlash(false);
@@ -199,16 +208,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const data = { moveId, targetMethod };
     socket.emit("RequestSubmitMove", { data });
     setshowSubmittedMoveMessage(true)
-    console.log("Attempted to submit move")
-    setHasSubmittedMove(true);
+    setbuttonDisabled(true)
   };
 
-  // Unlock buttons when server allows next turn
+  // GET READY TO UNLOCK BUTTON ON NEXT TURN
   useEffect(() => {
     if (!socket) return;
 
     const handleUnlock = () => {
-      setHasSubmittedMove(false);
       setShowMessage(false);
       setshowSubmittedMoveMessage(false);
       setshowEnemySubmittedMessage(false)
@@ -252,7 +259,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleNewEvent = (ev: any) => {
       setEvents(prev => {
       const next = [...prev, ev];
-      console.log("EVENTS (next):", JSON.stringify(next));
       console.log("New event received:", ev.name);
       return next;
     });
@@ -276,7 +282,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       playerMove: { moveId: EntryID };
       enemyMove: { moveId: EntryID };
     }) => {
-      console.log("handle execution is reahced, meaning taht execute turn was received")
       performMoveAnimation(playerMove.moveId, "player1").then(() =>
         performMoveAnimation(enemyMove.moveId, "player2")
       );
@@ -340,13 +345,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         isPlaying={isPlaying}
         autoAdvance={false}  // default: no autoplay
         onAdvanceTurn={(next) => setTurnIndex(next)}
+        myid = {matchData.myid}
       />
       {showEnemySubmittedMessage && <BattleMessage message={"Enemy Has Submitted"} />}
       {showSubmittedMoveMessage && <BattleMessage message={"Your Move Has Been Submitted"} />}
       <BattleBottom
         onAction={handleAction}
-        onRoll={() => rollNotice && rollBABY(rollNotice)}
-        disabled={hasSubmittedMove}
+        onRoll={() => rollNotice && rollNow(rollNotice)}
+        disabled={buttonDisabled}
         myMonsterMoves={{
           attack: myMonster.template.attackActionId,
           ability: myMonster.template.abilityActionId,

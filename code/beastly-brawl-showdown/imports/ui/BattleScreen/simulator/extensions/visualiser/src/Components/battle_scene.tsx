@@ -6,7 +6,6 @@ import { BaseEvent } from "../../../../core/event/base_event";
 import { BuffEvent, DamageEvent } from "../../../../core/event/core_events";
 import { getBaseStat } from "../../../../core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../data/common/common_monster_pool";
-import BattleMessage from "../BattleScreen/BattleMessage";
 import { BattleMiddle } from "../BattleScreen/BattleMiddle";
 
 interface BattleSceneProps {
@@ -15,6 +14,7 @@ interface BattleSceneProps {
   isPlaying: boolean;
   autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
+  myid : number;
 }
 
 console.log("BattleScene loaded");
@@ -25,9 +25,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   isPlaying,
   autoAdvance,
   onAdvanceTurn,
+  myid,
 }) => {
-  //setup the battle messages
-  const [currentMessage, setcurrentMessage] = useState("");
 
   // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
@@ -77,7 +76,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's defense charges
       state[playerId].defendActionCharge -= 1;
-      setcurrentMessage(`${playerId} has defended`);
       break;
       }
 
@@ -89,7 +87,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's health
       state[playerId].health -= damageEvent.amount;
-      setcurrentMessage(`${playerId} has taken ${damageEvent.amount} damage`);
       break;
       }
 
@@ -197,17 +194,21 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   //have to get maxhp to pass to battlemiddle
   //key of type of I hate this
+  //hp is being updated correctly so why isn't health updating?
   const template = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[0].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
+  console.log("my health is" + player1MaxHp)
 
   const template2 = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[1].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
+  console.log("enemy health is" + player2MaxHp)
 
   // Clear names for what the UI reads:
   const visiblePlayer1 = visibleState[0];
   const visiblePlayer2 = visibleState[1];
+  const myMonsterImage = visibleState[0].image;
+  const enemyMonsterImage = visibleState[1].image;
 
-  // console.log(visiblePlayer1.image);
   return (
     <div className="canvas-body" id="battle-screen-body">
       <BattleMiddle
@@ -216,10 +217,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         enemyMaxHp = {player2MaxHp}
         playerHp={visiblePlayer1.health ?? 0}
         playerMaxHp = {player1MaxHp}
-        enemyImgSrc={visiblePlayer2.image}
-        playerImgSrc={visiblePlayer1.image}
+        enemyImgSrc={enemyMonsterImage}
+        playerImgSrc={myMonsterImage}
       />
-      <BattleMessage message = {currentMessage} />
     </div>
   );
 };

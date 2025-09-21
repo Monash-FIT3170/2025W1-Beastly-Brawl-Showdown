@@ -63,7 +63,7 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number }; enemyMonster: { template: MonsterTemplate; currentHp: number } } | null>(null);
+  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number }; enemyMonster: { template: MonsterTemplate; currentHp: number }; myid: number } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
@@ -95,9 +95,14 @@ const PlayerContent = () => {
       const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
       const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
 
+      if (typeof data?.sideID !== "number") {
+        console.warn("Missing or invalid sideID in round-start data:", data);
+        return;
+      }
       setMatchData({
         myMonster: { template: myMonster, currentHp: data.myHp },
         enemyMonster: { template: enemyMonster, currentHp: data.enemyHp },
+        myid: data.sideID,
       });
       setAllReady(true);
     });

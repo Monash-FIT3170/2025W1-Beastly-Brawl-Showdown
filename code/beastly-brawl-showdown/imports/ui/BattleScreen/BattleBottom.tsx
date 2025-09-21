@@ -82,7 +82,6 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
       key={btn.id}
       className="glb-btn"
       onClick={() => onRoll()}
-      disabled={disabled}
     >
       <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
     </button>
