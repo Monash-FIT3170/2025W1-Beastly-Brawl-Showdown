@@ -1988,6 +1988,41 @@ input[type="range"] {
   margin-bottom: 3px;
   text-align: center;
 }
+  
+/* Modal overlay + box for selecting game mode */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.modal-box {
+  background-color: #ffcc9c;
+  border: 4px solid #ff9838;
+  border-radius: 1rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  box-shadow:
+    0 4px 0 #773519,
+    4px 0 0 #773519,
+    -4px 0 0 #773519,
+    0 -4px 0 #c26130;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: black;
+}
 
 /* #################################################################### */
 /* Mobile View Specific Styles */
@@ -2119,3 +2154,15 @@ input[type="range"] {
     transform: scale(0.95);
   }
 }
+ 
+  .modal-box {
+    width: 90%;
+    max-width: 300px;
+    padding: 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
