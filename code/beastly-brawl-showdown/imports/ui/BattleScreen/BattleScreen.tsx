@@ -86,6 +86,42 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         matchData.enemyMonster.currentHp ?? matchData.enemyMonster.template.baseStats.health,
       playerId: "player2",
     });
+    console.log("Match data:", matchData)
+
+    // Build snapshot JSON
+    const snapshot = {
+      name: "snapshot",
+      sides: [
+        {
+          id: 0,
+          monster: {
+            baseID: matchData.myMonster.template.templateId,
+            health:
+              matchData.myMonster.currentHp ??
+              matchData.myMonster.template.baseStats.health,
+            defendActionCharges: 0,
+            components: [],
+          },
+          pendingActions: null,
+        },
+        {
+          id: 1,
+          monster: {
+            baseID: matchData.enemyMonster.template.templateId,
+            health:
+              matchData.enemyMonster.currentHp ??
+              matchData.enemyMonster.template.baseStats.health,
+            defendActionCharges: 0,
+            components: [],
+          },
+          pendingActions: null,
+        },
+      ],
+      index: 0,
+    };
+
+    // put snapshot into events state as the first item
+    setEvents([snapshot]);
   }, [matchData]);
 
   // Listen for 'match-started' socket event
