@@ -792,8 +792,7 @@ input:focus {
 }
 
 .monster-selection-grid {
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
+  padding: 0.4rem;
   display: flex;
   flex-direction: column;
   gap: 20px;
