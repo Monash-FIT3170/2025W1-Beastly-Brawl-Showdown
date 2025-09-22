@@ -123,7 +123,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "knight",
       name: "Knight",
       description: "A brave and noble warrior. A Balanced Monster.",
-      imageUrl: "",
+      imageUrl: "/monsters/knight.png",
       baseStats: {
         health: 50,
         armour: 10,
