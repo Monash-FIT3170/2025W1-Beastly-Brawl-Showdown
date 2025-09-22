@@ -10,26 +10,7 @@ import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 import { TargetingMethod } from "../simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
-import express, { Request, Response } from "express";
-import cors from "cors";
-import mongoose from "mongoose";
-import { GameServerRegistryModel } from "./models/game_server_register";
-
-const MONGO_IP = "localhost";
-const MONGO_PORT = "27017";
-const MONGO_NAME = "RoomLocation";
-const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
-
-async function connectToDatabase(): Promise<typeof mongoose> {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log(`Connected to MongoDB at ${MONGO_URI}`);
-    return mongoose;
-  } catch (err) {
-    console.error(`MongoDB connection error: ${err}`);
-    process.exit(1);
-  }
-}
+import { TournamentType } from "./tournament_manager";
 
 type ServerConfig = {
   serverIp: string;
@@ -165,11 +146,14 @@ async function main(config: ServerConfig) {
     });
 
     // #region New Room
-    socket.on("request-room", async () => {
-      log_event("Room requested.");
+    socket.on("request-room", async (data: { type: "standard" | "random" }) => {
+      log_event("Room requested with mode: " + data.type);
       // TODO prevent multiple rooms at the same time
       try {
-        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(socket.id, playerChannel);
+        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
+          socket.id,
+          playerChannel
+        );
 
         socket.emit("request-room_response", {
           roomId: roomId,
