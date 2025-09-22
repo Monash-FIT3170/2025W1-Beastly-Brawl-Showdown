@@ -21,6 +21,7 @@ import {
 } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { match } from "assert";
 import { Match, MatchType } from "./match";
+import { TournamentType } from "./tournament_manager";
 
 type ServerConfig = {
   serverIp: string;
@@ -140,8 +141,8 @@ async function main(config: ServerConfig) {
     });
 
     // #region New Room
-    socket.on("request-room", async () => {
-      log_event("Room requested.");
+    socket.on("request-room", async (data: { type: "standard" | "random" }) => {
+      log_event("Room requested with mode: " + data.type);
       // TODO prevent multiple rooms at the same time
       try {
         const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
@@ -149,12 +150,19 @@ async function main(config: ServerConfig) {
           playerChannel
         );
 
-        socket.emit("request-room_response", {
-          roomId: roomId,
-          joinCode: joinCode,
-        });
-        log_notice(`Room generated. id = ${roomId}, join code = ${joinCode}`);
-      } catch {
+        // Set tournament type in the room
+        const room = gameServer.rooms.get(roomId);
+        if (room) {
+          room.tournamentManager.tournamentType =
+            data.type === "random"
+              ? TournamentType.Random
+              : TournamentType.Standard;
+        }
+
+        socket.emit("request-room_response", { roomId, joinCode });
+        log_notice(
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+        );      } catch {
         socket.emit("error", "Could not create room.");
       }
     });

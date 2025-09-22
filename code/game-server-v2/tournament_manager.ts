@@ -1,12 +1,21 @@
 import { Player } from "./player";
-import { Match } from "./match";
+import { Match, MatchType } from "./match";
+import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
+import { log_attention } from "./utils";
+
+export enum TournamentType {
+  Standard = "standard",
+  Random = "random",
+}
 
 export class TournamentManager {
   matches: Match[] = [];
   playerChannel: any;
+  tournamentType: TournamentType;
 
-  constructor(playerChannel: any) {
+  constructor(playerChannel: any, type: TournamentType) {
     this.playerChannel = playerChannel;
+    this.tournamentType = type;
   }
 
   async runRounds(remainingPlayers: Player[]) {
