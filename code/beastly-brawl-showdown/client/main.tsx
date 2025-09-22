@@ -1,8 +1,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import App from "/imports/ui/App";
+// import App from "/imports/ui/App";
 import { Meteor } from "meteor/meteor";
+import { MonsterSelectionScreen } from "/imports/ui/MonsterSelection/MonsterSelectionScreen";
 
 Meteor.startup(() => {
   const container = document.getElementById("react-target");
@@ -12,7 +13,9 @@ Meteor.startup(() => {
   const root = createRoot(container);
   root.render(
     <BrowserRouter>
-      <App />
+      {/* <App /> */}
+      <MonsterSelectionScreen />
     </BrowserRouter>,
+    // <MonsterSelectionScreen />
   );
 });

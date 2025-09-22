@@ -791,11 +791,16 @@ input:focus {
 }
 
 .monster-selection-grid {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 3vh;
   max-width: 40%;
+  max-height: 70vh;
+
+  overflow-y: auto;
 }
 
 .monster-selection-card {
@@ -861,6 +866,7 @@ input:focus {
 
 .monster-name {
   font-size: 1.5rem;
+  line-height: 1.5rem;
   font-weight: bold;
   color: black;
   margin-bottom: 5px;
