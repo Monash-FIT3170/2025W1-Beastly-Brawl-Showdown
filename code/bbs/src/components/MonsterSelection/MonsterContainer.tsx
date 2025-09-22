@@ -26,9 +26,6 @@ export const MonsterContainer = ({
       <div className="monster-selection-card-info">
         <div className="monster-name">{monster?.name || name}</div>
         <div className="monster-desc">{desc || "No description"}</div>
-        <div className="monster-stats" id="attack">Attack bonus: {monster?.baseStats.attack}</div>
-        <div className="monster-stats" id="AC">Armour: {monster?.baseStats.armour}</div>
-        
         {monster?.abilityActionId && (
           <div className="ability-desc">Ability: {monster.abilityActionId}</div>
         )}
