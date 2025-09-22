@@ -23,7 +23,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
 
@@ -42,7 +42,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -68,7 +68,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       abilityActionId: "dodge",
       onSpawnActions: [
         {
@@ -95,7 +95,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 4,
+      maxAttackCharges: 4,
       abilityActionId: "stun",
       onSpawnActions: [],
     },
@@ -115,7 +115,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
 
@@ -134,7 +134,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
 
@@ -153,7 +153,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
 
@@ -172,7 +172,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
 
@@ -191,7 +191,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
 
@@ -210,7 +210,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
   },
