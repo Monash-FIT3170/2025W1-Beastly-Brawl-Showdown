@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MonsterTemplate } from "../../../../beastly-brawl-showdown/imports/simulator/core/monster/monster_template";
+import { type MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
 import MonsterHealthRing from "./MonsterHealthRing";
 
 type BattleMiddleProps = {
@@ -37,7 +37,7 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   playerAbilityVisible,
   onPlayerAbilityComplete,
 }) => {
-  const [_ , setDisplayedNumber] = useState<number | null>(null);
+  const [_, setDisplayedNumber] = useState<number | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

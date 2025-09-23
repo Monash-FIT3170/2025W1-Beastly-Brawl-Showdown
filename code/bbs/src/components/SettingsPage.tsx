@@ -1,13 +1,12 @@
-import React from "react";
 import {
-  Dispatch,
-  SetStateAction,
-  MutableRefObject,
+  type Dispatch,
+  type SetStateAction,
+  type MutableRefObject,
   useState,
   useEffect,
 } from "react";
 // From chat since idk what they were ^
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export default function SettingsPage({
   bgmEnabled,

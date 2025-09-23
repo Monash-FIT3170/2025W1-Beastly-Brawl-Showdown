@@ -1,6 +1,6 @@
 // imports/ui/MonsterList.jsx
 import React from "react";
-// import { Monsters } from '/imports/api/monsters';
+// import { Monsters } from '../../../../api/monsters';
 
 const MonsterList = () => {
   const monsters = [

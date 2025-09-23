@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MonsterTemplate } from '../../../../beastly-brawl-showdown/imports/simulator/core/monster/monster_template';
+import { MonsterTemplate } from '../../../../beastly-brawl-showdown../../../../simulator/core/monster/monster_template';
 import { usePlayerSocket } from '../player/game/PlayerPage';
 
 type BattleMonsterProps = {

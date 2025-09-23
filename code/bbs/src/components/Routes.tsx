@@ -1,5 +1,4 @@
-import React from "react";
-import { Navigate, Route } from "react-router-dom";
+import { Navigate, Route } from "react-router";
 import { NotFound } from "./error/NotFound";
 import { HomePage } from "./HomePage";
 import ProjectorPage from "./host/projector/ProjectorPage";

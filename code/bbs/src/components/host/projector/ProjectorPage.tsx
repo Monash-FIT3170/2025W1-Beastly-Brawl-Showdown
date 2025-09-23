@@ -1,8 +1,8 @@
-import { Meteor } from "meteor/meteor";
 import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 import { io, Socket } from "socket.io-client";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import { getBestServerUrl } from "../../../utils/RoomMethods";
 
 export default function ProjectorPage() {
   const [serverUrl, setServerUrl] = useState<string>();
@@ -13,33 +13,33 @@ export default function ProjectorPage() {
   const socketRef = useRef<Socket | null>(null);
 
   function getJoinUrl() {
-    return Meteor.absoluteUrl() + "join/" + joinCode;
+    return process.env.ser + "join/" + joinCode;
   }
+
+  const fetchServerUrl = async () => {
+    if (!serverUrl) {
+      try {
+        const res = await getBestServerUrl();
+        setServerUrl(res);
+        console.log("Server found at:", res);
+      } catch (err) {
+        console.error("Error locating server:", err);
+      }
+    }
+  };
 
   useEffect(() => {
     if (socketRef.current) {
       return;
     }
-
+    
     //#region Startup
-    if (!serverUrl) {
-      /// Try get best server url
-      Meteor.call("getBestServerUrl", (error: any, result: string) => {
-        if (error) {
-          console.error("Error locating room:", error);
-          return;
-        }
-
-        console.log("Server found at:", result);
-        setServerUrl(result);
-      });
-    }
+    fetchServerUrl();
 
     if (!serverUrl) {
       console.log("Waiting for server url to load.");
       return;
     }
-
 
     // Connect to game server
     socketRef.current = io(serverUrl + "/host");
@@ -68,21 +68,17 @@ export default function ProjectorPage() {
     //#endregion
 
     //#region Request Room
-    socketRef.current.on(
-      "request-room_response",
-      (roomInfo: { roomId: number; joinCode: string }) => {
-        console.log("Room request response", roomInfo);
-        setRoomId(roomInfo.roomId);
-        setJoinCode(roomInfo.joinCode);
-      }
-    );
+    socketRef.current.on("request-room_response", (roomInfo: { roomId: number; joinCode: string }) => {
+      console.log("Room request response", roomInfo);
+      setRoomId(roomInfo.roomId);
+      setJoinCode(roomInfo.joinCode);
+    });
 
     //#region Host App events
     socketRef.current.on("player-set-changed", (newPlayerList: string[]) => {
       console.log("New set of players:", newPlayerList.toString());
       setPlayerList(newPlayerList);
     });
-
 
     if (!roomId) {
       socketRef.current.emit("request-room");
