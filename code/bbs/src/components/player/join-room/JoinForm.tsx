@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
-import { getBestServerUrl } from "../../../utils/RoomMethods";
+import { getBestServerUrl } from "../../../server/RoomMethods";
 
 export const InvalidCodeWarning = ({ enabled }: { enabled: boolean }) => {
   return enabled ? <b>Invalid room code.</b> : null;

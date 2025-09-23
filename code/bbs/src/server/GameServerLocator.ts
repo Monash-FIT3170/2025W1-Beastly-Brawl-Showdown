@@ -1,7 +1,24 @@
-import { Mongo } from "meteor/mongo";
-import { sqids } from "./main";
+import "./RoomMethods";
+import Sqids from "sqids";
+import "./RoomMethods";
+import { GameServerRecord } from "./models/game_server_record";
 
-export const GameServerRecords = new Mongo.Collection("game_server_registers");
+const newServer = new GameServerRecord({
+  serverName: "Alpha",
+  ipAddress: "192.168.1.1",
+  status: "online",
+});
+
+await newServer.save();
+
+const CODE_MIN_LENGTH = 6; // TODO use a global / db record
+const CODE_ALPHABET = "0123456789";
+
+/** Initialize new sqids object */
+export const sqids = new Sqids({
+  minLength: CODE_MIN_LENGTH,
+  alphabet: CODE_ALPHABET,
+});
 
 /**
  *  Get the server most suitable for the requester
@@ -14,7 +31,7 @@ export function getBestServerNo(): number {
 
 export async function locateServerBest(): Promise<string> {
   const bestServerNo = getBestServerNo();
-  const serverInfo = await GameServerRecords.findOneAsync({
+  const serverInfo = await GameServerRecord.findOne({
     serverNumber: bestServerNo,
   });
 
@@ -29,7 +46,7 @@ export async function locateServerBest(): Promise<string> {
 export async function locateServer(joinCode: string): Promise<string> {
   const [serverNo] = sqids.decode(joinCode);
 
-  const serverInfo = await GameServerRecords.findOneAsync({
+  const serverInfo = await GameServerRecord.findOne({
     serverNumber: serverNo,
   });
 
