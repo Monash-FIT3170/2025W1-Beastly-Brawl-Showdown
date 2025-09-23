@@ -158,45 +158,45 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
-  // Function to trigger move animations
-  const performMoveAnimation = async (
-    moveId: EntryID,
-    actor: "player1" | "player2"
-  ) => {
-    if (!myMonster || !enemyMonster) return;
+  // // Function to trigger move animations
+  // const performMoveAnimation = async (
+  //   moveId: EntryID,
+  //   actor: "player1" | "player2"
+  // ) => {
+  //   if (!myMonster || !enemyMonster) return;
 
-    let message = "";
+  //   let message = "";
     
-    const template = actor === "player1" ? myMonster.template : enemyMonster.template;
+  //   const template = actor === "player1" ? myMonster.template : enemyMonster.template;
 
-    if (moveId === template.attackActionId) {
-      message = actor === "player1" ? "You attack!" : "Enemy attacks!";
-      if (actor === "player1") setPlayerSlash(true);
-      else setEnemySlash(true);
-    } else if (moveId === template.defendActionId) {
-      message = actor === "player1" ? "You defend!" : "Enemy defends!";
-    } else if (moveId === template.abilityActionId) {
-      message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
-    }
+  //   if (moveId === template.attackActionId) {
+  //     message = actor === "player1" ? "You attack!" : "Enemy attacks!";
+  //     if (actor === "player1") setPlayerSlash(true);
+  //     else setEnemySlash(true);
+  //   } else if (moveId === template.defendActionId) {
+  //     message = actor === "player1" ? "You defend!" : "Enemy defends!";
+  //   } else if (moveId === template.abilityActionId) {
+  //     message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
+  //   }
 
-    setBattleMessage(message);
-    setShowAnimation(true);
+  //   setBattleMessage(message);
+  //   setShowAnimation(true);
 
-    if (message != ""){    
-      setShowMessage(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setShowMessage(false);
-    }
-    setShowAnimation(false);
-    if (showMessage){
-      setShowMessage(false);
-    }
+  //   if (message != ""){    
+  //     setShowMessage(true);
+  //     await new Promise((resolve) => setTimeout(resolve, 1000));
+  //     setShowMessage(false);
+  //   }
+  //   setShowAnimation(false);
+  //   if (showMessage){
+  //     setShowMessage(false);
+  //   }
     
 
-    if (actor === "player1") setPlayerSlash(false);
-    else setEnemySlash(false);
+  //   if (actor === "player1") setPlayerSlash(false);
+  //   else setEnemySlash(false);
 
-  };
+  // };
 
   // Handle player action (submit move to server)
   const handleAction = (
@@ -270,51 +270,53 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     }
   }, [socket]);
 
-  // Sequentially play animations after both players submit moves
-  useEffect(() => {
-    if (!socket) return;
+  
+  //#region Animation Code
+  // // Sequentially play animations after both players submit moves
+  // useEffect(() => {
+  //   if (!socket) return;
 
-    const handleExecuteTurn = ({
-      playerMove,
-      enemyMove,
+  //   const handleExecuteTurn = ({
+  //     playerMove,
+  //     enemyMove,
 
-    }: {
-      playerMove: { moveId: EntryID };
-      enemyMove: { moveId: EntryID };
-    }) => {
-      performMoveAnimation(playerMove.moveId, "player1").then(() =>
-        performMoveAnimation(enemyMove.moveId, "player2")
-      );
-    };
+  //   }: {
+  //     playerMove: { moveId: EntryID };
+  //     enemyMove: { moveId: EntryID };
+  //   }) => {
+  //     performMoveAnimation(playerMove.moveId, "player1").then(() =>
+  //       performMoveAnimation(enemyMove.moveId, "player2")
+  //     );
+  //   };
 
-    socket.on("ExecuteTurn", handleExecuteTurn);
+  //   socket.on("ExecuteTurn", handleExecuteTurn);
 
-    return () => {
-      socket.off("ExecuteTurn", handleExecuteTurn)
-    };
-  }, [socket, myMonster, enemyMonster]);
+  //   return () => {
+  //     socket.off("ExecuteTurn", handleExecuteTurn)
+  //   };
+  // }, [socket, myMonster, enemyMonster]);
 
-  // Sequentially play animations after both players submit moves
-  useEffect(() => {
-    if (!socket) return;
+  // // Sequentially play animations after both players submit moves
+  // useEffect(() => {
+  //   if (!socket) return;
 
-    const handleExecuteTurn = ({
-      playerMove,
-      enemyMove,
-    }: {
-      playerMove: { moveId: EntryID };
-      enemyMove: { moveId: EntryID };
-    }) => {
-      performMoveAnimation(playerMove.moveId, "player1").then(() =>
-        performMoveAnimation(enemyMove.moveId, "player2")
-      );
-    };
+  //   const handleExecuteTurn = ({
+  //     playerMove,
+  //     enemyMove,
+  //   }: {
+  //     playerMove: { moveId: EntryID };
+  //     enemyMove: { moveId: EntryID };
+  //   }) => {
+  //     performMoveAnimation(playerMove.moveId, "player1").then(() =>
+  //       performMoveAnimation(enemyMove.moveId, "player2")
+  //     );
+  //   };
 
-    socket.on("ExecuteTurn", handleExecuteTurn);
-    return () => {
-      socket.off("ExecuteTurn", handleExecuteTurn);
-    };
-  }, [socket, myMonster, enemyMonster]);
+  //   socket.on("ExecuteTurn", handleExecuteTurn);
+  //   return () => {
+  //     socket.off("ExecuteTurn", handleExecuteTurn);
+  //   };
+  // }, [socket, myMonster, enemyMonster]);
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
@@ -346,9 +348,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         autoAdvance={false}  // default: no autoplay
         onAdvanceTurn={(next) => setTurnIndex(next)}
         myid = {matchData.myid}
+        showEnemySubmittedMessage = {showEnemySubmittedMessage}
+        showSubmittedMoveMessage = {showSubmittedMoveMessage}
       />
-      {showEnemySubmittedMessage && <BattleMessage message={"Enemy Has Submitted"} />}
-      {showSubmittedMoveMessage && <BattleMessage message={"Your Move Has Been Submitted"} />}
       <BattleBottom
         onAction={handleAction}
         onRoll={() => rollNotice && rollNow(rollNotice)}

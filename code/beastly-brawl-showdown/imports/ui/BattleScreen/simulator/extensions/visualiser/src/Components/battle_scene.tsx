@@ -7,7 +7,7 @@ import { BuffEvent, DamageEvent } from "../../../../core/event/core_events";
 import { getBaseStat } from "../../../../core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../data/common/common_monster_pool";
 import { BattleMiddle } from "../BattleScreen/BattleMiddle";
-
+import BattleMessage from "../BattleScreen/BattleMessage";
 interface BattleSceneProps {
   events: BaseEvent[];
   turnIndex: number;
@@ -15,6 +15,8 @@ interface BattleSceneProps {
   autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
   myid : number;
+  showEnemySubmittedMessage: boolean;
+  showSubmittedMoveMessage: boolean;
 }
 
 console.log("BattleScene loaded");
@@ -26,10 +28,15 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   autoAdvance,
   onAdvanceTurn,
   myid,
+  showEnemySubmittedMessage,
+  showSubmittedMoveMessage,
 }) => {
 
   // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
+
+  //setup the battle messages
+  const [currentMessage, setcurrentMessage] = useState("");
 
   // Clamp selected index
   const selectedTurnIndex =
@@ -65,6 +72,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     latestVisibleRef.current = initialTurnState;
   }, [initialTurnState, isPlaying]);
 
+  //currentmessage is the battle message you need to look at
   // Updates the visible state based on the event
   function applyEventToVisible(state: typeof initialTurnState, ev: BaseEvent) {
     switch (ev.name) {
@@ -220,6 +228,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         enemyImgSrc={enemyMonsterImage}
         playerImgSrc={myMonsterImage}
       />
+      {showEnemySubmittedMessage && <BattleMessage message={"Enemy Has Submitted"} />}
+      {showSubmittedMoveMessage && <BattleMessage message={"Your Move Has Been Submitted"} />}
+      <BattleMessage message = {currentMessage} />
     </div>
   );
 };
