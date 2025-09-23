@@ -17,6 +17,7 @@ interface BattleSceneProps {
   myid : number;
   showEnemySubmittedMessage: boolean;
   showSubmittedMoveMessage: boolean;
+  showMessage: boolean;
 }
 
 console.log("BattleScene loaded");
@@ -30,6 +31,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   myid,
   showEnemySubmittedMessage,
   showSubmittedMoveMessage,
+  showMessage,
 }) => {
 
   // Build turns from raw events
@@ -230,7 +232,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       />
       {showEnemySubmittedMessage && <BattleMessage message={"Enemy Has Submitted"} />}
       {showSubmittedMoveMessage && <BattleMessage message={"Your Move Has Been Submitted"} />}
-      <BattleMessage message = {currentMessage} />
+      {showMessage && <BattleMessage message = {currentMessage} />}
     </div>
   );
 };

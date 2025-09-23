@@ -323,7 +323,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   return (
     <div className="canvas-body" id="battle-screen-body">
       <BattleTop />
-      {showMessage && <BattleMessage message={battleMessage} />}
       {/*}BattleMiddle
         showAnimation={showAnimation}
         player1={myMonster}
@@ -350,6 +349,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         myid = {matchData.myid}
         showEnemySubmittedMessage = {showEnemySubmittedMessage}
         showSubmittedMoveMessage = {showSubmittedMoveMessage}
+        showMessage = {showMessage}
       />
       <BattleBottom
         onAction={handleAction}
