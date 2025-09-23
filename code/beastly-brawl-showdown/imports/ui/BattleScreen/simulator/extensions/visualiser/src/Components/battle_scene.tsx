@@ -3,7 +3,7 @@ import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
 import { BaseEvent } from "../../../../core/event/base_event";
-import { BuffEvent, DamageEvent } from "../../../../core/event/core_events";
+import { BuffEvent, DamageEvent, SnapshotEvent } from "../../../../core/event/core_events";
 import { getBaseStat } from "../../../../core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../data/common/common_monster_pool";
 import { BattleMiddle } from "../BattleScreen/BattleMiddle";
@@ -53,7 +53,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   // Parsed snapshot at the start of the selected turn
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
-    [currentSnapshot] // <- stable driver
+    [currentSnapshot]
   );
 
   // What the panels currently show as events are applied
@@ -61,6 +61,35 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   // Keep a ref to avoid stale closures inside the async loop
   const latestVisibleRef = useRef(initialTurnState);
+
+  // New stuff to know when to play out the turn
+  const [runTurnNow, setRunTurnNow] = useState(false);
+  const lastSnapCountRef = useRef(0);
+  const turnToPlayRef = useRef<BaseEvent[]>([]);
+
+  // Keep track of the snapshot events' indices
+  const snapshotIdxs = useMemo(() => {
+    const idxs: number[] = [];
+    for (let i = 0; i < events.length; i++) {
+      if (events[i]?.name === "snapshot") idxs.push(i);
+    }
+    return idxs;
+  }, [events.length]);
+
+  // useeffect to know when to play the turn
+  useEffect(() => {
+    // # of completed turns = snapshots - 1 (first snapshot has no prior turn)
+    const completedTurns = snapshotIdxs.length - 1;
+    const alreadyPlayed = lastSnapCountRef.current;
+
+    if (completedTurns <= alreadyPlayed) return; // nothing new to play
+
+    const start = snapshotIdxs[alreadyPlayed];
+    const end = snapshotIdxs[alreadyPlayed + 1]; // the new snapshot
+    turnToPlayRef.current = events.slice(start, end);  // freeze the exact turn
+    setRunTurnNow(true);
+  }, [snapshotIdxs, events]); // events needed to slice; OK since we gate on snapshot count
+
 
   // This is to prevent replaying the turn when autoplay is toggled
   const onAdvanceRef = useRef(onAdvanceTurn);
@@ -153,43 +182,48 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   // Step through events of the selected turn and update the panels live
   useEffect(() => {
-    if (!currentTurn) return;
-
-    // Check if is playing
+    if (!runTurnNow) return;
     if (!isPlaying) return;
 
-    // Make cancel false at the start of each turn's playthrough
     let cancelled = false;
-    const perEventDelayMs = 600;
 
-    // Play out events
     (async () => {
-      for (const ev of currentTurn.turnEvents) {
-        // Check for cancel
-        if (cancelled) return;
+      const turnToPlay = turnToPlayRef.current;
+      if (!turnToPlay.length) return;
 
-        // Make copy to update
-        const stateCopy = cloneState(latestVisibleRef.current);
-        const nextState = applyEventToVisible(stateCopy, ev)
-
-        // Update live
-        setVisibleState(nextState);
-        // Update ref
-        latestVisibleRef.current = nextState;
-
-        // Delay between events (Could be to put animations or this could be done in applyEventToVisible)
-        await new Promise(r => setTimeout(r, perEventDelayMs));
-        if (cancelled) return;
+      // Reset to the snapshot at start of the slice
+      let i = 0;
+      if (turnToPlay[0]?.name === "snapshot") {
+        const snapState = parseSnapshot(turnToPlay[0] as SnapshotEvent);
+        latestVisibleRef.current = snapState;
+        setVisibleState(snapState);
+        i = 1;
       }
 
-      // What to do after this turn's playthrough is done
-      if (!cancelled && autoAdvanceRef.current && onAdvanceRef.current && selectedTurnIndex < turns.length - 1) {
-        onAdvanceRef.current(selectedTurnIndex + 1);
+      // Apply the rest of the events in this completed turn
+      for (; i < turnToPlay.length; i++) {
+        if (cancelled) return;
+        const ev = turnToPlay[i];
+
+        const base = cloneState(latestVisibleRef.current);
+        const next = applyEventToVisible(base, ev);
+        console.log("Rendering:", ev.name)
+
+        latestVisibleRef.current = next;
+        setVisibleState(next);
+
+        // When you add animations, put your delay here:
+        // await new Promise(r => setTimeout(r, 600));
+        // if (cancelled) return;
       }
+
+      // Mark this turn as played and lower the flag
+      lastSnapCountRef.current += 1;
+      setRunTurnNow(false);
     })();
 
     return () => { cancelled = true; };
-  }, [selectedTurnIndex, currentTurn, isPlaying]);
+  }, [runTurnNow, isPlaying]);
 
 
 
@@ -207,11 +241,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   //hp is being updated correctly so why isn't health updating?
   const template = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[0].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
-  console.log("my health is" + player1MaxHp)
+  // console.log("my health is" + player1MaxHp)
 
   const template2 = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[1].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
-  console.log("enemy health is" + player2MaxHp)
+  // console.log("enemy health is" + player2MaxHp)
 
   // Clear names for what the UI reads:
   const visiblePlayer1 = visibleState[0];

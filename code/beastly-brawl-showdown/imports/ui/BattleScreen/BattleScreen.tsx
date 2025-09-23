@@ -260,6 +260,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       setEvents(prev => {
       const next = [...prev, ev];
       console.log("New event received:", ev.name);
+      // console.log("EVENTS (next):", JSON.stringify(next));
       return next;
     });
     };
