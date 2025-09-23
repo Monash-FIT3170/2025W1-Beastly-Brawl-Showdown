@@ -1,7 +1,7 @@
 import { Player } from "./player";
 import { Match, MatchType } from "./match";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-import { log_attention } from "./utils";
+import { getRandomPool, log_attention, log_event } from "./utils";
 
 export enum TournamentType {
   Standard = "standard",
@@ -12,6 +12,8 @@ export class TournamentManager {
   matches: Match[] = [];
   playerChannel: any;
   tournamentType: TournamentType;
+  winners: Player[] = [];
+  private monsterSelectionResolvers: Map<string, (monster: string) => void> = new Map();
 
   constructor(playerChannel: any, type: TournamentType) {
     this.playerChannel = playerChannel;
@@ -24,7 +26,8 @@ export class TournamentManager {
     // as startTournament runs its first match using creatematchs (this file) and checks the results 
     // using checkRoundCompletion (this file) before checkRoundCompletion pingpongs this 
     // function over and over again to simulate a tournament.
-
+    log_attention("Remaining Players: ");
+    console.log(remainingPlayers);
     this.creatematchs(remainingPlayers);
     this.matches.forEach(match => match.createBattle());
 
@@ -44,20 +47,57 @@ export class TournamentManager {
     console.log(`Created ${this.matches.length} matchs for this round.`);
   }
 
-  checkRoundCompletion() {
+  public async waitForMonsterSelections(players: Player[]) {
+    const promises = players.map(player => {
+      return new Promise<void>(resolve => {
+        this.monsterSelectionResolvers.set(player.socketId, (monsterName) => {
+          player.selectedMonsterTemplateName = monsterName;
+          this.monsterSelectionResolvers.delete(player.socketId);
+          resolve();
+        });
+      });
+    });
+
+    await Promise.all(promises);
+  }
+
+  public resolveMonsterSelection(player: Player, monsterName: string) {
+    const resolver = this.monsterSelectionResolvers.get(player.socketId);
+    if (resolver) {
+      resolver(monsterName);
+    }
+  }
+
+  async checkRoundCompletion() {
     const allCompleted = this.matches.every(match => match.winner);
     if (!allCompleted) return;
 
-    const winners = this.matches.map(m => m.winner!).filter(Boolean);
-    if (winners.length === 1) {
-      console.log(`Tournament Winner: ${winners[0].displayName}`);
+    this.winners = this.matches.map(m => m.winner!).filter(Boolean);
+    if (this.winners.length === 1) {
+      console.log(`Tournament Winner: ${this.winners[0].displayName}`);
       // Optionally notify host:
-      this.playerChannel.emit("tournament-finished", winners[0].displayName);
+      this.playerChannel.emit("tournament-finished", this.winners[0].displayName);
       return;
+    }
+    
+    if (this.tournamentType == TournamentType.Random) {
+      let count = 0;
+      this.winners.forEach(player => {
+        count+= 1;
+        log_attention(`Winner: ${count}`);
+        player.isReady = false;
+        const pool = getRandomPool(3);
+        log_event("Random Pool: ");
+        console.log(pool);
+        player.currentMonsterPool = pool;
+        this.playerChannel.to(player.socketId).emit("select-monster", { monsterPool: pool });
+      });
+      await this.waitForMonsterSelections(this.winners);
     }
 
     // Recursively run next round with winners
-    this.runRounds(winners);
+    // TODO: Fix wrong players being sent to battle in second round
+    this.runRounds(this.winners);
   }
 
   async startTournament(players: Player[]): Promise<void> {

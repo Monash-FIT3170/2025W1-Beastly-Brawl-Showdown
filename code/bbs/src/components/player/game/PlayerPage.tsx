@@ -88,13 +88,23 @@ const PlayerContent = () => {
   const [allReady, setAllReady] = useState(false);
   const [winner, setWinner] = useState();
   const [waiting, setWaiting] = useState(false);
+  const [noSelections, setNoSelections] = useState(0);
+  const [randomMonsterPool, setMonsterPool] = useState<string[]>();
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("game-started", () => setStartSelection(true));
+    socket.on("select-monster", (data) => {
+      if (data?.monsterPool) {
+        setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
+      }
+      setStartSelection(true);
+      setMonsterSelected(false);
+      setAllReady(false);
+      setNoSelections(noSelections + 1);
+    });
 
     socket.on("round-start", (data) => {
       setWaiting(false)
@@ -145,6 +155,7 @@ const PlayerContent = () => {
     });
 
     socket.on("send-to-waiting", () => {
+      setNoSelections(noSelections + 1);
       setWaiting(true);
     });
 
@@ -158,7 +169,7 @@ const PlayerContent = () => {
     });
 
     return () => {
-      socket.off("game-started");
+      socket.off("select-monster");
       socket.off("round-start");
       socket.off("send-to-waiting");
       // socket.off("return-from-waiting");
@@ -188,7 +199,7 @@ const PlayerContent = () => {
     const initialTimeout = setTimeout(restartAnimation, 100);
     const interval = setInterval(restartAnimation, 2000);
 
-    return () => {
+    return () => { 
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
@@ -207,7 +218,11 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
-      socket.emit("RequestSubmitMonster", { data: monster.templateId });
+      socket.emit("RequestSubmitMonster", { data: {
+        monsterTemplate: monster.templateId,
+        selections: noSelections
+        }
+      });
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {
@@ -243,6 +258,7 @@ const PlayerContent = () => {
   if (!monsterSelected)
     return (
       <MonsterSelectionScreen
+        monsterPool={randomMonsterPool}
         setSelectedMonsterCallback={handleMonsterSelection}
       />
     );

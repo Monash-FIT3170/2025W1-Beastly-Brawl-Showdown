@@ -5,7 +5,7 @@ import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_mo
 
 interface MonsterSelectionScreenProps {
   setSelectedMonsterCallback?: (value: string) => void;
-  monsterPool?: string[];
+  monsterPool?: string[]; // Optional pool for Random mode
 }
 
 export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
@@ -16,7 +16,8 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
 
   const [selectedMonster, setSelectedMonster] = useState<string>("");
   const [confirmEnabled, setConfirmEnabled] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false);
+
   // Pool of monsters to display in the grid
   const [displayPool, setDisplayPool] = useState<string[]>([]);
 
@@ -32,7 +33,6 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
         deselect.style.opacity = "1";
       }
     }
-
     // Add styling to new selection
     const selected = document.getElementById(name);
     if (selected) {
@@ -40,13 +40,12 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
       selected.style.borderWidth = "8px";
       selected.style.opacity = "0.5";
     }
-
     setSelectedMonster(name);
     setConfirmEnabled(true);
   }
   //#endregion
 
-  //#region Update parent with selection
+  //#region Confirm selection
   function handleConfirm() {
     if (selectedMonster) {
       console.log("Confirmed monster:", selectedMonster);
