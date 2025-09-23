@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 //literally just a div, like nothing to see here
 export const BattleTop: React.FC = () => {
