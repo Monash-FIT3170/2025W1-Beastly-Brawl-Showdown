@@ -84,7 +84,6 @@ export class TournamentManager {
       let count = 0;
       this.winners.forEach(player => {
         count+= 1;
-        log_attention(`Winner: ${count}`);
         player.isReady = false;
         const pool = getRandomPool(3);
         log_event("Random Pool: ");
@@ -93,6 +92,7 @@ export class TournamentManager {
         this.playerChannel.to(player.socketId).emit("select-monster", { monsterPool: pool });
       });
       await this.waitForMonsterSelections(this.winners);
+      console.log("poopoo");
     }
 
     // Recursively run next round with winners
