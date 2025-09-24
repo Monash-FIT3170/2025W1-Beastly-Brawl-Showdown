@@ -13,8 +13,6 @@ export const renderRoutes = () => (
 
     {/* Host */}
     <Route path="/host/" element={<ProjectorPage />} />
-    {/* <Route path="/host/" element={<HostRoomRequestPage />} /> */}
-    {/* <Route path="/room/" element={<ProjectorPage />} /> */}
 
     {/* Player */}
     <Route path="/join/:joinCode" element={<JoinPage />} />

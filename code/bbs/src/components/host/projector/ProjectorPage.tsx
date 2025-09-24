@@ -2,7 +2,7 @@ import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 import { io, Socket } from "socket.io-client";
 import { useState, useRef, useEffect } from "react";
-import { getBestServerUrl } from "../../../server/RoomMethods";
+import { getBestServerUrl } from "../../../utils/RoomMethods";
 
 export default function ProjectorPage() {
   const [serverUrl, setServerUrl] = useState<string>();
