@@ -88,16 +88,32 @@ const PlayerContent = () => {
   const [allReady, setAllReady] = useState(false);
   const [winner, setWinner] = useState();
   const [waiting, setWaiting] = useState(false);
+  const [noSelections, setNoSelections] = useState(0);
+  const [randomMonsterPool, setMonsterPool] = useState<string[]>();
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("game-started", () => setStartSelection(true));
+    //#region Monster selection handle
+    socket.on("select-monster", (data) => {
+      if (data?.monsterPool) {
+        setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
+      }
+      setStartSelection(true);
+      setMonsterSelected(false);
+      setAllReady(false);
+      setNoSelections(prevSelections => {
+        const newVal = prevSelections + 1;
+        return newVal;
+      });
+    });
+    //#endregion
 
+    //#region Round Start
     socket.on("round-start", (data) => {
-      setWaiting(false)
+      setWaiting(false);
       log_event("Received round-start data:", data);
 
       const myTemplateName = data?.myMonster;
@@ -143,22 +159,27 @@ const PlayerContent = () => {
 
       setAllReady(true);
     });
+    //#endregion
 
+    //#region Waiting Room
     socket.on("send-to-waiting", () => {
       setWaiting(true);
     });
+    //#endregion
 
     // socket.on("return-from-waiting", () => {
     //   setWaiting(false);
     // });
 
+    //#region Set winner
     socket.on("tournament-finished", (data) => {
       setWaiting(false);
       setWinner(data);
     });
+    //#endregion
 
     return () => {
-      socket.off("game-started");
+      socket.off("select-monster");
       socket.off("round-start");
       socket.off("send-to-waiting");
       // socket.off("return-from-waiting");
@@ -188,7 +209,7 @@ const PlayerContent = () => {
     const initialTimeout = setTimeout(restartAnimation, 100);
     const interval = setInterval(restartAnimation, 2000);
 
-    return () => {
+    return () => { 
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
@@ -207,7 +228,12 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
-      socket.emit("RequestSubmitMonster", { data: monster.templateId });
+      console.log("No of selections: ", noSelections);
+      socket.emit("RequestSubmitMonster", { data: {
+        monsterTemplate: monster.templateId,
+        selections: noSelections
+        }
+      });
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {
@@ -243,6 +269,7 @@ const PlayerContent = () => {
   if (!monsterSelected)
     return (
       <MonsterSelectionScreen
+        monsterPool={randomMonsterPool}
         setSelectedMonsterCallback={handleMonsterSelection}
       />
     );
