@@ -1,0 +1,74 @@
+import express, { Request, Response } from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import { GameServerRegistryModel } from "./models/game_server_register";
+
+// TODO: MOVE TO ENV
+const MONGO_IP = "localhost";
+const MONGO_PORT = "27017";
+const MONGO_NAME = "RoomLocation";
+const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
+
+export async function connectToDatabase(): Promise<typeof mongoose> {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log(`Connected to MongoDB at ${MONGO_URI}`);
+    return mongoose;
+  } catch (err) {
+    console.error(`MongoDB connection error: ${err}`);
+    process.exit(1);
+  }
+}
+
+async function main() {
+  console.log("--< START >--");
+  //# DB
+  const db = await connectToDatabase();
+  db.connection.on("disconnect", () => {
+    console.error("ERROR: Mongo disconnected...");
+    process.exit(1);
+  });
+  console.log("Connected to mongo.");
+
+  //# HTTP server
+  const app = express();
+  app.use(express.json());
+  app.use(
+    cors({
+      origin: "*",
+    })
+  );
+
+  app.get("/status", (req: Request, res: Response) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  app.get("/game-server-url", async (req: Request, res: Response) => {
+    try {
+      // const { roomCode: queriedRoomCode } = req.query;
+      const bestServerNo: number = 7;
+
+      // TODO validation and sanitation
+
+      const record = await GameServerRegistryModel.findOne({ serverNumber: bestServerNo });
+      if (!record) {
+        return res.status(400).json({ error: "Room not found." });
+      }
+
+      return res.json({ url: record.serverUrl });
+    } catch (err) {
+      console.error("ERR: " + err);
+      return res.status(500).json({ error: "Request failed." });
+    }
+  });
+
+  //# Listen
+  const port: number = 3000;
+  app.listen(port);
+  console.log(`Listening @ port ${port}`);
+
+  //# Ready
+  console.log("--< READY >--");
+}
+
+main();

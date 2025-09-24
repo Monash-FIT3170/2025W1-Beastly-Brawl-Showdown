@@ -1,5 +1,4 @@
 import { io } from "socket.io-client";
-import { locateServerBest } from "./GameServerLocator";
 
 // /** Request for a room to be allocated */
 // async requestHostRoom() {
@@ -8,12 +7,13 @@ import { locateServerBest } from "./GameServerLocator";
 // },
 
 export const getBestServerUrl = async (): Promise<string> => {
-  /// Lookup the server info from the global db
-  const serverUrl = await locateServerBest();
-  /// Attempt to connect to the specified server
-  console.log(`Testing connection to game server @ <${serverUrl}>.`);
+  /// Fetch server
+
+  const response = await fetch("http://localhost:3000/game-server-url");
+  const { url: serverUrl } = await response.json();
 
   /// Check with server if join code leads to an active room if not error
+  console.log(`Testing connection to game server @ <${serverUrl}>.`);
   return new Promise((resolve, reject) => {
     const socket = io(serverUrl);
     /// If said server is not responding then error
