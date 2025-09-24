@@ -330,6 +330,13 @@ async function main(config: ServerConfig) {
       // Store selected monster template name directly
       player.setMonsterTemplate(monsterKey);
       player.isReady = true;
+      log_event(`Player ${player.displayName} selected ${player.selectedMonsterTemplateName}`);
+
+      // Resolve promise if random tournament, 2nd round onwareds
+      if (data.data.selections > 1) {
+        log_attention("Not the first monster selection, resolving promise...");
+        room.tournamentManager.resolveMonsterSelection(player, monsterKey);
+      }
 
       // Check if all players are ready
       let allReady;
@@ -340,45 +347,43 @@ async function main(config: ServerConfig) {
           (p) => p.isReady
         );
       } else { // Read from winners only
-        log_attention("Reading ready from winners");
+        log_notice("Reading ready from winners");
         allReady = Array.from(room.tournamentManager.winners.values()).every(
           (p) => p.isReady
         );
       }
-
       if (!allReady) {
         log_notice("Waiting for all players to submit their monsters...");
         return;
       }
 
       // All players ready, start tournament if first selection
-      // TODO: Fix this being entered twice (change if condition somehow or PlayerPage)
       if (data.data.selections == 1) {
         log_warning(`Only start the tournament once. The number of monster selections is: ${data.data.selections}`);
         room.tournamentManager.startTournament(Array.from(room.players.values()));
+
+        room.tournamentManager.matches.forEach((match: Match) => {
+          if (match.matchType == MatchType.BYE) {
+            log_notice("This match is a bye");
+            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", {bye: true});
+            return; //TODO HANDLE BYE
+          }
+
+          // P1: send a copy/start
+          room.playerChannel.to(match.player1.socketId).emit("round-start", {
+            myMonster: match.player1.selectedMonsterTemplateName,
+            enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
+            sideID: 0,
+          });
+
+          //P2: send a copy/start (invert sides?)
+          room.playerChannel.to(match.player2?.socketId).emit("round-start", {
+            myMonster: match.player2?.selectedMonsterTemplateName,
+            enemyMonster: match.player1.selectedMonsterTemplateName,
+            sideID: 1, 
+          });
+        });
       }
-
-      
-      room.tournamentManager.matches.forEach((match: Match) => {
-        if (match.matchType == MatchType.BYE) {
-          room.playerChannel.to(match.player1.socketId).emit("send-to-waiting");
-          return; //TODO HANDLE BYE
-        }
-
-        // P1: send a copy/start
-        room.playerChannel.to(match.player1.socketId).emit("round-start", {
-          myMonster: match.player1.selectedMonsterTemplateName,
-          enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
-          sideID: 0,
-        });
-
-        //P2: send a copy/start (invert sides?)
-        room.playerChannel.to(match.player2?.socketId).emit("round-start", {
-          myMonster: match.player2?.selectedMonsterTemplateName,
-          enemyMonster: match.player1.selectedMonsterTemplateName,
-          sideID: 1,
-        });
-      });
     });
 
     function handleRollNotice() {

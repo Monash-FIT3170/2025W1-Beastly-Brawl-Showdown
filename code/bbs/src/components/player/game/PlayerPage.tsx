@@ -96,6 +96,7 @@ const PlayerContent = () => {
   useEffect(() => {
     if (!socket) return;
 
+    //#region Monster selection handle
     socket.on("select-monster", (data) => {
       if (data?.monsterPool) {
         setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
@@ -103,11 +104,16 @@ const PlayerContent = () => {
       setStartSelection(true);
       setMonsterSelected(false);
       setAllReady(false);
-      setNoSelections(noSelections + 1);
+      setNoSelections(prevSelections => {
+        const newVal = prevSelections + 1;
+        return newVal;
+      });
     });
+    //#endregion
 
+    //#region Round Start
     socket.on("round-start", (data) => {
-      setWaiting(false)
+      setWaiting(false);
       log_event("Received round-start data:", data);
 
       const myTemplateName = data?.myMonster;
@@ -153,20 +159,24 @@ const PlayerContent = () => {
 
       setAllReady(true);
     });
+    //#endregion
 
+    //#region Waiting Room
     socket.on("send-to-waiting", () => {
-      setNoSelections(noSelections + 1);
       setWaiting(true);
     });
+    //#endregion
 
     // socket.on("return-from-waiting", () => {
     //   setWaiting(false);
     // });
 
+    //#region Set winner
     socket.on("tournament-finished", (data) => {
       setWaiting(false);
       setWinner(data);
     });
+    //#endregion
 
     return () => {
       socket.off("select-monster");
@@ -218,6 +228,7 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
+      console.log("No of selections: ", noSelections);
       socket.emit("RequestSubmitMonster", { data: {
         monsterTemplate: monster.templateId,
         selections: noSelections
