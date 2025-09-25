@@ -104,7 +104,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "fleet_foot",
       name: "Fleet Foot Stalker",
       description: "A swift and elusive hunter. Excels in dealing multi-hit damage.",
-      imageUrl: "",
+      imageUrl: "/monsters/owl.png",
       baseStats: {
         health: 32,
         armour: 8,
@@ -142,7 +142,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "sea_urchin",
       name: "Sea Urchin",
       description: "A prickly marine creature. A Defense Monster that deals damage back when hit.",
-      imageUrl: "",
+      imageUrl: "/monsters/sea_urchin.png",
       baseStats: {
         health: 60,
         armour: 10,
@@ -161,7 +161,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "lion",
       name: "Lion",
       description: "A fierce and majestic predator. An Attack Monster that excels in hitting hard.",
-      imageUrl: "",
+      imageUrl: "/monsters/lion.png",
       baseStats: {
         health: 36,
         armour: 6,
@@ -180,7 +180,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "bear",
       name: "Bear",
       description: "A strong and resilient creature. A Balanced Monster that goes berserk.",
-      imageUrl: "",
+      imageUrl: "/monsters/bear.png",
       baseStats: {
         health: 50,
         armour: 9,
@@ -197,9 +197,9 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
 
     shield: {
       templateId: "shield",
-      name: "Sheild",
+      name: "Shield",
       description: "A shield that once belonged to a knight gained sentience. A defender monster with inate damage reduction.",
-      imageUrl: "",
+      imageUrl: "/monsters/shield.png",
       baseStats: {
         health: 60,
         armour: 12,
