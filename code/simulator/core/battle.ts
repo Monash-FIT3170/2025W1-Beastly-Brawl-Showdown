@@ -51,6 +51,7 @@ export class Battle {
           baseID: playerOptions.monsterId,
           health: NaN,
           attackCharges: NaN,
+          defendCharges: NaN,
           components: [],
         },
         pendingActions: null,

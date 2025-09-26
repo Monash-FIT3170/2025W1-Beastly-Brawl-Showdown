@@ -24,7 +24,7 @@ export interface Monster {
    * How many times can the monster attack in a round
    */
   attackCharges: number;
-
+  defendCharges: number;
   //# Components
   /**
    * The components attached to this monster

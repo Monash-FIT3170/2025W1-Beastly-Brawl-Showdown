@@ -57,7 +57,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     async perform(battle: Battle, source: SideId): Promise<void> {
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      if (sourceMonster.defendActionCharges <= 0) {
+      if (sourceMonster.defendCharges <= 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
           source: source,
@@ -68,7 +68,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         battle.eventHistory.addEvent(failedEvent);
         return;
       }
-      sourceMonster.defendActionCharges -= 1;
+      sourceMonster.defendCharges -= 1;
 
       const defenseComponent: DefendComponent = new DefendComponent(1, 2);
       sourceMonster.components.push(defenseComponent);
