@@ -6,7 +6,7 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import connectDb from "./db/db";
 import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
-import { log_attention, log_event, log_notice, log_warning } from "./utils";
+import { getRandomPool, log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
@@ -15,9 +15,13 @@ import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator
 import { log } from "console";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
-import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
+import {
+  ChooseMove,
+  Roll,
+} from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { match } from "assert";
 import { Match, MatchType } from "./match";
+import { TournamentType } from "./tournament_manager";
 
 type ServerConfig = {
   serverIp: string;
@@ -50,20 +54,24 @@ async function main(config: ServerConfig) {
     serverNumber: config.serverNumber,
   });
   if (existingRecordCount > 0) {
-    console.log(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
+    console.log(
+      `Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`
+    );
     if (!config.overrideExistingRecordOnStartup) {
       throw new Error("A record already exists, room could not be registered.");
     }
   }
-  const updatedRecord = await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
-    { serverNumber: config.serverNumber },
-    {
-      serverNumber: config.serverNumber,
-      serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
-      lastUpdated: new Date(),
-    },
-    { upsert: true, new: true }
-  );
+  const updatedRecord =
+    await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
+      { serverNumber: config.serverNumber },
+      {
+        serverNumber: config.serverNumber,
+        serverUrl:
+          config.serverIp.toString() + ":" + config.serverPort.toString(),
+        lastUpdated: new Date(),
+      },
+      { upsert: true, new: true }
+    );
   log_notice("New Record:\n" + JSON.stringify(updatedRecord));
   log_notice("Registered to records.");
 
@@ -111,7 +119,9 @@ async function main(config: ServerConfig) {
     // hostName: string;
   };
   hostChannel.use((socket, next) => {
-    log_event(`Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
+    log_event(
+      `Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`
+    );
     const auth = socket.handshake.auth as HostChannelAuth;
     /// for now always accept the host name
     // if (!auth.hostName) {
@@ -131,18 +141,28 @@ async function main(config: ServerConfig) {
     });
 
     // #region New Room
-    socket.on("request-room", async () => {
-      log_event("Room requested.");
+    socket.on("request-room", async (data: { type: "standard" | "random" }) => {
+      log_event("Room requested with mode: " + data.type);
       // TODO prevent multiple rooms at the same time
       try {
-        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(socket.id, playerChannel);
+        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
+          socket.id,
+          playerChannel
+        );
 
-        socket.emit("request-room_response", {
-          roomId: roomId,
-          joinCode: joinCode,
-        });
-        log_notice(`Room generated. id = ${roomId}, join code = ${joinCode}`);
-      } catch {
+        // Set tournament type in the room
+        const room = gameServer.rooms.get(roomId);
+        if (room) {
+          room.tournamentManager.tournamentType =
+            data.type === "random"
+              ? TournamentType.Random
+              : TournamentType.Standard;
+        }
+
+        socket.emit("request-room_response", { roomId, joinCode });
+        log_notice(
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+        );      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
@@ -159,10 +179,24 @@ async function main(config: ServerConfig) {
 
       // Relay to all players in this room
       room.players.forEach((player) => {
-        playerChannel.to(player.socketId).emit("game-started"); // Clients can now start monster selection
+        let pool: string[];
+        if (room.tournamentManager.tournamentType === TournamentType.Random) {
+          pool = getRandomPool(3); // Random mode
+          log_event("Random Pool: ");
+          console.log(pool);
+        } else {
+          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
+            (k) => k !== "blank"
+          ); // Standard mode, exclude BlankMon
+        }
+
+        player.currentMonsterPool = pool;
+        playerChannel.to(player.socketId).emit("select-monster", { monsterPool: pool }); // Clients can now start monster selection
       });
 
-      log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
+      log_notice(
+        `All players in room ${msg.roomId} have been notified to start the game.`
+      );
     });
   });
 
@@ -204,14 +238,18 @@ async function main(config: ServerConfig) {
       res.send(checkResult);
       return;
     }
-    checkResult.isDisplayNameValid = !gameServer.rooms.get(roomId)?.hasPlayer(req.body.displayName);
+    checkResult.isDisplayNameValid = !gameServer.rooms
+      .get(roomId)
+      ?.hasPlayer(req.body.displayName);
 
     log_notice(`Player auth check result:\n${JSON.stringify(checkResult)}`);
     res.send(checkResult);
   });
 
   playerChannel.use((socket, next) => {
-    log_event(`Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
+    log_event(
+      `Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`
+    );
     const auth = socket.handshake.auth as PlayerChannelAuth;
 
     if (!auth.joinCode) {
@@ -249,14 +287,26 @@ async function main(config: ServerConfig) {
       next(new Error("Invalid credentials"));
     }
 
-    log_event(`Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`);
+    log_event(
+      `Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`
+    );
 
-    const playerNameList = gameServer.rooms.get(roomId)?.players.map((player) => player.displayName) ?? [];
+    const playerNameList =
+      gameServer.rooms
+        .get(roomId)
+        ?.players.map((player) => player.displayName) ?? [];
 
-    console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId);
+    console.log(
+      "Update player list",
+      playerNameList,
+      "to",
+      gameServer.rooms.get(roomId)!.hostSocketId
+    );
     console.log("Player socket: ", socket.data);
 
-    hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("player-set-changed", playerNameList);
+    hostChannel
+      .to(gameServer.rooms.get(roomId)!.hostSocketId)
+      .emit("player-set-changed", playerNameList);
     next();
   });
 
@@ -277,45 +327,81 @@ async function main(config: ServerConfig) {
       if (!room) return;
 
       // Expect the client to send the monster templateId (key)
-      const monsterKey = data.data as keyof typeof COMMON_MONSTER_POOL.monsters;
-      log_event("Player selected monster key: " + monsterKey);
-      if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
-        socket.emit("error", "Invalid monster selection");
-        return;
+      const monsterKey = data.data.monsterTemplate as keyof typeof COMMON_MONSTER_POOL.monsters;
+      log_event(`Player selected monster key: ${monsterKey}`);
+
+      // Validate selection
+      if (room.tournamentManager.tournamentType === TournamentType.Random) {
+        if (!player.currentMonsterPool?.includes(monsterKey)) {
+          log_warning(`Invalid monster selection by ${player.displayName}`);
+          socket.emit("error", "Invalid monster selection");
+          return;
+        }
+      } else {
+        if (!COMMON_MONSTER_POOL.monsters[monsterKey]) {
+          log_warning(`Invalid monster selection by ${player.displayName}`);
+          socket.emit("error", "Invalid monster selection");
+          return;
+        }
       }
+
       // Store selected monster template name directly
       player.setMonsterTemplate(monsterKey);
       player.isReady = true;
+      log_event(`Player ${player.displayName} selected ${player.selectedMonsterTemplateName}`);
+
+      // Resolve promise if random tournament, 2nd round onwareds
+      if (data.data.selections > 1) {
+        log_attention("Not the first monster selection, resolving promise...");
+        room.tournamentManager.resolveMonsterSelection(player, monsterKey);
+      }
 
       // Check if all players are ready
-      const allReady = Array.from(room.players.values()).every((p) => p.isReady);
+      let allReady;
+      if (data.data.selections == 1) {
+        // Read from all players in room
+        log_notice("Reading ready from all players");
+        allReady = Array.from(room.players.values()).every(
+          (p) => p.isReady
+        );
+      } else { // Read from winners only
+        log_notice("Reading ready from winners");
+        allReady = Array.from(room.tournamentManager.winners.values()).every(
+          (p) => p.isReady
+        );
+      }
       if (!allReady) {
         log_notice("Waiting for all players to submit their monsters...");
         return;
       }
 
-      // All players ready, start tournament
-      room.tournamentManager.startTournament(Array.from(room.players.values()));
+      // All players ready, start tournament if first selection
+      if (data.data.selections == 1) {
+        log_warning(`Only start the tournament once. The number of monster selections is: ${data.data.selections}`);
+        room.tournamentManager.startTournament(Array.from(room.players.values()));
 
-      room.tournamentManager.matches.forEach((match: Match) => {
-        if (match.matchType == MatchType.BYE) {
-          return; //TODO HANDLE BYE
-        }
+        room.tournamentManager.matches.forEach((match: Match) => {
+          if (match.matchType == MatchType.BYE) {
+            log_notice("This match is a bye");
+            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", {bye: true});
+            return; //TODO HANDLE BYE
+          }
 
-        // P1: send a copy/start
-        room.playerChannel.to(match.player1.socketId).emit("round-start", {
-          myMonster: match.player1.selectedMonsterTemplateName,
-          enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
-          sideID: 0,
+          // P1: send a copy/start
+          room.playerChannel.to(match.player1.socketId).emit("round-start", {
+            myMonster: match.player1.selectedMonsterTemplateName,
+            enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
+            sideID: 0,
+          });
+
+          //P2: send a copy/start (invert sides?)
+          room.playerChannel.to(match.player2?.socketId).emit("round-start", {
+            myMonster: match.player2?.selectedMonsterTemplateName,
+            enemyMonster: match.player1.selectedMonsterTemplateName,
+            sideID: 1, 
+          });
         });
-
-        //P2: send a copy/start (invert sides?)
-        room.playerChannel.to(match.player2?.socketId).emit("round-start", {  
-          myMonster: match.player2?.selectedMonsterTemplateName,
-          enemyMonster: match.player1.selectedMonsterTemplateName,
-          sideID: 1,
-        });
-      });
+      }
     });
 
     function handleRollNotice() {
@@ -323,7 +409,9 @@ async function main(config: ServerConfig) {
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
-      const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
+      const match = room.tournamentManager.matches.find(
+        (m) => m.player1 === player || m.player2 === player
+      );
       if (!match) return;
 
       match.submitRoll(player);
@@ -340,7 +428,9 @@ async function main(config: ServerConfig) {
       const room = gameServer.rooms.get(player.roomId!);
       if (!room) return;
 
-      const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
+      const match = room.tournamentManager.matches.find(
+        (m) => m.player1 === player || m.player2 === player
+      );
       if (!match) return;
       const [player1, player2] = [match.player1, match.player2];
 
@@ -349,11 +439,21 @@ async function main(config: ServerConfig) {
 
       switch (moveId) {
         case "defend":
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
+          match.submitMove(
+            player,
+            moveId,
+            targetMethod as TargetingMethod,
+            sourceSide as SideId
+          );
           break;
         case "attack-normal":
           const targetSide = sourceSide === 1 ? 0 : 1;
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+          match.submitMove(
+            player,
+            moveId,
+            targetMethod as TargetingMethod,
+            targetSide as SideId
+          );
           break;
       }
 
@@ -383,7 +483,11 @@ async function main(config: ServerConfig) {
   });
 
   httpServer.listen(config.serverPort, () => {
-    log_notice(`Socket.IO server running on ${config.serverIp.toString() + ":" + config.serverPort.toString()}. <CTRL+C> to shutdown.`);
+    log_notice(
+      `Socket.IO server running on ${
+        config.serverIp.toString() + ":" + config.serverPort.toString()
+      }. <CTRL+C> to shutdown.`
+    );
     //#endregion
 
     //#region IO

@@ -75,21 +75,45 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number; sideId: number }; enemyMonster: { template: MonsterTemplate; currentHp: number; sideId: number } } | null>(null);
+  const [matchData, setMatchData] = useState<{
+    myMonster: { template: MonsterTemplate; currentHp: number; sideId: number };
+    enemyMonster: {
+      template: MonsterTemplate;
+      currentHp: number;
+      sideId: number;
+    };
+  } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
   const [winner, setWinner] = useState();
   const [waiting, setWaiting] = useState(false);
+  const [noSelections, setNoSelections] = useState(0);
+  const [randomMonsterPool, setMonsterPool] = useState<string[]>();
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("game-started", () => setStartSelection(true));
+    //#region Monster selection handle
+    socket.on("select-monster", (data) => {
+      if (data?.monsterPool) {
+        setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
+      }
+      setStartSelection(true);
+      setMonsterSelected(false);
+      setAllReady(false);
+      setNoSelections(prevSelections => {
+        const newVal = prevSelections + 1;
+        return newVal;
+      });
+    });
+    //#endregion
 
+    //#region Round Start
     socket.on("round-start", (data) => {
+      setWaiting(false);
       log_event("Received round-start data:", data);
 
       const myTemplateName = data?.myMonster;
@@ -107,51 +131,58 @@ const PlayerContent = () => {
       // Create Monster instances for BattleScreen
       const myMonster =
         COMMON_MONSTER_POOL.monsters[
-        myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+          myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
       const enemyMonster =
         COMMON_MONSTER_POOL.monsters[
-        enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+          enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
-      
+
       // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
       const mySide = data.sideID;
       const enemySide = data.sideID === 0 ? 1 : 0;
 
       console.log(`My side is ${mySide} || Enemy side is ${enemySide}`);
 
-
       setMatchData({
         myMonster: {
           template: myMonster,
           currentHp: data.myHp,
-          sideId: mySide
+          sideId: mySide,
         },
         enemyMonster: {
           template: enemyMonster,
           currentHp: data.enemyHp,
-          sideId: enemySide
+          sideId: enemySide,
         },
       });
 
       setAllReady(true);
     });
+    //#endregion
 
+    //#region Waiting Room
     socket.on("send-to-waiting", () => {
       setWaiting(true);
     });
+    //#endregion
 
-    socket.on("return-from-waiting", () => { setWaiting(false) })
+    // socket.on("return-from-waiting", () => {
+    //   setWaiting(false);
+    // });
 
+    //#region Set winner
     socket.on("tournament-finished", (data) => {
+      setWaiting(false);
       setWinner(data);
     });
+    //#endregion
 
     return () => {
-      socket.off("game-started");
+      socket.off("select-monster");
       socket.off("round-start");
       socket.off("send-to-waiting");
-      socket.off("return-from-waiting");
+      // socket.off("return-from-waiting");
       socket.off("tournament-finished");
     };
   }, [socket]);
@@ -167,8 +198,9 @@ const PlayerContent = () => {
           const element = letter as HTMLElement;
           element.style.animation = "none";
           requestAnimationFrame(() => {
-            element.style.animation = `bounce 0.6s ease-in-out ${index * 0.1
-              }s both`;
+            element.style.animation = `bounce 0.6s ease-in-out ${
+              index * 0.1
+            }s both`;
           });
         });
       }
@@ -177,7 +209,7 @@ const PlayerContent = () => {
     const initialTimeout = setTimeout(restartAnimation, 100);
     const interval = setInterval(restartAnimation, 2000);
 
-    return () => {
+    return () => { 
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
@@ -196,7 +228,12 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
-      socket.emit("RequestSubmitMonster", { data: monster.templateId });
+      console.log("No of selections: ", noSelections);
+      socket.emit("RequestSubmitMonster", { data: {
+        monsterTemplate: monster.templateId,
+        selections: noSelections
+        }
+      });
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {
@@ -232,11 +269,12 @@ const PlayerContent = () => {
   if (!monsterSelected)
     return (
       <MonsterSelectionScreen
+        monsterPool={randomMonsterPool}
         setSelectedMonsterCallback={handleMonsterSelection}
       />
     );
   if (!allReady || waiting) return <WaitingScreen />;
-  // TODO: Create a spectator page for losers to wait in
+  // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
 
   return <BattleScreen matchData={matchData!} />;
