@@ -63,7 +63,7 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<{ myMonster: { template: MonsterTemplate; currentHp: number }; enemyMonster: { template: MonsterTemplate; currentHp: number }; myid: number } | null>(null);
+  const [matchData, setMatchData] = useState<{ player1Monster: { template: MonsterTemplate; currentHp: number }; player2Monster: { template: MonsterTemplate; currentHp: number }; myid: number } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
@@ -81,27 +81,25 @@ const PlayerContent = () => {
     socket.on("round-start", (data) => {
       log_event("Received round-start data:", data);
 
-      const myTemplateName = data?.myMonster;
-      const enemyTemplateName = data?.enemyMonster;
+      const player1TemplateName = data?.player1Monster;
+      const player2TemplateName = data?.player2Monster;
 
-      if (!myTemplateName || !enemyTemplateName) {
+      if (!player1TemplateName || !player2TemplateName) {
         console.warn("Incomplete round-start data:", data);
         return;
       }
 
-      console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
-
       // Create Monster instances for BattleScreen
-      const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
-      const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const player1Monster = COMMON_MONSTER_POOL.monsters[player1TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const player2Monster = COMMON_MONSTER_POOL.monsters[player2TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
 
       if (typeof data?.sideID !== "number") {
         console.warn("Missing or invalid sideID in round-start data:", data);
         return;
       }
       setMatchData({
-        myMonster: { template: myMonster, currentHp: data.myHp },
-        enemyMonster: { template: enemyMonster, currentHp: data.enemyHp },
+        player1Monster: { template: player1Monster, currentHp: data.myHp },
+        player2Monster: { template: player2Monster, currentHp: data.enemyHp },
         myid: data.sideID,
       });
       setAllReady(true);

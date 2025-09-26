@@ -1,21 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { BattleTop } from "./BattleTop";
-import { BattleMiddle } from "./BattleMiddle";
 import { BattleBottom } from "./BattleBottom";
 import { usePlayerSocket } from "../player/game/PlayerPage";
 import { MonsterTemplate } from "../../simulator/core/monster/monster_template";
 import { EntryID } from "/imports/simulator/core/utils";
 import { TargetingMethod } from "/imports/simulator/core/action/targeting";
-import BattleMessage from "./BattleMessage";
-import { DamageEvent } from "/imports/simulator/core/event/core_events";
 import { Notice, Roll } from "/imports/simulator/core/notice/notice";
-import { roll } from "/imports/simulator/core/roll";
-import { BattleScene } from "./simulator/extensions/visualiser/src/Components/battle_scene"
+import { BattleScene } from "./battle_scene"
 
 interface BattleScreenProps {
   matchData: {
-    myMonster: { template: MonsterTemplate; currentHp: number };
-    enemyMonster: { template: MonsterTemplate; currentHp: number };
+    player1Monster: { template: MonsterTemplate; currentHp: number };
+    player2Monster: { template: MonsterTemplate; currentHp: number };
     myid: number;
   };
 }
@@ -31,62 +27,44 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
   const [buttonDisabled, setbuttonDisabled] = useState(false);
-
-  const [showAnimation, setShowAnimation] = useState(false);
-  const [battleMessage, setBattleMessage] = useState<string>("");
   const [showMessage, setShowMessage] = useState(false);
-  const [enemySlash, setEnemySlash] = useState(false);
-  const [playerSlash, setPlayerSlash] = useState(false);
-  const [enemyShield, setEnemyShield] = useState(false);
-  const [playerShield, setPlayerShield] = useState(false);
-  const [enemyAbility, setEnemyAbility] = useState(false);
-  const [playerAbility, setPlayerAbility] = useState(false);
-
   const [rollNotice, setRollNotice] = useState<Roll | null>(null);
   const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
   const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
-
-  //#region Test States
+  const [showRollMessage, setshowRollMessage] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
   const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(false)
+  const [hasReceivedChooseMove, setHasReceivedChooseMove] = useState(false);
 
-  function rollNow(rollNotice : Roll): void {
-    if (!socket) return;
-    setShowMessage(false)
-    const params: Parameters<typeof rollNotice.callback> = [];
-    socket.emit("requestRoll", rollNotice.kind, params);
-    setRollNotice(null)
-  }
-
-    useEffect(() => {
-    if (!socket) return;
-
-    const handleEnemySubmitted = () => {
-      setshowEnemySubmittedMessage(true)
-    };
-
-    socket.on("EnemySubmitted", handleEnemySubmitted);
-    return () => {
-      socket.off("EnemySubmitted", handleEnemySubmitted);
-    }
-  }, [socket]);
-
+  //#region initializations
   // Initialize monsters when matchData changes
   useEffect(() => {
+    if (!matchData) return;
+
+    const isPlayer1 = matchData.myid === 0;
+
+    const myMonsterData = isPlayer1
+      ? matchData.player1Monster
+      : matchData.player2Monster;
+
+    const enemyMonsterData = isPlayer1
+      ? matchData.player2Monster
+      : matchData.player1Monster;
+      
     setMyMonster({
-      template: matchData.myMonster.template,
+      template: myMonsterData.template,
       currentHp:
-        matchData.myMonster.currentHp ?? matchData.myMonster.template.baseStats.health,
-      playerId: "player1",
+        myMonsterData.currentHp ?? myMonsterData.template.baseStats.health,
+      playerId: matchData.myid.toString(),  
     });
     setEnemyMonster({
-      template: matchData.enemyMonster.template,
+      template: enemyMonsterData.template,
       currentHp:
-        matchData.enemyMonster.currentHp ?? matchData.enemyMonster.template.baseStats.health,
-      playerId: "player2",
+        enemyMonsterData.currentHp ?? enemyMonsterData.template.baseStats.health,
+      playerId: matchData.myid.toString(),
     });
-    console.log("Match data:", matchData)
 
     // Build snapshot JSON
     const snapshot = {
@@ -95,10 +73,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         {
           id: 0,
           monster: {
-            baseID: matchData.myMonster.template.templateId,
+            baseID: matchData.player1Monster.template.templateId,
             health:
-              matchData.myMonster.currentHp ??
-              matchData.myMonster.template.baseStats.health,
+              matchData.player1Monster.currentHp ??
+              matchData.player1Monster.template.baseStats.health,
             defendActionCharges: 0,
             components: [],
           },
@@ -107,10 +85,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         {
           id: 1,
           monster: {
-            baseID: matchData.enemyMonster.template.templateId,
+            baseID: matchData.player2Monster.template.templateId,
             health:
-              matchData.enemyMonster.currentHp ??
-              matchData.enemyMonster.template.baseStats.health,
+              matchData.player2Monster.currentHp ??
+              matchData.player2Monster.template.baseStats.health,
             defendActionCharges: 0,
             components: [],
           },
@@ -136,21 +114,44 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
-  //just copying your event handler code but repurposing for roll
+  //#region battle code
+
+  //function that callsback rolls
+  function rollNow(rollNotice : Roll): void {
+  if (!socket) return;
+  setShowMessage(false)
+  const params: Parameters<typeof rollNotice.callback> = [];
+  socket.emit("requestRoll", rollNotice.kind, params);
+  setRollNotice(null)
+  setshowRollMessage(false)
+}
+
+ //listen for enemy submitting messages
+  useEffect(() => {
+  if (!socket) return;
+
+  const handleEnemySubmitted = () => {
+    setshowEnemySubmittedMessage(true)
+  };
+
+  socket.on("EnemySubmitted", handleEnemySubmitted);
+  return () => {
+    socket.off("EnemySubmitted", handleEnemySubmitted);
+  }
+}, [socket]);
+
+  //notice handler for the 2 types of notices we have so far, reroll made need to be added later
   useEffect(() => {
     if (!socket) return;
-
     const handleNewNotice = (notice: Notice) => {
-      console.log("Notice received:", notice);
       if (notice.kind === "roll") {
-        setshowEnemySubmittedMessage(false)
-        setshowSubmittedMoveMessage(false)
-        setShowMessage(true)
-        setBattleMessage("Time To Roll!")
-        setRollNotice(notice)
+        setshowEnemySubmittedMessage(false);
+        setshowSubmittedMoveMessage(false);
+        setRollNotice(notice);
+        setshowRollMessage(true)
       }
       if (notice.kind === "chooseMove")
-        setbuttonDisabled(false)
+        setHasReceivedChooseMove(true);
     };
     socket.on("newNotice", handleNewNotice);
     return () => {
@@ -158,45 +159,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
-  // // Function to trigger move animations
-  // const performMoveAnimation = async (
-  //   moveId: EntryID,
-  //   actor: "player1" | "player2"
-  // ) => {
-  //   if (!myMonster || !enemyMonster) return;
-
-  //   let message = "";
-    
-  //   const template = actor === "player1" ? myMonster.template : enemyMonster.template;
-
-  //   if (moveId === template.attackActionId) {
-  //     message = actor === "player1" ? "You attack!" : "Enemy attacks!";
-  //     if (actor === "player1") setPlayerSlash(true);
-  //     else setEnemySlash(true);
-  //   } else if (moveId === template.defendActionId) {
-  //     message = actor === "player1" ? "You defend!" : "Enemy defends!";
-  //   } else if (moveId === template.abilityActionId) {
-  //     message = actor === "player1" ? "You use your ability!" : "Enemy uses ability!";
-  //   }
-
-  //   setBattleMessage(message);
-  //   setShowAnimation(true);
-
-  //   if (message != ""){    
-  //     setShowMessage(true);
-  //     await new Promise((resolve) => setTimeout(resolve, 1000));
-  //     setShowMessage(false);
-  //   }
-  //   setShowAnimation(false);
-  //   if (showMessage){
-  //     setShowMessage(false);
-  //   }
-    
-
-  //   if (actor === "player1") setPlayerSlash(false);
-  //   else setEnemySlash(false);
-
-  // };
+  //only disable button if there is a choosemove waiting, and turn has finished playing
+  useEffect(() => {
+    if (hasReceivedChooseMove && turnFinishedPlaying) {
+      setbuttonDisabled(false);
+    }
+  }, [hasReceivedChooseMove, turnFinishedPlaying]);
 
   // Handle player action (submit move to server)
   const handleAction = (
@@ -216,6 +184,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!socket) return;
 
     const handleUnlock = () => {
+      setTurnFinishedPlaying(false)
       setShowMessage(false);
       setshowSubmittedMoveMessage(false);
       setshowEnemySubmittedMessage(false)
@@ -227,40 +196,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     };
   }, [socket]);
 
-  // Listen for new battle events from server (only DamageEvent for now)
-  // useEffect(() => {
-  //   if (!socket) return;
-  //   const handleNewEvent = (event: any) => {
-  //     if (!myMonster || !enemyMonster) return;
-  //     console.log("received" + event.name)
-
-  //     if (event.name === "damage") {
-  //       const damageEvent = event as DamageEvent;
-  //       if (damageEvent.target === 0) {
-  //         // player1 took damage
-  //         setMyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
-  //       } else if (damageEvent.target === 1) {
-  //         // player2 took damage
-  //         setEnemyMonster((prev) => prev ? { ...prev, currentHp: prev.currentHp - damageEvent.amount } : prev);
-  //       }
-  //     }
-  //   };
-  //   socket.on("newEvent", handleNewEvent);
-  //   return () => {
-  //     socket.off("newEvent", handleNewEvent);
-  //   };
-  // }, [socket, myMonster, enemyMonster]);
-
-  //#region Test Handle Event
-  // Change to make it keep the new events in an array
+  //function to pass in new events to battle scene
   useEffect(() => {
     if (!socket) return;
 
     const handleNewEvent = (ev: any) => {
       setEvents(prev => {
       const next = [...prev, ev];
-      console.log("New event received:", ev.name);
-      // console.log("EVENTS (next):", JSON.stringify(next));
       return next;
     });
     };
@@ -271,76 +213,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     }
   }, [socket]);
 
-  
-  //#region Animation Code
-  // // Sequentially play animations after both players submit moves
-  // useEffect(() => {
-  //   if (!socket) return;
-
-  //   const handleExecuteTurn = ({
-  //     playerMove,
-  //     enemyMove,
-
-  //   }: {
-  //     playerMove: { moveId: EntryID };
-  //     enemyMove: { moveId: EntryID };
-  //   }) => {
-  //     performMoveAnimation(playerMove.moveId, "player1").then(() =>
-  //       performMoveAnimation(enemyMove.moveId, "player2")
-  //     );
-  //   };
-
-  //   socket.on("ExecuteTurn", handleExecuteTurn);
-
-  //   return () => {
-  //     socket.off("ExecuteTurn", handleExecuteTurn)
-  //   };
-  // }, [socket, myMonster, enemyMonster]);
-
-  // // Sequentially play animations after both players submit moves
-  // useEffect(() => {
-  //   if (!socket) return;
-
-  //   const handleExecuteTurn = ({
-  //     playerMove,
-  //     enemyMove,
-  //   }: {
-  //     playerMove: { moveId: EntryID };
-  //     enemyMove: { moveId: EntryID };
-  //   }) => {
-  //     performMoveAnimation(playerMove.moveId, "player1").then(() =>
-  //       performMoveAnimation(enemyMove.moveId, "player2")
-  //     );
-  //   };
-
-  //   socket.on("ExecuteTurn", handleExecuteTurn);
-  //   return () => {
-  //     socket.off("ExecuteTurn", handleExecuteTurn);
-  //   };
-  // }, [socket, myMonster, enemyMonster]);
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
   return (
     <div className="canvas-body" id="battle-screen-body">
       <BattleTop />
-      {/*}BattleMiddle
-        showAnimation={showAnimation}
-        player1={myMonster}
-        player2={enemyMonster}
-        enemySlashVisible={enemySlash}
-        onEnemySlashComplete={() => setEnemySlash(false)}
-        playerSlashVisible={playerSlash}
-        onPlayerSlashComplete={() => setPlayerSlash(false)}
-        enemyShieldVisible={enemyShield}
-        onEnemyShieldComplete={() => setEnemyShield(false)}
-        playerShieldVisible={playerShield}
-        onPlayerShieldComplete={() => setPlayerShield(false)}
-        enemyAbilityVisible={enemyAbility}
-        onEnemyAbilityComplete={() => setEnemyAbility(false)}
-        playerAbilityVisible={playerAbility}
-        onPlayerAbilityComplete={() => setPlayerAbility(false)}
-      />*/}
       <BattleScene
         events={events}
         turnIndex={turnIndex}
@@ -351,6 +229,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         showEnemySubmittedMessage = {showEnemySubmittedMessage}
         showSubmittedMoveMessage = {showSubmittedMoveMessage}
         showMessage = {showMessage}
+        setTurnFinishedPlaying={setTurnFinishedPlaying}
+        showRollMessage = {showRollMessage}
       />
       <BattleBottom
         onAction={handleAction}
