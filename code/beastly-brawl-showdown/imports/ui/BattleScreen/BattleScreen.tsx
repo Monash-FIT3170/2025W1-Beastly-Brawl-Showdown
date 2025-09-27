@@ -150,9 +150,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         setRollNotice(notice);
         setshowRollMessage(true)
       }
-      if (notice.kind === "chooseMove")
+      if (notice.kind === "chooseMove") {
         setHasReceivedChooseMove(true);
         console.log("we have received choosemove")
+      }
     };
     socket.on("newNotice", handleNewNotice);
     return () => {

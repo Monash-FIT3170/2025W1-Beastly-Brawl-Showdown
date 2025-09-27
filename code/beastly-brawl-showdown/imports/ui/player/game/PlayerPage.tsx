@@ -132,8 +132,8 @@ const PlayerContent = () => {
         return;
       }
       setMatchData({
-        player1Monster: { template: player1Monster, currentHp: data.myHp },
-        player2Monster: { template: player2Monster, currentHp: data.enemyHp },
+        player1Monster: { template: player1Monster, currentHp: player1Monster.baseStats.health },
+        player2Monster: { template: player2Monster, currentHp: player2Monster.baseStats.health },
         myid: data.sideID,
       });
 
