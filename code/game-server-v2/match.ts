@@ -199,16 +199,17 @@ export class Match {
         // switch displayed page to battle screen
         // playerChannel.to(this.player1.socketId).emit("return-from-waiting");
         // playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
+
         playerChannel.to(this.player1.socketId).emit("round-start", {
-          myMonster: this.player1.selectedMonsterTemplateName,
-          enemyMonster: this.player2?.selectedMonsterTemplateName, // not option if bye
+          player1Monster: this.player1?.selectedMonsterTemplateName,
+          player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
           sideID: 0,
         })
-          playerChannel.to(this.player2?.socketId).emit("round-start", {
-            myMonster: this.player2?.selectedMonsterTemplateName,
-            enemyMonster: this.player1.selectedMonsterTemplateName,
+        playerChannel.to(this.player2?.socketId).emit("round-start", {
+            player1Monster: this.player1?.selectedMonsterTemplateName,
+            player2Monster: this.player2?.selectedMonsterTemplateName,
             sideID: 1,
-          });
+        });
 
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);

@@ -120,7 +120,7 @@ const PlayerContent = () => {
       }
 
       console.log(
-        `Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`
+        `Round started! Player 1's monster: ${player1TemplateName}, Player 2's monster: ${player2TemplateName}, I am ${data.sideID}`
       );
 
       // Create Monster instances for BattleScreen

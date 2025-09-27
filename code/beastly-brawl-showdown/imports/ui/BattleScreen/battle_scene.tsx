@@ -377,6 +377,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       // Mark this turn as played and lower the flag
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true)
+      console.log("Turn finished playing")
       setRunTurnNow(false);
       setcurrentMessage("");
     })();
@@ -438,8 +439,18 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         enemyAbilityVisible={enemyAbility}
         onEnemyAbilityComplete={() => setEnemyAbility(false)}
         playerAbilityVisible={playerAbility}
-        onPlayerAbilityComplete={() => setPlayerAbility(false)}
-      />
+        onPlayerAbilityComplete={() => setPlayerAbility(false)} 
+        enemyMonsterName={template2.name}
+        enemyBaseStats={{
+          attack: template2.baseStats.attack,
+            defense: template2.baseStats.armour
+          }}
+          playerMonsterName={template.name}
+          playerBaseStats={{
+            attack: template.baseStats.attack,
+            defense: template.baseStats.armour
+          }}
+        />
       {showEnemySubmittedMessage && (
         <BattleMessage message={"Enemy Has Submitted"} />
       )}
