@@ -12,7 +12,7 @@ export const renderRoutes = () => (
     <Route path="/home/" element={<HomePage />} />
 
     {/* Host */}
-    <Route path="/host/" element={<ProjectorPage />} />
+    <Route path="/host/:type" element={<ProjectorPage />} />
 
     {/* Player */}
     <Route path="/join/:joinCode" element={<JoinPage />} />

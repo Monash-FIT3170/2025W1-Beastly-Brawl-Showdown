@@ -2,6 +2,7 @@ import { WaitingRoomInfoBox } from "./WaitingRoomInfoBox";
 import { ParticipantDisplayBox } from "./ParticipantDisplayBox";
 import { io, Socket } from "socket.io-client";
 import { useState, useRef, useEffect } from "react";
+import { useParams } from "react-router";
 import { getBestServerUrl } from "../../../utils/RoomMethods";
 
 export default function ProjectorPage() {
@@ -12,6 +13,9 @@ export default function ProjectorPage() {
   const [playerList, setPlayerList] = useState<string[]>([]);
   const socketRef = useRef<Socket | null>(null);
 
+  const { type } = useParams<{ type: "standard" | "random" }>();
+  const tournamentType = type === "random" ? "random" : "standard";
+  
   function getJoinUrl() {
     return window.location.hostname + "join/" + joinCode;
   }
@@ -81,7 +85,7 @@ export default function ProjectorPage() {
     });
 
     if (!roomId) {
-      socketRef.current.emit("request-room");
+      socketRef.current.emit("request-room", {type: tournamentType});
       return;
     }
     //#endregion
@@ -91,15 +95,15 @@ export default function ProjectorPage() {
         socketRef.current.disconnect(); // Cleanup on unmount
       }
     };
-  }, [serverUrl]);
+  }, [serverUrl, type]);
   //#endregion
 
   //#region Host App
 
   function handleStartGame() {
     if (socketRef.current) {
-      socketRef.current.emit("start-game", { roomId }); // Send start-game to server
-      console.log("Start game requested!");
+      socketRef.current.emit("start-game", { roomId, type: tournamentType });
+      console.log("Start game requested!", tournamentType);
     }
   }
 
