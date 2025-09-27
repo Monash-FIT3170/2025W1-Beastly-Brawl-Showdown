@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
@@ -23,9 +17,7 @@ const PlayerSocketContext = createContext<PlayerSocketContextType>({
   isConnected: false,
 });
 
-const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
@@ -34,7 +26,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const serverUrl = sessionStorage.getItem("serverUrl");
 
   useEffect(() => {
-    if (serverUrl) {
+    if ((!socketRef.current || !socketRef.current.connected) && serverUrl) {
       socketRef.current = io(serverUrl + "/player", {
         auth: { joinCode, displayName },
       });
@@ -59,13 +51,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [serverUrl, joinCode, displayName]);
 
-  return (
-    <PlayerSocketContext.Provider
-      value={{ socket: socketRef.current, isConnected }}
-    >
-      {children}
-    </PlayerSocketContext.Provider>
-  );
+  return <PlayerSocketContext.Provider value={{ socket: socketRef.current, isConnected }}>{children}</PlayerSocketContext.Provider>;
 };
 
 export const usePlayerSocket = () => useContext(PlayerSocketContext);
@@ -104,7 +90,7 @@ const PlayerContent = () => {
       setStartSelection(true);
       setMonsterSelected(false);
       setAllReady(false);
-      setNoSelections(prevSelections => {
+      setNoSelections((prevSelections) => {
         const newVal = prevSelections + 1;
         return newVal;
       });
@@ -124,19 +110,11 @@ const PlayerContent = () => {
         return;
       }
 
-      console.log(
-        `Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`
-      );
+      console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
 
       // Create Monster instances for BattleScreen
-      const myMonster =
-        COMMON_MONSTER_POOL.monsters[
-          myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
-        ];
-      const enemyMonster =
-        COMMON_MONSTER_POOL.monsters[
-          enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
-        ];
+      const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
 
       // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
       const mySide = data.sideID;
@@ -192,15 +170,12 @@ const PlayerContent = () => {
 
     const restartAnimation = () => {
       if (waitingTextRef.current) {
-        const letters =
-          waitingTextRef.current.querySelectorAll(".bounce-letter");
+        const letters = waitingTextRef.current.querySelectorAll(".bounce-letter");
         letters.forEach((letter, index) => {
           const element = letter as HTMLElement;
           element.style.animation = "none";
           requestAnimationFrame(() => {
-            element.style.animation = `bounce 0.6s ease-in-out ${
-              index * 0.1
-            }s both`;
+            element.style.animation = `bounce 0.6s ease-in-out ${index * 0.1}s both`;
           });
         });
       }
@@ -209,7 +184,7 @@ const PlayerContent = () => {
     const initialTimeout = setTimeout(restartAnimation, 100);
     const interval = setInterval(restartAnimation, 2000);
 
-    return () => { 
+    return () => {
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
@@ -217,9 +192,7 @@ const PlayerContent = () => {
 
   const handleMonsterSelection = (monsterName: string) => {
     // Find the monster in COMMON_MONSTER_POOL by name
-    const monster = Object.values(COMMON_MONSTER_POOL.monsters).find(
-      (m) => m.name === monsterName
-    );
+    const monster = Object.values(COMMON_MONSTER_POOL.monsters).find((m) => m.name === monsterName);
 
     if (!monster) {
       console.error("Invalid monster selected:", monsterName);
@@ -229,10 +202,11 @@ const PlayerContent = () => {
     if (socket) {
       // Send the templateId instead of the name
       console.log("No of selections: ", noSelections);
-      socket.emit("RequestSubmitMonster", { data: {
-        monsterTemplate: monster.templateId,
-        selections: noSelections
-        }
+      socket.emit("RequestSubmitMonster", {
+        data: {
+          monsterTemplate: monster.templateId,
+          selections: noSelections,
+        },
       });
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
@@ -266,13 +240,7 @@ const PlayerContent = () => {
   );
 
   if (!startSelection) return <WaitingScreen />;
-  if (!monsterSelected)
-    return (
-      <MonsterSelectionScreen
-        monsterPool={randomMonsterPool}
-        setSelectedMonsterCallback={handleMonsterSelection}
-      />
-    );
+  if (!monsterSelected) return <MonsterSelectionScreen monsterPool={randomMonsterPool} setSelectedMonsterCallback={handleMonsterSelection} />;
   if (!allReady || waiting) return <WaitingScreen />;
   // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
