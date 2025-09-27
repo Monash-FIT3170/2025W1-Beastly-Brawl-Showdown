@@ -8,33 +8,42 @@ import { io } from "socket.io-client";
 
 export const getBestServerUrl = async (): Promise<string> => {
   /// Fetch server
+  try {
+    const response = await fetch("http://localhost:3010/game-server-url");
+    const { url: serverUrl }: { url: string } = await response.json();
 
-  const response = await fetch("http://localhost:3010/game-server-url");
-  const { url: serverUrl } = await response.json();
+    // /// Check with server if join code leads to an active room if not error
+    // console.log(`Testing connection to game server @ <${serverUrl}>.`);
+    return new Promise((resolve, reject) => {
+      // const socket = io(serverUrl);
+      // /// If said server is not responding then error
+      // const echoMsg = "Test echo msg";
+      // socket.on("connect", () => {
+      //   console.log("Connected to server");
 
-  /// Check with server if join code leads to an active room if not error
-  console.log(`Testing connection to game server @ <${serverUrl}>.`);
-  return new Promise((resolve, reject) => {
-    const socket = io(serverUrl);
-    /// If said server is not responding then error
-    const echoMsg = "Test echo msg";
-    socket.on("connect", () => {
-      console.log("Connected to server");
+      //   // Send a test message
+      //   console.log("Test connection to server (echo)");
+      //   socket.emit("echo", echoMsg);
+      // });
+      // socket.on("echo", async (msg) => {
+      //   console.log("Echo sent:", echoMsg, " | Echo response:", msg);
+      //   resolve(serverUrl);
+      // });
 
-      // Send a test message
-      console.log("Test connection to server (echo)");
-      socket.emit("echo", echoMsg);
-    });
-    socket.on("echo", async (msg) => {
-      console.log("Echo sent:", echoMsg, " | Echo response:", msg);
-      resolve(serverUrl);
-    });
-
-    socket.on("connect_error", (err) => {
-      console.error(`Connection failed: ${err.message}`);
+      // socket.on("connect_error", (err) => {
+      //   console.error(`Connection failed: ${err.message}`);
+      //   reject(new Error("Room is not joinable."));
+      // });
+      if (serverUrl.trim().length > 0) {
+        resolve(serverUrl);
+      }
       reject(new Error("Room is not joinable."));
     });
-  });
+  } catch (e) {
+    return new Promise((resolve, reject) => {
+      reject(new Error("Room is not joinable."));
+    });
+  }
 };
 
 // /**
