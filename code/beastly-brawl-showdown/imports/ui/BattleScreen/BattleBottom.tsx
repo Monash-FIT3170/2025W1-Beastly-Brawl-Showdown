@@ -1,7 +1,6 @@
 import React from "react";
 import { EntryID } from "/imports/simulator/core/utils";
 import { TargetingMethod } from "/imports/simulator/core/action/targeting";
-import { SideId } from "/imports/simulator/core/side";
 import { COMMON_MOVE_POOL } from "/imports/simulator/data/common/common_move_pool";
 
 type Button = {
@@ -12,11 +11,10 @@ type Button = {
 type MoveButton = Button & {
   id: EntryID;
   targetMethod: TargetingMethod;
-  targetSide: SideId;
 };
 
 type BattleBottomProps = {
-  onAction: (moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId) => void;
+  onAction: (moveId: EntryID, targetMethod: TargetingMethod) => void;
   disabled?: boolean;
   onRoll: () => void;
   mode: "combat" | "roll";
@@ -70,7 +68,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     <button
       key={btn.id}
       className="glb-btn"
-      onClick={() => onAction(btn.id, btn.targetMethod, btn.targetSide)}
+      onClick={() => onAction(btn.id, btn.targetMethod)}
       disabled={disabled}
     >
       <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />

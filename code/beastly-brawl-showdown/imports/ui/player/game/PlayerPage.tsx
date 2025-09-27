@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
@@ -17,7 +23,9 @@ const PlayerSocketContext = createContext<PlayerSocketContextType>({
   isConnected: false,
 });
 
-const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
@@ -27,7 +35,9 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     if (!socketRef.current && serverUrl) {
-      socketRef.current = io(serverUrl + "/player", { auth: { joinCode, displayName } });
+      socketRef.current = io(serverUrl + "/player", {
+        auth: { joinCode, displayName },
+      });
 
       socketRef.current.on("connect", () => {
         console.log("Connected to server");
@@ -50,7 +60,9 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [serverUrl, joinCode, displayName]);
 
   return (
-    <PlayerSocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+    <PlayerSocketContext.Provider
+      value={{ socket: socketRef.current, isConnected }}
+    >
       {children}
     </PlayerSocketContext.Provider>
   );
@@ -68,6 +80,9 @@ const PlayerContent = () => {
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
   const [winner, setWinner] = useState();
+  const [waiting, setWaiting] = useState(false);
+  const [noSelections, setNoSelections] = useState(0);
+  const [randomMonsterPool, setMonsterPool] = useState<string[]>();
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
@@ -76,9 +91,24 @@ const PlayerContent = () => {
 
     socket.on("return-from-waiting", () => {console.log("Returned from waiting")})
 
-    socket.on("game-started", () => setStartSelection(true));
+    //#region Monster selection handle
+    socket.on("select-monster", (data) => {
+      if (data?.monsterPool) {
+        setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
+      }
+      setStartSelection(true);
+      setMonsterSelected(false);
+      setAllReady(false);
+      setNoSelections(prevSelections => {
+        const newVal = prevSelections + 1;
+        return newVal;
+      });
+    });
+    //#endregion
 
+    //#region Round Start
     socket.on("round-start", (data) => {
+      setWaiting(false);
       log_event("Received round-start data:", data);
 
       const player1TemplateName = data?.player1Monster;
@@ -88,6 +118,10 @@ const PlayerContent = () => {
         console.warn("Incomplete round-start data:", data);
         return;
       }
+
+      console.log(
+        `Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`
+      );
 
       // Create Monster instances for BattleScreen
       const player1Monster = COMMON_MONSTER_POOL.monsters[player1TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
@@ -102,17 +136,33 @@ const PlayerContent = () => {
         player2Monster: { template: player2Monster, currentHp: data.enemyHp },
         myid: data.sideID,
       });
+
       setAllReady(true);
     });
+    //#endregion
 
-    socket.on("tournament-finished", (data) => {
-      setWinner(data);
-      console.log(`Winner is: ${winner}`);
+    //#region Waiting Room
+    socket.on("send-to-waiting", () => {
+      setWaiting(true);
     });
+    //#endregion
+
+    // socket.on("return-from-waiting", () => {
+    //   setWaiting(false);
+    // });
+
+    //#region Set winner
+    socket.on("tournament-finished", (data) => {
+      setWaiting(false);
+      setWinner(data);
+    });
+    //#endregion
 
     return () => {
-      socket.off("game-started");
+      socket.off("select-monster");
       socket.off("round-start");
+      socket.off("send-to-waiting");
+      // socket.off("return-from-waiting");
       socket.off("tournament-finished");
     };
   }, [socket]);
@@ -122,12 +172,15 @@ const PlayerContent = () => {
 
     const restartAnimation = () => {
       if (waitingTextRef.current) {
-        const letters = waitingTextRef.current.querySelectorAll(".bounce-letter");
+        const letters =
+          waitingTextRef.current.querySelectorAll(".bounce-letter");
         letters.forEach((letter, index) => {
           const element = letter as HTMLElement;
           element.style.animation = "none";
           requestAnimationFrame(() => {
-            element.style.animation = `bounce 0.6s ease-in-out ${index * 0.1}s both`;
+            element.style.animation = `bounce 0.6s ease-in-out ${
+              index * 0.1
+            }s both`;
           });
         });
       }
@@ -136,7 +189,7 @@ const PlayerContent = () => {
     const initialTimeout = setTimeout(restartAnimation, 100);
     const interval = setInterval(restartAnimation, 2000);
 
-    return () => {
+    return () => { 
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
@@ -155,7 +208,12 @@ const PlayerContent = () => {
 
     if (socket) {
       // Send the templateId instead of the name
-      socket.emit("RequestSubmitMonster", { data: monster.templateId });
+      console.log("No of selections: ", noSelections);
+      socket.emit("RequestSubmitMonster", { data: {
+        monsterTemplate: monster.templateId,
+        selections: noSelections
+        }
+      });
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {
@@ -188,9 +246,16 @@ const PlayerContent = () => {
   );
 
   if (!startSelection) return <WaitingScreen />;
-  if (!monsterSelected) return <MonsterSelectionScreen setSelectedMonsterCallback={handleMonsterSelection} />;
-  if (!allReady) return <WaitingScreen />;
-  if (winner) return <WinnerScreen winnerName={winner}/>
+  if (!monsterSelected)
+    return (
+      <MonsterSelectionScreen
+        monsterPool={randomMonsterPool}
+        setSelectedMonsterCallback={handleMonsterSelection}
+      />
+    );
+  if (!allReady || waiting) return <WaitingScreen />;
+  // TODO: Create a spectator page for losers/byematch to wait in
+  if (winner) return <WinnerScreen winnerName={winner} />;
 
   return <BattleScreen matchData={matchData!} />;
 };

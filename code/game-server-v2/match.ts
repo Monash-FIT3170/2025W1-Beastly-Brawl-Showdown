@@ -4,7 +4,7 @@ import { Battle, BattleOptions } from "../beastly-brawl-showdown/imports/simulat
 import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
 import { COMMON_MOVE_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_move_pool";
-import { log_event } from "./utils";
+import { log_attention, log_event } from "./utils";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
 import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
@@ -158,7 +158,7 @@ export class Match {
     async runBattle(playerChannel: any): Promise<void> {
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
-            console.log(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
+            log_attention(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
             return;
         }
 
@@ -197,11 +197,22 @@ export class Match {
         });
         
         // switch displayed page to battle screen
-        playerChannel.to(this.player1.socketId).emit("return-from-waiting");
-        playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
+        // playerChannel.to(this.player1.socketId).emit("return-from-waiting");
+        // playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
+        playerChannel.to(this.player1.socketId).emit("round-start", {
+          myMonster: this.player1.selectedMonsterTemplateName,
+          enemyMonster: this.player2?.selectedMonsterTemplateName, // not option if bye
+          sideID: 0,
+        })
+          playerChannel.to(this.player2?.socketId).emit("round-start", {
+            myMonster: this.player2?.selectedMonsterTemplateName,
+            enemyMonster: this.player1.selectedMonsterTemplateName,
+            sideID: 1,
+          });
+
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
-        await this.battle.run();
+        await this.battle.run(); 
         log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
