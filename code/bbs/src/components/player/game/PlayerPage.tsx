@@ -34,7 +34,7 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const serverUrl = sessionStorage.getItem("serverUrl");
 
   useEffect(() => {
-    if (!socketRef.current && serverUrl) {
+    if (serverUrl) {
       socketRef.current = io(serverUrl + "/player", {
         auth: { joinCode, displayName },
       });
