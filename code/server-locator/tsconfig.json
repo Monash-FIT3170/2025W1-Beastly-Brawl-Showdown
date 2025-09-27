@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.typecheck.json",
   "compilerOptions": {
-    "esModuleInterop": true
+    "esModuleInterop": true,
   }
 }

@@ -13,7 +13,7 @@ export default function ProjectorPage() {
   const socketRef = useRef<Socket | null>(null);
 
   function getJoinUrl() {
-    return process.env.ser + "join/" + joinCode;
+    return window.location.hostname + "join/" + joinCode;
   }
 
   const fetchServerUrl = async () => {
@@ -32,7 +32,7 @@ export default function ProjectorPage() {
     if (socketRef.current) {
       return;
     }
-    
+
     //#region Startup
     fetchServerUrl();
 

@@ -7,7 +7,7 @@ import { GameServerRegistryModel } from "./models/game_server_register";
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
 const MONGO_NAME = "RoomLocation";
-const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
+export const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
   try {
@@ -38,9 +38,14 @@ async function main() {
       origin: "*",
     })
   );
+  app.get("", (req, res) => {
+    res.status(403);
+    return;
+  });
 
   app.get("/status", (req: Request, res: Response) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+    return;
   });
 
   app.get("/game-server-url", async (req: Request, res: Response) => {
@@ -52,18 +57,21 @@ async function main() {
 
       const record = await GameServerRegistryModel.findOne({ serverNumber: bestServerNo });
       if (!record) {
-        return res.status(400).json({ error: "Room not found." });
+        res.status(400).json({ error: "Room not found." });
+        return;
       }
 
-      return res.json({ url: record.serverUrl });
+      res.json({ url: record.serverUrl });
+      return;
     } catch (err) {
       console.error("ERR: " + err);
-      return res.status(500).json({ error: "Request failed." });
+      res.status(500).json({ error: "Request failed." });
+      return;
     }
   });
 
   //# Listen
-  const port: number = 3000;
+  const port: number = 3010;
   app.listen(port);
   console.log(`Listening @ port ${port}`);
 

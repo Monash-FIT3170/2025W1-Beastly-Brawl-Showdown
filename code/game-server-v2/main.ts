@@ -4,7 +4,6 @@ import cors from "cors";
 import express from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import connectDb from "./utils";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
@@ -14,6 +13,8 @@ import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_poo
 import { TargetingMethod } from "../simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
 import { GameServerRegistryModel, IGameServerRegistryEntry } from "../server-locator/src/models/game_server_register";
+import mongoose from "mongoose";
+import { MONGO_URI } from "../server-locator/src/app";
 
 type ServerConfig = {
   serverIp: string;
@@ -40,27 +41,42 @@ async function main(config: ServerConfig) {
 
   log_notice("Websockets server started.");
   log_notice("Connect to database...");
-  await connectDb();
-  log_notice("Register to global records...");
-  const existingRecordCount = await GameServerRegistryModel.countDocuments({
-    serverNumber: config.serverNumber,
-  });
-  if (existingRecordCount > 0) {
-    console.log(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
-    if (!config.overrideExistingRecordOnStartup) {
-      throw new Error("A record already exists, room could not be registered.");
-    }
+  try {
+    await mongoose.connect(MONGO_URI);
+    log_notice("Connected to MongoDB.");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
   }
-  const updatedRecord = await GameServerRegistryModel.findOneAndUpdate<IGameServerRegistryEntry>(
-    { serverNumber: config.serverNumber },
-    {
+  log_notice("Register to global records...");
+  try {
+    console.log("fesfsfsef" + config.serverNumber);
+    const record = await GameServerRegistryModel.findOne();
+    console.log(record);
+
+    const existingRecordCount = await GameServerRegistryModel.countDocuments({
       serverNumber: config.serverNumber,
-      serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
-      lastUpdated: new Date(),
-    },
-    { upsert: true, new: true }
-  );
-  log_notice("New Record:\n" + JSON.stringify(updatedRecord));
+    });
+    if (existingRecordCount > 0) {
+      console.log(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
+      if (!config.overrideExistingRecordOnStartup) {
+        throw new Error("A record already exists, room could not be registered.");
+      }
+    }
+    const updatedRecord = await GameServerRegistryModel.findOneAndUpdate<IGameServerRegistryEntry>(
+      { serverNumber: config.serverNumber },
+      {
+        serverNumber: config.serverNumber,
+        serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
+        lastUpdated: new Date(),
+      },
+      { upsert: true, new: true }
+    );
+    log_notice("New Record:\n" + JSON.stringify(updatedRecord));
+  } catch (e) {
+    log_attention("ERR: Failed to register this server. " + e);
+    process.exit(1);
+  }
   log_notice("Registered to records.");
 
   log_notice("Starting game service...");
