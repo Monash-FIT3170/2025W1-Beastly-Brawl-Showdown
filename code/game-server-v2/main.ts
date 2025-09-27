@@ -248,10 +248,12 @@ async function main(config: ServerConfig) {
 
     if (!auth.joinCode) {
       socket.emit("error", "No join code");
+      next(new Error("Invalid credentials"));
       return;
     }
     if (!auth.displayName) {
       socket.emit("error", "No display name");
+      next(new Error("Invalid credentials"));
       return;
     }
 
@@ -279,6 +281,7 @@ async function main(config: ServerConfig) {
         log_attention("Unexpected error is not of error type.");
       }
       next(new Error("Invalid credentials"));
+      return;
     }
 
     log_event(`Join code <${auth.joinCode}> is valid. From <${auth.displayName}>. Socket id = ${socket.id}`);
