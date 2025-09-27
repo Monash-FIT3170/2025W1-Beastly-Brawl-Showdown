@@ -1,5 +1,5 @@
 import mongoose, { Model } from "mongoose";
-import { DOCUMENT_NAME, IGameServerRegistryEntry } from "../../../shared/types";
+import { IGameServerRegistryEntry, DOCUMENT_NAME } from "../../shared/types";
 
 // Schema definition
 const GameServerRegistrySchema = new mongoose.Schema<IGameServerRegistryEntry>({
