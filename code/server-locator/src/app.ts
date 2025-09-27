@@ -7,9 +7,9 @@ import { GameServerRegistryModel } from "./models/game_server_register";
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
 const MONGO_NAME = "RoomLocation";
-export const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
+const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
 
-export async function connectToDatabase(): Promise<typeof mongoose> {
+async function connectToDatabase(): Promise<typeof mongoose> {
   try {
     await mongoose.connect(MONGO_URI);
     console.log(`Connected to MongoDB at ${MONGO_URI}`);
@@ -29,7 +29,13 @@ async function main() {
     process.exit(1);
   });
   console.log("Connected to mongo.");
-
+  try {
+    const _docSizeAtStartup = await GameServerRegistryModel.countDocuments();
+    console.log("Current collection size:", _docSizeAtStartup);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
   //# HTTP server
   const app = express();
   app.use(express.json());
@@ -38,8 +44,8 @@ async function main() {
       origin: "*",
     })
   );
-  app.get("", (req, res) => {
-    res.status(403);
+  app.get("/", (req, res) => {
+    res.sendStatus(403);
     return;
   });
 
