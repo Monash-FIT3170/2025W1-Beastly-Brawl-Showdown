@@ -901,6 +901,11 @@ input:focus {
   width: 30vw;
 }
 
+#room-code-button {
+  background-color: transparent;
+  border: none;
+}
+
 /* Waiting/Loading Screen for match to start */
 .waiting-screen {
   display: flex;
