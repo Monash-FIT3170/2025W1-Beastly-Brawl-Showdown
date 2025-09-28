@@ -13,28 +13,37 @@ type BasicServerToClientEvents = {
 };
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
+  requestMonsterSelection: (data: any) => void;
   submitMonsterChoice: () => void;
   submitGameReadyState: () => void;
-  submitMove: (actionData: MoveRequest) => void;
+  requestRoll: () => void;
+  requestSubmitMove: (data: any) => void;
   submitMoveLockState: () => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
-  requestMonsterSelection: (setMonsterName: (monsterName: MonsterName) => void) => void;
+  enterWaitingRoom: () => void;
   requestMoveSelection: (responseDeadline: number) => void;
   gameReadytoStart: () => void;
+  startRound: (data: any) => void;
+  executeTurn: (data: any) => void;
+  unlockButton: () => void;
+  tournamentFinished: (data: any) => void;
+  newNotice: (data: any) => void;
+  removeNotice: (data: any) => void;
+  newEvent: (data: any) => void;
 };
 
 export type PlayerSocketData = {};
 
 export type HostClientToServerEvents = BasicClientToServerEvents & {
   requestNewLobby: (res: (connectionDetails: Result<{ lobbyId: LobbyId; joinCode: JoinCode }>) => void) => void;
-  requestStartGame: () => void;
-  requestStartRound: () => void;
+  requestStartGame: (data: any) => void;
+  requestStartRound: (data: any) => void;
 };
 export type HostServerToClientEvents = BasicServerToClientEvents & {
-  newLobbyCreated: (details: { roomId: RoomId; joinCode: JoinCode }) => void;
+  newLobbyCreated: (data: any) => void;
   refreshPlayerList: (list: string[]) => void;
   gameReadyToStart: (data: any) => void;
 };

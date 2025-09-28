@@ -77,7 +77,7 @@ export class TournamentManager {
     if (this.winners.length === 1) {
       console.log(`Tournament Winner: ${this.winners[0].displayName}`);
       // Optionally notify host:
-      this.playerChannel.emit("tournament-finished", this.winners[0].displayName);
+      this.playerChannel.emit("tournamentFinished", this.winners[0].displayName);
       return;
     }
     

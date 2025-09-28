@@ -21,7 +21,7 @@ socket.on("disconnect", () => {
   console.log("Disconnected from server");
 });
 
-socket.on("request-room_response", (msg) => {
+socket.on("newLobbyCreated", (msg) => {
   console.log("Room request response", msg);
 });
 
@@ -51,18 +51,18 @@ const main = async () => {
   const hostChannel = io("http://localhost:8080/host", {
     auth: { hostName: _hostName },
   });
-  hostChannel.emit("request-room");
+  hostChannel.emit("requestNewLobby");
 
   await requestInput("start player join?");
   const playerChannel = io("http://localhost:8080/player", {
     auth: { joinCode: _joinCode, displayName: _displayName },
   });
-  playerChannel.on("game-started", () => {
+  playerChannel.on("gameReadyToStart", () => {
     console.log("GAME START");
   });
 
   await requestInput("start game?");
-  hostChannel.emit("start-game", _roomId);
+  hostChannel.emit("requestStartGame", _roomId);
 
   // while (1) {
   //   const msg = await requestInput("Echo to server: ");

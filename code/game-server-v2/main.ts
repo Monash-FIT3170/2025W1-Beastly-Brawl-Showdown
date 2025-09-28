@@ -20,7 +20,7 @@ import {
   PlayerServerToClientEvents, 
   PlayerSocketData, 
   HostClientToServerEvents, 
-  HostServerToClientEvents
+  HostServerToClientEvents,
 } from "../shared/types";
 
 export type PlayerNamespace = Namespace<
@@ -157,7 +157,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region New Room
-    socket.on("request-room", async (data: { type: "standard" | "random" }) => {
+    socket.on("requestNewLobby", async (data: { type: "standard" | "random" }) => {
       log_event("Room requested with mode: " + data.type);
       // TODO prevent multiple rooms at the same time
       try {
@@ -184,8 +184,8 @@ async function main(config: ServerConfig) {
     });
 
     // #region Start Game
-    socket.on("start-game", (msg: { roomId: number }) => {
-      log_event(`Host requested start-game for room ${msg.roomId}`);
+    socket.on("requestStartGame", (msg: { roomId: number }) => {
+      log_event(`Host requested start game for room ${msg.roomId}`);
 
       const room = gameServer.rooms.get(msg.roomId);
       if (!room) {
@@ -322,7 +322,7 @@ async function main(config: ServerConfig) {
 
     hostChannel
       .to(gameServer.rooms.get(roomId)!.hostSocketId)
-      .emit("player-set-changed", playerNameList);
+      .emit("refreshPlayerList", playerNameList);
     next();
   });
 
@@ -335,7 +335,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region Select Monster
-    socket.on("RequestSubmitMonster", (data: any) => {
+    socket.on("requestMonsterSelection", (data: any) => {
       const player = socket.data.player as Player;
       if (!player) return;
 
@@ -399,20 +399,25 @@ async function main(config: ServerConfig) {
         room.tournamentManager.matches.forEach((match: Match) => {
           if (match.matchType == MatchType.BYE) {
             log_notice("This match is a bye");
-            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", {bye: true});
+            room.playerChannel.to(match.player1.socketId).emit("enterWaitingRoom", {bye: true});
             return; //TODO HANDLE BYE
           }
-
+        
           // P1: send a copy/start
-          room.playerChannel.to(match.player1.socketId).emit("round-start", {
+          room.playerChannel.to(match.player1.socketId).emit("startRound", {
             myMonster: match.player1.selectedMonsterTemplateName,
             enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
             sideID: 0,
           });
 
+        if (!match.player2) {
+          log_event("Skipping match: player2 is undefined");
+          return;
+        }
+        
           //P2: send a copy/start (invert sides?)
-          room.playerChannel.to(match.player2?.socketId).emit("round-start", {
-            myMonster: match.player2?.selectedMonsterTemplateName,
+          room.playerChannel.to(match.player2.socketId).emit("startRound", {
+            myMonster: match.player2.selectedMonsterTemplateName,
             enemyMonster: match.player1.selectedMonsterTemplateName,
             sideID: 1, 
           });
@@ -436,7 +441,7 @@ async function main(config: ServerConfig) {
     socket.on("requestRoll", handleRollNotice);
 
     // #region Submit Move
-    socket.on("RequestSubmitMove", (msg: { data: any }) => {
+    socket.on("requestSubmitMove", (msg: { data: any }) => {
       log_event("Test move submission log");
       const { moveId, targetMethod } = msg.data;
 
@@ -483,17 +488,17 @@ async function main(config: ServerConfig) {
         const player2Move = match.getPlayerMove(player2);
 
         // Send both moves to the clients
-        playerChannel.to(player1.socketId).emit("ExecuteTurn", {
+        playerChannel.to(player1.socketId).emit("executeTurn", {
           playerMove: player1Move,
           enemyMove: player2Move,
         });
-        playerChannel.to(player2.socketId).emit("ExecuteTurn", {
+        playerChannel.to(player2.socketId).emit("executeTurn", {
           playerMove: player2Move,
           enemyMove: player1Move,
         });
 
-        playerChannel.to(player1.socketId).emit("UnlockButton");
-        playerChannel.to(player2.socketId).emit("UnlockButton");
+        playerChannel.to(player1.socketId).emit("unlockButton");
+        playerChannel.to(player2.socketId).emit("unlockButton");
       }
     });
   });

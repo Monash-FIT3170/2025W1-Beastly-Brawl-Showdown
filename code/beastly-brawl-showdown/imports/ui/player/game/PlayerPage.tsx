@@ -14,7 +14,6 @@ import WinnerScreen from "../../host/projector/WinnerScreen";
 import type {
   PlayerClientToServerEvents,
   PlayerServerToClientEvents,
-  PlayerSocketData
 } from "../../../../../shared/types";
 
 type TypedPlayerSocket = Socket<
@@ -172,8 +171,7 @@ const PlayerContent = () => {
     });
     //#endregion
 
-    //#region Waiting Room
-    socket.on("send-to-waiting", () => {
+    socket.on("enterWaitingRoom", () => {
       setWaiting(true);
     });
     //#endregion
@@ -182,19 +180,18 @@ const PlayerContent = () => {
     //   setWaiting(false);
     // });
 
-    //#region Set winner
-    socket.on("tournament-finished", (data) => {
+    socket.on("tournamentFinished", (data) => {
       setWaiting(false);
       setWinner(data);
     });
     //#endregion
 
     return () => {
-      socket.off("select-monster");
-      socket.off("round-start");
-      socket.off("send-to-waiting");
+      socket.off("gameReadyToStart");
+      socket.off("startRound");
+      socket.off("enterWaitingRoom");
       // socket.off("return-from-waiting");
-      socket.off("tournament-finished");
+      socket.off("tournamentFinished");
     };
   }, [socket]);
 
@@ -240,7 +237,7 @@ const PlayerContent = () => {
     if (socket) {
       // Send the templateId instead of the name
       console.log("No of selections: ", noSelections);
-      socket.emit("RequestSubmitMonster", { data: {
+      socket.emit("requestMonsterSelection", { data: {
         monsterTemplate: monster.templateId,
         selections: noSelections
         }

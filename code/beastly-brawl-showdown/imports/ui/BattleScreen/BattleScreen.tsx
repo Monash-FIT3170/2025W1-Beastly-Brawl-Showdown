@@ -71,8 +71,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const handleNewNotice = (notice: Notice) => {
       console.log("Notice received:", notice);
       if (notice.kind === "roll") {
-        const params: Parameters<typeof notice.callback> = [];
-        socket.emit("requestRoll", notice.kind, params);
+        socket.emit("requestRoll");
         console.log("Attempted to send back roll notice resolve");
       }
     };
@@ -133,7 +132,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!socket || !myMonster) return;
 
     const data = { moveId, targetMethod };
-    socket.emit("RequestSubmitMove", { data });
+    socket.emit("requestSubmitMove", { data });
     console.log("Attempted to submit move");
     setHasSubmittedMove(true);
   };
@@ -142,9 +141,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   useEffect(() => {
     if (!socket) return;
     const handleUnlock = () => setHasSubmittedMove(false);
-    socket.on("UnlockButton", handleUnlock);
+    socket.on("unlockButton", handleUnlock);
     return () => {
-      socket.off("UnlockButton", handleUnlock);
+      socket.off("unlockButton", handleUnlock);
     };
   }, [socket]);
 
@@ -197,9 +196,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       );
     };
 
-    socket.on("ExecuteTurn", handleExecuteTurn);
+    socket.on("executeTurn", handleExecuteTurn);
     return () => {
-      socket.off("ExecuteTurn", handleExecuteTurn);
+      socket.off("executeTurn", handleExecuteTurn);
     };
   }, [socket, myMonster, enemyMonster]);
 

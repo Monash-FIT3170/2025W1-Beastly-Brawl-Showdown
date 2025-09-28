@@ -199,12 +199,17 @@ export class Match {
         // switch displayed page to battle screen
         // playerChannel.to(this.player1.socketId).emit("return-from-waiting");
         // playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
-        playerChannel.to(this.player1.socketId).emit("round-start", {
+        playerChannel.to(this.player1.socketId).emit("startRound", {
           myMonster: this.player1.selectedMonsterTemplateName,
           enemyMonster: this.player2?.selectedMonsterTemplateName, // not option if bye
           sideID: 0,
         })
-          playerChannel.to(this.player2?.socketId).emit("round-start", {
+        
+        if (!this.player2) {
+        throw new Error(`Match ${this.matchID} is missing player2 for a DUEL match.`);
+        }
+        
+        playerChannel.to(this.player2.socketId).emit("startRound", {
             myMonster: this.player2?.selectedMonsterTemplateName,
             enemyMonster: this.player1.selectedMonsterTemplateName,
             sideID: 1,
@@ -228,8 +233,8 @@ export class Match {
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
         
-        playerChannel.to(this.winner?.socketId).emit("send-to-waiting");
-        playerChannel.to(loser?.socketId).emit("send-to-waiting");
+        playerChannel.to(this.winner?.socketId).emit("enterWaitingRoom");
+        playerChannel.to(loser?.socketId).emit("enterWaitingRoom");
     }
 
 }

@@ -73,7 +73,7 @@ export default function ProjectorPage() {
 
     //#region Request Room
     socketRef.current.on(
-      "request-room_response",
+      "newLobbyCreated",
       (roomInfo: { roomId: number; joinCode: string }) => {
         console.log("Room request response", roomInfo);
         setRoomId(roomInfo.roomId);
@@ -82,14 +82,14 @@ export default function ProjectorPage() {
     );
 
     //#region Host App events
-    socketRef.current.on("player-set-changed", (newPlayerList: string[]) => {
+    socketRef.current.on("refreshPlayerList", (newPlayerList: string[]) => {
       console.log("New set of players:", newPlayerList.toString());
       setPlayerList(newPlayerList);
     });
 
 
     if (!roomId) {
-      socketRef.current.emit("request-room", {type: tournamentType});
+      socketRef.current.emit("requestNewLobby", {type: tournamentType});
       return;
     }
     //#endregion
@@ -106,7 +106,7 @@ export default function ProjectorPage() {
 
   function handleStartGame() {
     if (socketRef.current) {
-      socketRef.current.emit("start-game", { roomId, type: tournamentType });
+      socketRef.current.emit("requestStartGame", { roomId, type: tournamentType });
       console.log("Start game requested!", tournamentType);
     }
   }
