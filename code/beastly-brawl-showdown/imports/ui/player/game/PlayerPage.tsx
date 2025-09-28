@@ -237,11 +237,11 @@ const PlayerContent = () => {
     if (socket) {
       // Send the templateId instead of the name
       console.log("No of selections: ", noSelections);
-      socket.emit("requestMonsterSelection", { data: {
+      socket.emit("requestMonsterSelection", {
         monsterTemplate: monster.templateId,
         selections: noSelections
         }
-      });
+     );
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {

@@ -22,6 +22,7 @@ import {
   HostClientToServerEvents, 
   HostServerToClientEvents,
 } from "../shared/types";
+import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
 
 export type PlayerNamespace = Namespace<
   PlayerClientToServerEvents,
@@ -335,7 +336,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region Select Monster
-    socket.on("requestMonsterSelection", (data: any) => {
+    socket.on("requestMonsterSelection", (monsterId: MonsterId) => {
       const player = socket.data.player as Player;
       if (!player) return;
 
@@ -343,7 +344,7 @@ async function main(config: ServerConfig) {
       if (!room) return;
 
       // Expect the client to send the monster templateId (key)
-      const monsterKey = data.data.monsterTemplate as keyof typeof COMMON_MONSTER_POOL.monsters;
+      const monsterKey = monsterId.monsterTemplate as keyof typeof COMMON_MONSTER_POOL.monsters;
       log_event(`Player selected monster key: ${monsterKey}`);
 
       // Validate selection
@@ -441,9 +442,9 @@ async function main(config: ServerConfig) {
     socket.on("requestRoll", handleRollNotice);
 
     // #region Submit Move
-    socket.on("requestSubmitMove", (msg: { data: any }) => {
+    socket.on("requestSubmitMove", (data) => {
       log_event("Test move submission log");
-      const { moveId, targetMethod } = msg.data;
+      const { moveId, targetingMethod } = data;
 
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -463,7 +464,7 @@ async function main(config: ServerConfig) {
           match.submitMove(
             player,
             moveId,
-            targetMethod as TargetingMethod,
+            targetingMethod as TargetingMethod,
             sourceSide as SideId
           );
           break;
@@ -472,7 +473,7 @@ async function main(config: ServerConfig) {
           match.submitMove(
             player,
             moveId,
-            targetMethod as TargetingMethod,
+            targetingMethod as TargetingMethod,
             targetSide as SideId
           );
           break;

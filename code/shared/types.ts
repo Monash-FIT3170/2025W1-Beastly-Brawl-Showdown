@@ -1,4 +1,7 @@
-import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move"
+import { MoveId } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move_pool";
+import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
+
 export type Result<T> = { success: true; value: T } | { success: false; error: Error };
 export type MonsterName = string & { __brand: "MonsterName" };
 
@@ -13,11 +16,11 @@ type BasicServerToClientEvents = {
 };
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
-  requestMonsterSelection: (data: any) => void;
+  requestMonsterSelection: (monsterId: MonsterId) => void;
   submitMonsterChoice: () => void;
   submitGameReadyState: () => void;
   requestRoll: () => void;
-  requestSubmitMove: (data: any) => void;
+  requestSubmitMove: (data: {moveId: MoveId; targetingMethod: TargetingMethod}) => void;
   submitMoveLockState: () => void;
 };
 

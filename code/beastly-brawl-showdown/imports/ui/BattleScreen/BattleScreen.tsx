@@ -128,11 +128,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   };
 
   // Handle player action (submit move to server)
-  const handleAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
+  const handleAction = (moveId: EntryID, targetingMethod: TargetingMethod) => {
     if (!socket || !myMonster) return;
 
-    const data = { moveId, targetMethod };
-    socket.emit("requestSubmitMove", { data });
+    socket.emit("requestSubmitMove", {moveId, targetingMethod});
     console.log("Attempted to submit move");
     setHasSubmittedMove(true);
   };
