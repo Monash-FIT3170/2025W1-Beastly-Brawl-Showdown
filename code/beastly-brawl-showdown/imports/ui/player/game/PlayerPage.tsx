@@ -126,8 +126,8 @@ const PlayerContent = () => {
       setWaiting(false);
       log_event("Received round-start data:", data);
 
-      const myTemplateName = data?.myMonster;
-      const enemyTemplateName = data?.enemyMonster;
+      const myTemplateName = data?.myMonsterName;
+      const enemyTemplateName = data?.enemyMonsterName;
 
       if (!myTemplateName || !enemyTemplateName) {
         console.warn("Incomplete round-start data:", data);
@@ -149,20 +149,20 @@ const PlayerContent = () => {
         ];
 
       // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
-      const mySide = data.sideID;
-      const enemySide = data.sideID === 0 ? 1 : 0;
+      const mySide = data.sideId;
+      const enemySide = data.sideId === 0 ? 1 : 0;
 
       console.log(`My side is ${mySide} || Enemy side is ${enemySide}`);
 
       setMatchData({
         myMonster: {
           template: myMonster,
-          currentHp: data.myHp,
+          currentHp: myMonster.baseStats.health,
           sideId: mySide,
         },
         enemyMonster: {
           template: enemyMonster,
-          currentHp: data.enemyHp,
+          currentHp: enemyMonster.baseStats.health,
           sideId: enemySide,
         },
       });

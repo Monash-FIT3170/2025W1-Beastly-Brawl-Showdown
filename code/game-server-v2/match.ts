@@ -200,9 +200,9 @@ export class Match {
         // playerChannel.to(this.player1.socketId).emit("return-from-waiting");
         // playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
         playerChannel.to(this.player1.socketId).emit("startRound", {
-          myMonster: this.player1.selectedMonsterTemplateName,
-          enemyMonster: this.player2?.selectedMonsterTemplateName, // not option if bye
-          sideID: 0,
+          myMonsterName: this.player1.selectedMonsterTemplateName,
+          enemyMonsterName: this.player2?.selectedMonsterTemplateName, // not option if bye
+          sideId: 0,
         })
         
         if (!this.player2) {
@@ -210,9 +210,9 @@ export class Match {
         }
         
         playerChannel.to(this.player2.socketId).emit("startRound", {
-            myMonster: this.player2?.selectedMonsterTemplateName,
-            enemyMonster: this.player1.selectedMonsterTemplateName,
-            sideID: 1,
+            myMonsterName: this.player2?.selectedMonsterTemplateName,
+            enemyMonsterName: this.player1.selectedMonsterTemplateName,
+            sideId: 1,
           });
 
 

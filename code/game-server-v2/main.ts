@@ -404,26 +404,25 @@ async function main(config: ServerConfig) {
             return; //TODO HANDLE BYE
           }
         
-          // P1: send a copy/start
-          room.playerChannel.to(match.player1.socketId).emit("startRound", {
-            myMonster: match.player1.selectedMonsterTemplateName,
-            enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
-            sideID: 0,
-          });
+        // P1: send a copy/start
+        room.playerChannel.to(match.player1.socketId).emit("startRound", {
+          myMonsterName: match.player1.selectedMonsterTemplateName,
+          enemyMonsterName: match.player2?.selectedMonsterTemplateName, // not option if bye
+          sideId: 0,
+        });
 
         if (!match.player2) {
           log_event("Skipping match: player2 is undefined");
           return;
         }
         
-          //P2: send a copy/start (invert sides?)
-          room.playerChannel.to(match.player2.socketId).emit("startRound", {
-            myMonster: match.player2.selectedMonsterTemplateName,
-            enemyMonster: match.player1.selectedMonsterTemplateName,
-            sideID: 1, 
-          });
+        //P2: send a copy/start (invert sides?)
+        room.playerChannel.to(match.player2.socketId).emit("startRound", {
+          myMonsterName: match.player2.selectedMonsterTemplateName,
+          enemyMonsterName: match.player1.selectedMonsterTemplateName,
+          sideId: 1,
         });
-      }
+      });
     });
 
     function handleRollNotice() {
