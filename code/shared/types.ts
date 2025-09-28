@@ -34,6 +34,7 @@ export type HostClientToServerEvents = BasicClientToServerEvents & {
   requestStartRound: () => void;
 };
 export type HostServerToClientEvents = BasicServerToClientEvents & {
+  newLobbyCreated: (details: { roomId: RoomId; joinCode: JoinCode }) => void;
   refreshPlayerList: (list: string[]) => void;
   gameReadyToStart: (data: any) => void;
 };
