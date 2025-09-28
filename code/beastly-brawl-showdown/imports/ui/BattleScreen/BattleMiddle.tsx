@@ -32,6 +32,8 @@ type BattleMiddleProps = {
   enemyBaseStats: BaseStats;
   playerMonsterName: string;
   playerBaseStats: BaseStats;
+  enemyAbilityName?: string;
+  playerAbilityName?: string;
 };
 //takes a boolean when initialized
 export const BattleMiddle: React.FC<BattleMiddleProps> = ({
@@ -42,7 +44,6 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   playerImgSrc,
   enemyMaxHp,
   playerMaxHp,
-  showAnimation,
   enemySlashVisible,
   onEnemySlashComplete,
   playerSlashVisible,
@@ -59,6 +60,8 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
   enemyBaseStats,
   playerMonsterName,
   playerBaseStats,
+  enemyAbilityName,
+  playerAbilityName,
 }) => {
   return (
     <div className="combat-arena">
@@ -71,9 +74,11 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         showShield={enemyShieldVisible}
         onShieldComplete={onEnemyShieldComplete}
         showAbility={enemyAbilityVisible}
-        onAbilityComplete={onEnemyAbilityComplete} 
-        monsterName={enemyMonsterName} 
-        baseStats={enemyBaseStats}      />
+        onAbilityComplete={onEnemyAbilityComplete}
+        monsterName={enemyMonsterName}
+        baseStats={enemyBaseStats}
+        abilityName={enemyAbilityName}
+      />
       <MonsterHealthRing
         currentHealth={playerHp}
         maxHealth={playerMaxHp}
@@ -83,9 +88,11 @@ export const BattleMiddle: React.FC<BattleMiddleProps> = ({
         showShield={playerShieldVisible}
         onShieldComplete={onPlayerShieldComplete}
         showAbility={playerAbilityVisible}
-        onAbilityComplete={onPlayerAbilityComplete} 
-        monsterName={playerMonsterName} 
-        baseStats={playerBaseStats}      />
+        onAbilityComplete={onPlayerAbilityComplete}
+        monsterName={playerMonsterName}
+        baseStats={playerBaseStats}
+        abilityName={playerAbilityName}
+      />
     </div>
   );
 };
