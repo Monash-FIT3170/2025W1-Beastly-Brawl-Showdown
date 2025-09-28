@@ -9,6 +9,7 @@ import { TargetingMethod } from "/imports/simulator/core/action/targeting";
 import BattleMessage from "./BattleMessage";
 import { DamageEvent } from "/imports/simulator/core/event/core_events";
 import { Notice } from "/imports/simulator/core/notice/notice";
+import { MoveRequest } from "/imports/simulator/core/action/move/move";
 
 interface BattleScreenProps {
   matchData: {
@@ -128,10 +129,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   };
 
   // Handle player action (submit move to server)
-  const handleAction = (moveId: EntryID, targetingMethod: TargetingMethod) => {
+  const handleAction = (moveId: EntryID) => {
     if (!socket || !myMonster) return;
 
-    socket.emit("requestSubmitMove", {moveId, targetingMethod});
+    socket.emit("requestSubmitMove", {moveId});
     console.log("Attempted to submit move");
     setHasSubmittedMove(true);
   };
@@ -186,13 +187,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       playerMove,
       enemyMove,
     }: {
-      playerMove: { moveId: EntryID };
-      enemyMove: { moveId: EntryID };
+      playerMove: MoveRequest | undefined;
+      enemyMove: MoveRequest | undefined;
     }) => {
       console.log("handle execution reached, ExecuteTurn received");
-      performMoveAnimation(playerMove.moveId, "player1").then(() =>
-        performMoveAnimation(enemyMove.moveId, "player2")
-      );
+
+      if (playerMove?.moveId) {
+        performMoveAnimation(playerMove.moveId, "player1").then(() => {
+          if (enemyMove?.moveId) {
+            performMoveAnimation(enemyMove.moveId, "player2");
+          }
+        });
+      } else if (enemyMove?.moveId) {
+        performMoveAnimation(enemyMove.moveId, "player2");
+      }
     };
 
     socket.on("executeTurn", handleExecuteTurn);

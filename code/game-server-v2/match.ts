@@ -11,6 +11,7 @@ import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils"
 import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { PlayerNamespace } from "./main";
+import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move";
 
 export enum MatchType {
     DUEL,
@@ -26,7 +27,7 @@ export class Match {
     matchID: number;
     battle?: Battle;
 
-    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
+    private submittedMoves: Map<Player, MoveRequest> = new Map();
 
 
     /**
@@ -100,13 +101,13 @@ export class Match {
     }
 
     // Called by main when a player submits a move
-    submitMove(player: Player, moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId): void {
+    submitMove(player: Player, move: MoveRequest): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
 
         // Store move
-        this.submittedMoves.set(player, { moveId, targetSide, targetMethod });
+        this.submittedMoves.set(player, move);
 
         const sideIndex = this.getSideForPlayer(player);
         const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
@@ -116,13 +117,7 @@ export class Match {
             throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no chooseMove notice.`);
         }
 
-        // Wrap SideId in a TargetingData object with the correct targetingMethod
-        const targetData: TargetingData = {
-            targetingMethod: targetMethod,
-            target: targetSide,
-        };
-
-        chooseMoveNotice.callback(moveId, targetData);
+        chooseMoveNotice.callback(move.moveId, move.targetingData);
     }
 
     // Called by main when a player submits a move

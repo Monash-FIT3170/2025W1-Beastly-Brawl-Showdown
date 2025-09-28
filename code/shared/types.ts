@@ -1,6 +1,9 @@
+import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move";
 import { MoveId } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move_pool";
 import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { OrderedEvent } from "../beastly-brawl-showdown/imports/simulator/core/event/event_history";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
+import { Notice } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 
 export type Result<T> = { success: true; value: T } | { success: false; error: Error };
 export type MonsterName = string & { __brand: "MonsterName" };
@@ -20,7 +23,7 @@ export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   submitMonsterChoice: () => void;
   submitGameReadyState: () => void;
   requestRoll: () => void;
-  requestSubmitMove: (data: {moveId: MoveId; targetingMethod: TargetingMethod}) => void;
+  requestSubmitMove: (data: {moveId: MoveId}) => void;
   submitMoveLockState: () => void;
 };
 
@@ -30,12 +33,12 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   requestMoveSelection: (responseDeadline: number) => void;
   gameReadytoStart: () => void;
   startRound: (data: {myMonsterName: string | undefined; enemyMonsterName: string | undefined; sideId: number}) => void;
-  executeTurn: (data: any) => void;
+  executeTurn: (data: {playerMove: MoveRequest | undefined; enemyMove: MoveRequest | undefined}) => void;
   unlockButton: () => void;
   tournamentFinished: (data: any) => void;
-  newNotice: (data: any) => void;
-  removeNotice: (data: any) => void;
-  newEvent: (data: any) => void;
+  newNotice: (notice: Notice) => void;
+  removeNotice: (notice: Notice) => void;
+  newEvent: (event: any) => void;
 };
 
 export type PlayerSocketData = {};

@@ -10,7 +10,7 @@ type MoveButton = {
 };
 
 type BattleBottomProps = {
-  onAction: (moveId: EntryID, targetMethod: TargetingMethod) => void;
+  onAction: (moveId: EntryID) => void;
   disabled?: boolean;
   myMonsterMoves: {
     attack: EntryID;
@@ -51,7 +51,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     <button
       key={btn.id}
       className="glb-btn"
-      onClick={() => onAction(btn.id, btn.targetMethod)}
+      onClick={() => onAction(btn.id)}
       disabled={disabled}
     >
       <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />

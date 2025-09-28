@@ -12,7 +12,7 @@ import * as path from "path";
 import { Player } from "./player";
 import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { TargetingData, TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
 import { TournamentType } from "./tournament_manager";
 import {
@@ -23,6 +23,7 @@ import {
   HostServerToClientEvents,
 } from "../shared/types";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
+import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move";
 
 export type PlayerNamespace = Namespace<
   PlayerClientToServerEvents,
@@ -443,7 +444,7 @@ async function main(config: ServerConfig) {
     // #region Submit Move
     socket.on("requestSubmitMove", (data) => {
       log_event("Test move submission log");
-      const { moveId, targetingMethod } = data;
+      const { moveId } = data;
 
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -455,28 +456,24 @@ async function main(config: ServerConfig) {
       if (!match) return;
       const [player1, player2] = [match.player1, match.player2];
 
-      const sourceSide = match.getSideForPlayer(player);
+      const source = match.getSideForPlayer(player) as SideId;
       player.submittedMove = true;
 
+      let targetingData: TargetingData
       switch (moveId) {
         case "defend":
-          match.submitMove(
-            player,
-            moveId,
-            targetingMethod as TargetingMethod,
-            sourceSide as SideId
-          );
+          targetingData = {targetingMethod: "self"};
           break;
         case "attack-normal":
-          const targetSide = sourceSide === 1 ? 0 : 1;
-          match.submitMove(
-            player,
-            moveId,
-            targetingMethod as TargetingMethod,
-            targetSide as SideId
-          );
+          const targetSide = source === 1 ? 0 : 1;
+          targetingData = {targetingMethod: "single-enemy", target: targetSide as SideId}
           break;
+        default:
+          throw new Error('Unhandled moveId: ${moveId}')
       }
+
+      let move: MoveRequest = {moveId, source, targetingData}
+      match.submitMove(player, move)
 
       const allSubmitted = player1.submittedMove && player2?.submittedMove;
 
