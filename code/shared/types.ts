@@ -17,17 +17,13 @@ type BasicServerToClientEvents = {
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   requestMonsterSelection: (monsterId: MonsterId) => void;
-  submitMonsterChoice: () => void;
-  submitGameReadyState: () => void;
   requestRoll: () => void;
   requestSubmitMove: (data: {moveId: MoveId}) => void;
-  submitMoveLockState: () => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
   enterWaitingRoom: () => void;
-  requestMoveSelection: (responseDeadline: number) => void;
   gameReadyToStart: () => void;
   startRound: (data: {myMonsterName: string | undefined; enemyMonsterName: string | undefined; sideId: number}) => void;
   executeTurn: (data: {playerMove: MoveRequest | undefined; enemyMove: MoveRequest | undefined}) => void;
