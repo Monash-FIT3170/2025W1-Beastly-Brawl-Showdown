@@ -150,10 +150,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         setRollNotice(notice);
         setshowRollMessage(true)
       }
-      if (notice.kind === "chooseMove") {
+      if (notice.kind === "chooseMove")
         setHasReceivedChooseMove(true);
-        console.log("we have received choosemove")
-      }
     };
     socket.on("newNotice", handleNewNotice);
     return () => {
@@ -164,7 +162,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   //only disable button if there is a choosemove waiting, and turn has finished playing
   useEffect(() => {
     if (hasReceivedChooseMove && turnFinishedPlaying) {
-      console.log("buttons are now enabled")
       setbuttonDisabled(false);
     }
   }, [hasReceivedChooseMove, turnFinishedPlaying]);
@@ -202,9 +199,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   //function to pass in new events to battle scene
   useEffect(() => {
     if (!socket) return;
-    for (const event of events) {
-      console.log(event);
-    }
+
     const handleNewEvent = (ev: any) => {
       setEvents(prev => {
       const next = [...prev, ev];

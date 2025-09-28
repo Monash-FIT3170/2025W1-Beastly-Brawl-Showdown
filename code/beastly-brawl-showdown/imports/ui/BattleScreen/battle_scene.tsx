@@ -103,21 +103,27 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       if (events[i]?.name === "snapshot") idxs.push(i);
     }
     return idxs;
-  }, [events.length]);
+  }, [events]);
 
   // useeffect to know when to play the turn
   useEffect(() => {
-    // # of completed turns = snapshots - 1 (first snapshot has no prior turn)
-    const completedTurns = snapshotIdxs.length - 1;
-    const alreadyPlayed = lastSnapCountRef.current;
+    let completedTurns = snapshotIdxs.length - 1;
 
-    if (completedTurns <= alreadyPlayed) return; // nothing new to play
+    // If our playback counter is ahead, reset it so it never blocks turns from running
+    if (lastSnapCountRef.current > completedTurns) {
+      lastSnapCountRef.current = Math.max(0, completedTurns);
+    }
+
+    const alreadyPlayed = lastSnapCountRef.current;
+    console.log({ completedTurns, alreadyPlayed, snapshotIdxs });
+
+    if (completedTurns <= alreadyPlayed) return;
 
     const start = snapshotIdxs[alreadyPlayed];
-    const end = snapshotIdxs[alreadyPlayed + 1]; // the new snapshot
-    turnToPlayRef.current = events.slice(start, end); // freeze the exact turn
+    const end   = snapshotIdxs[alreadyPlayed + 1];
+    turnToPlayRef.current = events.slice(start, end);
     setRunTurnNow(true);
-  }, [snapshotIdxs, events]); // events needed to slice; OK since we gate on snapshot count
+  }, [snapshotIdxs, events]);
 
   // This is to prevent replaying the turn when autoplay is toggled
   const onAdvanceRef = useRef(onAdvanceTurn);
@@ -356,6 +362,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         setVisibleState(snapState);
         i = 1;
       }
+
+      console.log("APPLYING EVENTS")
 
       // Apply the rest of the events in this completed turn
       for (; i < turnToPlay.length; i++) {
