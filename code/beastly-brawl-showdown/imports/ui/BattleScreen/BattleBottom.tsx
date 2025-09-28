@@ -62,7 +62,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
       "/img/ability2.png"
     )
     : null;
-  const rollBtn = buildNormalButton("roll","/img/monster-image/miku.jpg")
+  const rollBtn = buildNormalButton("roll","/img/d20.png")
 
   const renderButton = (btn: MoveButton) => (
     <button
