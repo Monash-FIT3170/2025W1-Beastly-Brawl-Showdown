@@ -45,7 +45,7 @@ button {
 }
 
 .canvas-body {
-  background-image: url("/homepage/background_3.png");
+  background-image: url("/assets/homepage/background_3.png");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -72,7 +72,7 @@ button {
 
 /* For log in page */
 .logo {
-  background-image: url("/homepage/logo.png");
+  background-image: url("/assets/homepage/logo.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -122,7 +122,7 @@ input:focus {
 /* Top Row */
 /* Top Right */
 .branding {
-  background-image: url("/design-systems/brandingBackground.png");
+  background-image: url("/assets/design-systems/brandingBackground.png");
   background-size: 100% 100%;
   background-position: center;
   text-shadow: 0 10px black;
@@ -194,77 +194,77 @@ input:focus {
 }
 
 .volume-icon {
-  background-image: url("/icons/volumeIcon.png");
+  background-image: url("/assets/icons/volumeIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .volume-muted {
-  background-image: url("/icons/volumeMuted.png");
+  background-image: url("/assets/icons/volumeMuted.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .sfx-icon {
-  background-image: url("/icons/sfxIcon.png");
+  background-image: url("/assets/icons/sfxIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .sfx-muted {
-  background-image: url("/icons/sfxMuted.png");
+  background-image: url("/assets/icons/sfxMuted.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .up-icon {
-  background-image: url("/icons/upArrowIcon.png");
+  background-image: url("/assets/icons/upArrowIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .down-icon {
-  background-image: url("/icons/downArrowIcon.png");
+  background-image: url("/assets/icons/downArrowIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .left-icon {
-  background-image: url("/icons/leftArrowIcon.png");
+  background-image: url("/assets/icons/leftArrowIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .right-icon {
-  background-image: url("/icons/rightArrowIcon.png");
+  background-image: url("/assets/icons/rightArrowIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .settings-icon {
-  background-image: url("/icons/settingsIcon.png");
+  background-image: url("/assets/icons/settingsIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .home-icon {
-  background-image: url("/icons/homeIcon.png");
+  background-image: url("/assets/icons/homeIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
 }
 
 .money-icon {
-  background-image: url("/icons/moneyIcon.png");
+  background-image: url("/assets/icons/moneyIcon.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -484,7 +484,7 @@ input:focus {
 }
 
 .btn-dark-brown {
-  background-image: url("/buttons/darkBrownBtn.png");
+  background-image: url("/assets/buttons/darkBrownBtn.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -494,7 +494,7 @@ input:focus {
 }
 
 .btn-dark-brown:hover {
-  background-image: url("/buttons/darkBrownBtnClicked.png");
+  background-image: url("/assets/buttons/darkBrownBtnClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -503,7 +503,7 @@ input:focus {
 }
 
 .btn-brown {
-  background-image: url("/buttons/brownBtn.png");
+  background-image: url("/assets/buttons/brownBtn.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -513,7 +513,7 @@ input:focus {
 }
 
 .btn-brown:hover {
-  background-image: url("/buttons/brownBtnClicked.png");
+  background-image: url("/assets/buttons/brownBtnClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -522,7 +522,7 @@ input:focus {
 }
 
 .btn-light-brown {
-  background-image: url("/buttons/lightBrownBtn.png");
+  background-image: url("/assets/buttons/lightBrownBtn.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -531,7 +531,7 @@ input:focus {
 }
 
 .btn-light-brown:hover {
-  background-image: url("/buttons/lightBrownBtnClicked.png");
+  background-image: url("/assets/buttons/lightBrownBtnClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -540,7 +540,7 @@ input:focus {
 }
 
 .btn-default {
-  background-image: url("/buttons/Btn.png");
+  background-image: url("/assets/buttons/Btn.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -549,7 +549,7 @@ input:focus {
 }
 
 .btn-default:hover {
-  background-image: url("/buttons/BtnClicked.png");
+  background-image: url("/assets/buttons/BtnClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -565,7 +565,7 @@ input:focus {
 }
 
 .brown-check {
-  background-image: url("/buttons/brownCheck.png");
+  background-image: url("/assets/buttons/brownCheck.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -573,7 +573,7 @@ input:focus {
 }
 
 .brown-check:hover {
-  background-image: url("/buttons/brownCheckClicked.png");
+  background-image: url("/assets/buttons/brownCheckClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -581,7 +581,7 @@ input:focus {
 }
 
 .brown-cross {
-  background-image: url("/buttons/brownCross.png");
+  background-image: url("/assets/buttons/brownCross.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -589,7 +589,7 @@ input:focus {
 }
 
 .brown-cross:hover {
-  background-image: url("/buttons/brownCrossClicked.png");
+  background-image: url("/assets/buttons/brownCrossClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -599,7 +599,7 @@ input:focus {
 .atk-btn {
   width: 48px;
   height: 58px;
-  background-image: url("/buttons/attackBtn.png");
+  background-image: url("/assets/buttons/attackBtn.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -609,7 +609,7 @@ input:focus {
 .atk-btn:hover {
   width: 48px;
   height: 58px;
-  background-image: url("/buttons/attackBtnClicked.png");
+  background-image: url("/assets/buttons/attackBtnClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -619,7 +619,7 @@ input:focus {
 .shld-btn {
   width: 50px;
   height: 50px;
-  background-image: url("/buttons/shieldButton.png");
+  background-image: url("/assets/buttons/shieldButton.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -627,7 +627,7 @@ input:focus {
 }
 
 .shld-btn:hover {
-  background-image: url("/buttons/shieldButtonClicked.png");
+  background-image: url("/assets/buttons/shieldButtonClicked.png");
   background-size: 100% 100%;
   background-position: center;
   image-rendering: pixelated;
@@ -649,7 +649,7 @@ input:focus {
 .name-board {
   width: 500px; /* 544px */
   height: 200px; /* 432px */
-  background-image: url("/Panel 1.png");
+  background-image: url("/assets/Panel 1.png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -663,7 +663,7 @@ input:focus {
   padding: 10px 20px;
   /* Adjust based on where the text should sit */
   font-size: 16px;
-  background-image: url("/Textbox.png");
+  background-image: url("/assets/Textbox.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -683,7 +683,7 @@ input:focus {
 .healthbar {
   width: 276px; /* 544px */
   height: 88px; /* 432px */
-  background-image: url("/healthbar.png");
+  background-image: url("/assets/healthbar.png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -694,7 +694,7 @@ input:focus {
 .monster-card {
   width: 150px; /* 544px */
   height: 150px; /* 432px */
-  background-image: url("/MonsterCardBg.png");
+  background-image: url("/assets/MonsterCardBg.png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -1273,7 +1273,7 @@ input:focus {
 /* Battle Screen styles */
 #battle-screen-body {
   position: relative;
-  background-image: url("/combat-bg.png");
+  background-image: url("/assets/combat-bg.png");
   display: flex;
   flex-direction: column;
   height: 100vh;
