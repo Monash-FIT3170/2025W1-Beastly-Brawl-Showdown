@@ -64,18 +64,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     });
   }, [matchData]);
 
-  // Listen for 'match-started' socket event
-  useEffect(() => {
-    if (!socket) return undefined;
-    const handleMatchStarted = (data: any) => {
-      console.log("Match started:", data);
-    };
-    socket.on("match-started", handleMatchStarted);
-    return () => {
-      socket.off("match-started", handleMatchStarted);
-    };
-  }, [socket]);
-
   // Repurpose for roll notices
   useEffect(() => {
     if (!socket) return;
