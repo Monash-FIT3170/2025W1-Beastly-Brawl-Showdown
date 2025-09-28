@@ -1,7 +1,5 @@
 import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move";
 import { MoveId } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move_pool";
-import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
-import { OrderedEvent } from "../beastly-brawl-showdown/imports/simulator/core/event/event_history";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
 import { Notice } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
 
@@ -15,7 +13,6 @@ type BasicClientToServerEvents = {
 type BasicServerToClientEvents = {
   pong: () => void;
   error: (msg: string) => void;
-  gameReadyToStart: () => void;
 };
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
@@ -31,7 +28,7 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
   enterWaitingRoom: () => void;
   requestMoveSelection: (responseDeadline: number) => void;
-  gameReadytoStart: () => void;
+  gameReadyToStart: () => void;
   startRound: (data: {myMonsterName: string | undefined; enemyMonsterName: string | undefined; sideId: number}) => void;
   executeTurn: (data: {playerMove: MoveRequest | undefined; enemyMove: MoveRequest | undefined}) => void;
   unlockButton: () => void;
@@ -45,13 +42,11 @@ export type PlayerSocketData = {};
 
 export type HostClientToServerEvents = BasicClientToServerEvents & {
   requestNewLobby: (res: (connectionDetails: Result<{ lobbyId: LobbyId; joinCode: JoinCode }>) => void) => void;
-  requestStartGame: (data: any) => void;
-  requestStartRound: (data: any) => void;
+  requestStartGame: (roomId: number | undefined) => void;
 };
 export type HostServerToClientEvents = BasicServerToClientEvents & {
-  newLobbyCreated: (data: any) => void;
+  newLobbyCreated: (data: {roomId: RoomId; joinCode: JoinCode}) => void;
   refreshPlayerList: (list: string[]) => void;
-  gameReadyToStart: (data: any) => void;
 };
 
 export type PlayerChannelAuth = {

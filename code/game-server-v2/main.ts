@@ -12,7 +12,7 @@ import * as path from "path";
 import { Player } from "./player";
 import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-import { TargetingData, TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
 import { TournamentType } from "./tournament_manager";
 import {
@@ -21,6 +21,8 @@ import {
   PlayerSocketData, 
   HostClientToServerEvents, 
   HostServerToClientEvents,
+  RoomId,
+  JoinCode,
 } from "../shared/types";
 import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
 import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move";
@@ -163,7 +165,7 @@ async function main(config: ServerConfig) {
       log_event("Room requested with mode: " + data.type);
       // TODO prevent multiple rooms at the same time
       try {
-        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
+        const { roomId, joinCode } = gameServer.createRoom(
           socket.id,
           playerChannel
         );
@@ -186,10 +188,10 @@ async function main(config: ServerConfig) {
     });
 
     // #region Start Game
-    socket.on("requestStartGame", (msg: { roomId: number }) => {
-      log_event(`Host requested start game for room ${msg.roomId}`);
+    socket.on("requestStartGame", (roomId) => {
+      log_event(`Host requested start game for room ${roomId}`);
 
-      const room = gameServer.rooms.get(msg.roomId);
+      const room = gameServer.rooms.get(roomId as number);
       if (!room) {
         socket.emit("error", "Room not found");
         return;
@@ -213,7 +215,7 @@ async function main(config: ServerConfig) {
       });
 
       log_notice(
-        `All players in room ${msg.roomId} have been notified to start the game.`
+        `All players in room ${roomId} have been notified to start the game.`
       );
     });
   });
