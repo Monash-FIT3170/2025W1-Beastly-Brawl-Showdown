@@ -23,8 +23,6 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
   requestMonsterSelection: (setMonsterName: (monsterName: MonsterName) => void) => void;
   requestMoveSelection: (responseDeadline: number) => void;
-
-  submitGameReadyState: () => void;
   gameReadytoStart: () => void;
 };
 
@@ -32,12 +30,12 @@ export type PlayerSocketData = {};
 
 export type HostClientToServerEvents = BasicClientToServerEvents & {
   requestNewLobby: (res: (connectionDetails: Result<{ lobbyId: LobbyId; joinCode: JoinCode }>) => void) => void;
-
   requestStartGame: () => void;
   requestStartRound: () => void;
 };
 export type HostServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
+  gameReadyToStart: (data: any) => void;
 };
 
 export type PlayerChannelAuth = {
