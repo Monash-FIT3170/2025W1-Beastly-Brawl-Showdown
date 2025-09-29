@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@beastly-brawl-showdown/sim-core": "latest",
+    "@beastly-brawl-showdown/sim-data": "latest",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@beastly-brawl-showdown/configs": "latest",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

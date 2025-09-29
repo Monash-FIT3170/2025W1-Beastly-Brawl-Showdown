@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { parseTurns } from "./turns_array_maker";
-import { BaseEvent } from "../../../simulator/core/event/base_event";
+import { BaseEvent } from "../../../../../simulator/core/event/base_event";
 
 interface GameLogProps {
   isOpen: boolean;

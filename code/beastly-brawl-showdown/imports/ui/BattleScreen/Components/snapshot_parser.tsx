@@ -1,5 +1,5 @@
-import { SnapshotEvent } from "../../../simulator/core/event/core_events";
-import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
+import { SnapshotEvent } from "../../../../../simulator/core/event/core_events";
+import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
 
 console.log("snapshot parser loaded");
 

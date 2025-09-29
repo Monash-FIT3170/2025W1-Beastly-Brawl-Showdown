@@ -1,5 +1,5 @@
 import React from "react";
-import { COMMON_MONSTER_POOL } from "../../simulator/data/common/common_monster_pool";
+import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
 
 export const MonsterContainer = ({
   name,

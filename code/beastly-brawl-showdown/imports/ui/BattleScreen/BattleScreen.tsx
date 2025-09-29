@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { BattleTop } from "./BattleTop";
 import { BattleBottom } from "./BattleBottom";
 import { usePlayerSocket } from "../player/game/PlayerPage";
-import { MonsterTemplate } from "../../simulator/core/monster/monster_template";
-import { EntryID } from "/imports/simulator/core/utils";
-import { TargetingMethod } from "/imports/simulator/core/action/targeting";
-import { Notice, Roll } from "/imports/simulator/core/notice/notice";
+import { MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
+import { EntryID } from "../../../../simulator/core/utils";
+import { TargetingMethod } from "../../../../simulator/core/action/targeting";
+import { Notice, Roll } from "../../../../simulator/core/notice/notice";
 import { BattleScene } from "./battle_scene"
 
 interface BattleScreenProps {

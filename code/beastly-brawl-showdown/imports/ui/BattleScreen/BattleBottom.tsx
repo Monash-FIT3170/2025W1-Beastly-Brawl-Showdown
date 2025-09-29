@@ -1,7 +1,7 @@
 import React from "react";
-import { EntryID } from "/imports/simulator/core/utils";
-import { TargetingMethod } from "/imports/simulator/core/action/targeting";
-import { COMMON_MOVE_POOL } from "/imports/simulator/data/common/common_move_pool";
+import { EntryID } from "../../../../simulator/core/utils";
+import { TargetingMethod } from "../../../../simulator/core/action/targeting";
+import { COMMON_MOVE_POOL } from "../../../../simulator/data/common/common_move_pool";
 
 type Button = {
   id: string;

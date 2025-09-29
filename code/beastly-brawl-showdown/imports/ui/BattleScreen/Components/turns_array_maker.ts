@@ -1,6 +1,6 @@
 
-import { BaseEvent } from "../../../simulator/core/event/base_event";
-import { SnapshotEvent } from "../../../simulator/core/event/core_events";
+import { BaseEvent } from "../../../../../simulator/core/event/base_event";
+import { SnapshotEvent } from "../../../../../simulator/core/event/core_events";
 import { Turn } from "./turn";
 
 export function parseTurns(events: BaseEvent[]): Turn[] {

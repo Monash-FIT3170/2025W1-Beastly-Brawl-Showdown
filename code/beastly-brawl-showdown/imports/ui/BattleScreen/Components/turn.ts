@@ -1,5 +1,5 @@
-import { BaseEvent } from "../../../simulator/core/event/base_event";
-import { SnapshotEvent, StartMoveEvent, BuffEvent, RollEvent, DamageEvent, BlockedEvent } from "../../../simulator/core/event/core_events";
+import { BaseEvent } from "../../../../../simulator/core/event/base_event";
+import { SnapshotEvent, StartMoveEvent, BuffEvent, RollEvent, DamageEvent, BlockedEvent } from "../../../../../simulator/core/event/core_events";
 
 export class Turn {
     turnEvents: BaseEvent[] = [];

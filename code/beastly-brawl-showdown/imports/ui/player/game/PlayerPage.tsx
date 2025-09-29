@@ -7,8 +7,8 @@ import React, {
 } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
-import { COMMON_MONSTER_POOL } from "../../../simulator/data/common/common_monster_pool";
-import { MonsterTemplate } from "../../../simulator/core/monster/monster";
+import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
+import { MonsterTemplate } from "../../../../../simulator/core/monster/monster";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
 

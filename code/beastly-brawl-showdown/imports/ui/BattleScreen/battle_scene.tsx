@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { parseSnapshot } from "./Components/snapshot_parser";
 import { parseTurns } from "./Components/turns_array_maker";
 import { clamp } from "./Components/utils/clamp";
-import { BaseEvent } from "../..//simulator/core/event/base_event";
+import { BaseEvent } from "../../../../simulator/core/event/base_event";
 import {
   BuffEvent,
   DamageEvent,
@@ -11,9 +11,9 @@ import {
   MoveFailedEvent,
   BlockedEvent,
   MoveEvadedEvent,
-} from "../../simulator/core/event/core_events";
-import { getBaseStat } from "../../simulator/core/monster/monster";
-import { COMMON_MONSTER_POOL } from "../../simulator/data/common/common_monster_pool";
+} from "../../../../simulator/core/event/core_events";
+import { getBaseStat } from "../../../../simulator/core/monster/monster";
+import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
 import { BattleMiddle } from ".//BattleMiddle";
 import BattleMessage from "./BattleMessage";
 
