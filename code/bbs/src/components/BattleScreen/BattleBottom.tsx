@@ -54,15 +54,15 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   };
 
   // Build button configs dynamically
-  const attackBtn = buildButton(myMonsterMoves.attack, "/img/sword3.png");
-  const defendBtn = buildButton(myMonsterMoves.defend, "/img/shield2.png");
+  const attackBtn = buildButton(myMonsterMoves.attack, "/assets/img/sword3.png");
+  const defendBtn = buildButton(myMonsterMoves.defend, "/assets/img/shield2.png");
   const abilityBtn = myMonsterMoves.ability
     ? buildButton(
       myMonsterMoves.ability,
-      "/img/ability2.png"
+      "/assets/img/ability2.png"
     )
     : null;
-  const rollBtn = buildNormalButton("roll","/img/d20.png")
+  const rollBtn = buildNormalButton("roll","/assets/img/d20.png")
 
   const renderButton = (btn: MoveButton) => (
     <button
