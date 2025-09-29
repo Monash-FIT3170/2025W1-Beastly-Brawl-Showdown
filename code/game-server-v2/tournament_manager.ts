@@ -1,6 +1,6 @@
 import { Player } from "./player";
 import { Match, MatchType } from "./match";
-import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
+import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 import { getRandomPool, log_attention, log_event } from "./utils";
 
 export enum TournamentType {

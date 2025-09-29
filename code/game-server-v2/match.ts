@@ -1,16 +1,15 @@
 import { Player } from "./player";
 import { AccountId } from "../shared/types";
-import { Battle, BattleOptions } from "../beastly-brawl-showdown/imports/simulator/core/battle";
-import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
-import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-import { COMMON_MOVE_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_move_pool";
+import { Battle, BattleOptions } from "../simulator/core/battle";
+import { SideId } from "../simulator/core/side";
+import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 import { log_attention, log_event } from "./utils";
-import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
-import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
-import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
-import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
-import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
-import { Socket } from "socket.io";
+import { MonsterId } from "../simulator/core/monster/monster_pool";
+import { TargetingData } from "../simulator/core/action/targeting";
+import { EntryID } from "../simulator/core/utils";
+import { ChooseMove, Roll } from "../simulator/core/notice/notice";
+import { TargetingMethod } from "../simulator/core/action/targeting";
 
 export enum MatchType {
     DUEL,
