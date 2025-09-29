@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/react": "^19.1.15",
+    "@types/react-dom": "^19.1.9",
+    "@types/socket.io-client": "^1.4.36"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}

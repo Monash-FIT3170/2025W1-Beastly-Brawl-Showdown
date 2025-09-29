@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import SlashAnimation from "../Animation/SlashAnimation";
-import ShieldAnimation from "../Animation/ShieldAnimation";
-import AbilityAnimation from "../Animation/AbilityAnimation";
+import SlashAnimation from "./SlashAnimation";
+import ShieldAnimation from "./ShieldAnimation";
+import AbilityAnimation from "./AbilityAnimation";
 import MonsterTooltip from "../MonsterToolTip";
 
 type BaseStats = {

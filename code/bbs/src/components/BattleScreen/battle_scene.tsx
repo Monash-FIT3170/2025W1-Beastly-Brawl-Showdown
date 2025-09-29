@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { parseSnapshot } from "./Components/snapshot_parser";
 import { parseTurns } from "./Components/turns_array_maker";
 import { clamp } from "./Components/utils/clamp";
-import { BaseEvent } from "../../../../simulator/core/event/base_event";
-import {
+import type { BaseEvent } from "../../../../simulator/core/event/base_event";
+import type {
   BuffEvent,
   DamageEvent,
   SnapshotEvent,

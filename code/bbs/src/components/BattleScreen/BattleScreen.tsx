@@ -5,9 +5,8 @@ import { usePlayerSocket } from "../player/game/PlayerPage";
 import { type MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
-import BattleMessage from "./BattleMessage";
-import { type DamageEvent } from "../../../../simulator/core/event/core_events";
-import { type Notice } from "../../../../simulator/core/notice/notice";
+import BattleScene from "./battle_scene";
+import { type Notice, type Roll } from "../../../../simulator/core/notice/notice";
 
 interface BattleScreenProps {
   matchData: {
@@ -225,7 +224,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         turnIndex={turnIndex}
         isPlaying={isPlaying}
         autoAdvance={false}  // default: no autoplay
-        onAdvanceTurn={(next) => setTurnIndex(next)}
+        onAdvanceTurn={(next: React.SetStateAction<number>) => setTurnIndex(next)}
         myid = {matchData.myid}
         showEnemySubmittedMessage = {showEnemySubmittedMessage}
         showSubmittedMoveMessage = {showSubmittedMoveMessage}
