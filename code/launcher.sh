@@ -38,6 +38,23 @@ done
 echo "[launcher] MongoDB is up."
 
 # ----------------------------
+# Start Server Locator
+# ----------------------------
+SERVER_LOCATOR_DIR="$BASE_DIR/server-locator"
+echo "[launcher] Starting game server in $SERVER_LOCATOR_DIR..."
+(
+  cd "$SERVER_LOCATOR_DIR"
+  # Check if ts-node is installed
+  if [ ! -f "./node_modules/.bin/ts-node" ]; then
+    echo "ts-node not found locally. Installing..."
+    npm install --save-dev ts-node typescript
+else
+    echo "ts-node is already installed locally."
+fi
+  npx ts-node ./src/app.ts
+) &
+
+# ----------------------------
 # Start Game Server
 # ----------------------------
 GAME_SERVER_DIR="$BASE_DIR/game-server-v2"
@@ -64,26 +81,26 @@ rm -f "$READY_FILE"
 echo "[launcher] Game server is ready."
 
 # ----------------------------
-# Start Meteor App
+# Start React App
 # ----------------------------
-METEOR_DIR="$BASE_DIR/beastly-brawl-showdown"
-echo "[launcher] Starting Meteor app in $METEOR_DIR..."
+REACT_DIR="$BASE_DIR/bbs"
+echo "[launcher] Starting React app in $REACT_DIR..."
 (
-  cd "$METEOR_DIR"
+  cd "$REACT_DIR"
   
   # Check for missing npm packages
   missing=$(meteor npm ls --depth=0 2>&1 | grep "missing:" || true)
   if [ -n "$missing" ]; then
     echo "[launcher] Missing packages detected:"
     echo "$missing"
-    echo "[launcher] Running 'meteor npm install'..."
-    meteor npm install
+    echo "[launcher] Running 'npm install'..."
+    npm install
   else
     echo "[launcher] All packages installed."
   fi
 
   # Launch Meteor
-  sh run.sh
+  npm run dev
 ) &
 
 # ----------------------------
