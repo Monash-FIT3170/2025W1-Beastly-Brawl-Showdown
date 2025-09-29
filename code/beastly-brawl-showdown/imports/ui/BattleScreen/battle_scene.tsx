@@ -120,7 +120,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     if (completedTurns <= alreadyPlayed) return;
 
     const start = snapshotIdxs[alreadyPlayed];
-    const end   = snapshotIdxs[alreadyPlayed + 1];
+    const end = snapshotIdxs[alreadyPlayed + 1];
     turnToPlayRef.current = events.slice(start, end);
     setRunTurnNow(true);
   }, [snapshotIdxs, events]);
@@ -363,7 +363,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         i = 1;
       }
 
-      console.log("APPLYING EVENTS")
+      console.log("APPLYING EVENTS");
 
       // Apply the rest of the events in this completed turn
       for (; i < turnToPlay.length; i++) {
@@ -384,8 +384,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Mark this turn as played and lower the flag
       lastSnapCountRef.current += 1;
-      setTurnFinishedPlaying(true)
-      console.log("Turn finished playing")
+      setTurnFinishedPlaying(true);
+      console.log("Turn finished playing");
       setRunTurnNow(false);
       setcurrentMessage("");
     })();
@@ -411,19 +411,19 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
-  
+
   const template2 =
     COMMON_MONSTER_POOL.monsters[
-      currentSnapshot.sides[1-myid].monster
+      currentSnapshot.sides[1 - myid].monster
         .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
- 
+
   // Clear names for what the UI reads:asd
   const visiblePlayer1 = visibleState[myid];
-  const visiblePlayer2 = visibleState[1-myid];
+  const visiblePlayer2 = visibleState[1 - myid];
   const myMonsterImage = visibleState[myid].image;
-  const enemyMonsterImage = visibleState[1-myid].image;
+  const enemyMonsterImage = visibleState[1 - myid].image;
   const shouldShowMessage = showMessage || currentMessage !== "";
 
   return (
@@ -447,27 +447,27 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         enemyAbilityVisible={enemyAbility}
         onEnemyAbilityComplete={() => setEnemyAbility(false)}
         playerAbilityVisible={playerAbility}
-        onPlayerAbilityComplete={() => setPlayerAbility(false)} 
+        onPlayerAbilityComplete={() => setPlayerAbility(false)}
         enemyMonsterName={template2.name}
         enemyBaseStats={{
           attack: template2.baseStats.attack,
-            defense: template2.baseStats.armour
-          }}
-          playerMonsterName={template.name}
-          playerBaseStats={{
-            attack: template.baseStats.attack,
-            defense: template.baseStats.armour
-          }}
-        />
+          defense: template2.baseStats.armour,
+        }}
+        playerMonsterName={template.name}
+        playerBaseStats={{
+          attack: template.baseStats.attack,
+          defense: template.baseStats.armour,
+        }}
+        enemyAbilityName={template2.abilityActionId}
+        playerAbilityName={template.abilityActionId}
+      />
       {showEnemySubmittedMessage && (
         <BattleMessage message={"Enemy Has Submitted"} />
       )}
       {showSubmittedMoveMessage && (
         <BattleMessage message={"Your Move Has Been Submitted"} />
       )}
-      {showRollMessage && (
-        <BattleMessage message={"Time To Roll!"} />
-      )}
+      {showRollMessage && <BattleMessage message={"Time To Roll!"} />}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
     </div>
   );
