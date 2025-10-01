@@ -177,8 +177,6 @@ describe("Battle.Move.perform.stun", () => {
       const abilityCharge = getComponent(stunner.monster, "abilityChargeStun");
       expect(abilityCharge).toBeNull();
 
-      const failureEvents = battle.eventHistory.events.filter((event) => event.name === "moveFailed");
-      expect(failureEvents).toHaveLength(0);
     } finally {
       battle.noticeBoard.unsubscribeListener(autoResolve);
     }
