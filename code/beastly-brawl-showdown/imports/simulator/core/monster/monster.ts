@@ -1,6 +1,9 @@
+import { Battle } from "../battle";
+import { SideId } from "../side";
 import { EntryID } from "../utils";
 import { BaseComponent } from "./component/component";
 import { ComponentKindMap } from "./component/core_components";
+import { MonsterPool } from "./monster_pool";
 import type { MonsterStatType } from "./monster_stats";
 import type { MonsterTemplate } from "./monster_template";
 
@@ -18,15 +21,25 @@ export interface Monster {
   health: number;
 
   /**
-   * How many times can the monster defend in a round
+   * How many times can the monster attack in a round
    */
-  defendActionCharges: number;
+  attackCharges: number;
 
   //# Components
   /**
    * The components attached to this monster
    */
   components: Array<BaseComponent>;
+}
+
+//# Spawn Utils
+export function spawnMonster(battle: Battle, sideId: SideId, monster_pool: MonsterPool) {
+  const monster: Monster = battle.sides[sideId].monster;
+  const template: MonsterTemplate = monster_pool.monsters[monster.baseID];
+  monster.health = template.baseStats.health;
+  monster.attackCharges = template.maxAttackCharges;
+  monster.components = []
+  template.onSpawnActions.forEach((onSpawnAction) => onSpawnAction.do(battle, sideId));
 }
 
 //# Component Utils
@@ -59,5 +72,3 @@ export function getStatBonus(statType: MonsterStatType, monster: Monster): numbe
 export function getIsBlockedFromMove(monster: Monster) {
   return monster.components.filter((component) => component.getIsBlockedFromMove !== undefined).some((component) => component.getIsBlockedFromMove!());
 }
-
-export { MonsterTemplate };

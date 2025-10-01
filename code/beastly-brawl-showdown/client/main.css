@@ -791,11 +791,15 @@ input:focus {
 }
 
 .monster-selection-grid {
+  padding: 0.4rem;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 3vh;
   max-width: 40%;
+  max-height: 70vh;
+
+  overflow-y: auto;
 }
 
 .monster-selection-card {
@@ -810,7 +814,7 @@ input:focus {
   transition: all 0.3s ease;
   position: relative;
   max-width: 30vw;
-  height: 24.5vh;
+  height: 30%;
 
   box-shadow:
     0 4px 0 #773519,
@@ -861,6 +865,7 @@ input:focus {
 
 .monster-name {
   font-size: 1.5rem;
+  line-height: 1.5rem;
   font-weight: bold;
   color: black;
   margin-bottom: 5px;
@@ -879,14 +884,26 @@ input:focus {
   margin-bottom: 8px;
 }
 
+.monster-stats {
+  font-style: italic;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
 .ability-desc {
-  color: #7f8c8d;
   font-size: 0.9rem;
   font-style: italic;
 }
 
 #monster-selection-btn {
   width: 30vw;
+}
+
+#room-code-button {
+  background-color: transparent;
+  border: none;
 }
 
 /* Waiting/Loading Screen for match to start */
