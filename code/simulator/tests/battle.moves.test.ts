@@ -1,13 +1,18 @@
 import { COMMON_MONSTER_POOL } from "../data/common/common_monster_pool";
 import { TargetingData } from "../core/action/targeting";
-import { getComponent, getStat, spawnMonster } from "../core/monster/monster";
+import { getComponent, getIsBlockedFromMove, getStat, spawnMonster } from "../core/monster/monster";
 import { roll as rollDice } from "../core/roll";
 import { PRNG } from "../core/prng";
 import { autoResolveRollsAndRerolls, makeBattle, targetEnemy } from "./testUtils";
+import { AbilityChargeStunComponent } from "../core/monster/component/core_components";
+
 
 describe("Battle.Move.perform.attack-normal", () => {
   test("battle deals damage when attack-normal is used", async () => {
-    const battle = makeBattle(1456);
+    const battle = makeBattle(1456, [
+      { monsterId: "shadow_fang" },
+      { monsterId: "mystic_wryven" },
+    ]);
     const autoResolveNotices = autoResolveRollsAndRerolls();
     battle.noticeBoard.subscribeListener(autoResolveNotices);
 
@@ -54,7 +59,10 @@ describe("Battle.Move.perform.attack-normal", () => {
 
 describe("Battle.Move.perform.defend", () => {
   test("defend consumes a charge and grants temporary armour", async () => {
-    const battle = makeBattle(2025);
+    const battle = makeBattle(2025, [
+      { monsterId: "shadow_fang" },
+      { monsterId: "mystic_wryven" },
+    ]);
     const autoResolve = autoResolveRollsAndRerolls();
     battle.noticeBoard.subscribeListener(autoResolve);
 
@@ -104,7 +112,10 @@ describe("Battle.Move.perform.defend", () => {
 
 describe("Battle.Move.perform.dodge", () => {
   test("dodge adds dodge state when charges are available", async () => {
-    const battle = makeBattle(3030);
+    const battle = makeBattle(3030, [
+      { monsterId: "shadow_fang" },
+      { monsterId: "mystic_wryven" },
+    ]);
     const autoResolve = autoResolveRollsAndRerolls();
     battle.noticeBoard.subscribeListener(autoResolve);
 
@@ -130,6 +141,44 @@ describe("Battle.Move.perform.dodge", () => {
       expect(evadedEvent).toBeDefined();
       expect((evadedEvent as any).target).toBe(dodger.id);
       expect(dodger.monster.health).toBe(startingHP);
+    } finally {
+      battle.noticeBoard.unsubscribeListener(autoResolve);
+    }
+  });
+});
+
+
+describe("Battle.Move.perform.stun", () => {
+  test("stun consumes a charge and leaves the target unable to act", async () => {
+    const battle = makeBattle(5050, [
+      { monsterId: "stone_hide" },
+      { monsterId: "shadow_fang" },
+    ]);
+    const autoResolve = autoResolveRollsAndRerolls();
+    battle.noticeBoard.subscribeListener(autoResolve);
+
+    try {
+      battle.sides.forEach((side) => spawnMonster(battle, side.id, battle.monsterPool));
+
+      const stunner = battle.sides[0];
+      const target = battle.sides[1];
+      stunner.monster.components.push(new AbilityChargeStunComponent(1));
+
+      expect(getComponent(target.monster, "stunned")).toBeNull();
+
+      await battle.movePool["stun"].perform(battle, stunner.id, {
+        targetingMethod: "single-enemy",
+        target: target.id,
+      });
+
+      expect(getComponent(target.monster, "stunned")).not.toBeNull();
+      expect(getIsBlockedFromMove(target.monster)).toBe(true);
+
+      const abilityCharge = getComponent(stunner.monster, "abilityChargeStun");
+      expect(abilityCharge).toBeNull();
+
+      const failureEvents = battle.eventHistory.events.filter((event) => event.name === "moveFailed");
+      expect(failureEvents).toHaveLength(0);
     } finally {
       battle.noticeBoard.unsubscribeListener(autoResolve);
     }

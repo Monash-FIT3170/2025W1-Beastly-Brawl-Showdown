@@ -21,7 +21,10 @@ describe("Battle Errors", () => {
 
 describe("Battle order", () => {
   test("faster monster acts before slower monster when priority is equal", async () => {
-    const battle = makeBattle(77);
+    const battle = makeBattle(77, [
+      { monsterId: "shadow_fang" },
+      { monsterId: "mystic_wryven" },
+    ]);
     const autoResolve = autoResolveRollsAndRerolls();
     const autoResolveNotices = {
       onPostNotice: (target: number, notice: Notice) => {
@@ -53,5 +56,4 @@ describe("Battle order", () => {
     expect(startMoveEvents[1].source).toBe(battle.sides[1].id);
   });
 });
-
 
