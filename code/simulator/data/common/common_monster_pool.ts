@@ -104,7 +104,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "fleet_foot",
       name: "Fleet Foot Stalker",
       description: "A swift and elusive hunter. Excels in dealing multi-hit damage.",
-      imageUrl: "/monsters/owl.png",
+      imageUrl: "/assets/monsters/owl.png",
       baseStats: {
         health: 32,
         armour: 8,
@@ -123,7 +123,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "knight",
       name: "Knight",
       description: "A brave and noble warrior. A Balanced Monster.",
-      imageUrl: "/monsters/knight.png",
+      imageUrl: "/assets/monsters/knight.png",
       baseStats: {
         health: 50,
         armour: 10,
@@ -142,7 +142,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "sea_urchin",
       name: "Sea Urchin",
       description: "A prickly marine creature. A Defense Monster that deals damage back when hit.",
-      imageUrl: "/monsters/sea_urchin.png",
+      imageUrl: "/assets/monsters/sea_urchin.png",
       baseStats: {
         health: 60,
         armour: 10,
@@ -161,7 +161,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "lion",
       name: "Lion",
       description: "A fierce and majestic predator. An Attack Monster that excels in hitting hard.",
-      imageUrl: "/monsters/lion.png",
+      imageUrl: "/assets/monsters/lion.png",
       baseStats: {
         health: 36,
         armour: 6,
@@ -180,7 +180,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "bear",
       name: "Bear",
       description: "A strong and resilient creature. A Balanced Monster that goes berserk.",
-      imageUrl: "/monsters/bear.png",
+      imageUrl: "/assets/monsters/bear.png",
       baseStats: {
         health: 50,
         armour: 9,
@@ -199,7 +199,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "shield",
       name: "Shield",
       description: "A shield that once belonged to a knight gained sentience. A defender monster with inate damage reduction.",
-      imageUrl: "/monsters/shield.png",
+      imageUrl: "/assets/monsters/shield.png",
       baseStats: {
         health: 60,
         armour: 12,
