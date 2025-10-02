@@ -24,27 +24,34 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   disabled,
   myMonsterMoves,
 }) => {
-
   const getMove = (moveId: EntryID) => {
-    return (COMMON_MOVE_POOL as Record<string, typeof COMMON_MOVE_POOL[keyof typeof COMMON_MOVE_POOL]>)[moveId];
+    return (
+      COMMON_MOVE_POOL as Record<
+        string,
+        (typeof COMMON_MOVE_POOL)[keyof typeof COMMON_MOVE_POOL]
+      >
+    )[moveId];
   };
 
   const buildButton = (moveId: EntryID, fallbackIcon: string) => {
     return {
       id: moveId,
       icon: fallbackIcon,
-      targetMethod: getMove(moveId)?.targetingMethod ?? "self"
+      targetMethod: getMove(moveId)?.targetingMethod ?? "self",
     } as MoveButton;
   };
 
   // Build button configs dynamically
-  const attackBtn = buildButton(myMonsterMoves.attack, "/img/sword3.png");
-  const defendBtn = buildButton(myMonsterMoves.defend, "/img/shield2.png");
+  const attackBtn = buildButton(
+    myMonsterMoves.attack,
+    "/assets/img/sword3.png"
+  );
+  const defendBtn = buildButton(
+    myMonsterMoves.defend,
+    "/assets/img/shield2.png"
+  );
   const abilityBtn = myMonsterMoves.ability
-    ? buildButton(
-      myMonsterMoves.ability,
-      "/img/ability2.png"
-    )
+    ? buildButton(myMonsterMoves.ability, "/assets/img/ability2.png")
     : null;
 
   const renderButton = (btn: MoveButton) => (
@@ -54,7 +61,11 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
       onClick={() => onAction(btn.id, btn.targetMethod)}
       disabled={disabled}
     >
-      <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
+      <img
+        src={btn.icon}
+        alt={btn.id}
+        className="battleScreenBottomButtonImage"
+      />
     </button>
   );
 
