@@ -104,7 +104,8 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
               desc={monster.description}
               currentlySelectedMonster={highlightAndShowConfirm}
             />
-          ))}
+          );
+        })}
       </div>
 
       <button

@@ -2,8 +2,6 @@ import { GameServer } from "./gameServer";
 import * as readline from "readline";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import connectDb from "./db/db";
-import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { getRandomPool, log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
@@ -13,6 +11,26 @@ import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_poo
 import { TargetingMethod } from "../simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
 import { TournamentType } from "./tournament_manager";
+import express, { Request, Response } from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import { GameServerRegistryModel } from "./models/game_server_register";
+
+const MONGO_IP = "localhost";
+const MONGO_PORT = "27017";
+const MONGO_NAME = "RoomLocation";
+const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
+
+async function connectToDatabase(): Promise<typeof mongoose> {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log(`Connected to MongoDB at ${MONGO_URI}`);
+    return mongoose;
+  } catch (err) {
+    console.error(`MongoDB connection error: ${err}`);
+    process.exit(1);
+  }
+}
 
 type ServerConfig = {
   serverIp: string;
@@ -152,17 +170,21 @@ async function main(config: ServerConfig) {
       log_event("Room requested with mode: " + data.type);
       // TODO prevent multiple rooms at the same time
       try {
-        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(
-          socket.id,
-          playerChannel
-        );
+        const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(socket.id, playerChannel);
 
-        socket.emit("request-room_response", {
-          roomId: roomId,
-          joinCode: joinCode,
-        });
-        log_notice(`Room generated. id = ${roomId}, join code = ${joinCode}`);
-      } catch {
+        // Set tournament type in the room
+        const room = gameServer.rooms.get(roomId);
+        if (room) {
+          room.tournamentManager.tournamentType =
+            data.type === "random"
+              ? TournamentType.Random
+              : TournamentType.Standard;
+        }
+
+        socket.emit("request-room_response", { roomId, joinCode });
+        log_notice(
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+        );      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
