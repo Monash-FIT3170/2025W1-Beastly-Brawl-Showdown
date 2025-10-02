@@ -1,4 +1,4 @@
-import { MoveRequest } from "../beastly-brawl-showdown/imports/simulator/core/action/move/move"
+import { MoveRequest } from "../simulator/core/action/move/move";
 export type Result<T> = { success: true; value: T } | { success: false; error: Error };
 export type MonsterName = string & { __brand: "MonsterName" };
 
@@ -64,3 +64,12 @@ export type RoomId = number & { __brand: "RoomId" };
 //   /** Waiting for host to start next round. */
 //   RoundSummary,
 // }
+
+//#region DB
+export const DOCUMENT_NAME = "game_server_registries";
+export interface IGameServerRegistryEntry {
+  serverNumber: number;
+  serverUrl: string;
+  lastUpdated: Date;
+}
+//#endregion
