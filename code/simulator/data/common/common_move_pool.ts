@@ -3,11 +3,11 @@ import { default_attack } from "../../core/action/move/move_utils";
 import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../core/action/targeting";
 import { Battle } from "../../core/battle";
 import { BuffEvent, MoveFailedEvent } from "../../core/event/core_events";
-import { AbilityChargeStunComponent, DefendComponent, DodgeChargeComponent, DodgeStateComponent, StunnedStateComponent } from "../../core/monster/component/core_components";
+import { AbilityChargeStunComponent, DefendComponent, DodgeChargeComponent, DodgeStateComponent, NextAttacksBonusComponent, PermanentStatBuffComponent, StunnedStateComponent } from "../../core/monster/component/core_components";
 import { getComponent, Monster } from "../../core/monster/monster";
 import { SideId } from "../../core/side";
 
-export type COMMON_MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun";
+export type COMMON_MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun" | "double-attack" | "attack-bonus-next3" | "battle-cry";
 export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
   nothing: {
     moveId: "nothing",
@@ -20,7 +20,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     perform: async function (battle: Battle, source: SideId, targetingData: TargetingData) {
       throw new Error("This action should not be used EVER.");
     },
-    onFail: async function (battle: Battle, source: SideId): Promise<void> {},
+    onFail: async function (battle: Battle, source: SideId): Promise<void> { },
   },
 
   "attack-normal": {
@@ -42,7 +42,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     onHit: async function (battle: Battle, source: SideId, target: SideId): Promise<void> {
       // TODO
     },
-    onFail: async function (battle: Battle, source: SideId): Promise<void> {},
+    onFail: async function (battle: Battle, source: SideId): Promise<void> { },
   },
 
   defend: {
@@ -152,6 +152,125 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         stunnedComponent.remainingDuration++;
       }
     },
+    onFail: async function (battle: Battle, source: SideId): Promise<void> {
+      throw new Error("Function not implemented.");
+    },
+  },
+
+  "double-attack": {
+    moveId: "double-attack",
+    type: "move",
+    name: "Double Attack",
+    description: "Attack the target twice. Can only be used once per battle.",
+    priorityClass: 1,
+    targetingMethod: "single-enemy",
+
+    perform: async function (battle: Battle, source: SideId, targetingData: SingleEnemyTargeting) {
+      const target: SideId = targetingData.target;
+      const sourceMonster: Monster = battle.sides[source].monster;
+
+      // Track usage with a temporary property
+      if ((sourceMonster as any)._doubleAttackUsed) {
+        const failedEvent: MoveFailedEvent = {
+          name: "moveFailed",
+          source: source,
+          target: source,
+          moveId: this.moveId,
+          reason: "Double attack already used",
+        };
+        battle.eventHistory.addEvent(failedEvent);
+        return;
+      }
+
+      // Mark as used
+      (sourceMonster as any)._doubleAttackUsed = true;
+
+      // Perform the attack twice
+      await default_attack(this, battle, source, target);
+      await default_attack(this, battle, source, target);
+    },
+
+    onFail: async function (battle: Battle, source: SideId): Promise<void> {
+      throw new Error("Function not implemented.");
+    },
+  },
+
+  "attack-bonus-next3": {
+    moveId: "attack-bonus-next3",
+    type: "move",
+    name: "Fury Boost",
+    description: "Your next 3 attacks deal +3 damage each. Can only be used once per battle.",
+    priorityClass: 2,
+    targetingMethod: "self",
+
+    perform: async function (battle: Battle, source: SideId) {
+      const sourceMonster: Monster = battle.sides[source].monster;
+
+      // Track usage per battle
+      if ((sourceMonster as any)._attackBonusUsed) {
+        const failedEvent: MoveFailedEvent = {
+          name: "moveFailed",
+          source,
+          target: source,
+          moveId: this.moveId,
+          reason: "Fury Boost already used",
+        };
+        battle.eventHistory.addEvent(failedEvent);
+        return;
+      }
+
+      // Mark as used
+      (sourceMonster as any)._attackBonusUsed = true;
+
+      // Add the bonus component
+      sourceMonster.components.push(new NextAttacksBonusComponent(3, 3));
+    },
+
+    onFail: async function (battle: Battle, source: SideId): Promise<void> {
+      throw new Error("Function not implemented.");
+    },
+  },
+
+  "battle-cry": {
+    moveId: "battle-cry",
+    type: "move",
+    name: "Battle Cry",
+    description: "Increase your attack and armour by +2 for the rest of the battle. Can only be used once per battle.",
+    priorityClass: 2,
+    targetingMethod: "self",
+
+    perform: async function (battle: Battle, source: SideId) {
+      const sourceMonster: Monster = battle.sides[source].monster;
+
+      // Track usage per battle
+      if ((sourceMonster as any)._battleCryUsed) {
+        const failedEvent: MoveFailedEvent = {
+          name: "moveFailed",
+          source,
+          target: source,
+          moveId: this.moveId,
+          reason: "Battle Cry already used",
+        };
+        battle.eventHistory.addEvent(failedEvent);
+        return;
+      }
+
+      // Mark as used
+      (sourceMonster as any)._battleCryUsed = true;
+
+      // Apply permanent stat buff
+      sourceMonster.components.push(new PermanentStatBuffComponent(2, 2));
+
+      // Emit BuffEvent
+      const buffEvent: BuffEvent = {
+        name: "buff",
+        source,
+        target: source,
+        buffs: { attack: 2, armour: 2 },
+      };
+      battle.eventHistory.addEvent(buffEvent);
+    },
+
     onFail: async function (battle: Battle, source: SideId): Promise<void> {
       throw new Error("Function not implemented.");
     },

@@ -184,7 +184,8 @@ async function main(config: ServerConfig) {
         socket.emit("request-room_response", { roomId, joinCode });
         log_notice(
           `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
-        );      } catch {
+        );
+      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
@@ -390,7 +391,7 @@ async function main(config: ServerConfig) {
         room.tournamentManager.matches.forEach((match: Match) => {
           if (match.matchType == MatchType.BYE) {
             log_notice("This match is a bye");
-            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", {bye: true});
+            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", { bye: true });
             return; //TODO HANDLE BYE
           }
 
@@ -405,7 +406,7 @@ async function main(config: ServerConfig) {
           room.playerChannel.to(match.player2?.socketId).emit("round-start", {
             myMonster: match.player2?.selectedMonsterTemplateName,
             enemyMonster: match.player1.selectedMonsterTemplateName,
-            sideID: 1, 
+            sideID: 1,
           });
         });
       }

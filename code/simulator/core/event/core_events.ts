@@ -42,7 +42,7 @@ export interface StartMoveEvent extends BaseEvent {
   source: SideId;
   target: SideId;
   moveId: EntryID;
-  attackChargesConsumed: Number;
+  attackChargesConsumed: number;
 }
 
 export interface MoveSuccessEvent extends BaseEvent {
@@ -65,9 +65,10 @@ export interface MoveFailedEvent extends BaseEvent {
   moveId: EntryID;
   reason: unknown; // TODO
 }
+
 export interface BuffEvent extends BaseEvent {
   name: "buff";
   source: SideId;
   target: SideId;
-  buffs: { armour: number };
+  buffs: {attack?: number, armour?: number };
 }

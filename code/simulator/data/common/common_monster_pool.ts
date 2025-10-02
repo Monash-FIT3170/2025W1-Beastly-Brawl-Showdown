@@ -1,10 +1,10 @@
 import { Battle } from "../../core/battle";
-import { RerollChargeComponent, DodgeChargeComponent } from "../../core/monster/component/core_components";
+import { RerollChargeComponent, DodgeChargeComponent, AdvantageComponent, DamageReductionComponent, ThornsComponent } from "../../core/monster/component/core_components";
 import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
-type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide" | "fleet_foot" | 
-"knight" | "sea_urchin" | "lion" | "bear" | "shield";
+type MONSTER_IDS = "blank" | "mystic_wryven" | "shadow_fang" | "stone_hide" | "fleet_foot" |
+  "knight" | "sea_urchin" | "lion" | "bear" | "shield";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
   name: "common_monster_pool",
   monsters: {
@@ -97,14 +97,16 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 4,
       abilityActionId: "stun",
-      onSpawnActions: [],
+      onSpawnActions: [
+
+      ],
     },
 
     fleet_foot: {
       templateId: "fleet_foot",
       name: "Fleet Foot Stalker",
       description: "A swift and elusive hunter. Excels in dealing multi-hit damage.",
-      imageUrl: "/monsters/owl.png",
+      imageUrl: "/assets/monsters/owl.png",
       baseStats: {
         health: 32,
         armour: 8,
@@ -116,6 +118,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityActionId: "double-attack",
       onSpawnActions: [],
     },
 
@@ -123,7 +126,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "knight",
       name: "Knight",
       description: "A brave and noble warrior. A Balanced Monster.",
-      imageUrl: "/monsters/knight.png",
+      imageUrl: "/assets/monsters/knight.png",
       baseStats: {
         health: 50,
         armour: 10,
@@ -135,14 +138,21 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(new AdvantageComponent());
+          },
+        }
+      ],
     },
 
     sea_urchin: {
       templateId: "sea_urchin",
       name: "Sea Urchin",
       description: "A prickly marine creature. A Defense Monster that deals damage back when hit.",
-      imageUrl: "/monsters/sea_urchin.png",
+      imageUrl: "/assets/monsters/sea_urchin.png",
       baseStats: {
         health: 60,
         armour: 10,
@@ -154,14 +164,21 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(new ThornsComponent(1));
+          },
+        }
+      ],
     },
 
     lion: {
       templateId: "lion",
       name: "Lion",
       description: "A fierce and majestic predator. An Attack Monster that excels in hitting hard.",
-      imageUrl: "/monsters/lion.png",
+      imageUrl: "/assets/monsters/lion.png",
       baseStats: {
         health: 36,
         armour: 6,
@@ -173,6 +190,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityActionId: "attack-bonus-next3",
       onSpawnActions: [],
     },
 
@@ -180,7 +198,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "bear",
       name: "Bear",
       description: "A strong and resilient creature. A Balanced Monster that goes berserk.",
-      imageUrl: "/monsters/bear.png",
+      imageUrl: "/assets/monsters/bear.png",
       baseStats: {
         health: 50,
         armour: 9,
@@ -192,6 +210,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityActionId: "battle-cry",
       onSpawnActions: [],
     },
 
@@ -199,7 +218,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       templateId: "shield",
       name: "Shield",
       description: "A shield that once belonged to a knight gained sentience. A defender monster with inate damage reduction.",
-      imageUrl: "/monsters/shield.png",
+      imageUrl: "/assets/monsters/shield.png",
       baseStats: {
         health: 60,
         armour: 12,
@@ -211,7 +230,14 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(new DamageReductionComponent(3));
+          },
+        }
+      ],
     },
   },
 } as const;
