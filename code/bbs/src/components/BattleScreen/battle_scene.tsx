@@ -458,8 +458,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           attack: template.baseStats.attack,
           defense: template.baseStats.armour,
         }}
-        enemyAbilityName={template2.abilityActionId}
-        playerAbilityName={template.abilityActionId}
+        enemyAbilityName={template2.abilityName}
+        playerAbilityName={template.abilityName}
       />
       {showEnemySubmittedMessage && (
         <BattleMessage message={"Enemy Has Submitted"} />
