@@ -30,7 +30,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     mystic_wryven: {
       templateId: "mystic_wryven",
       name: "Mystic Wyvern",
-      description: "A mystical creature of the skies. A Balanced Monster.",
+      description: "A mystical creature of the skies. A Balanced Monster with the belief that they can turn every situation in their favour.",
       imageUrl: "/assets/monsters/dragon.png",
       baseStats: {
         health: 50,
@@ -56,7 +56,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     shadow_fang: {
       templateId: "shadow_fang",
       name: "Shadow Fang Predator",
-      description: "A stealthy and cunning beast. An Attack Monster.",
+      description: "A stealthy and cunning beast. An Attack Monster that can swiftly dodge attacks.",
       imageUrl: "/assets/monsters/wolf.png",
       baseStats: {
         health: 40,
@@ -83,7 +83,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     stone_hide: {
       templateId: "stone_hide",
       name: "Stone Hide Guardian",
-      description: "A sturdy and resilient protector. A Defense Monster.",
+      description: "A sturdy and resilient protector. A Defense Monster that can stun the foe.",
       imageUrl: "/assets/monsters/turtle.png",
       baseStats: {
         health: 60,
@@ -95,7 +95,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      maxAttackCharges: 4,
+      maxAttackCharges: 3,
       abilityActionId: "stun",
       onSpawnActions: [
 
@@ -125,7 +125,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     knight: {
       templateId: "knight",
       name: "Knight",
-      description: "A brave and noble warrior. A Balanced Monster.",
+      description: "A brave and noble warrior. A Balanced Monster that always makes advantageous decisions.",
       imageUrl: "/assets/monsters/knight.png",
       baseStats: {
         health: 50,
@@ -151,7 +151,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     sea_urchin: {
       templateId: "sea_urchin",
       name: "Sea Urchin",
-      description: "A prickly marine creature. A Defense Monster that deals damage back when hit.",
+      description: "A prickly marine creature. A Defense Monster that returns damage when hit.",
       imageUrl: "/assets/monsters/sea_urchin.png",
       baseStats: {
         health: 60,
@@ -177,7 +177,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     lion: {
       templateId: "lion",
       name: "Lion",
-      description: "A fierce and majestic predator. An Attack Monster that excels in hitting hard.",
+      description: "A fierce and majestic predator. An Attack Monster that excels in hard hitting attacks.",
       imageUrl: "/assets/monsters/lion.png",
       baseStats: {
         health: 36,
@@ -197,7 +197,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     bear: {
       templateId: "bear",
       name: "Bear",
-      description: "A strong and resilient creature. A Balanced Monster that goes berserk.",
+      description: "A strong and resilient creature. A Balanced Monster that sets up to go berserk.",
       imageUrl: "/assets/monsters/bear.png",
       baseStats: {
         health: 50,
@@ -217,7 +217,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     shield: {
       templateId: "shield",
       name: "Shield",
-      description: "A shield that once belonged to a knight gained sentience. A defender monster with inate damage reduction.",
+      description: "A creature weilding a shield that may or may not be too big for it. A Defense Monster with inate damage reduction.",
       imageUrl: "/assets/monsters/shield.png",
       baseStats: {
         health: 60,
