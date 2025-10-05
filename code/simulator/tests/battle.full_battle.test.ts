@@ -225,3 +225,92 @@ describe("Battle full flow", () => {
     expect(getComponent(shadowFang.monster, "dodging")).toBeNull();
   });
 });
+
+describe("Battle full flow", () => {
+  test("FULL battle.run 3", async () => {
+    const battle = makeBattle(7777, [
+      { monsterId: "mystic_wryven" },
+      { monsterId: "stone_hide" },
+    ]);
+    spawnAllMonsters(battle);
+
+    const mysticWryven = battle.sides[0];
+    const stoneHide = battle.sides[1];
+    mysticWryven.monster.health = 8;
+
+    const rngSequence = [0.1, 0.9, 0.6];
+    let rngIndex = 0;
+    const originalNext = battle.rng.next;
+
+    battle.rng.next = () => {
+      if (rngIndex < rngSequence.length) {
+        const value = rngSequence[rngIndex];
+        rngIndex++;
+        return value;
+      } else {
+        return originalNext.call(battle.rng);
+      }
+    };
+
+    const gameTurns: Array<Record<number, { moveId: EntryID; targeting: TargetingData }>> = [
+      {
+        // turn 1
+        [mysticWryven.id]: { moveId: "attack-normal" as EntryID, targeting: targetEnemy(stoneHide.id) },
+        [stoneHide.id]: { moveId: "defend" as EntryID, targeting: { targetingMethod: "self" } as TargetingData },
+      },
+      {
+        // turn 2
+        [mysticWryven.id]: { moveId: "defend" as EntryID, targeting: { targetingMethod: "self" } as TargetingData },
+        [stoneHide.id]: { moveId: "attack-normal" as EntryID, targeting: targetEnemy(mysticWryven.id) },
+      },
+    ];
+
+    const autoResolve = autoResolveRollsAndRerolls();
+    let turnIndex = 0;
+    const scriptedListener = {
+      onPostNotice: (target: number, notice: any) => {
+        if (notice.kind === "chooseMove") {
+          if (turnIndex >= gameTurns.length) {
+            throw new Error(`No turn for index ${turnIndex}`);
+          }
+          const plan = gameTurns[turnIndex];
+          const action = plan[target];
+
+          notice.callback(action.moveId, action.targeting);
+          if (target === battle.sides.length - 1) {
+            turnIndex++;
+          }
+        } else {
+          autoResolve.onPostNotice(target, notice);
+        }
+      },
+      onRemoveNotice: autoResolve.onRemoveNotice,
+    };
+
+    battle.noticeBoard.subscribeListener(scriptedListener);
+
+    try {
+      await battle.run();
+    } finally {
+      battle.noticeBoard.unsubscribeListener(scriptedListener);
+      battle.rng.next = originalNext;
+    }
+
+    const rerollEvents = battle.eventHistory.events.filter((event) => event.name === "reroll");
+    expect(rerollEvents).toHaveLength(0);
+
+    const mysticWryvenReroll = getComponent(mysticWryven.monster, "reroll");
+    expect(mysticWryvenReroll).not.toBeNull();
+    expect(mysticWryvenReroll!.charges).toBe(1);
+
+    const damageEvents = battle.eventHistory.events.filter(
+      (event): event is DamageEvent & { index: number } => event.name === "damage"
+    );
+    expect(damageEvents).toHaveLength(1);
+    expect(damageEvents.map((event) => ({ source: event.source, target: event.target, amount: event.amount }))).toEqual([
+      { source: stoneHide.id, target: mysticWryven.id, amount: 8 },
+    ]);
+
+    expect(mysticWryven.monster.health).toBeLessThanOrEqual(0);
+  });
+});
