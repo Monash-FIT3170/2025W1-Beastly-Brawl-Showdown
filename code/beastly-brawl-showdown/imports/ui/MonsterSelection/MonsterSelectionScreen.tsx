@@ -72,7 +72,9 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
             />
           ))}
 
-        <button
+        
+      </div>
+      <button
           className="glb-btn"
           id="monster-selection-btn"
           onClick={handleConfirm}
@@ -80,7 +82,6 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
         >
           Confirm
         </button>
-      </div>
     </div>
   );
 };
