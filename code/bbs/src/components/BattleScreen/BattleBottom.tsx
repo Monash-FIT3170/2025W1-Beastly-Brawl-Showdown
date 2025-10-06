@@ -63,7 +63,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
       {renderButton(attackBtn)}
       {abilityBtn && renderButton(abilityBtn)}
       {renderButton(defendBtn)}
-      <div className="shield-uses"></div>
+      {/* <div className="shield-uses"></div> */}
     </div>
   );
 };
