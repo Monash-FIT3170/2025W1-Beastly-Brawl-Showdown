@@ -15,7 +15,7 @@ const AbilityAnimation: React.FC<AbilityAnimationProps> = ({
       onAnimationEnd={onComplete}
     >
       <img
-        src="/img/ability_animation.png"
+        src="/battle-icons/ability_animation.png"
         alt="ability"
         className="ability-image"
       />
