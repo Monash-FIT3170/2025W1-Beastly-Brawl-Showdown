@@ -387,7 +387,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       setTurnFinishedPlaying(true);
       console.log("Turn finished playing");
       setRunTurnNow(false);
-      setcurrentMessage("");
+      setTimeout(() => {
+        setcurrentMessage("");
+      }, 1200);
     })();
 
     return () => {
