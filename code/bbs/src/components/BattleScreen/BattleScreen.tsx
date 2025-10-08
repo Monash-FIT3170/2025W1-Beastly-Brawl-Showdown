@@ -121,23 +121,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
 
   //#region battle code
 
-  //function that executes roll immediately and shows dice animation
+  //function that executes roll on server
   function rollNow(rollNotice: Roll): void {
     if (!socket) return;
     
-    // Generate random dice roll result (1-20)
-    const rollResult = Math.floor(Math.random() * 20) + 1;
-    setDiceRollResult(rollResult);
-    
-    // Show dice animation immediately
-    setShowDiceAnimation(true);
-    
-    // Execute the roll on server immediately (don't wait for animation)
+    // Execute the roll on server immediately
     setShowMessage(false);
     const params: Parameters<typeof rollNotice.callback> = [];
     socket.emit("requestRoll", rollNotice.kind, params);
     setRollNotice(null);
     setshowRollMessage(false);
+    // Note: dice animation will be triggered when we receive the roll event back from server
   }
 
   // Handle dice animation completion - just hide the animation
@@ -220,6 +214,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!socket) return;
 
     const handleNewEvent = (ev: any) => {
+      // Check if this is a roll event for the current player
+      if (ev.name === "roll" && ev.source === matchData.myid) {
+        // Show dice animation with the actual server roll result
+        setDiceRollResult(ev.result);
+        setShowDiceAnimation(true);
+      }
+      
       setEvents(prev => {
         const next = [...prev, ev];
         return next;
@@ -230,7 +231,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     return () => {
       socket.off("newEvent", handleNewEvent);
     };
-  }, [socket]);
+  }, [socket, matchData.myid]);
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
