@@ -54,12 +54,12 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   };
 
   // Build button configs dynamically
-  const attackBtn = buildButton(myMonsterMoves.attack, "/assets/img/sword3.png");
-  const defendBtn = buildButton(myMonsterMoves.defend, "/assets/img/shield2.png");
+  const attackBtn = buildButton(myMonsterMoves.attack, "assets/battle-icons/sword3.png");
+  const defendBtn = buildButton(myMonsterMoves.defend, "assets/battle-icons/shield2.png");
   const abilityBtn = myMonsterMoves.ability
     ? buildButton(
       myMonsterMoves.ability,
-      "/assets/img/ability2.png"
+      "assets/img/ability2.png"
     )
     : null;
   const rollBtn = buildNormalButton("roll","/assets/img/d20.png")
@@ -71,7 +71,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
       onClick={() => onAction(btn.id, btn.targetMethod)}
       disabled={disabled}
     >
-      <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
+      <img src={btn.icon} className="battleScreenBottomButtonImage" />
     </button>
   );
 
@@ -94,8 +94,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
       {renderButton(attackBtn)}
       {abilityBtn && renderButton(abilityBtn)}
       {renderButton(defendBtn)}
-    </>
-  )}
-</div>
+      {/* <div className="shield-uses"></div> */}
+    </div>
   );
 };

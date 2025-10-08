@@ -14,7 +14,7 @@ const SlashAnimation: React.FC<SlashAnimationProps> = ({
       className={`slash-animation ${isVisible ? "active" : ""}`}
       onAnimationEnd={onComplete}
     >
-      <img src="/assets/img/slash.png" alt="slash" className="slash-image" />
+      <img src="/battle-icons/slash.png" alt="slash" className="slash-image" />
     </div>
   );
 };
