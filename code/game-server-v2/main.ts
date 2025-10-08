@@ -396,16 +396,16 @@ async function main(config: ServerConfig) {
 
           // P1: send a copy/start
           room.playerChannel.to(match.player1.socketId).emit("round-start", {
-            myMonster: match.player1.selectedMonsterTemplateName,
-            enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
+            player1Monster: match.player1?.selectedMonsterTemplateName,
+            player2Monster: match.player2?.selectedMonsterTemplateName, // not option if bye
             sideID: 0,
           });
 
           //P2: send a copy/start (invert sides?)
-          room.playerChannel.to(match.player2?.socketId).emit("round-start", {
-            myMonster: match.player2?.selectedMonsterTemplateName,
-            enemyMonster: match.player1.selectedMonsterTemplateName,
-            sideID: 1, 
+          room.playerChannel.to(match.player2?.socketId).emit("round-start", {  
+            player1Monster: match.player1?.selectedMonsterTemplateName,
+            player2Monster: match.player2?.selectedMonsterTemplateName,
+            sideID: 1,
           });
         });
       }
@@ -439,6 +439,11 @@ async function main(config: ServerConfig) {
 
       const sourceSide = match.getSideForPlayer(player);
       player.submittedMove = true;
+
+      if (player1 && player1.submittedMove && player2?.socketId)
+        playerChannel.to(player2.socketId).emit("EnemySubmitted")
+      if (player2 && player2.submittedMove && player1?.socketId)
+        playerChannel.to(player1.socketId).emit("EnemySubmitted")
 
       switch (moveId) {
         case "defend":
