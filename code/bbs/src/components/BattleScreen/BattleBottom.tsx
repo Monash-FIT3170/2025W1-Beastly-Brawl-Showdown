@@ -6,7 +6,7 @@ import { COMMON_MOVE_POOL } from "../../../../simulator/data/common/common_move_
 type Button = {
   id: string;
   icon: string;
-}
+};
 
 type MoveButton = Button & {
   id: EntryID;
@@ -32,23 +32,25 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   onRoll,
   mode,
 }: BattleBottomProps) => {
-
   const getMove = (moveId: EntryID) => {
-    return (COMMON_MOVE_POOL as Record<string, typeof COMMON_MOVE_POOL[keyof typeof COMMON_MOVE_POOL]>)[moveId];
+    return (COMMON_MOVE_POOL as Record<
+      string,
+      (typeof COMMON_MOVE_POOL)[keyof typeof COMMON_MOVE_POOL]
+    >)[moveId];
   };
 
   const buildButton = (moveId: EntryID, fallbackIcon: string) => {
     return {
       id: moveId,
       icon: fallbackIcon,
-      targetMethod: getMove(moveId)?.targetingMethod ?? "self"
+      targetMethod: getMove(moveId)?.targetingMethod ?? "self",
     } as MoveButton;
   };
 
-  //added a button that isn't tied to the monsters actions
+  // Added a button that isn't tied to the monster's actions
   const buildNormalButton = (id: string, fallbackIcon: string) => {
     return {
-      id: id,
+      id,
       icon: fallbackIcon,
     } as Button;
   };
@@ -57,12 +59,9 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   const attackBtn = buildButton(myMonsterMoves.attack, "assets/battle-icons/sword3.png");
   const defendBtn = buildButton(myMonsterMoves.defend, "assets/battle-icons/shield2.png");
   const abilityBtn = myMonsterMoves.ability
-    ? buildButton(
-      myMonsterMoves.ability,
-      "assets/img/ability2.png"
-    )
+    ? buildButton(myMonsterMoves.ability, "assets/img/ability2.png")
     : null;
-  const rollBtn = buildNormalButton("roll","/assets/img/d20.png")
+  const rollBtn = buildNormalButton("roll", "/assets/img/d20.png");
 
   const renderButton = (btn: MoveButton) => (
     <button
@@ -75,26 +74,24 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     </button>
   );
 
-    const renderButtonForRoll = (btn: Button) => (
-    <button
-      key={btn.id}
-      className="glb-btn"
-      onClick={() => onRoll()}
-    >
+  const renderButtonForRoll = (btn: Button) => (
+    <button key={btn.id} className="glb-btn" onClick={onRoll}>
       <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
     </button>
   );
 
   return (
-<div className="battleScreenBottom">
-  {mode === "roll" ? (
-    renderButtonForRoll(rollBtn)
-  ) : (
-    <>
-      {renderButton(attackBtn)}
-      {abilityBtn && renderButton(abilityBtn)}
-      {renderButton(defendBtn)}
-      {/* <div className="shield-uses"></div> */}
+    <div className="battleScreenBottom">
+      {mode === "roll" ? (
+        renderButtonForRoll(rollBtn)
+      ) : (
+        <>
+          {renderButton(attackBtn)}
+          {abilityBtn && renderButton(abilityBtn)}
+          {renderButton(defendBtn)}
+          {/* <div className="shield-uses"></div> */}
+        </>
+      )}
     </div>
   );
 };
