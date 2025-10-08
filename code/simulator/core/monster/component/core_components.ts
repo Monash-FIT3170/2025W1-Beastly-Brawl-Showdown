@@ -99,6 +99,68 @@ export class SpeedModifierComponent implements BaseComponent<"speedModifier"> {
   }
 }
 
+export class NextAttacksBonusComponent implements BaseComponent<"nextAttacksBonus"> {
+  kind = "nextAttacksBonus" as const;
+  remainingAttacks: number;
+  bonusDamage: number;
+
+  constructor(remainingAttacks: number, bonusDamage: number) {
+    this.remainingAttacks = remainingAttacks;
+    this.bonusDamage = bonusDamage;
+  }
+}
+
+
+export class ThornsComponent implements BaseComponent<"thorns"> {
+  kind = "thorns" as const;
+  damage: number;
+
+  constructor(damage: number = 1) {
+    this.damage = damage;
+  }
+
+  // This method will be triggered when the monster is hit
+  onHit(battle: Battle, selfSide: SideId, attackerSide: SideId) {
+    const attacker = battle.sides[attackerSide].monster;
+    attacker.health -= this.damage;
+  }
+}
+
+
+export class DamageReductionComponent implements BaseComponent<"damageReduction"> {
+  kind = "damageReduction" as const;
+  reductionAmount: number;
+
+  constructor(reductionAmount: number) {
+    this.reductionAmount = reductionAmount;
+  }
+
+  getReduction() {
+    return this.reductionAmount;
+  }
+}
+
+export class AdvantageComponent implements BaseComponent<"advantage"> {
+  kind = "advantage" as const;
+}
+
+export class PermanentStatBuffComponent implements BaseComponent<"permanentStatBuff"> {
+  kind = "permanentStatBuff" as const;
+  attackBonus: number;
+  armourBonus: number;
+
+  constructor(attackBonus: number, armourBonus: number) {
+    this.attackBonus = attackBonus;
+    this.armourBonus = armourBonus;
+  }
+
+  getStatBonus(statType: MonsterStatType) {
+    if (statType === "attack") return this.attackBonus;
+    if (statType === "armour") return this.armourBonus;
+    return null;
+  }
+}
+
 type CommonComponentTypes =
   | typeof RerollChargeComponent
   | typeof DodgeChargeComponent
@@ -106,9 +168,15 @@ type CommonComponentTypes =
   | typeof DefendComponent
   | typeof AbilityChargeStunComponent
   | typeof StunnedStateComponent
-  | typeof SpeedModifierComponent;
+  | typeof SpeedModifierComponent
+  | typeof NextAttacksBonusComponent
+  | typeof ThornsComponent
+  | typeof DamageReductionComponent
+  | typeof AdvantageComponent
+  | typeof PermanentStatBuffComponent;
 //# Map it then export
 type ComponentInstanceType = InstanceType<CommonComponentTypes>;
 export type ComponentKindMap = {
   [K in ComponentInstanceType["kind"]]: Extract<ComponentInstanceType, { kind: K }>;
 };
+

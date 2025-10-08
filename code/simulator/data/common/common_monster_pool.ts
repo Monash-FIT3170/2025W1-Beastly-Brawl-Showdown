@@ -1,5 +1,5 @@
 import { Battle } from "../../core/battle";
-import { RerollChargeComponent, DodgeChargeComponent } from "../../core/monster/component/core_components";
+import { RerollChargeComponent, DodgeChargeComponent} from "../../core/monster/component/core_components";
 import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
@@ -22,7 +22,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [],
     },
 
@@ -32,8 +32,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A mystical creature of the skies. A Balanced Monster.",
       imageUrl: "/assets/monsters/dragon.png",
       baseStats: {
-        health: 25,
-        armour: 14,
+        health: 50,
+        armour: 9,
         attack: 2,
         speed: 5,
         crit_chance: 5,
@@ -41,7 +41,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -58,8 +58,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A stealthy and cunning beast. An Attack Monster.",
       imageUrl: "/assets/monsters/wolf.png",
       baseStats: {
-        health: 20,
-        armour: 12,
+        health: 40,
+        armour: 7,
         attack: 4,
         speed: 7,
         crit_chance: 7,
@@ -67,8 +67,9 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 3,
+      maxAttackCharges: 3,
       abilityActionId: "dodge",
+      abilityName: "Dodge",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -85,8 +86,8 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       description: "A sturdy and resilient protector. A Defense Monster.",
       imageUrl: "/assets/monsters/turtle.png",
       baseStats: {
-        health: 30,
-        armour: 16,
+        health: 60,
+        armour: 11,
         attack: 1,
         speed: 3,
         crit_chance: 2,
@@ -94,9 +95,12 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      baseDefendActionCharges: 4,
+      maxAttackCharges: 4,
       abilityActionId: "stun",
-      onSpawnActions: [],
+      abilityName: "Stun",
+      onSpawnActions: [
+
+      ],
     },
   },
 } as const;
