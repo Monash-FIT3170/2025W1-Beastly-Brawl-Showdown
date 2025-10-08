@@ -35,7 +35,9 @@ export type MonsterTemplate = {
    * - Optional
    */
   abilityActionId?: EntryID;
-  /** 
+  
+  abilityName?: string;
+  /**
    * Actions to perform when spawning. 
    * 
    * This includes: 
@@ -45,3 +47,4 @@ export type MonsterTemplate = {
    */
   onSpawnActions: SpawnAction[];
 };
+

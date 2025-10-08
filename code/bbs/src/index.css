@@ -2118,7 +2118,7 @@ input[type="range"] {
     transform: scale(0.9);
     transform-origin: top left;
   }
-
+  
   .health-tooltip {
     top: -60px; 
   }

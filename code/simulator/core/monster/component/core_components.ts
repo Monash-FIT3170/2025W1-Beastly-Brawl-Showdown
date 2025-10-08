@@ -179,3 +179,4 @@ type ComponentInstanceType = InstanceType<CommonComponentTypes>;
 export type ComponentKindMap = {
   [K in ComponentInstanceType["kind"]]: Extract<ComponentInstanceType, { kind: K }>;
 };
+

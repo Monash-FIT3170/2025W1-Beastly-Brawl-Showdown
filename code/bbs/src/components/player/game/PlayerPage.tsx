@@ -61,14 +61,7 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
-  const [matchData, setMatchData] = useState<{
-    myMonster: { template: MonsterTemplate; currentHp: number; sideId: number };
-    enemyMonster: {
-      template: MonsterTemplate;
-      currentHp: number;
-      sideId: number;
-    };
-  } | null>(null);
+  const [matchData, setMatchData] = useState<{ player1Monster: { template: MonsterTemplate; currentHp: number }; player2Monster: { template: MonsterTemplate; currentHp: number }; myid: number } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
@@ -81,6 +74,8 @@ const PlayerContent = () => {
 
   useEffect(() => {
     if (!socket) return;
+
+    socket.on("return-from-waiting", () => {console.log("Returned from waiting")})
 
     //#region Monster selection handle
     socket.on("select-monster", (data) => {
@@ -102,37 +97,30 @@ const PlayerContent = () => {
       setWaiting(false);
       log_event("Received round-start data:", data);
 
-      const myTemplateName = data?.myMonster;
-      const enemyTemplateName = data?.enemyMonster;
+      const player1TemplateName = data?.player1Monster;
+      const player2TemplateName = data?.player2Monster;
 
-      if (!myTemplateName || !enemyTemplateName) {
+      if (!player1TemplateName || !player2TemplateName) {
         console.warn("Incomplete round-start data:", data);
         return;
       }
 
-      console.log(`Round started! Player's monster: ${myTemplateName}, Opponent's monster: ${enemyTemplateName}`);
+      console.log(
+        `Round started! Player 1's monster: ${player1TemplateName}, Player 2's monster: ${player2TemplateName}, I am ${data.sideID}`
+      );
 
       // Create Monster instances for BattleScreen
-      const myMonster = COMMON_MONSTER_POOL.monsters[myTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
-      const enemyMonster = COMMON_MONSTER_POOL.monsters[enemyTemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const player1Monster = COMMON_MONSTER_POOL.monsters[player1TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
+      const player2Monster = COMMON_MONSTER_POOL.monsters[player2TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters];
 
-      // Take sides based on server definition (match.player1 = 0, match.player2 = 1)
-      const mySide = data.sideID;
-      const enemySide = data.sideID === 0 ? 1 : 0;
-
-      console.log(`My side is ${mySide} || Enemy side is ${enemySide}`);
-
+      if (typeof data?.sideID !== "number") {
+        console.warn("Missing or invalid sideID in round-start data:", data);
+        return;
+      }
       setMatchData({
-        myMonster: {
-          template: myMonster,
-          currentHp: data.myHp,
-          sideId: mySide,
-        },
-        enemyMonster: {
-          template: enemyMonster,
-          currentHp: data.enemyHp,
-          sideId: enemySide,
-        },
+        player1Monster: { template: player1Monster, currentHp: player1Monster.baseStats.health },
+        player2Monster: { template: player2Monster, currentHp: player2Monster.baseStats.health },
+        myid: data.sideID,
       });
 
       setAllReady(true);

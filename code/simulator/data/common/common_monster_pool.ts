@@ -1,5 +1,5 @@
 import { Battle } from "../../core/battle";
-import { RerollChargeComponent, DodgeChargeComponent, AdvantageComponent, DamageReductionComponent, ThornsComponent } from "../../core/monster/component/core_components";
+import { RerollChargeComponent, DodgeChargeComponent} from "../../core/monster/component/core_components";
 import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
 
@@ -30,7 +30,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     mystic_wryven: {
       templateId: "mystic_wryven",
       name: "Mystic Wyvern",
-      description: "A mystical creature of the skies. A Balanced Monster with the belief that they can turn every situation in their favour.",
+      description: "A mystical creature of the skies. A Balanced Monster.",
       imageUrl: "/assets/monsters/dragon.png",
       baseStats: {
         health: 50,
@@ -56,7 +56,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     shadow_fang: {
       templateId: "shadow_fang",
       name: "Shadow Fang Predator",
-      description: "A stealthy and cunning beast. An Attack Monster that can swiftly dodge attacks.",
+      description: "A stealthy and cunning beast. An Attack Monster.",
       imageUrl: "/assets/monsters/wolf.png",
       baseStats: {
         health: 40,
@@ -70,6 +70,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "dodge",
+      abilityName: "Dodge",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -83,7 +84,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
     stone_hide: {
       templateId: "stone_hide",
       name: "Stone Hide Guardian",
-      description: "A sturdy and resilient protector. A Defense Monster that can stun the foe.",
+      description: "A sturdy and resilient protector. A Defense Monster.",
       imageUrl: "/assets/monsters/turtle.png",
       baseStats: {
         health: 60,
@@ -95,31 +96,12 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       },
       attackActionId: "attack-normal",
       defendActionId: "defend",
-      maxAttackCharges: 3,
+      maxAttackCharges: 4,
       abilityActionId: "stun",
+      abilityName: "Stun",
       onSpawnActions: [
 
       ],
-    },
-
-    fleet_foot: {
-      templateId: "fleet_foot",
-      name: "Fleet Foot Stalker",
-      description: "A swift and elusive hunter. Excels in dealing multi-hit damage.",
-      imageUrl: "/assets/monsters/owl.png",
-      baseStats: {
-        health: 32,
-        armour: 8,
-        attack: 3,
-        speed: 4,
-        crit_chance: 7,
-        crit_damage: 7,
-      },
-      attackActionId: "attack-normal",
-      defendActionId: "defend",
-      maxAttackCharges: 3,
-      abilityActionId: "double-attack",
-      onSpawnActions: [],
     },
 
     knight: {

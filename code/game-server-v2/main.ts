@@ -184,8 +184,7 @@ async function main(config: ServerConfig) {
         socket.emit("request-room_response", { roomId, joinCode });
         log_notice(
           `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
-        );
-      } catch {
+        );      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
@@ -391,21 +390,21 @@ async function main(config: ServerConfig) {
         room.tournamentManager.matches.forEach((match: Match) => {
           if (match.matchType == MatchType.BYE) {
             log_notice("This match is a bye");
-            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", { bye: true });
+            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", {bye: true});
             return; //TODO HANDLE BYE
           }
 
           // P1: send a copy/start
           room.playerChannel.to(match.player1.socketId).emit("round-start", {
-            myMonster: match.player1.selectedMonsterTemplateName,
-            enemyMonster: match.player2?.selectedMonsterTemplateName, // not option if bye
+            player1Monster: match.player1?.selectedMonsterTemplateName,
+            player2Monster: match.player2?.selectedMonsterTemplateName, // not option if bye
             sideID: 0,
           });
 
           //P2: send a copy/start (invert sides?)
-          room.playerChannel.to(match.player2?.socketId).emit("round-start", {
-            myMonster: match.player2?.selectedMonsterTemplateName,
-            enemyMonster: match.player1.selectedMonsterTemplateName,
+          room.playerChannel.to(match.player2?.socketId).emit("round-start", {  
+            player1Monster: match.player1?.selectedMonsterTemplateName,
+            player2Monster: match.player2?.selectedMonsterTemplateName,
             sideID: 1,
           });
         });
@@ -440,6 +439,11 @@ async function main(config: ServerConfig) {
 
       const sourceSide = match.getSideForPlayer(player);
       player.submittedMove = true;
+
+      if (player1 && player1.submittedMove && player2?.socketId)
+        playerChannel.to(player2.socketId).emit("EnemySubmitted")
+      if (player2 && player2.submittedMove && player1?.socketId)
+        playerChannel.to(player1.socketId).emit("EnemySubmitted")
 
       switch (moveId) {
         case "defend":

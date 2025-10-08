@@ -68,7 +68,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         battle.eventHistory.addEvent(failedEvent);
         return;
       }
-      sourceMonster.attackCharges -= 1;
+      --sourceMonster.defendActionCharges;
 
       const defenseComponent: DefendComponent = new DefendComponent(1, 2);
       sourceMonster.components.push(defenseComponent);
@@ -96,7 +96,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       const sourceMonster: Monster = battle.sides[source].monster;
 
       const dodgeChargeComponent: DodgeChargeComponent | null = getComponent(sourceMonster, "dodgeCharges");
-      if (!dodgeChargeComponent) {
+      if (!dodgeChargeComponent || dodgeChargeComponent.charges < 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
           source: source,
@@ -107,6 +107,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         battle.eventHistory.addEvent(failedEvent);
         return;
       }
+      --dodgeChargeComponent.charges;
 
       const dodgeComponent: DodgeStateComponent | null = getComponent(sourceMonster, "dodging");
       if (!dodgeComponent) {
@@ -133,7 +134,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       const targetMonster: Monster = battle.sides[target].monster;
 
       const abilityChargeStunComponent: AbilityChargeStunComponent | null = getComponent(sourceMonster, "abilityChargeStun");
-      if (!abilityChargeStunComponent) {
+      if (!abilityChargeStunComponent || abilityChargeStunComponent.charges < 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
           source: source,
@@ -147,10 +148,12 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
       const stunnedComponent: StunnedStateComponent | null = getComponent(targetMonster, "stunned");
       if (!stunnedComponent) {
-        sourceMonster.components.push(new StunnedStateComponent(1));
+        targetMonster.components.push(new StunnedStateComponent(1));
       } else {
         stunnedComponent.remainingDuration++;
       }
+
+      --abilityChargeStunComponent.charges;
     },
     onFail: async function (battle: Battle, source: SideId): Promise<void> {
       throw new Error("Function not implemented.");
