@@ -50,11 +50,9 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
   "attack-normal": {
     moveId: "attack-normal",
     type: "move",
-
     name: "Attack",
-    description: "A regular attack.",
+    description: "A regular attack that consumes one attack charge.",
     icon: "wolverine-claws.svg",
-
     priorityClass: 0,
     targetingMethod: "single-enemy",
 
@@ -64,16 +62,35 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       targetingData: SingleEnemyTargeting
     ) {
       const target: SideId = targetingData.target;
+      const sourceMonster: Monster = battle.sides[source].monster;
 
+      // Initialize attackCharges if missing
+      if (sourceMonster.attackCharges == null) {
+        sourceMonster.attackCharges = 1;
+      }
+
+      // Check if any charges left
+      if (sourceMonster.attackCharges <= 0) {
+        const failedEvent: MoveFailedEvent = {
+          name: "moveFailed",
+          source,
+          target: source,
+          moveId: this.moveId,
+          reason: "No attack charges remaining",
+        };
+        battle.eventHistory.addEvent(failedEvent);
+        return;
+      }
+
+      // Consume one charge
+      if (sourceMonster.attackCharges != 0){
+        sourceMonster.attackCharges -= 1;
+      }
+
+      // Perform attack
       await default_attack(this, battle, source, target);
     },
-    onHit: async function (
-      battle: Battle,
-      source: SideId,
-      target: SideId
-    ): Promise<void> {
-      // TODO
-    },
+
     onFail: async function (battle: Battle, source: SideId): Promise<void> {},
   },
 
@@ -81,7 +98,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     moveId: "defend",
     type: "move",
     name: "Defend",
-    description: "Increase your armor class temporarily.",
+    description: "Increase your armor temporarily and regain 1 attack charge.",
     icon: "vibrating-shield.svg",
     priorityClass: 5,
     targetingMethod: "self",
@@ -89,29 +106,26 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     async perform(battle: Battle, source: SideId): Promise<void> {
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      if (sourceMonster.attackCharges <= 0) {
-        const failedEvent: MoveFailedEvent = {
-          name: "moveFailed",
-          source: source,
-          target: source,
-          moveId: this.moveId,
-          reason: null,
-        };
-        battle.eventHistory.addEvent(failedEvent);
-        return;
+      // Add +1 attack charge when defending
+      if (sourceMonster.attackCharges == null || sourceMonster.attackCharges != 3) {
+        sourceMonster.attackCharges = 1;
+      } else {
+        sourceMonster.attackCharges += 1;
       }
-      sourceMonster.attackCharges -= 1;
 
+      // Apply defense buff
       const defenseComponent: DefendComponent = new DefendComponent(1, 2);
       sourceMonster.components.push(defenseComponent);
+
       const buffEvent: BuffEvent = {
         name: "buff",
-        source: source,
+        source,
         target: source,
         buffs: { armour: defenseComponent.bonusArmour },
       };
       battle.eventHistory.addEvent(buffEvent);
     },
+
     onFail: function (battle: Battle, source: SideId): Promise<void> {
       throw new Error("Function not implemented.");
     },
