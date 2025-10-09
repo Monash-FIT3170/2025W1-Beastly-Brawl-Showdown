@@ -107,9 +107,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       const sourceMonster: Monster = battle.sides[source].monster;
 
       // Add +1 attack charge when defending
-      if (sourceMonster.attackCharges == null || sourceMonster.attackCharges != 3) {
-        sourceMonster.attackCharges = 1;
-      } else {
+      if (sourceMonster.attackCharges < 3) {
         sourceMonster.attackCharges += 1;
       }
 

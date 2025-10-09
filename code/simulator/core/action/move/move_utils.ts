@@ -22,8 +22,7 @@ export async function default_attack(parentMove: MoveData, battle: Battle, sourc
   const sourceMonster: Monster = battle.sides[source].monster;
   const targetMonster: Monster = battle.sides[target].monster;
 
-  //# Start move (consume charge)
-  --sourceMonster.attackCharges;
+  //# Start move
   const startMoveEvent: StartMoveEvent = {
     name: "startMove",
     source: source,
