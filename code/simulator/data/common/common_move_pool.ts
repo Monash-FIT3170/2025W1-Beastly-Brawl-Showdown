@@ -18,6 +18,7 @@ import {
 } from "../../core/monster/component/core_components";
 import { getComponent, Monster } from "../../core/monster/monster";
 import { SideId } from "../../core/side";
+import { COMMON_MONSTER_POOL } from "./common_monster_pool";
 
 export type COMMON_MOVE_NAMES =
   | "nothing"
@@ -64,11 +65,6 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       const target: SideId = targetingData.target;
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      // Initialize attackCharges if missing
-      if (sourceMonster.attackCharges == null) {
-        sourceMonster.attackCharges = 1;
-      }
-
       // Check if any charges left
       if (sourceMonster.attackCharges <= 0) {
         const failedEvent: MoveFailedEvent = {
@@ -83,7 +79,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       }
 
       // Consume one charge
-      if (sourceMonster.attackCharges != 0){
+      if (sourceMonster.attackCharges > 0){
         sourceMonster.attackCharges -= 1;
       }
 
@@ -107,7 +103,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       const sourceMonster: Monster = battle.sides[source].monster;
 
       // Add +1 attack charge when defending
-      if (sourceMonster.attackCharges < 3) {
+      if (sourceMonster.attackCharges < COMMON_MONSTER_POOL.monsters[sourceMonster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters].maxAttackCharges) {
         sourceMonster.attackCharges += 1;
       }
 
