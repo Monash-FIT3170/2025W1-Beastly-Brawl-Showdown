@@ -32,6 +32,7 @@ export type COMMON_MOVE_NAMES =
 export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
   nothing: {
     moveId: "nothing",
+    moveCat : "attack",
     type: "move",
     name: "Do nothing",
     description: "Do nothing...",
@@ -50,6 +51,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "attack-normal": {
     moveId: "attack-normal",
+    moveCat : "attack",
     type: "move",
     name: "Attack",
     description: "A regular attack that consumes one attack charge.",
@@ -92,6 +94,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   defend: {
     moveId: "defend",
+    moveCat : "defend",
     type: "move",
     name: "Defend",
     description: "Increase your armor temporarily and regain 1 attack charge.",
@@ -127,6 +130,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   dodge: {
     moveId: "dodge",
+    moveCat : "ability",
     type: "move",
     name: "Dodge",
     description: "Dodge an attack, avoid it completely.",
@@ -172,6 +176,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   stun: {
     moveId: "stun",
+    moveCat : "ability",
     type: "move",
     name: "Stun",
     description:
@@ -218,6 +223,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "double-attack": {
     moveId: "double-attack",
+    moveCat : "ability",
     type: "move",
     name: "Double Attack",
     description: "Attack the target twice. Can only be used once per battle.",
@@ -260,6 +266,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "attack-bonus-next3": {
     moveId: "attack-bonus-next3",
+    moveCat : "ability",
     type: "move",
     name: "Fury Boost",
     description:
@@ -297,6 +304,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "battle-cry": {
     moveId: "battle-cry",
+    moveCat : "ability",
     type: "move",
     name: "Battle Cry",
     description:

@@ -2,6 +2,7 @@ import React from "react";
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import { COMMON_MOVE_POOL } from "../../../../simulator/data/common/common_move_pool";
+import type { ChooseMove } from "../../../../simulator/core/notice/notice";
 
 type Button = {
   id: string;
@@ -18,17 +19,13 @@ type BattleBottomProps = {
   disabled?: boolean;
   onRoll: () => void;
   mode: "combat" | "roll";
-  myMonsterMoves: {
-    attack: EntryID;
-    ability?: EntryID;
-    defend: EntryID;
-  };
+  chooseMove: ChooseMove | null;
 };
 
 export const BattleBottom: React.FC<BattleBottomProps> = ({
   onAction,
   disabled,
-  myMonsterMoves,
+  chooseMove,
   onRoll,
   mode,
 }: BattleBottomProps) => {
@@ -44,6 +41,19 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     } as MoveButton;
   };
 
+  const buildAtkButton = (moveId: EntryID) => {
+      return moveId ? buildButton(moveId, "assets/battle-icons/sword3.png"): null;
+  };
+
+  const buildDefButton = (moveId: EntryID) => {
+      return moveId ? buildButton(moveId, "assets/battle-icons/shield2.png"): null;
+  };
+
+  const buildAbilityButton = (moveId: EntryID) => {
+      return moveId ? buildButton(moveId, "assets/img/ability2.png"): null;
+  };
+
+
   // Added a button that isn't tied to the monster's actions
   const buildNormalButton = (id: string, fallbackIcon: string) => {
     return {
@@ -52,13 +62,33 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     } as Button;
   };
 
+  let attackBtn: MoveButton | null = null;
+  let defendBtn: MoveButton | null = null;
+  let abilityBtn: MoveButton | null = null;
+  
   // Build button configs dynamically
-  const attackBtn = buildButton(myMonsterMoves.attack, "assets/battle-icons/sword3.png");
-  const defendBtn = buildButton(myMonsterMoves.defend, "assets/battle-icons/shield2.png");
-  const abilityBtn = myMonsterMoves.ability
-    ? buildButton(myMonsterMoves.ability, "assets/img/ability2.png")
-    : null;
   const rollBtn = buildNormalButton("roll", "/assets/img/d20.png");
+  if (chooseMove?.data?.moveIdOptions) {
+    for (const move of chooseMove.data.moveIdOptions) {
+      switch(getMove(move).moveCat){
+        case "attack": {
+          attackBtn = buildAtkButton(move);
+          break;
+        }
+        case "defend": {
+          defendBtn = buildDefButton(move);
+          break;
+        }
+        case "ability": {
+          abilityBtn = buildAbilityButton(move);
+          break;
+        }
+        default:{
+          console.log("WHICH DUMB DUMB IS ADDING NEW MOVECATS")
+        }
+      }
+    }
+  }
 
   const renderButton = (btn: MoveButton) => (
     <button
@@ -83,9 +113,9 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
         renderButtonForRoll(rollBtn)
       ) : (
         <>
-          {renderButton(attackBtn)}
+          {attackBtn && renderButton(attackBtn)}
           {abilityBtn && renderButton(abilityBtn)}
-          {renderButton(defendBtn)}
+          {defendBtn &&  renderButton(defendBtn)}
           {/* <div className="shield-uses"></div> */}
         </>
       )}

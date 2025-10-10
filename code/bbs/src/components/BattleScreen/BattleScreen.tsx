@@ -6,7 +6,7 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./battle_scene";
-import { type Notice, type Roll } from "../../../../simulator/core/notice/notice";
+import { type ChooseMove, type Notice, type Roll } from "../../../../simulator/core/notice/notice";
 
 interface BattleScreenProps {
   matchData: {
@@ -37,6 +37,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(false)
   const [hasReceivedChooseMove, setHasReceivedChooseMove] = useState(false);
+  const [chooseMove, setChooseMove] = useState<ChooseMove|null>(null);
 
   //#region initializations
   // Initialize monsters when matchData changes
@@ -144,14 +145,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   useEffect(() => {
     if (!socket) return;
     const handleNewNotice = (notice: Notice) => {
+      console.log("Receiving Notice of type " + notice.kind)
       if (notice.kind === "roll") {
         setshowEnemySubmittedMessage(false);
         setshowSubmittedMoveMessage(false);
         setRollNotice(notice);
         setshowRollMessage(true)
       }
-      if (notice.kind === "chooseMove")
+      if (notice.kind === "chooseMove"){
         setHasReceivedChooseMove(true);
+        setChooseMove(notice)
+      }
+      if (notice.kind === "rerollOption"){
+        notice.callback(true)
+      }
     };
     socket.on("newNotice", handleNewNotice);
     return () => {
@@ -172,11 +179,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     targetMethod: TargetingMethod
   ) => {
     if (!socket || !myMonster) return;
-
+    console.log("Handling Action now")
     const data = { moveId, targetMethod };
     socket.emit("RequestSubmitMove", { data });
     setshowSubmittedMoveMessage(true)
     setbuttonDisabled(true)
+    setChooseMove(null)
   };
 
   // GET READY TO UNLOCK BUTTON ON NEXT TURN
@@ -236,12 +244,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         onAction={handleAction}
         onRoll={() => rollNotice && rollNow(rollNotice)}
         disabled={buttonDisabled}
-        myMonsterMoves={{
-          attack: myMonster.template.attackActionId,
-          ability: myMonster.template.abilityActionId,
-          defend: myMonster.template.defendActionId,
-        }}
         mode={rollNotice ? "roll" : "combat"}
+        chooseMove = {chooseMove}
       />
     </div>
   );
