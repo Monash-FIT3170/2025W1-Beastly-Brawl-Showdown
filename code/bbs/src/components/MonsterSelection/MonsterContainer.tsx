@@ -2,11 +2,11 @@ import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_mo
 
 export const MonsterContainer = ({
   name,
-  type,
+  desc,
   currentlySelectedMonster,
 }: {
   name: string;
-  type: string;
+  desc: string;
   currentlySelectedMonster: (name: string) => void;
 }) => {
   function onClick() {
@@ -25,8 +25,10 @@ export const MonsterContainer = ({
       </div>
       <div className="monster-selection-card-info">
         <div className="monster-name">{monster?.name || name}</div>
-        <div className="monster-type">{type}</div>
-        <div className="monster-desc">{monster?.description || "No description"}</div>
+        <div className="monster-desc">{desc || "No description"}</div>
+        <div className="monster-stats" id="attack">Attack bonus: {monster?.baseStats.attack}</div>
+        <div className="monster-stats" id="AC">Armour: {monster?.baseStats.armour}</div>
+        
         {monster?.abilityActionId && (
           <div className="ability-desc">Ability: {monster.abilityActionId}</div>
         )}

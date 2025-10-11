@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
-import type { MonsterTemplate } from "../../../../../simulator/core/monster/monster";
+import type { MonsterTemplate } from "../../../../../simulator/core/monster/monster_template";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
 

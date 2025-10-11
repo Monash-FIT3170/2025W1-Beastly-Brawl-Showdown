@@ -101,7 +101,7 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
             <MonsterContainer
               key={monster.templateId}
               name={monster.name}
-              type={monster.description}
+              desc={monster.description}
               currentlySelectedMonster={highlightAndShowConfirm}
             />
           );
@@ -116,6 +116,15 @@ export const MonsterSelectionScreen: React.FC<MonsterSelectionScreenProps> = ({
           Confirm
         </button>
       </div>
+
+      <button
+        className="glb-btn"
+        id="monster-selection-btn"
+        onClick={handleConfirm}
+        disabled={!confirmEnabled}
+      >
+        Confirm
+      </button>
     </div>
   );
   //#endregion

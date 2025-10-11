@@ -8,7 +8,7 @@ import { EntryID } from "./utils";
 import { TargetingData } from "./action/targeting";
 import { PRNG } from "./prng";
 import { MonsterPool, MonsterId } from "./monster/monster_pool";
-import { getIsBlockedFromMove, getStat } from "./monster/monster";
+import { getIsBlockedFromMove, getStat, spawnMonster } from "./monster/monster";
 import { MovePool } from "./action/move/move_pool";
 
 export interface PlayerOptions {
@@ -49,8 +49,8 @@ export class Battle {
         id: idx as SideId,
         monster: {
           baseID: playerOptions.monsterId,
-          health: this.monsterPool.monsters[playerOptions.monsterId].baseStats.health,
-          defendActionCharges: 0,
+          health: NaN,
+          attackCharges: NaN,
           components: [],
         },
         pendingActions: null,
@@ -66,6 +66,9 @@ export class Battle {
   // TODO ? make the battle director a swappable component
   async run(): Promise<void> {
     console.log("Battle: Start");
+
+    console.log("Spawning all sides...");
+    this.sides.forEach((side) => spawnMonster(this, side.id, this.monsterPool));
 
     const initialState: SnapshotEvent = {
       name: "snapshot",
@@ -125,10 +128,10 @@ export class Battle {
             throw new RangeError(`Key out of range: [key=${side.monster.baseID}] does not exist in the monster pool ${this.monsterPool.name}`);
           }
 
-          if (base.attackActionId) {
+          if (base.attackActionId && side.monster.attackCharges > 0) {
             moveIdOptions.push(base.attackActionId);
           }
-          if (base.defendActionId && side.monster.defendActionCharges > 0) {
+          if (base.defendActionId) {
             moveIdOptions.push(base.defendActionId);
           }
           if (base.abilityActionId) {
