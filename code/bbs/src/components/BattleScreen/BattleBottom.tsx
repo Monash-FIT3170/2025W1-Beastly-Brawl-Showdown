@@ -30,7 +30,10 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   mode,
 }: BattleBottomProps) => {
   const getMove = (moveId: EntryID) => {
-    return (COMMON_MOVE_POOL as Record<string, typeof COMMON_MOVE_POOL[keyof typeof COMMON_MOVE_POOL]>)[moveId];
+    return (COMMON_MOVE_POOL as Record<
+      string,
+      (typeof COMMON_MOVE_POOL)[keyof typeof COMMON_MOVE_POOL]
+    >)[moveId];
   };
 
   const buildButton = (moveId: EntryID, fallbackIcon: string) => {
@@ -57,7 +60,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   // Added a button that isn't tied to the monster's actions
   const buildNormalButton = (id: string, fallbackIcon: string) => {
     return {
-      id: id,
+      id,
       icon: fallbackIcon,
     } as Button;
   };

@@ -15,7 +15,7 @@ const ShieldAnimation: React.FC<ShieldAnimationProps> = ({
       onAnimationEnd={onComplete}
     >
       <img
-        src="/battle-icons/shield_animation.png"
+        src="assets/battle-icons/shield_animation.png"
         alt="shield"
         className="shield-image"
       />
