@@ -1,10 +1,6 @@
 import { MovePool } from "../../core/action/move/move_pool";
 import { default_attack } from "../../core/action/move/move_utils";
-import {
-  SelfTargeting,
-  SingleEnemyTargeting,
-  TargetingData,
-} from "../../core/action/targeting";
+import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../core/action/targeting";
 import { Battle } from "../../core/battle";
 import { BuffEvent, MoveFailedEvent } from "../../core/event/core_events";
 import {
@@ -20,30 +16,18 @@ import { getComponent, Monster } from "../../core/monster/monster";
 import { SideId } from "../../core/side";
 import { COMMON_MONSTER_POOL } from "./common_monster_pool";
 
-export type COMMON_MOVE_NAMES =
-  | "nothing"
-  | "attack-normal"
-  | "defend"
-  | "dodge"
-  | "stun"
-  | "double-attack"
-  | "attack-bonus-next3"
-  | "battle-cry";
+export type COMMON_MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun" | "double-attack" | "attack-bonus-next3" | "battle-cry";
 export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
   nothing: {
     moveId: "nothing",
-    moveCat : "attack",
+    moveCat: "attack",
     type: "move",
     name: "Do nothing",
     description: "Do nothing...",
     priorityClass: 0,
     targetingMethod: "self",
 
-    perform: async function (
-      battle: Battle,
-      source: SideId,
-      targetingData: TargetingData
-    ) {
+    perform: async function (battle: Battle, source: SideId, targetingData: TargetingData) {
       throw new Error("This action should not be used EVER.");
     },
     onFail: async function (battle: Battle, source: SideId): Promise<void> {},
@@ -51,7 +35,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "attack-normal": {
     moveId: "attack-normal",
-    moveCat : "attack",
+    moveCat: "attack",
     type: "move",
     name: "Attack",
     description: "A regular attack that consumes one attack charge.",
@@ -59,11 +43,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     priorityClass: 0,
     targetingMethod: "single-enemy",
 
-    perform: async function (
-      battle: Battle,
-      source: SideId,
-      targetingData: SingleEnemyTargeting
-    ) {
+    perform: async function (battle: Battle, source: SideId, targetingData: SingleEnemyTargeting) {
       const target: SideId = targetingData.target;
       const sourceMonster: Monster = battle.sides[source].monster;
 
@@ -81,9 +61,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       }
 
       // Consume one charge
-      if (sourceMonster.attackCharges > 0){
-        sourceMonster.attackCharges -= 1;
-      }
+      sourceMonster.attackCharges -= 1;
 
       // Perform attack
       await default_attack(this, battle, source, target);
@@ -94,7 +72,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   defend: {
     moveId: "defend",
-    moveCat : "defend",
+    moveCat: "defend",
     type: "move",
     name: "Defend",
     description: "Increase your armor temporarily and regain 1 attack charge.",
@@ -130,23 +108,16 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   dodge: {
     moveId: "dodge",
-    moveCat : "ability",
+    moveCat: "ability",
     type: "move",
     name: "Dodge",
     description: "Dodge an attack, avoid it completely.",
     priorityClass: 5,
     targetingMethod: "self",
-    async perform(
-      battle: Battle,
-      source: SideId,
-      targetingData: SelfTargeting
-    ): Promise<void> {
+    async perform(battle: Battle, source: SideId, targetingData: SelfTargeting): Promise<void> {
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      const dodgeChargeComponent: DodgeChargeComponent | null = getComponent(
-        sourceMonster,
-        "dodgeCharges"
-      );
+      const dodgeChargeComponent: DodgeChargeComponent | null = getComponent(sourceMonster, "dodgeCharges");
       if (!dodgeChargeComponent) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
@@ -159,10 +130,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         return;
       }
 
-      const dodgeComponent: DodgeStateComponent | null = getComponent(
-        sourceMonster,
-        "dodging"
-      );
+      const dodgeComponent: DodgeStateComponent | null = getComponent(sourceMonster, "dodging");
       if (!dodgeComponent) {
         sourceMonster.components.push(new DodgeStateComponent(1));
       } else {
@@ -176,25 +144,19 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   stun: {
     moveId: "stun",
-    moveCat : "ability",
+    moveCat: "ability",
     type: "move",
     name: "Stun",
-    description:
-      "Stun the monster, preventing it from taking actions for one turn.",
+    description: "Stun the monster, preventing it from taking actions for one turn.",
     priorityClass: 3,
     targetingMethod: "single-enemy",
-    async perform(
-      battle: Battle,
-      source: SideId,
-      targetingData: SingleEnemyTargeting
-    ): Promise<void> {
+    async perform(battle: Battle, source: SideId, targetingData: SingleEnemyTargeting): Promise<void> {
       const sourceMonster: Monster = battle.sides[source].monster;
       const target: SideId = targetingData.target;
       const targetMonster: Monster = battle.sides[target].monster;
 
-      const abilityChargeStunComponent: AbilityChargeStunComponent | null =
-        getComponent(sourceMonster, "abilityChargeStun");
-      if (!abilityChargeStunComponent) {
+      const abilityChargeStunComponent: AbilityChargeStunComponent | null = getComponent(sourceMonster, "abilityChargeStun");
+      if (!abilityChargeStunComponent || abilityChargeStunComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
           source: source,
@@ -205,13 +167,11 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         battle.eventHistory.addEvent(failedEvent);
         return;
       }
+      --abilityChargeStunComponent.charges;
 
-      const stunnedComponent: StunnedStateComponent | null = getComponent(
-        targetMonster,
-        "stunned"
-      );
+      const stunnedComponent: StunnedStateComponent | null = getComponent(targetMonster, "stunned");
       if (!stunnedComponent) {
-        sourceMonster.components.push(new StunnedStateComponent(1));
+        targetMonster.components.push(new StunnedStateComponent(1));
       } else {
         stunnedComponent.remainingDuration++;
       }
@@ -223,18 +183,14 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "double-attack": {
     moveId: "double-attack",
-    moveCat : "ability",
+    moveCat: "ability",
     type: "move",
     name: "Double Attack",
     description: "Attack the target twice. Can only be used once per battle.",
     priorityClass: 1,
     targetingMethod: "single-enemy",
 
-    perform: async function (
-      battle: Battle,
-      source: SideId,
-      targetingData: SingleEnemyTargeting
-    ) {
+    perform: async function (battle: Battle, source: SideId, targetingData: SingleEnemyTargeting) {
       const target: SideId = targetingData.target;
       const sourceMonster: Monster = battle.sides[source].monster;
 
@@ -266,11 +222,10 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "attack-bonus-next3": {
     moveId: "attack-bonus-next3",
-    moveCat : "ability",
+    moveCat: "ability",
     type: "move",
     name: "Fury Boost",
-    description:
-      "Your next 3 attacks deal +3 damage each. Can only be used once per battle.",
+    description: "Your next 3 attacks deal +3 damage each. Can only be used once per battle.",
     priorityClass: 2,
     targetingMethod: "self",
 
@@ -304,11 +259,10 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
   "battle-cry": {
     moveId: "battle-cry",
-    moveCat : "ability",
+    moveCat: "ability",
     type: "move",
     name: "Battle Cry",
-    description:
-      "Increase your attack and armour by +2 for the rest of the battle. Can only be used once per battle.",
+    description: "Increase your attack and armour by +2 for the rest of the battle. Can only be used once per battle.",
     priorityClass: 2,
     targetingMethod: "self",
 
