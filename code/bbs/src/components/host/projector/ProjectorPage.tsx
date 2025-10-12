@@ -4,6 +4,9 @@ import { io, Socket } from "socket.io-client";
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router";
 import { getBestServerUrl } from "../../../utils/RoomMethods";
+import type { HostNamespace } from "../../../../../shared/types";
+
+type HostSocket = Socket<HostNamespace>
 
 export default function ProjectorPage() {
   const [serverUrl, setServerUrl] = useState<string>();
@@ -11,7 +14,7 @@ export default function ProjectorPage() {
   const [joinCode, setJoinCode] = useState<string>("");
 
   const [playerList, setPlayerList] = useState<string[]>([]);
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<HostSocket | null>(null);
 
   const { type } = useParams<{ type: "standard" | "random" }>();
   const tournamentType = type === "random" ? "random" : "standard";

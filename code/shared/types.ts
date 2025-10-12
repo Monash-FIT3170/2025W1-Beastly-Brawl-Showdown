@@ -1,13 +1,19 @@
 import { MoveRequest } from "../simulator/core/action/move/move";
+import { Namespace } from "socket.io"
 export type Result<T> = { success: true; value: T } | { success: false; error: Error };
 export type MonsterName = string & { __brand: "MonsterName" };
 
-type BasicClientToServerEvents = {
+export type PlayerNamespace = Namespace<PlayerClientToServerEvents, PlayerServerToClientEvents>;
+export type HostNamespace = Namespace<HostClientToServerEvents, HostServerToClientEvents>;
+
+export type BasicClientToServerEvents = {
   ping(): void;
+  echo(msg: any): void;
 };
 
-type BasicServerToClientEvents = {
+export type BasicServerToClientEvents = {
   pong: () => void;
+  echo: (msg: any) => void;
   error: (msg: string) => void;
   gameReadyToStart: () => void;
 };

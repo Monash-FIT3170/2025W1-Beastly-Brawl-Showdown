@@ -1,5 +1,5 @@
 import { Player } from "./player";
-import { AccountId } from "../shared/types";
+import { AccountId, PlayerNamespace } from "../shared/types";
 import { Battle, BattleOptions } from "../simulator/core/battle";
 import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
@@ -154,7 +154,7 @@ export class Match {
      * @param playersByAccountId Hashmap of players in the tournament
      * @returns None
      */
-    async runBattle(playerChannel: any): Promise<void> {
+    async runBattle(playerChannel: PlayerNamespace): Promise<void> {
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
             log_attention(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);

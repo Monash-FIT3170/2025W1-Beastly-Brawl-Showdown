@@ -15,6 +15,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
+import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
 
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
@@ -69,10 +70,10 @@ async function main(config: ServerConfig) {
   expressApp.use(express.json()); // Allow cross-origin requests
 
   const httpServer = http.createServer(expressApp);
-  const socketServer = new Server(httpServer, { cors: { origin: "*" } });
+  const socketServer = new Server<BasicClientToServerEvents, BasicServerToClientEvents>(httpServer, { cors: { origin: "*" } });
 
-  const playerChannel = socketServer.of("/player");
-  const hostChannel = socketServer.of("/host");
+  const playerChannel: PlayerNamespace = socketServer.of("/player");
+  const hostChannel: HostNamespace = socketServer.of("/host");
 
   log_notice("Websockets server started.");
 
@@ -114,7 +115,7 @@ async function main(config: ServerConfig) {
   //#region Events
   log_notice("Register events and start listening...");
   log_notice("Attatching events...");
-  socketServer.on("connection", async (socket: Socket) => {
+  socketServer.on("connection", async (socket) => {
     log_event(`User connected with id: ${socket.id}`);
 
     //#region Standard
@@ -127,7 +128,7 @@ async function main(config: ServerConfig) {
       socket.emit("pong");
     });
 
-    socket.on("echo", async (msg) => {
+    socket.on("echo", async (msg: any) => {
       log_event(`Echoing: ${msg}`);
       socket.emit("echo", msg);
     });
@@ -158,7 +159,7 @@ async function main(config: ServerConfig) {
   });
 
   // TODO use a persistent ID rather than socket ID
-  hostChannel.on("connection", async (socket: Socket) => {
+  hostChannel.on("connection", async (socket) => {
     log_event(`Host connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -318,7 +319,7 @@ async function main(config: ServerConfig) {
   });
 
   // #region Player Channel
-  playerChannel.on("connection", async (socket: Socket) => {
+  playerChannel.on("connection", async (socket) => {
     log_event(`Player connected: ${socket.id}`);
 
     socket.on("disconnect", () => {

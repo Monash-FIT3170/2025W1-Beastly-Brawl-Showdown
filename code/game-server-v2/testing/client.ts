@@ -1,6 +1,13 @@
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import * as readline from "readline";
+import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../../shared/types";
 
-const socket = io("http://localhost:8080/");
+type TypedSocket = Socket<BasicClientToServerEvents, BasicServerToClientEvents>;
+type TypedHostSocket = Socket<HostNamespace>;
+type TypedPlayerSocket = Socket<PlayerNamespace>;
+
+const socket: TypedSocket = io("http://localhost:8080/");
+
 
 socket.on("echo", (msg) => {
   console.log(`Server says: ${msg}`);
@@ -25,8 +32,6 @@ socket.on("request-room_response", (msg) => {
   console.log("Room request response", msg);
 });
 
-import * as readline from "readline";
-
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -48,13 +53,13 @@ const main = async () => {
   const _hostName = "Mr Host";
 
   await requestInput("start host join?");
-  const hostChannel = io("http://localhost:8080/host", {
+  const hostChannel: TypedHostSocket = io("http://localhost:8080/host", {
     auth: { hostName: _hostName },
   });
   hostChannel.emit("request-room");
 
   await requestInput("start player join?");
-  const playerChannel = io("http://localhost:8080/player", {
+  const playerChannel: TypedPlayerSocket = io("http://localhost:8080/player", {
     auth: { joinCode: _joinCode, displayName: _displayName },
   });
   playerChannel.on("game-started", () => {
