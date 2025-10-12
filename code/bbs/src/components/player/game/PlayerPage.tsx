@@ -78,8 +78,6 @@ const PlayerContent = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("return-from-waiting", () => {console.log("Returned from waiting")})
-
     //#region Monster selection handle
     socket.on("requestMonsterSelection", (data) => {
       if (data?.monsterPool) {
@@ -136,10 +134,6 @@ const PlayerContent = () => {
     });
     //#endregion
 
-    // socket.on("return-from-waiting", () => {
-    //   setWaiting(false);
-    // });
-
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
@@ -151,7 +145,6 @@ const PlayerContent = () => {
       socket.off("requestMonsterSelection");
       socket.off("startRound");
       socket.off("sendToWaiting");
-      // socket.off("return-from-waiting");
       socket.off("tournamentFinished");
     };
   }, [socket]);
@@ -193,7 +186,7 @@ const PlayerContent = () => {
     if (socket) {
       // Send the templateId instead of the name
       console.log("No of selections: ", noSelections);
-      socket.emit("RequestSubmitMonster", {
+      socket.emit("submitMonster", {
         data: {
           monsterTemplate: monster.templateId,
           selections: noSelections,

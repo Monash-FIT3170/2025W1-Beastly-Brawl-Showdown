@@ -1,24 +1,23 @@
 import React from "react";
 import { useNavigate } from "react-router";
 import { SelectMode } from "./SelectMode";
+import { io, Socket } from "socket.io-client";
 import type { HostClientToServerEvents, HostServerToClientEvents } from "../../../shared/types";
-import { io, type Socket } from "socket.io-client";
 
-type HostSocket = Socket<HostServerToClientEvents, HostClientToServerEvents>;
 
 export const HomePage = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = React.useState(false);
+  type HostSocket = Socket<HostServerToClientEvents, HostClientToServerEvents>;
 
-const handleHost = (type: "standard" | "random") => {
-  const serverUrl = sessionStorage.getItem("serverUrl");
-  if (!serverUrl) return;
+  const handleHost = (type: "standard" | "random") => {
+    const serverUrl = sessionStorage.getItem("serverUrl");
+    if (!serverUrl) return;
 
-  const socket: HostSocket = io(serverUrl + "/host") as HostSocket;
-  socket.emit("requestRoom", { type });
-
-  navigate(`/host/${type}`);
-};
+    const hostSocket: HostSocket = io(serverUrl + "/host") as HostSocket;
+    hostSocket.emit("requestRoom", { type });
+    navigate(`/host/${type}`);
+  };
 
   //todo for the other type
   const handleType2 = () => {

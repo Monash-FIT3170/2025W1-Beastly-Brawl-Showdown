@@ -194,10 +194,6 @@ export class Match {
                 }
             },
         });
-        
-        // switch displayed page to battle screen
-        // playerChannel.to(this.player1.socketId).emit("return-from-waiting");
-        // playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
           player1Monster: this.player1?.selectedMonsterTemplateName,
