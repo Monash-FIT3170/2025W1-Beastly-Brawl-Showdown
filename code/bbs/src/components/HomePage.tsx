@@ -11,10 +11,7 @@ export const HomePage = () => {
   type HostSocket = Socket<HostServerToClientEvents, HostClientToServerEvents>;
 
   const handleHost = (type: "standard" | "random") => {
-    const serverUrl = sessionStorage.getItem("serverUrl");
-    if (!serverUrl) return;
-
-    const hostSocket: HostSocket = io(serverUrl + "/host") as HostSocket;
+    const hostSocket: HostSocket = io("/host") as HostSocket;
     hostSocket.emit("requestRoom", { type });
     navigate(`/host/${type}`);
   };
