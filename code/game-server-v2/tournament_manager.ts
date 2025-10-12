@@ -77,7 +77,7 @@ export class TournamentManager {
     if (this.winners.length === 1) {
       console.log(`Tournament Winner: ${this.winners[0].displayName}`);
       // Optionally notify host:
-      this.playerChannel.emit("tournament-finished", this.winners[0].displayName);
+      this.playerChannel.emit("tournamentFinished", this.winners[0].displayName);
       return;
     }
     
@@ -90,7 +90,7 @@ export class TournamentManager {
         log_event("Random Pool: ");
         console.log(pool);
         player.currentMonsterPool = pool;
-        this.playerChannel.to(player.socketId).emit("select-monster", { monsterPool: pool });
+        this.playerChannel.to(player.socketId).emit("requestMonsterSelection", { monsterPool: pool });
       });
       await this.waitForMonsterSelections(this.winners);
       console.log("poopoo");

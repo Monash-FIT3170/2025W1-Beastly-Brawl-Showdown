@@ -4,9 +4,12 @@ import { io, Socket } from "socket.io-client";
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router";
 import { getBestServerUrl } from "../../../utils/RoomMethods";
-import type { HostNamespace } from "../../../../../shared/types";
+import type {
+  HostClientToServerEvents,
+  HostServerToClientEvents,
+} from "../../../../../shared/types";
 
-type HostSocket = Socket<HostNamespace>
+type HostSocket = Socket<HostServerToClientEvents, HostClientToServerEvents>;
 
 export default function ProjectorPage() {
   const [serverUrl, setServerUrl] = useState<string>();
@@ -56,9 +59,6 @@ export default function ProjectorPage() {
         return;
       }
       console.log("Connected to server");
-
-      // Send a test message
-      socketRef.current.emit("message", "Hello from Projector!");
     });
 
     socketRef.current.on("connect_error", (err: Error) => {
@@ -75,20 +75,20 @@ export default function ProjectorPage() {
     //#endregion
 
     //#region Request Room
-    socketRef.current.on("request-room_response", (roomInfo: { roomId: number; joinCode: string }) => {
+    socketRef.current.on("requestRoomResponse", (roomInfo: { roomId: number; joinCode: string }) => {
       console.log("Room request response", roomInfo);
       setRoomId(roomInfo.roomId);
       setJoinCode(roomInfo.joinCode);
     });
 
     //#region Host App events
-    socketRef.current.on("player-set-changed", (newPlayerList: string[]) => {
+    socketRef.current.on("refreshPlayerList", (newPlayerList: string[]) => {
       console.log("New set of players:", newPlayerList.toString());
       setPlayerList(newPlayerList);
     });
 
     if (!roomId) {
-      socketRef.current.emit("request-room", {type: tournamentType});
+      socketRef.current.emit("requestRoom", {type: tournamentType});
       return;
     }
     //#endregion
@@ -105,7 +105,7 @@ export default function ProjectorPage() {
 
   function handleStartGame() {
     if (socketRef.current) {
-      socketRef.current.emit("start-game", { roomId, type: tournamentType });
+      socketRef.current.emit("requestStartGame", { roomId, type: tournamentType });
       console.log("Start game requested!", tournamentType);
     }
   }

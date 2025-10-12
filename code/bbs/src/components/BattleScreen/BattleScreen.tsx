@@ -108,18 +108,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     setEvents([snapshot]);
   }, [matchData]);
 
-  // Listen for 'match-started' socket event
-  useEffect(() => {
-    if (!socket) return undefined;
-    const handleMatchStarted = (data: any) => {
-      console.log("Match started:", data);
-    };
-    socket.on("match-started", handleMatchStarted);
-    return () => {
-      socket.off("match-started", handleMatchStarted);
-    };
-  }, [socket]);
-
   //#region battle code
 
   //function that executes roll on server
@@ -128,8 +116,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     
     // Execute the roll on server immediately
     setShowMessage(false);
-    const params: Parameters<typeof rollNotice.callback> = [];
-    socket.emit("requestRoll", rollNotice.kind, params);
+    socket.emit("requestRoll", rollNotice.kind);
     setRollNotice(null);
     setshowRollMessage(false);
     // Note: dice animation will be triggered when we receive the roll event back from server
@@ -148,9 +135,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       setshowEnemySubmittedMessage(true);
     };
 
-    socket.on("EnemySubmitted", handleEnemySubmitted);
+    socket.on("enemyMoveSubmitted", handleEnemySubmitted);
     return () => {
-      socket.off("EnemySubmitted", handleEnemySubmitted);
+      socket.off("enemyMoveSubmitted", handleEnemySubmitted);
     };
   }, [socket]);
 
@@ -194,7 +181,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!socket || !myMonster) return;
     console.log("Handling Action now")
     const data = { moveId, targetMethod };
-    socket.emit("RequestSubmitMove", { data });
+    socket.emit("submitMove", { data });
     setshowSubmittedMoveMessage(true)
     setbuttonDisabled(true)
     setChooseMove(null)
@@ -211,9 +198,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
       setshowEnemySubmittedMessage(false);
     };
 
-    socket.on("UnlockButton", handleUnlock);
+    socket.on("unlockButton", handleUnlock);
     return () => {
-      socket.off("UnlockButton", handleUnlock);
+      socket.off("unlockButton", handleUnlock);
     };
   }, [socket]);
 

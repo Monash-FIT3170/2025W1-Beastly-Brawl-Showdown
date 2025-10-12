@@ -1,4 +1,3 @@
-import { MoveRequest } from "../simulator/core/action/move/move";
 import { Namespace } from "socket.io"
 export type Result<T> = { success: true; value: T } | { success: false; error: Error };
 export type MonsterName = string & { __brand: "MonsterName" };
@@ -19,31 +18,38 @@ export type BasicServerToClientEvents = {
 };
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
-  submitMonsterChoice: () => void;
-  submitGameReadyState: () => void;
-  submitMove: (actionData: MoveRequest) => void;
+  submitMonster: (data: any) => void;
+  submitMove: (data: any) => void;
   submitMoveLockState: () => void;
+  requestRoll: (data: any) => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
+  newNotice: (data: any) => void;
+  newEvent: (data: any) => void;
+  removeNotice: (data: any) => void;
   refreshPlayerList: (list: string[]) => void;
-  requestMonsterSelection: (setMonsterName: (monsterName: MonsterName) => void) => void;
+  requestMonsterSelection: (data: any) => void;
   requestMoveSelection: (responseDeadline: number) => void;
-
-  submitGameReadyState: () => void;
-  gameReadytoStart: () => void;
+  enemyMoveSubmitted: () => void;
+  executeTurn: () => void;
+  unlockButton: () => void;
+  startRound: (data: any) => void;
+  sendToWaiting: () => void;
+  tournamentFinished: (data: any) => void;
 };
 
 export type PlayerSocketData = {};
 
 export type HostClientToServerEvents = BasicClientToServerEvents & {
-  requestNewLobby: (res: (connectionDetails: Result<{ lobbyId: LobbyId; joinCode: JoinCode }>) => void) => void;
-
-  requestStartGame: () => void;
+  requestRoom: (data: any) => void;
+  requestStartGame: (data: any) => void;
   requestStartRound: () => void;
 };
+
 export type HostServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
+  requestRoomResponse: (data: any) => void;
 };
 
 export type PlayerChannelAuth = {
