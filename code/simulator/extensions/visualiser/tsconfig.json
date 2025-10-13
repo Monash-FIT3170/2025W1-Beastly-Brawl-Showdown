@@ -1,11 +1,13 @@
 {
-    "extends": "@beastly-brawl-showdown/configs/tsconfig",
+    // "extends": "@beastly-brawl-showdown/configs/tsconfig",
     "compilerOptions": {
+        "esModuleInterop": true,
         "target": "ES2020",
         "module": "ES2020",
         "moduleResolution": "Bundler",
         "declaration": true,
         "emitDeclarationOnly": false,
+        "composite": true,
         "outDir": "dist",
         "rootDir": "src",
         "sourceMap": true,
@@ -14,5 +16,13 @@
     },
     "include": [
         "src"
+    ],
+    "references": [
+        {
+            "path": "../../core"
+        },
+        {
+            "path": "../../data"
+        },
     ]
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
 import { parseTurns } from "./turns_array_maker";
+import { BaseEvent } from "../../../../core/event/base_event";
 
 interface GameLogProps {
   isOpen: boolean;

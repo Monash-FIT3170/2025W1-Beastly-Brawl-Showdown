@@ -1,13 +1,22 @@
-import { SnapshotEvent } from "@beastly-brawl-showdown/sim-core/event/core_events"
+import { SnapshotEvent } from "../../../../core/event/core_events";
+import { COMMON_MONSTER_POOL } from "../../../../data/common/common_monster_pool";
 
-console.log("snapshot parser loaded")
+console.log("snapshot parser loaded");
+
+
 export function parseSnapshot(snapshot: SnapshotEvent) {
-  return snapshot.sides.map((side) => ({
-    id: side.id,
-    name: side.monster.base.name,
-    image: side.monster.base.imageUrl,
-    health: side.monster.health,
-    armour: side.monster.base.baseStats.armour,
-    defendActionCharge: side.monster.defendActionCharges,
-  }));
+  return snapshot.sides.map((side) => {
+    // Look up the MonsterTemplate using the baseID
+    const template = COMMON_MONSTER_POOL.monsters[
+      side.monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+    ];
+    // console.log("Monster template for", side.monster.baseID, template);
+    return {
+      id: side.id,
+      name: template.name,
+      image: template.imageUrl,
+      health: side.monster.health,
+      defendActionCharge: side.monster.defendActionCharges,
+    };
+  });
 }

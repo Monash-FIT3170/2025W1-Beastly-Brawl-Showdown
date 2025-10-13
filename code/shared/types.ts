@@ -1,43 +1,49 @@
-import { MoveRequest } from "/app/simulator/core/action/move/move"
+import { Namespace } from "socket.io"
 export type Result<T> = { success: true; value: T } | { success: false; error: Error };
 export type MonsterName = string & { __brand: "MonsterName" };
 
-type BasicClientToServerEvents = {
+export type PlayerNamespace = Namespace<PlayerClientToServerEvents, PlayerServerToClientEvents>;
+export type HostNamespace = Namespace<HostClientToServerEvents, HostServerToClientEvents>;
+
+export type BasicClientToServerEvents = {
   ping(): void;
+  echo(msg: any): void;
 };
 
-type BasicServerToClientEvents = {
+export type BasicServerToClientEvents = {
   pong: () => void;
+  echo: (msg: any) => void;
   error: (msg: string) => void;
-  gameReadyToStart: () => void;
 };
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
-  submitMonsterChoice: () => void;
-  submitGameReadyState: () => void;
-  submitMove: (actionData: MoveRequest) => void;
-  submitMoveLockState: () => void;
+  submitMonster: (data: any) => void;
+  submitMove: (data: any) => void;
+  requestRoll: (data: any) => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
-  refreshPlayerList: (list: string[]) => void;
-  requestMonsterSelection: (setMonsterName: (monsterName: MonsterName) => void) => void;
-  requestMoveSelection: (responseDeadline: number) => void;
-
-  submitGameReadyState: () => void;
-  gameReadytoStart: () => void;
+  newNotice: (data: any) => void;
+  newEvent: (data: any) => void;
+  removeNotice: (data: any) => void;
+  requestMonsterSelection: (data: any) => void;
+  enemyMoveSubmitted: () => void;
+  unlockButton: () => void;
+  startRound: (data: any) => void;
+  sendToWaiting: () => void;
+  tournamentFinished: (data: any) => void;
 };
 
 export type PlayerSocketData = {};
 
 export type HostClientToServerEvents = BasicClientToServerEvents & {
-  requestNewLobby: (res: (connectionDetails: Result<{ lobbyId: LobbyId; joinCode: JoinCode }>) => void) => void;
-
-  requestStartGame: () => void;
-  requestStartRound: () => void;
+  requestRoom: (data: any) => void;
+  requestStartGame: (data: any) => void;
 };
+
 export type HostServerToClientEvents = BasicServerToClientEvents & {
   refreshPlayerList: (list: string[]) => void;
+  requestRoomResponse: (data: any) => void;
 };
 
 export type PlayerChannelAuth = {
@@ -64,3 +70,12 @@ export type RoomId = number & { __brand: "RoomId" };
 //   /** Waiting for host to start next round. */
 //   RoundSummary,
 // }
+
+//#region DB
+export const DOCUMENT_NAME = "game_server_registries";
+export interface IGameServerRegistryEntry {
+  serverNumber: number;
+  serverUrl: string;
+  lastUpdated: Date;
+}
+//#endregion

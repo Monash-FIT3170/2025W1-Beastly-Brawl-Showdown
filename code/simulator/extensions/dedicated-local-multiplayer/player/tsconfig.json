@@ -1,15 +1,8 @@
 {
-  "extends": "@beastly-brawl-showdown/configs/tsconfig",
+  "extends": "./tsconfig.typecheck.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2020",
-    "moduleResolution": "Bundler",
-    "declaration": true,
-    "emitDeclarationOnly": false,
-    "outDir": "dist",
-    "rootDir": "src",
-    "skipLibCheck": true,
-    "sourceMap": true,
+    "composite": true,
+    "esModuleInterop": true,
     "jsx": "react"
   },
   "include": [
@@ -17,7 +10,13 @@
   ],
   "references": [
     {
-      "path": "../host"
+      "path": "../../../core"
+    },
+    {
+      "path": "../../../data"
+    },
+    {
+      "path": "../api"
     },
     {
       "path": "../../visualiser"

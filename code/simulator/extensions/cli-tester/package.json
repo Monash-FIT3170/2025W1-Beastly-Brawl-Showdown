@@ -1,11 +1,7 @@
 {
   "devDependencies": {
-    "@beastly-brawl-showdown/configs": "latest",
     "@types/node": "^24.3.0",
-    "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "@beastly-brawl-showdown/sim-core": "latest",
-    "@beastly-brawl-showdown/sim-data": "latest"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }

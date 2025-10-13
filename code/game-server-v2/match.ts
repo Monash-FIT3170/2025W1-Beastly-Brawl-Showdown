@@ -1,17 +1,17 @@
 import { Player } from "./player";
-import { AccountId } from "../shared/types";
-import { Battle, BattleOptions } from "/app/simulator//core/battle";
-import { SideId } from "/app/simulator//core/side";
-import { COMMON_MONSTER_POOL } from "/app/simulator//data/common/common_monster_pool";
-import { COMMON_MOVE_POOL } from "/app/simulator//data/common/common_move_pool";
-import { log_event } from "./utils";
-import { MonsterId } from "/app/simulator//core/monster/monster_pool";
-import { TargetingData } from "/app/simulator//core/action/targeting";
-import { EntryID } from "/app/simulator//core/utils";
-import { ChooseMove } from "/app/simulator//core/notice/notice";
-import { TargetingMethod } from "/app/simulator//core/action/targeting";
+import { AccountId, PlayerNamespace } from "../shared/types";
+import { Battle, BattleOptions } from "../simulator/core/battle";
+import { SideId } from "../simulator/core/side";
+import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
+import { log_attention, log_event } from "./utils";
+import { MonsterId } from "../simulator/core/monster/monster_pool";
+import { TargetingData } from "../simulator/core/action/targeting";
+import { EntryID } from "../simulator/core/utils";
+import { ChooseMove, Roll } from "../simulator/core/notice/notice";
+import { TargetingMethod } from "../simulator/core/action/targeting";
 
-enum MatchType {
+export enum MatchType {
     DUEL,
     BYE
 }
@@ -24,7 +24,9 @@ export class Match {
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
-    playerChannel: any;
+
+    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
+
 
     /**
      * Constructor.
@@ -33,13 +35,12 @@ export class Match {
      * @param matchID Unique integer created in tournament_manager
      * @param player2 Optional second player in the match (the match is a bye if left empty)
      */
-    constructor(player1: Player, player2: Player | undefined, matchID: number, playerChannel: any) {
+    constructor(player1: Player, player2: Player | undefined, matchID: number) {
         this.player1 = player1;
         this.player2 = player2;
         this.spectators = player1.spectators.concat(player2?.spectators ?? []);
         this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
         this.matchID = matchID;
-        this.playerChannel = playerChannel;
     }
 
     createBattle(): void {
@@ -103,6 +104,9 @@ export class Match {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
 
+        // Store move
+        this.submittedMoves.set(player, { moveId, targetSide, targetMethod });
+
         const sideIndex = this.getSideForPlayer(player);
         const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
         const chooseMoveNotice = noticeMap.get("chooseMove") as ChooseMove | undefined;
@@ -115,9 +119,30 @@ export class Match {
         const targetData: TargetingData = {
             targetingMethod: targetMethod,
             target: targetSide,
-        };  
+        };
 
         chooseMoveNotice.callback(moveId, targetData);
+    }
+
+    // Called by main when a player submits a move
+    submitRoll(player: Player): void {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to submit rolls to.`);
+        }
+
+        const sideIndex = this.getSideForPlayer(player);
+        const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
+        const rollNotice = noticeMap.get("roll") as Roll | undefined;
+
+        if (!rollNotice) {
+            throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no roll notice.`);
+        }
+        rollNotice.callback();
+    }
+
+
+    getPlayerMove(player: Player) {
+        return this.submittedMoves.get(player);
     }
 
 
@@ -129,11 +154,10 @@ export class Match {
      * @param playersByAccountId Hashmap of players in the tournament
      * @returns None
      */
-    async runBattle(playerChannel: any): Promise<void> {
-
+    async runBattle(playerChannel: PlayerNamespace): Promise<void> {
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
-            console.log(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
+            log_attention(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
             return;
         }
 
@@ -145,16 +169,49 @@ export class Match {
         this.battle.noticeBoard.subscribeListener({
             onPostNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
-                this.playerChannel.to(player.socketId).emit("newNotice", notice);
+                log_event(`[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`);
+                playerChannel.to(player.socketId).emit("newNotice", notice);
             },
             onRemoveNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
-                this.playerChannel.to(player.socketId).emit("removeNotice", notice);
+                log_event(`[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`);
+                playerChannel.to(player.socketId).emit("removeNotice", notice);
             }
         });
 
+        // Subscribe to event history (damage, heals, rolls, etc.)
+        this.battle.eventHistory.subscribeListener({
+            onNewEvent: (event) => {
+                log_event(`[EVENT] New event emitted: ${JSON.stringify(event)}`);
 
-        await this.battle.run();
+                // Broadcast event to both players
+                log_event(`[EVENT] Sending event to player 1 (${this.player1.displayName})`);
+                playerChannel.to(this.player1.socketId).emit("newEvent", event);
+
+                if (this.player2) {
+                    log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
+                    playerChannel.to(this.player2.socketId).emit("newEvent", event);
+                }
+            },
+        });
+
+        playerChannel.to(this.player1.socketId).emit("startRound", {
+          player1Monster: this.player1?.selectedMonsterTemplateName,
+          player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
+          sideID: 0,
+        })
+        if (this.player2) {
+            playerChannel.to(this.player2?.socketId).emit("startRound", {
+            player1Monster: this.player1?.selectedMonsterTemplateName,
+            player2Monster: this.player2?.selectedMonsterTemplateName,
+            sideID: 1,
+            })
+        };
+
+
+        log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
+        await this.battle.run(); 
+        log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
@@ -166,7 +223,12 @@ export class Match {
             if (loser.linkedAccountId) {
                 this.winner?.addSpectator(loser.linkedAccountId);
             }
-            console.log(`Match ${this.matchID}: Player ${loser.displayName} has been defeated.`);
+            log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
+        }
+        if (this.winner && loser) {
+            playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
+            playerChannel.to(loser?.socketId).emit("sendToWaiting");
         }
     }
+
 }

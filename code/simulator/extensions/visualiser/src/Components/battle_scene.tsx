@@ -1,9 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { BaseEvent } from "@beastly-brawl-showdown/sim-core/event/base_event";
-import type { BuffEvent, DamageEvent } from "@beastly-brawl-showdown/sim-core/event/core_events";
 import { parseSnapshot } from "./snapshot_parser";
 import { parseTurns } from "./turns_array_maker";
 import { clamp } from "./utils/clamp";
+import { BaseEvent } from "../../../../core/event/base_event";
+import { BuffEvent, DamageEvent } from "../../../../core/event/core_events";
+import { getBaseStat } from "../../../../core/monster/monster";
+import { COMMON_MONSTER_POOL } from "../../../../data/common/common_monster_pool";
+import BattleMessage from "../BattleScreen/BattleMessage";
+import { BattleMiddle } from "../BattleScreen/BattleMiddle";
 
 interface BattleSceneProps {
   events: BaseEvent[];
@@ -22,6 +26,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   autoAdvance,
   onAdvanceTurn,
 }) => {
+  //setup the battle messages
+  const [currentMessage, setcurrentMessage] = useState("");
+
   // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
 
@@ -70,6 +77,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's defense charges
       state[playerId].defendActionCharge -= 1;
+      setcurrentMessage(`${playerId} has defended`);
       break;
       }
 
@@ -81,6 +89,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
       // Decrease the player's health
       state[playerId].health -= damageEvent.amount;
+      setcurrentMessage(`${playerId} has taken ${damageEvent.amount} damage`);
       break;
       }
 
@@ -176,43 +185,41 @@ const BattleScene: React.FC<BattleSceneProps> = ({
   }, [selectedTurnIndex, currentTurn, isPlaying]);
 
 
+
   // Check if there are 2 players
   if (visibleState.length < 2) {
     return <p>Waiting for game data...</p>;
   }
+  
+  if (!currentSnapshot) {
+  return null; // or a loading/fallback state
+  }
+
+  //have to get maxhp to pass to battlemiddle
+  //key of type of I hate this
+  const template = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[0].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
+  const player1MaxHp = template ? getBaseStat("health", template) : 0;
+
+  const template2 = COMMON_MONSTER_POOL.monsters[currentSnapshot.sides[1].monster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters];
+  const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
   // Clear names for what the UI reads:
   const visiblePlayer1 = visibleState[0];
   const visiblePlayer2 = visibleState[1];
 
   // console.log(visiblePlayer1.image);
-
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-        height: "300px",
-        border: "1px solid black",
-      }}
-    >
-      {/* Left Panel (PLAYER 1) */}
-      <div style={{ flex: 3, backgroundColor: "#d0e6ff", padding: "20px" }}>
-        <h2>{visiblePlayer1.name}</h2>
-        <p>HP: {visiblePlayer1.health}</p>
-        <p>Defend Charges: {visiblePlayer1.defendActionCharge}</p>
-        {/* <img src={visiblePlayer1.image} /> */}
-      </div>
-
-      {/* Right Panel (PLAYER 2) */}
-      <div style={{ flex: 3, backgroundColor: "#ffd0d0", padding: "20px" }}>
-        <h2>{visiblePlayer2.name}</h2>
-        <p>HP: {visiblePlayer2.health}</p>
-        <p>Defend Charges: {visiblePlayer2.defendActionCharge}</p>
-        {/* <img src={visiblePlayer2.image} /> */}
-      </div>
+    <div className="canvas-body" id="battle-screen-body">
+      <BattleMiddle
+        //showAnimation={showAnimation}
+        enemyHp={visiblePlayer2.health ?? 0}
+        enemyMaxHp = {player2MaxHp}
+        playerHp={visiblePlayer1.health ?? 0}
+        playerMaxHp = {player1MaxHp}
+        enemyImgSrc={visiblePlayer2.image}
+        playerImgSrc={visiblePlayer1.image}
+      />
+      <BattleMessage message = {currentMessage} />
     </div>
   );
 };

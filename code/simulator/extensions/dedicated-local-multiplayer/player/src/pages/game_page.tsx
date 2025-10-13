@@ -1,13 +1,20 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router";
 import { SocketContext } from "../socket/socket_context";
-import BattleControls from "../components/battle_controls";
-import type { Notice } from "@beastly-brawl-showdown/sim-core/notice/notice";
-import { useRef } from "react";
-import type { SideId } from "@beastly-brawl-showdown/sim-core/side";
-import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "@beastly-brawl-showdown/sim-core/action/targeting";
-import {COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "@beastly-brawl-showdown/sim-data/common/common_move_pool";
-import type { OrderedEvent } from "@beastly-brawl-showdown/sim-core/event/event_history";
+import BattleControls from "../../../../../extensions/visualiser/src/Components/battle_controls";
+import type { Notice } from "../../../../../core/notice/notice";
+import type { SideId } from "../../../../../core/side";
+import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../../../../core/action/targeting";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../../../../../data/common/common_move_pool";
+import type { OrderedEvent } from "../../../../../core/event/event_history";
+import { MoveId } from "../../../../../core/action/move/move_pool";
+import BattleVisualiser from "../../../../visualiser/src/BattleVisualiser";
+import {} from "../../../api/src/api";
+
+/**
+ * Duration for timeouts before they should be counted as dropped
+ */
+const ACK_TIMEOUT = 10000;
 
 const GamePage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +24,6 @@ const GamePage: React.FC = () => {
   const [selfInfo, setSelfInfo] = useState<SideId | null>(null);
   const [turnHistory, setTurnHistory] = useState<OrderedEvent[] | null>(null);
   const [pendingNotices, setPendngNotices] = useState<Notice[] | null>(null);
-
 
   const hasListeners = useRef(false);
 
@@ -37,42 +43,84 @@ const GamePage: React.FC = () => {
 
       const timer = setTimeout(() => {
         navigate("/join");
-      }, 5000);
+      }, ACK_TIMEOUT);
 
       return () => clearTimeout(timer);
     }
 
     socketContext.socket.onAny((event, args) => console.log(`Message recieved:\n${event}\n${JSON.stringify(args)}`));
 
-    /// Request game data
-    setSelfInfo(await socketContext.socket.emitWithAck("getSelfInfo"));
-    if (!selfInfo) {
-      console.error("Did not recieve SelfInfo");
-      return;
-    }
-    setTurnHistory(await socketContext.socket.emitWithAck("getHistory"));
-    if (!turnHistory) {
-      console.error("Did not recieve TurnHistory");
-      return;
-    }
-    setPendngNotices(await socketContext.socket.emitWithAck("getNotices"));
-    if (!pendingNotices) {
-      console.error("Did not recieve PendingNotices");
-      return;
-    }
-
     // TODO block / display loading until all data recieved
 
     socketContext.socket.on("newEvent", (event: OrderedEvent) => {
       console.log(`New event recorded: ${JSON.stringify(event)}`);
+      if (!turnHistory) {
+        setTurnHistory([event]);
+      }
+      else{
       setTurnHistory((prev) => [...prev!, event]);
+      }
     });
     socketContext.socket.on("newNotice", (notice: Notice) => {
       console.log(`New notice recieved: ${JSON.stringify(notice)}`);
-      setPendngNotices((prev) => [...prev!, notice]);
+      setPendngNotices((prev) => [...(prev ?? [notice]), notice]);
+      if (!pendingNotices) {
+        console.error("ERR: Pending notices is still not initialised.");
+        return;
+      }
       console.log(`Queued notice (length=${pendingNotices.length}): ${JSON.stringify(notice)}`);
     });
 
+    console.log("Fetching self info");
+    try {
+      await socketContext.socket
+        .timeout(ACK_TIMEOUT)
+        .emitWithAck("getSelfInfo")
+        .then((fetchedSelfInfo) => {
+          console.log(`Self info recieved: ${fetchedSelfInfo}`);
+          if (!selfInfo) {
+            console.error("Did not receive SelfInfo");
+            return;
+          }
+          setSelfInfo(fetchedSelfInfo);
+        });
+    } catch (err) {
+      console.error("ERR: " + err);
+    }
+
+    console.warn(`Fetching turn history`);
+    try {
+      await socketContext.socket
+        .timeout(ACK_TIMEOUT)
+        .emitWithAck("getHistory")
+        .then((fetchedHistory) => {
+          console.log(`History recieved: ${fetchedHistory}`);
+          if (!turnHistory) {
+            console.error("Did not receive TurnHistory");
+            return;
+          }
+          setTurnHistory(fetchedHistory);
+        });
+    } catch (err) {
+      console.error("ERR: " + err);
+    }
+
+    console.warn(`Fetching turn notices`);
+    try {
+      await socketContext.socket
+        .timeout(ACK_TIMEOUT)
+        .emitWithAck("getNotices")
+        .then((notices) => {
+          console.log(`Notices recieved: ${notices}`);
+          if (!pendingNotices) {
+            console.error("Did not receive PendingNotices");
+            return;
+          }
+          setPendngNotices(notices);
+        });
+    } catch (err) {
+      console.error("ERR: " + err);
+    }
     return () => {
       if (!socketContext.socket) {
         return;
@@ -101,6 +149,7 @@ const GamePage: React.FC = () => {
   }
 
   function actionPanel() {
+    console.log(pendingNotices);
     if (!pendingNotices || pendingNotices.length == 0) {
       return <p>No pending action</p>;
     }
@@ -111,7 +160,7 @@ const GamePage: React.FC = () => {
         return (
           <>
             <BattleControls
-              onSelectedMoveId={(moveId) => {
+              onSelectedMoveId={(moveId: MoveId) => {
                 console.log(`Action pressed: ${moveId}`);
                 let targeting: TargetingData;
                 switch (COMMON_MOVE_POOL[moveId as COMMON_MOVE_NAMES].targetingMethod) {
@@ -186,10 +235,9 @@ const GamePage: React.FC = () => {
 
   return (
     <>
-      <h1>WIP - GAME</h1>
       <div>
-        {/* <BattleVisualizer /> */}
-        <textarea disabled value={JSON.stringify(turnHistory)} />
+        <BattleVisualiser rawEvents={turnHistory} />
+        {/* <textarea disabled value={JSON.stringify(turnHistory)} /> */}
         <br />
         {actionPanel()}
       </div>
