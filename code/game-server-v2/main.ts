@@ -2,7 +2,7 @@ import { GameServer } from "./gameServer";
 import * as readline from "readline";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import { log_attention, log_event, log_notice, log_warning } from "./utils";
+import { getRandomPool, log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
 import { Player } from "./player";
@@ -15,7 +15,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
-import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
+import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, IGameServerRegistryEntry, PlayerNamespace } from "../shared/types";
 
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
@@ -87,13 +87,13 @@ async function main(config: ServerConfig) {
     const db = mongoose.connection.db;
     if (!db) throw new Error("MongoDB native database object is undefined");
 
-    const collectionName = GameServerRegisterModel.collection.name;
+    const collectionName = GameServerRegistryModel.collection.name;
     const collections = await db.listCollections({ name: collectionName }).toArray();
 
     let existingRecordCount = 0;
 
     if (collections.length > 0) {
-      existingRecordCount = await GameServerRegisterModel.countDocuments({
+      existingRecordCount = await GameServerRegistryModel.countDocuments({
         serverNumber: config.serverNumber,
       });
 
@@ -107,7 +107,7 @@ async function main(config: ServerConfig) {
       console.log(`Collection '${collectionName}' does not exist yet. Proceeding with registration.`);
     }
 
-    const updatedRecord = await GameServerRegisterModel.findOneAndUpdate<IGameServerRegisterEntry>(
+    const updatedRecord = await GameServerRegistryModel.findOneAndUpdate<IGameServerRegistryEntry>(
       { serverNumber: config.serverNumber },
       {
         serverNumber: config.serverNumber,
@@ -121,7 +121,7 @@ async function main(config: ServerConfig) {
   } catch (err) {
     log_attention("Failed to find or update records (collection may be missing or query failed): " + err);
     log_attention("Using fallback - Creating new record.");
-    const newRecord = new GameServerRegisterModel({
+    const newRecord = new GameServerRegistryModel({
       serverNumber: config.serverNumber,
       serverUrl: `${config.serverIp}:${config.serverPort}`,
       lastUpdated: new Date(),
