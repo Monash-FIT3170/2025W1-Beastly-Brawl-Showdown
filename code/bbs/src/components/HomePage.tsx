@@ -1,21 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router";
 import { SelectMode } from "./SelectMode";
-import { usePlayerSocket } from "./player/game/PlayerPage";
+import { io, Socket } from "socket.io-client";
+import type { HostClientToServerEvents, HostServerToClientEvents } from "../../../shared/types";
+
 
 export const HomePage = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = React.useState(false);
-  const { socket } = usePlayerSocket();
+  type HostSocket = Socket<HostServerToClientEvents, HostClientToServerEvents>;
 
   const handleHost = (type: "standard" | "random") => {
-    // Tell the server to create a room with this mode
-    if (socket) {
-      socket.emit("request-room", { type }); 
-      // Server will respond with room code / confirmation
-    }
-
-    navigate(`/host/${type}`); // can later pass room id if needed
+    const hostSocket: HostSocket = io("/host") as HostSocket;
+    hostSocket.emit("requestRoom", { type });
+    navigate(`/host/${type}`);
   };
 
   //todo for the other type

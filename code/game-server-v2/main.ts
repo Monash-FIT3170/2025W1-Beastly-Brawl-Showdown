@@ -15,6 +15,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
+import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
 
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
@@ -69,10 +70,10 @@ async function main(config: ServerConfig) {
   expressApp.use(express.json()); // Allow cross-origin requests
 
   const httpServer = http.createServer(expressApp);
-  const socketServer = new Server(httpServer, { cors: { origin: "*" } });
+  const socketServer = new Server<BasicClientToServerEvents, BasicServerToClientEvents>(httpServer, { cors: { origin: "*" } });
 
-  const playerChannel = socketServer.of("/player");
-  const hostChannel = socketServer.of("/host");
+  const playerChannel: PlayerNamespace = socketServer.of("/player");
+  const hostChannel: HostNamespace = socketServer.of("/host");
 
   log_notice("Websockets server started.");
 
@@ -114,7 +115,7 @@ async function main(config: ServerConfig) {
   //#region Events
   log_notice("Register events and start listening...");
   log_notice("Attatching events...");
-  socketServer.on("connection", async (socket: Socket) => {
+  socketServer.on("connection", async (socket) => {
     log_event(`User connected with id: ${socket.id}`);
 
     //#region Standard
@@ -127,18 +128,10 @@ async function main(config: ServerConfig) {
       socket.emit("pong");
     });
 
-    socket.on("echo", async (msg) => {
+    socket.on("echo", async (msg: any) => {
       log_event(`Echoing: ${msg}`);
       socket.emit("echo", msg);
     });
-
-    //#endregion
-    /*
-    socket.on("message", async (msg) => {
-      log_event(`Received: ${msg}`);
-      socket.emit("serverResponse", `Recieved: ${msg}`);
-    });
-    */
   });
 
   // #region Host Channel
@@ -158,7 +151,7 @@ async function main(config: ServerConfig) {
   });
 
   // TODO use a persistent ID rather than socket ID
-  hostChannel.on("connection", async (socket: Socket) => {
+  hostChannel.on("connection", async (socket) => {
     log_event(`Host connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -166,7 +159,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region New Room
-    socket.on("request-room", async (data: { type: "standard" | "random" }) => {
+    socket.on("requestRoom", async (data: { type: "standard" | "random" }) => {
       log_event("Room requested with mode: " + data.type);
       // TODO prevent multiple rooms at the same time
       try {
@@ -181,7 +174,7 @@ async function main(config: ServerConfig) {
               : TournamentType.Standard;
         }
 
-        socket.emit("request-room_response", { roomId, joinCode });
+        socket.emit("requestRoomResponse", { roomId, joinCode });
         log_notice(
           `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
         );      } catch {
@@ -190,7 +183,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region Start Game
-    socket.on("start-game", (msg: { roomId: number }) => {
+    socket.on("requestStartGame", (msg: { roomId: number }) => {
       log_event(`Host requested start-game for room ${msg.roomId}`);
 
       const room = gameServer.rooms.get(msg.roomId);
@@ -213,7 +206,7 @@ async function main(config: ServerConfig) {
         }
 
         player.currentMonsterPool = pool;
-        playerChannel.to(player.socketId).emit("select-monster", { monsterPool: pool }); // Clients can now start monster selection
+        playerChannel.to(player.socketId).emit("requestMonsterSelection", { monsterPool: pool }); // Clients can now start monster selection
       });
 
       log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
@@ -313,12 +306,12 @@ async function main(config: ServerConfig) {
     console.log("Update player list", playerNameList, "to", gameServer.rooms.get(roomId)!.hostSocketId);
     console.log("Player socket: ", socket.data);
 
-    hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("player-set-changed", playerNameList);
+    hostChannel.to(gameServer.rooms.get(roomId)!.hostSocketId).emit("refreshPlayerList", playerNameList);
     next();
   });
 
   // #region Player Channel
-  playerChannel.on("connection", async (socket: Socket) => {
+  playerChannel.on("connection", async (socket) => {
     log_event(`Player connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -326,7 +319,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region Select Monster
-    socket.on("RequestSubmitMonster", (data: any) => {
+    socket.on("submitMonster", (data: any) => {
       const player = socket.data.player as Player;
       if (!player) return;
 
@@ -390,23 +383,25 @@ async function main(config: ServerConfig) {
         room.tournamentManager.matches.forEach((match: Match) => {
           if (match.matchType == MatchType.BYE) {
             log_notice("This match is a bye");
-            room.playerChannel.to(match.player1.socketId).emit("send-to-waiting", {bye: true});
+            room.playerChannel.to(match.player1.socketId).emit("sendToWaiting");
             return; //TODO HANDLE BYE
           }
 
           // P1: send a copy/start
-          room.playerChannel.to(match.player1.socketId).emit("round-start", {
+          room.playerChannel.to(match.player1.socketId).emit("startRound", {
             player1Monster: match.player1?.selectedMonsterTemplateName,
             player2Monster: match.player2?.selectedMonsterTemplateName, // not option if bye
             sideID: 0,
           });
 
           //P2: send a copy/start (invert sides?)
-          room.playerChannel.to(match.player2?.socketId).emit("round-start", {  
-            player1Monster: match.player1?.selectedMonsterTemplateName,
-            player2Monster: match.player2?.selectedMonsterTemplateName,
-            sideID: 1,
-          });
+          if (match.player2) {
+            room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
+              player1Monster: match.player1?.selectedMonsterTemplateName,
+              player2Monster: match.player2?.selectedMonsterTemplateName,
+              sideID: 1,
+            });
+          }
         });
       }
     });
@@ -425,7 +420,7 @@ async function main(config: ServerConfig) {
     socket.on("requestRoll", handleRollNotice);
 
     // #region Submit Move
-    socket.on("RequestSubmitMove", (msg: { data: any }) => {
+    socket.on("submitMove", (msg: { data: any }) => {
       log_event("Test move submission log");
       const { moveId, targetMethod } = msg.data;
 
@@ -441,9 +436,9 @@ async function main(config: ServerConfig) {
       player.submittedMove = true;
 
       if (player1 && player1.submittedMove && player2?.socketId)
-        playerChannel.to(player2.socketId).emit("EnemySubmitted")
+        playerChannel.to(player2.socketId).emit("enemyMoveSubmitted")
       if (player2 && player2.submittedMove && player1?.socketId)
-        playerChannel.to(player1.socketId).emit("EnemySubmitted")
+        playerChannel.to(player1.socketId).emit("enemyMoveSubmitted")
 
       switch (moveId) {
         case "defend":
@@ -464,18 +459,8 @@ async function main(config: ServerConfig) {
         const player1Move = match.getPlayerMove(player1); // or store last submitted move somewhere
         const player2Move = match.getPlayerMove(player2);
 
-        // Send both moves to the clients
-        playerChannel.to(player1.socketId).emit("ExecuteTurn", {
-          playerMove: player1Move,
-          enemyMove: player2Move,
-        });
-        playerChannel.to(player2.socketId).emit("ExecuteTurn", {
-          playerMove: player2Move,
-          enemyMove: player1Move,
-        });
-
-        playerChannel.to(player1.socketId).emit("UnlockButton");
-        playerChannel.to(player2.socketId).emit("UnlockButton");
+        playerChannel.to(player1.socketId).emit("unlockButton");
+        playerChannel.to(player2.socketId).emit("unlockButton");
       }
     });
   });

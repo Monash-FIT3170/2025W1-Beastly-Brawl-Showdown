@@ -1,5 +1,5 @@
 import { Player } from "./player";
-import { AccountId } from "../shared/types";
+import { AccountId, PlayerNamespace } from "../shared/types";
 import { Battle, BattleOptions } from "../simulator/core/battle";
 import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
@@ -154,7 +154,7 @@ export class Match {
      * @param playersByAccountId Hashmap of players in the tournament
      * @returns None
      */
-    async runBattle(playerChannel: any): Promise<void> {
+    async runBattle(playerChannel: PlayerNamespace): Promise<void> {
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
             log_attention(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
@@ -194,21 +194,19 @@ export class Match {
                 }
             },
         });
-        
-        // switch displayed page to battle screen
-        // playerChannel.to(this.player1.socketId).emit("return-from-waiting");
-        // playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
 
-        playerChannel.to(this.player1.socketId).emit("round-start", {
+        playerChannel.to(this.player1.socketId).emit("startRound", {
           player1Monster: this.player1?.selectedMonsterTemplateName,
           player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
           sideID: 0,
         })
-        playerChannel.to(this.player2?.socketId).emit("round-start", {
+        if (this.player2) {
+            playerChannel.to(this.player2?.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
             player2Monster: this.player2?.selectedMonsterTemplateName,
             sideID: 1,
-        });
+            })
+        };
 
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
@@ -227,9 +225,10 @@ export class Match {
             }
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
-        
-        playerChannel.to(this.winner?.socketId).emit("send-to-waiting");
-        playerChannel.to(loser?.socketId).emit("send-to-waiting");
+        if (this.winner && loser) {
+            playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
+            playerChannel.to(loser?.socketId).emit("sendToWaiting");
+        }
     }
 
 }
