@@ -2,8 +2,6 @@ import { GameServer } from "./gameServer";
 import * as readline from "readline";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import connectDb, { MONGO_URI } from "./db/db";
-import { GameServerRegisterModel, IGameServerRegisterEntry } from "./db/models";
 import { log_attention, log_event, log_notice, log_warning } from "./utils";
 import * as fs from "fs";
 import * as path from "path";
