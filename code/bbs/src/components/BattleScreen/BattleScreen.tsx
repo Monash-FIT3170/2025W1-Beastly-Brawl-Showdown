@@ -159,18 +159,27 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     if (!socket) return;
     const handleNewNotice = (notice: Notice) => {
       console.log("Receiving Notice of type " + notice.kind)
-      if (notice.kind === "roll") {
-        setshowEnemySubmittedMessage(false);
-        setshowSubmittedMoveMessage(false);
-        setRollNotice(notice);
-        setshowRollMessage(true);
-      }
-      if (notice.kind === "chooseMove"){
-        setHasReceivedChooseMove(true);
-        setChooseMove(notice)
-      }
-      if (notice.kind === "rerollOption"){
-        notice.callback(true)
+      switch (notice.kind){
+        case "roll": {
+          setshowEnemySubmittedMessage(false);
+          setshowSubmittedMoveMessage(false);
+          setRollNotice(notice);
+          setshowRollMessage(true);
+          break;
+        }
+        case "chooseMove": {
+          setHasReceivedChooseMove(true);
+          setChooseMove(notice);
+          break;
+        }
+        case "rerollOption": {
+          notice.callback(true);
+          break;
+        }
+        default: {
+          console.log("ERROR, UNHANDLED NOTICE TYPE");
+          break;
+        }
       }
     };
     socket.on("newNotice", handleNewNotice);
@@ -266,9 +275,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
           disabled={buttonDisabled}
           mode={rollNotice ? "roll" : "combat"}
           chooseMove = {chooseMove}
+          fallbackMoves={{
+            attack: myMonster.template.attackActionId,
+            ability: myMonster.template.abilityActionId,
+            defend: myMonster.template.defendActionId,
+          }}
         />
       </div>
-      
       {/* Dice Roll Animation Overlay */}
       {showDiceAnimation && (
         <DiceRollAnimation

@@ -20,6 +20,11 @@ type BattleBottomProps = {
   onRoll: () => void;
   mode: "combat" | "roll";
   chooseMove: ChooseMove | null;
+  fallbackMoves: {
+    attack: EntryID;
+    ability?: EntryID;
+    defend: EntryID;
+  };
 };
 
 export const BattleBottom: React.FC<BattleBottomProps> = ({
@@ -28,6 +33,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   chooseMove,
   onRoll,
   mode,
+  fallbackMoves,
 }: BattleBottomProps) => {
   const getMove = (moveId: EntryID) => {
     return (COMMON_MOVE_POOL as Record<
@@ -71,6 +77,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   
   // Build button configs dynamically
   const rollBtn = buildNormalButton("roll", "/assets/img/d20.png");
+
   if (chooseMove?.data?.moveIdOptions) {
     for (const move of chooseMove.data.moveIdOptions) {
       switch(getMove(move).moveCat){
@@ -90,6 +97,13 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
           console.log("WHICH DUMB DUMB IS ADDING NEW MOVECATS")
         }
       }
+    }
+  }
+  else {
+    if (!disabled){
+      attackBtn = buildAtkButton(fallbackMoves.attack);
+      defendBtn = buildDefButton(fallbackMoves.defend);
+      abilityBtn = fallbackMoves.ability ? buildButton(fallbackMoves.ability, "/assets/img/ability2.png") : null;
     }
   }
 
