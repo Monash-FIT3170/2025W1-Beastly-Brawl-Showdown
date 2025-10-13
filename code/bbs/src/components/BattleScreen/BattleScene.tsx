@@ -14,7 +14,7 @@ import type {
 } from "../../../../simulator/core/event/core_events";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
-import { BattleMiddle } from ".//BattleMiddle";
+import { BattleMiddle } from "./BattleMiddle";
 import BattleMessage from "./BattleMessage";
 
 interface BattleSceneProps {

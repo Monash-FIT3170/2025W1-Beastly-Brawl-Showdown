@@ -5,10 +5,13 @@ import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common
 import type { MonsterTemplate } from "../../../../../simulator/core/monster/monster_template";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
+import type { PlayerClientToServerEvents, PlayerServerToClientEvents } from "../../../../../shared/types"
+
+type PlayerSocket = Socket<PlayerServerToClientEvents, PlayerClientToServerEvents>;
 
 //#region Socket Context Definition
 interface PlayerSocketContextType {
-  socket: Socket | null;
+  socket: PlayerSocket | null;
   isConnected: boolean;
 }
 
@@ -19,7 +22,7 @@ const PlayerSocketContext = createContext<PlayerSocketContextType>({
 
 const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<PlayerSocket | null>(null);
 
   const joinCode = sessionStorage.getItem("joinCode");
   const displayName = sessionStorage.getItem("displayName");
@@ -75,10 +78,8 @@ const PlayerContent = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("return-from-waiting", () => {console.log("Returned from waiting")})
-
     //#region Monster selection handle
-    socket.on("select-monster", (data) => {
+    socket.on("requestMonsterSelection", (data) => {
       if (data?.monsterPool) {
         setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
       }
@@ -93,7 +94,7 @@ const PlayerContent = () => {
     //#endregion
 
     //#region Round Start
-    socket.on("round-start", (data) => {
+    socket.on("startRound", (data) => {
       setWaiting(false);
       log_event("Received round-start data:", data);
 
@@ -128,28 +129,23 @@ const PlayerContent = () => {
     //#endregion
 
     //#region Waiting Room
-    socket.on("send-to-waiting", () => {
+    socket.on("sendToWaiting", () => {
       setWaiting(true);
     });
     //#endregion
 
-    // socket.on("return-from-waiting", () => {
-    //   setWaiting(false);
-    // });
-
     //#region Set winner
-    socket.on("tournament-finished", (data) => {
+    socket.on("tournamentFinished", (data) => {
       setWaiting(false);
       setWinner(data);
     });
     //#endregion
 
     return () => {
-      socket.off("select-monster");
-      socket.off("round-start");
-      socket.off("send-to-waiting");
-      // socket.off("return-from-waiting");
-      socket.off("tournament-finished");
+      socket.off("requestMonsterSelection");
+      socket.off("startRound");
+      socket.off("sendToWaiting");
+      socket.off("tournamentFinished");
     };
   }, [socket]);
 
@@ -190,7 +186,7 @@ const PlayerContent = () => {
     if (socket) {
       // Send the templateId instead of the name
       console.log("No of selections: ", noSelections);
-      socket.emit("RequestSubmitMonster", {
+      socket.emit("submitMonster", {
         data: {
           monsterTemplate: monster.templateId,
           selections: noSelections,
