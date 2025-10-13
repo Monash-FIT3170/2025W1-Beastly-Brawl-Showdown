@@ -20,7 +20,7 @@ export default function ProjectorPage() {
   const socketRef = useRef<HostSocket | null>(null);
 
   const { type } = useParams<{ type: "standard" | "random" }>();
-  const tournamentType = type === "random" ? "random" : "standard";
+  const roomType = type === "random" ? "random" : "standard";
   
   function getJoinUrl() {
     return window.location.hostname + "join/" + joinCode;
@@ -75,10 +75,10 @@ export default function ProjectorPage() {
     //#endregion
 
     //#region Request Room
-    socketRef.current.on("requestRoomResponse", (roomInfo: { roomId: number; joinCode: string }) => {
-      console.log("Room request response", roomInfo);
-      setRoomId(roomInfo.roomId);
-      setJoinCode(roomInfo.joinCode);
+    socketRef.current.on("requestRoomResponse", (data) => {
+      console.log("Room request response", data);
+      setRoomId(data.roomId);
+      setJoinCode(data.joinCode);
     });
 
     //#region Host App events
@@ -88,7 +88,7 @@ export default function ProjectorPage() {
     });
 
     if (!roomId) {
-      socketRef.current.emit("requestRoom", {type: tournamentType});
+      socketRef.current.emit("requestRoom", roomType);
       return;
     }
     //#endregion
@@ -105,8 +105,8 @@ export default function ProjectorPage() {
 
   function handleStartGame() {
     if (socketRef.current) {
-      socketRef.current.emit("requestStartGame", { roomId, type: tournamentType });
-      console.log("Start game requested!", tournamentType);
+      socketRef.current.emit("requestStartGame", roomId);
+      console.log("Start game requested!", roomType);
     }
   }
 

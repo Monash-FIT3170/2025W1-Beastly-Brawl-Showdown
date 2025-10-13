@@ -16,6 +16,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
 import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
+import { MonsterId } from "../simulator/core/monster/monster_pool";
+import { EntryID } from "../simulator/core/utils";
 
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
@@ -128,7 +130,7 @@ async function main(config: ServerConfig) {
       socket.emit("pong");
     });
 
-    socket.on("echo", async (msg: any) => {
+    socket.on("echo", async (msg: string) => {
       log_event(`Echoing: ${msg}`);
       socket.emit("echo", msg);
     });
@@ -159,8 +161,8 @@ async function main(config: ServerConfig) {
     });
 
     // #region New Room
-    socket.on("requestRoom", async (data: { type: "standard" | "random" }) => {
-      log_event("Room requested with mode: " + data.type);
+    socket.on("requestRoom", async (roomType) => {
+      log_event("Room requested with mode: " + roomType);
       // TODO prevent multiple rooms at the same time
       try {
         const { roomId: roomId, joinCode: joinCode } = gameServer.createRoom(socket.id, playerChannel);
@@ -169,47 +171,49 @@ async function main(config: ServerConfig) {
         const room = gameServer.rooms.get(roomId);
         if (room) {
           room.tournamentManager.tournamentType =
-            data.type === "random"
+            roomType === "random"
               ? TournamentType.Random
               : TournamentType.Standard;
         }
 
         socket.emit("requestRoomResponse", { roomId, joinCode });
         log_notice(
-          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${roomType}`
         );      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
 
     // #region Start Game
-    socket.on("requestStartGame", (msg: { roomId: number }) => {
-      log_event(`Host requested start-game for room ${msg.roomId}`);
+    socket.on("requestStartGame", (roomId) => {
+      log_event(`Host requested start-game for room ${roomId}`);
 
-      const room = gameServer.rooms.get(msg.roomId);
-      if (!room) {
-        socket.emit("error", "Room not found");
-        return;
-      }
-
-      // Relay to all players in this room
-      room.players.forEach((player) => {
-        let pool: string[];
-        if (room.tournamentManager.tournamentType === TournamentType.Random) {
-          pool = getRandomPool(3); // Random mode
-          log_event("Random Pool: ");
-          console.log(pool);
-        } else {
-          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
-            (k) => k !== "blank"
-          ); // Standard mode, exclude BlankMon
+      if (roomId) {
+      const room = gameServer.rooms.get(roomId);
+        if (!room) {
+          socket.emit("error", "Room not found");
+          return;
         }
 
-        player.currentMonsterPool = pool;
-        playerChannel.to(player.socketId).emit("requestMonsterSelection", { monsterPool: pool }); // Clients can now start monster selection
-      });
+        // Relay to all players in this room
+        room.players.forEach((player) => {
+          let pool: string[];
+          if (room.tournamentManager.tournamentType === TournamentType.Random) {
+            pool = getRandomPool(3); // Random mode
+            log_event("Random Pool: ");
+            console.log(pool);
+          } else {
+            pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
+              (k) => k !== "blank"
+            ); // Standard mode, exclude BlankMon
+          }
 
-      log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
+          player.currentMonsterPool = pool;
+          playerChannel.to(player.socketId).emit("requestMonsterSelection", { monsterPool: pool }); // Clients can now start monster selection
+        });
+      }
+
+      log_notice(`All players in room ${roomId} have been notified to start the game.`);
     });
   });
 
@@ -319,7 +323,7 @@ async function main(config: ServerConfig) {
     });
 
     // #region Select Monster
-    socket.on("submitMonster", (data: any) => {
+    socket.on("submitMonster", (data) => {
       const player = socket.data.player as Player;
       if (!player) return;
 
@@ -327,7 +331,7 @@ async function main(config: ServerConfig) {
       if (!room) return;
 
       // Expect the client to send the monster templateId (key)
-      const monsterKey = data.data.monsterTemplate as keyof typeof COMMON_MONSTER_POOL.monsters;
+      const monsterKey = data.monsterTemplate as keyof typeof COMMON_MONSTER_POOL.monsters;
       log_event(`Player selected monster key: ${monsterKey}`);
 
       // Validate selection
@@ -351,14 +355,14 @@ async function main(config: ServerConfig) {
       log_event(`Player ${player.displayName} selected ${player.selectedMonsterTemplateName}`);
 
       // Resolve promise if random tournament, 2nd round onwareds
-      if (data.data.selections > 1) {
+      if (data.selections > 1) {
         log_attention("Not the first monster selection, resolving promise...");
         room.tournamentManager.resolveMonsterSelection(player, monsterKey);
       }
 
       // Check if all players are ready
       let allReady;
-      if (data.data.selections == 1) {
+      if (data.selections == 1) {
         // Read from all players in room
         log_notice("Reading ready from all players");
         allReady = Array.from(room.players.values()).every(
@@ -376,8 +380,8 @@ async function main(config: ServerConfig) {
       }
 
       // All players ready, start tournament if first selection
-      if (data.data.selections == 1) {
-        log_warning(`Only start the tournament once. The number of monster selections is: ${data.data.selections}`);
+      if (data.selections == 1) {
+        log_warning(`Only start the tournament once. The number of monster selections is: ${data.selections}`);
         room.tournamentManager.startTournament(Array.from(room.players.values()));
 
         room.tournamentManager.matches.forEach((match: Match) => {
@@ -420,9 +424,9 @@ async function main(config: ServerConfig) {
     socket.on("requestRoll", handleRollNotice);
 
     // #region Submit Move
-    socket.on("submitMove", (msg: { data: any }) => {
+    socket.on("submitMove", (data) => {
       log_event("Test move submission log");
-      const { moveId, targetMethod } = msg.data;
+      const { moveId, targetingMethod } = data;
 
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -442,11 +446,11 @@ async function main(config: ServerConfig) {
 
       switch (moveId) {
         case "defend":
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
+          match.submitMove(player, moveId, targetingMethod as TargetingMethod, sourceSide as SideId);
           break;
         case "attack-normal":
           const targetSide = sourceSide === 1 ? 0 : 1;
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+          match.submitMove(player, moveId, targetingMethod as TargetingMethod, targetSide as SideId);
           break;
       }
 

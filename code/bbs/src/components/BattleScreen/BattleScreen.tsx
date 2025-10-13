@@ -8,6 +8,8 @@ import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
 import { type ChooseMove, type Notice, type Roll } from "../../../../simulator/core/notice/notice";
+import type { OrderedEvent } from "../../../../simulator/core/event/event_history";
+import type { RollEvent } from "../../../../simulator/core/event/core_events";
 
 interface BattleScreenProps {
   matchData: {
@@ -111,12 +113,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   //#region battle code
 
   //function that executes roll on server
-  function rollNow(rollNotice: Roll): void {
+  function rollNow(): void {
     if (!socket) return;
     
     // Execute the roll on server immediately
     setShowMessage(false);
-    socket.emit("requestRoll", rollNotice.kind);
+    socket.emit("requestRoll");
     setRollNotice(null);
     setshowRollMessage(false);
     // Note: dice animation will be triggered when we receive the roll event back from server
@@ -176,12 +178,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   // Handle player action (submit move to server)
   const handleAction = (
     moveId: EntryID,
-    targetMethod: TargetingMethod
+    targetingMethod: TargetingMethod
   ) => {
     if (!socket || !myMonster) return;
     console.log("Handling Action now")
-    const data = { moveId, targetMethod };
-    socket.emit("submitMove", { data });
+    socket.emit("submitMove", { moveId, targetingMethod });
     setshowSubmittedMoveMessage(true)
     setbuttonDisabled(true)
     setChooseMove(null)
@@ -208,16 +209,21 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewEvent = (ev: any) => {
-      // Check if this is a roll event for the current player
-      if (ev.name === "roll" && ev.source === matchData.myid) {
-        // Show dice animation with the actual server roll result
-        setDiceRollResult(ev.result);
+    const handleNewEvent = (event: OrderedEvent) => {
+      // Type narrowing to check this is a roll event.
+      if (
+        event.name === "roll" &&
+        "source" in event &&
+        "result" in event &&
+        typeof event.result === "number" &&
+        event.source === matchData.myid
+      ) {
+        setDiceRollResult(event.result);
         setShowDiceAnimation(true);
       }
       
       setEvents(prev => {
-        const next = [...prev, ev];
+        const next = [...prev, event];
         return next;
       });
     };
@@ -249,7 +255,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         />
         <BattleBottom
           onAction={handleAction}
-          onRoll={() => rollNotice && rollNow(rollNotice)}
+          onRoll={() => rollNotice && rollNow()}
           disabled={buttonDisabled}
           mode={rollNotice ? "roll" : "combat"}
           chooseMove = {chooseMove}
