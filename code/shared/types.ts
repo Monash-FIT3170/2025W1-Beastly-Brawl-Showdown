@@ -14,13 +14,11 @@ export type BasicServerToClientEvents = {
   pong: () => void;
   echo: (msg: any) => void;
   error: (msg: string) => void;
-  gameReadyToStart: () => void;
 };
 
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   submitMonster: (data: any) => void;
   submitMove: (data: any) => void;
-  submitMoveLockState: () => void;
   requestRoll: (data: any) => void;
 };
 
@@ -28,11 +26,8 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   newNotice: (data: any) => void;
   newEvent: (data: any) => void;
   removeNotice: (data: any) => void;
-  refreshPlayerList: (list: string[]) => void;
   requestMonsterSelection: (data: any) => void;
-  requestMoveSelection: (responseDeadline: number) => void;
   enemyMoveSubmitted: () => void;
-  executeTurn: () => void;
   unlockButton: () => void;
   startRound: (data: any) => void;
   sendToWaiting: () => void;
@@ -44,7 +39,6 @@ export type PlayerSocketData = {};
 export type HostClientToServerEvents = BasicClientToServerEvents & {
   requestRoom: (data: any) => void;
   requestStartGame: (data: any) => void;
-  requestStartRound: () => void;
 };
 
 export type HostServerToClientEvents = BasicServerToClientEvents & {
