@@ -2,7 +2,7 @@ import { Side, SideId } from "../side";
 import { EntryID } from "../utils";
 import { BaseEvent } from "./base_event";
 
-export interface BattleOverEvent extends BaseEvent{
+export interface BattleOverEvent extends BaseEvent {
   name: "battleOver";
 }
 
@@ -42,6 +42,7 @@ export interface StartMoveEvent extends BaseEvent {
   source: SideId;
   target: SideId;
   moveId: EntryID;
+  attackChargesConsumed: number;
 }
 
 export interface MoveSuccessEvent extends BaseEvent {
@@ -64,9 +65,10 @@ export interface MoveFailedEvent extends BaseEvent {
   moveId: EntryID;
   reason: unknown; // TODO
 }
+
 export interface BuffEvent extends BaseEvent {
   name: "buff";
   source: SideId;
   target: SideId;
-  buffs: { armour: number; };
+  buffs: {attack?: number, armour?: number };
 }
