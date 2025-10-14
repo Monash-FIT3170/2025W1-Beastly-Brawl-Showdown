@@ -101,6 +101,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   }
   else {
     if (!disabled){
+      console.warn("NO CHOOOSEMOVE HAS BEEN DETECED, GOING BACK TO FALLBACK BUTTONS")
       attackBtn = buildAtkButton(fallbackMoves.attack);
       defendBtn = buildDefButton(fallbackMoves.defend);
       abilityBtn = fallbackMoves.ability ? buildButton(fallbackMoves.ability, "/assets/img/ability2.png") : null;
