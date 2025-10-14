@@ -105,9 +105,17 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     return idxs;
   }, [events]);
 
+  const prevEventsRef = useRef(events);
+  useEffect(() => {
+    console.log('events identity changed:', prevEventsRef.current !== events);
+    prevEventsRef.current = events;
+  }, [events]);
+
   // useeffect to know when to play the turn
   useEffect(() => {
     let completedTurns = snapshotIdxs.length - 1;
+    console.log("EVENTS:", JSON.stringify(events))
+    console.log(turns)
 
     // If our playback counter is ahead, reset it so it never blocks turns from running
     if (lastSnapCountRef.current > completedTurns) {

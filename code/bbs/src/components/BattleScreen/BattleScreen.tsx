@@ -139,6 +139,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setEvents([snapshot]);
   }, [matchData]);
 
+  // Whenever there is new matchdata, reset the turn index
+  useEffect(() => {
+    if (!matchData) return;
+    setTurnIndex(0);
+    setIsPlaying(true);
+  }, [matchData]);
+
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
     onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
@@ -160,6 +167,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       <div className="canvas-body" id="battle-screen-body">
         <BattleTop />
         <BattleScene
+          key={matchData.myid + '-' + matchData.player1Monster.template.templateId + '-' + matchData.player2Monster.template.templateId}
           events={events}
           turnIndex={turnIndex}
           isPlaying={isPlaying}
