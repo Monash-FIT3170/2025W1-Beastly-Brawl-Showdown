@@ -5,6 +5,9 @@ import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common
 import type { MonsterTemplate } from "../../../../../simulator/core/monster/monster_template";
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
+import type { ChooseMove, Notice, Roll } from "../../../../../simulator/core/notice/notice";
+import type { EntryID } from "../../../../../simulator/core/utils";
+import type { TargetingMethod } from "../../../../../simulator/core/action/targeting";
 import type { PlayerClientToServerEvents, PlayerServerToClientEvents } from "../../../../../shared/types"
 
 type PlayerSocket = Socket<PlayerServerToClientEvents, PlayerClientToServerEvents>;
@@ -73,6 +76,18 @@ const PlayerContent = () => {
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
 
+  const [events, setEvents] = useState<any[]>([]);
+  const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
+  const [hasReceivedChooseMove, setHasReceivedChooseMove] = useState(false);
+  const [rollNotice, setRollNotice] = useState<Roll | null>(null);
+  const [showRollMessage, setShowRollMessage] = useState(false);
+  const [diceRollResult, setDiceRollResult] = useState<number>(20);
+  const [showDiceAnimation, setShowDiceAnimation] = useState(false);
+  const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
+  const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
+  const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
+  const [showMessage, setShowMessage] = useState(false);
+
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -126,7 +141,6 @@ const PlayerContent = () => {
 
       setAllReady(true);
     });
-    //#endregion
 
     //#region Waiting Room
     socket.on("sendToWaiting", () => {
@@ -174,7 +188,7 @@ const PlayerContent = () => {
     };
   }, [isConnected]);
 
-  const handleMonsterSelection = (monsterName: string) => {
+    const handleMonsterSelection = (monsterName: string) => {
     // Find the monster in COMMON_MONSTER_POOL by name
     const monster = Object.values(COMMON_MONSTER_POOL.monsters).find((m) => m.name === monsterName);
 
@@ -198,6 +212,131 @@ const PlayerContent = () => {
       console.warn("No socket connection available");
     }
   };
+
+  //#region battleScreen props
+  //notice handler
+  useEffect(() => {
+    if (!socket) return;
+    const handleNewNotice = (notice: Notice) => {
+      console.log("Receiving Notice of type " + notice.kind)
+      switch (notice.kind){
+        case "roll": {
+          setshowEnemySubmittedMessage(false);
+          setshowSubmittedMoveMessage(false);
+          setRollNotice(notice);
+          setShowRollMessage(true)
+          break;
+        }
+        case "chooseMove": {
+          setHasReceivedChooseMove(true);
+          setChooseMove(notice);
+          break;
+        }
+        case "rerollOption": {
+          notice.callback(true);
+          break;
+        }
+        default: {
+          console.warn("ERROR, UNHANDLED NOTICE TYPE");
+          break;
+        }
+      }
+    };
+    socket.on("newNotice", handleNewNotice);
+    return () => {
+      socket.off("newNotice", handleNewNotice);
+    };
+  }, [socket]);
+
+  //event handler
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewEvent = (ev: any) => {
+      // Check if this is a roll event for the current player
+      if (ev.name === "roll" && ev.source === matchData?.myid) {
+        // Show dice animation with the actual server roll result
+        setDiceRollResult(ev.result);
+        setShowDiceAnimation(true);
+      }
+      
+      setEvents(prev => {
+        const next = [...prev, ev];
+        return next;
+      });
+    };
+
+    socket.on("newEvent", handleNewEvent);
+    return () => {
+      socket.off("newEvent", handleNewEvent);
+    };
+  }, [socket, matchData?.myid]);
+
+  //listen for enemy submitting messages
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleEnemySubmitted = () => {
+      setshowEnemySubmittedMessage(true);
+    };
+
+    socket.on("EnemySubmitted" as keyof PlayerServerToClientEvents, handleEnemySubmitted);
+    return () => {
+      socket.off("EnemySubmitted" as keyof PlayerServerToClientEvents, handleEnemySubmitted);
+    };
+  }, [socket]);
+
+  //UnlockButton responder, so we know when server is ready to unlock the button
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUnlock = () => {
+      setTurnFinishedPlaying(false);
+      setShowMessage(false);
+      setshowSubmittedMoveMessage(false);
+      setshowEnemySubmittedMessage(false);
+    };
+
+    socket.on("UnlockButton" as keyof PlayerServerToClientEvents, handleUnlock);
+    return () => {
+      socket.off("UnlockButton" as keyof PlayerServerToClientEvents, handleUnlock);
+    };
+  }, [socket]);
+
+  //button unlocker for when both client and server are ready
+  const isButtonEnabled = hasReceivedChooseMove && turnFinishedPlaying;
+
+  //function that executes roll on server
+  function rollNow(rollNotice: Roll): void {
+    if (!socket) return;
+    // Execute the roll on server immediately
+    setShowMessage(false);
+    const params: Parameters<typeof rollNotice.callback> = [];
+    socket.emit("requestRoll", { kind: rollNotice.kind, params });
+    setRollNotice(null);
+    setShowRollMessage(false);
+    // Note: dice animation will be triggered when we receive the roll event back from server
+  }
+  
+  //callback function to be passed into battleScrren and battlebottom to handle player actions
+  const handleSubmitMove = (moveId: EntryID, targetMethod: TargetingMethod, myMonsterId: EntryID) => {
+    if (!socket) return;
+    socket.emit("submitMove", {
+      data: { moveId, targetMethod, myMonsterId },
+    });
+  };
+  
+  // Debugging useEffect
+  useEffect(() => {
+    console.log(
+      "Button is now",
+      isButtonEnabled ? "ENABLED" : "DISABLED",
+      "| hasReceivedChooseMove =", hasReceivedChooseMove,
+      "| turnFinishedPlaying =", turnFinishedPlaying
+    );
+  }, [isButtonEnabled, hasReceivedChooseMove, turnFinishedPlaying]);
+
+  //#endregion
 
   if (!isConnected) return <p>Connecting to server...</p>;
 
@@ -229,7 +368,27 @@ const PlayerContent = () => {
   // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
 
-  return <BattleScreen matchData={matchData!} />;
+  return <BattleScreen 
+    matchData={matchData!} 
+    events={events}
+    setEvents={setEvents}
+    chooseMove={chooseMove}
+    setChooseMove={setChooseMove}
+    setHasReceivedChooseMove = {setHasReceivedChooseMove}
+    rollNotice={rollNotice}
+    showRollMessage={showRollMessage}
+    buttonDisabled={!isButtonEnabled}
+    showDiceAnimation={showDiceAnimation}
+    diceRollResult={diceRollResult}
+    setShowDiceAnimation={setShowDiceAnimation}
+    onSubmitMove={handleSubmitMove}
+    onRoll={rollNow}
+    setTurnFinishedPlaying={setTurnFinishedPlaying}
+    showEnemySubmittedMessage={showEnemySubmittedMessage}
+    showSubmittedMoveMessage={showSubmittedMoveMessage}
+    setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
+    showMessage={showMessage}
+  />;
 };
 //#endregion
 
