@@ -388,21 +388,21 @@ async function main(config: ServerConfig) {
             return; //TODO HANDLE BYE
           }
 
-          // P1: send a copy/start
-          room.playerChannel.to(match.player1.socketId).emit("startRound", {
-            player1Monster: match.player1?.selectedMonsterTemplateName,
-            player2Monster: match.player2?.selectedMonsterTemplateName, // not option if bye
-            sideID: 0,
-          });
+          // // P1: send a copy/start
+          // room.playerChannel.to(match.player1.socketId).emit("startRound", {
+          //   player1Monster: match.player1?.selectedMonsterTemplateName,
+          //   player2Monster: match.player2?.selectedMonsterTemplateName, // not option if bye
+          //   sideID: 0,
+          // });
 
-          //P2: send a copy/start (invert sides?)
-          if (match.player2) {
-            room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
-              player1Monster: match.player1?.selectedMonsterTemplateName,
-              player2Monster: match.player2?.selectedMonsterTemplateName,
-              sideID: 1,
-            });
-          }
+          // //P2: send a copy/start (invert sides?)
+          // if (match.player2) {
+          //   room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
+          //     player1Monster: match.player1?.selectedMonsterTemplateName,
+          //     player2Monster: match.player2?.selectedMonsterTemplateName,
+          //     sideID: 1,
+          //   });
+          // }
         });
       }
     });
