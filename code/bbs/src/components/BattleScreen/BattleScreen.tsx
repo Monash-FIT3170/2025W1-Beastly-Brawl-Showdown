@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { BattleTop } from "./BattleTop";
 import { BattleBottom } from "./BattleBottom";
-import { DiceRollAnimation } from "./DiceRollAnimation";
+import { DiceRollAnimation } from "./Animations/DiceRollAnimation";
 import { usePlayerSocket } from "../player/game/PlayerPage";
 import { type MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./battle_scene";
-import { type ChooseMove, type Notice, type Roll } from "../../../../simulator/core/notice/notice";
+import {
+  type ChooseMove,
+  type Notice,
+  type Roll,
+} from "../../../../simulator/core/notice/notice";
 
 interface BattleScreenProps {
   matchData: {
@@ -30,16 +34,18 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   const [buttonDisabled, setbuttonDisabled] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const [rollNotice, setRollNotice] = useState<Roll | null>(null);
-  const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
-  const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
+  const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] =
+    useState(false);
+  const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] =
+    useState(false);
   const [showRollMessage, setshowRollMessage] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
   const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(false);
   const [hasReceivedChooseMove, setHasReceivedChooseMove] = useState(false);
-  const [chooseMove, setChooseMove] = useState<ChooseMove|null>(null);
-  
+  const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
+
   // Dice animation state
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [diceRollResult, setDiceRollResult] = useState(20);
@@ -58,17 +64,18 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
     const enemyMonsterData = isPlayer1
       ? matchData.player2Monster
       : matchData.player1Monster;
-      
+
     setMyMonster({
       template: myMonsterData.template,
       currentHp:
         myMonsterData.currentHp ?? myMonsterData.template.baseStats.health,
-      playerId: matchData.myid.toString(),  
+      playerId: matchData.myid.toString(),
     });
     setEnemyMonster({
       template: enemyMonsterData.template,
       currentHp:
-        enemyMonsterData.currentHp ?? enemyMonsterData.template.baseStats.health,
+        enemyMonsterData.currentHp ??
+        enemyMonsterData.template.baseStats.health,
       playerId: matchData.myid.toString(),
     });
 
@@ -125,7 +132,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   //function that executes roll on server
   function rollNow(rollNotice: Roll): void {
     if (!socket) return;
-    
+
     // Execute the roll on server immediately
     setShowMessage(false);
     const params: Parameters<typeof rollNotice.callback> = [];
@@ -158,19 +165,19 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   useEffect(() => {
     if (!socket) return;
     const handleNewNotice = (notice: Notice) => {
-      console.log("Receiving Notice of type " + notice.kind)
+      console.log("Receiving Notice of type " + notice.kind);
       if (notice.kind === "roll") {
         setshowEnemySubmittedMessage(false);
         setshowSubmittedMoveMessage(false);
         setRollNotice(notice);
         setshowRollMessage(true);
       }
-      if (notice.kind === "chooseMove"){
+      if (notice.kind === "chooseMove") {
         setHasReceivedChooseMove(true);
-        setChooseMove(notice)
+        setChooseMove(notice);
       }
-      if (notice.kind === "rerollOption"){
-        notice.callback(true)
+      if (notice.kind === "rerollOption") {
+        notice.callback(true);
       }
     };
     socket.on("newNotice", handleNewNotice);
@@ -187,17 +194,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
   }, [hasReceivedChooseMove, turnFinishedPlaying]);
 
   // Handle player action (submit move to server)
-  const handleAction = (
-    moveId: EntryID,
-    targetMethod: TargetingMethod
-  ) => {
+  const handleAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!socket || !myMonster) return;
-    console.log("Handling Action now")
+    console.log("Handling Action now");
     const data = { moveId, targetMethod };
     socket.emit("RequestSubmitMove", { data });
-    setshowSubmittedMoveMessage(true)
-    setbuttonDisabled(true)
-    setChooseMove(null)
+    setshowSubmittedMoveMessage(true);
+    setbuttonDisabled(true);
+    setChooseMove(null);
   };
 
   // GET READY TO UNLOCK BUTTON ON NEXT TURN
@@ -228,8 +232,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
         setDiceRollResult(ev.result);
         setShowDiceAnimation(true);
       }
-      
-      setEvents(prev => {
+
+      setEvents((prev) => {
         const next = [...prev, ev];
         return next;
       });
@@ -252,7 +256,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
           turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) => setTurnIndex(next)}
+          onAdvanceTurn={(next: React.SetStateAction<number>) =>
+            setTurnIndex(next)
+          }
           myid={matchData.myid}
           showEnemySubmittedMessage={showEnemySubmittedMessage}
           showSubmittedMoveMessage={showSubmittedMoveMessage}
@@ -265,10 +271,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({ matchData }) => {
           onRoll={() => rollNotice && rollNow(rollNotice)}
           disabled={buttonDisabled}
           mode={rollNotice ? "roll" : "combat"}
-          chooseMove = {chooseMove}
+          chooseMove={chooseMove}
         />
       </div>
-      
+
       {/* Dice Roll Animation Overlay */}
       {showDiceAnimation && (
         <DiceRollAnimation

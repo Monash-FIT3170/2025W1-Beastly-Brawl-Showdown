@@ -89,6 +89,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "dodge",
+      abilityName: "Dodge",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -119,6 +120,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "stun",
+      abilityName: "Stun",
       onSpawnActions: [],
     },
 
@@ -140,6 +142,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "double-attack",
+      abilityName: "Double Attack",
       onSpawnActions: [],
     },
 
@@ -217,6 +220,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "attack-bonus-next3",
+      abilityName: "Roar",
       onSpawnActions: [],
     },
 
@@ -238,6 +242,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "battle-cry",
+      abilityName: "Battle Cry",
       onSpawnActions: [],
     },
 
