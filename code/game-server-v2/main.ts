@@ -16,6 +16,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
 import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
+import { log } from "console";
 
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
@@ -177,7 +179,8 @@ async function main(config: ServerConfig) {
         socket.emit("requestRoomResponse", { roomId, joinCode });
         log_notice(
           `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
-        );      } catch {
+        );
+      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
@@ -396,7 +399,7 @@ async function main(config: ServerConfig) {
 
           //P2: send a copy/start (invert sides?)
           if (match.player2) {
-            room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
+            room.playerChannel.to(match.player2?.socketId).emit("startRound", {
               player1Monster: match.player1?.selectedMonsterTemplateName,
               player2Monster: match.player2?.selectedMonsterTemplateName,
               sideID: 1,
@@ -440,6 +443,9 @@ async function main(config: ServerConfig) {
       if (player2 && player2.submittedMove && player1?.socketId)
         playerChannel.to(player1.socketId).emit("enemyMoveSubmitted")
 
+      log_event(`Player ${player.displayName} submitted move ${moveId} with targeting method ${targetMethod} from side ${sourceSide} and monster ${player.monster}`);
+
+      // Handle different move types
       switch (moveId) {
         case "defend":
           match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
@@ -448,16 +454,34 @@ async function main(config: ServerConfig) {
           const targetSide = sourceSide === 1 ? 0 : 1;
           match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
           break;
+        case "ability": {
+          const abilityMoveId = match.getMonsterAbility(player);
+          if (!abilityMoveId) return;
+
+          const moveData = COMMON_MOVE_POOL[abilityMoveId];
+          const opponentSide = (match.getSideForPlayer(player) === 0 ? 1 : 0) as SideId;
+
+          let targetSide: SideId;
+          switch (moveData.targetingMethod) {
+            case "self":
+              targetSide = match.getSideForPlayer(player) as SideId;
+              break;
+            case "single-enemy":
+              targetSide = opponentSide;
+              break;
+            default:
+              targetSide = match.getSideForPlayer(player) as SideId;
+          }
+
+          match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId);
+          break;
+        }
       }
 
       const allSubmitted = player1.submittedMove && player2?.submittedMove;
 
       if (allSubmitted) {
         [player1.submittedMove, player2.submittedMove] = [false, false];
-
-        // Prepare move data for client
-        const player1Move = match.getPlayerMove(player1); // or store last submitted move somewhere
-        const player2Move = match.getPlayerMove(player2);
 
         playerChannel.to(player1.socketId).emit("unlockButton");
         playerChannel.to(player2.socketId).emit("unlockButton");

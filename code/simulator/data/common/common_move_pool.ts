@@ -1,5 +1,5 @@
 import { MovePool } from "../../core/action/move/move_pool";
-import { default_attack } from "../../core/action/move/move_utils";
+import { default_attack, postMoveSuccessEvent, postStartMoveEvent } from "../../core/action/move/move_utils";
 import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../core/action/targeting";
 import { Battle } from "../../core/battle";
 import { BuffEvent, MoveFailedEvent } from "../../core/event/core_events";
@@ -155,6 +155,8 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       const target: SideId = targetingData.target;
       const targetMonster: Monster = battle.sides[target].monster;
 
+      postStartMoveEvent(battle, source, target, this, 1);
+
       const abilityChargeStunComponent: AbilityChargeStunComponent | null = getComponent(sourceMonster, "abilityChargeStun");
       if (!abilityChargeStunComponent || abilityChargeStunComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
@@ -175,6 +177,9 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       } else {
         stunnedComponent.remainingDuration++;
       }
+
+      postMoveSuccessEvent(battle, source, target, this);
+      
     },
     onFail: async function (battle: Battle, source: SideId): Promise<void> {
       throw new Error("Function not implemented.");
