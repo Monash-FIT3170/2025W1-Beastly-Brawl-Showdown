@@ -1,6 +1,7 @@
 import { RoomId, JoinCode, AccountId } from "./types";
 import { Player } from "./player";
 import { TournamentManager, TournamentType } from "./tournament_manager";
+import { PlayerNamespace } from "../shared/types";
 
 export class Room {
   readonly hostSocketId: string;
@@ -15,11 +16,11 @@ export class Room {
 
   players: Player[] = [];
   gameState: any = undefined;
-  playerChannel: any;
+  playerChannel: PlayerNamespace;
   tournamentType: TournamentType;
   tournamentManager: TournamentManager;
 
-  constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode, playerChannel: any, tournamentType: TournamentType) {
+  constructor(hostSocketId: string, roomId: RoomId, joinCode: JoinCode, playerChannel: PlayerNamespace, tournamentType: TournamentType) {
     this.hostSocketId = hostSocketId;
     this.roomId = roomId;
     this.joinCode = joinCode;

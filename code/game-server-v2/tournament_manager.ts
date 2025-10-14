@@ -2,6 +2,7 @@ import { Player } from "./player";
 import { Match, MatchType } from "./match";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 import { getRandomPool, log_attention, log_event } from "./utils";
+import { PlayerNamespace } from "../shared/types";
 
 export enum TournamentType {
   Standard = "standard",
@@ -10,12 +11,12 @@ export enum TournamentType {
 
 export class TournamentManager {
   matches: Match[] = [];
-  playerChannel: any;
+  playerChannel: PlayerNamespace;
   tournamentType: TournamentType;
   winners: Player[] = [];
   private monsterSelectionResolvers: Map<string, (monster: string) => void> = new Map();
 
-  constructor(playerChannel: any, type: TournamentType) {
+  constructor(playerChannel: PlayerNamespace, type: TournamentType) {
     this.playerChannel = playerChannel;
     this.tournamentType = type;
   }
@@ -76,7 +77,7 @@ export class TournamentManager {
     if (this.winners.length === 1) {
       console.log(`Tournament Winner: ${this.winners[0].displayName}`);
       // Optionally notify host:
-      this.playerChannel.emit("tournament-finished", this.winners[0].displayName);
+      this.playerChannel.emit("tournamentFinished", this.winners[0].displayName);
       return;
     }
     
@@ -89,7 +90,7 @@ export class TournamentManager {
         log_event("Random Pool: ");
         console.log(pool);
         player.currentMonsterPool = pool;
-        this.playerChannel.to(player.socketId).emit("select-monster", { monsterPool: pool });
+        this.playerChannel.to(player.socketId).emit("requestMonsterSelection", { monsterPool: pool });
       });
       await this.waitForMonsterSelections(this.winners);
       console.log("poopoo");
