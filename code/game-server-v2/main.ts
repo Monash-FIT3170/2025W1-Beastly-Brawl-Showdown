@@ -138,7 +138,7 @@ async function main(config: ServerConfig) {
   type HostChannelAuth = {
     // hostName: string;
   };
-  hostChannel.use((socket, next) => {
+  hostChannel.use((socket: Socket, next: (err?: any) => void) => {
     log_event(`Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as HostChannelAuth;
     /// for now always accept the host name
@@ -151,7 +151,8 @@ async function main(config: ServerConfig) {
   });
 
   // TODO use a persistent ID rather than socket ID
-  hostChannel.on("connection", async (socket) => {
+
+  hostChannel.on("connection", async (socket: Socket) => {
     log_event(`Host connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -257,7 +258,7 @@ async function main(config: ServerConfig) {
     res.send(checkResult);
   });
 
-  playerChannel.use((socket, next) => {
+  playerChannel.use((socket: Socket, next: (err?: any) => void) => {
     log_event(`Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as PlayerChannelAuth;
 
@@ -311,7 +312,7 @@ async function main(config: ServerConfig) {
   });
 
   // #region Player Channel
-  playerChannel.on("connection", async (socket) => {
+  playerChannel.on("connection", async (socket: Socket) => {
     log_event(`Player connected: ${socket.id}`);
 
     socket.on("disconnect", () => {

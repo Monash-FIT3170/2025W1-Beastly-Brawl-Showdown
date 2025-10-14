@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { BattleTop } from "./BattleTop";
 import { BattleBottom } from "./BattleBottom";
 import { DiceRollAnimation } from "./DiceRollAnimation";
-import { usePlayerSocket } from "../player/game/PlayerPage";
 import { type MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
@@ -21,13 +20,12 @@ interface BattleScreenProps {
 
   chooseMove: ChooseMove | null;
   setChooseMove:React.Dispatch<React.SetStateAction<ChooseMove | null>>;
-  hasReceivedChooseMove: boolean;
+  setHasReceivedChooseMove : React.Dispatch<React.SetStateAction<boolean>>;
 
   rollNotice: Roll | null;
   showRollMessage: boolean;
 
   buttonDisabled : boolean;
-  setbuttonDisabled : React.Dispatch<React.SetStateAction<boolean>>;
 
   showDiceAnimation: boolean;
   diceRollResult: number;
@@ -36,13 +34,11 @@ interface BattleScreenProps {
   onSubmitMove: (moveId: EntryID, targetMethod: TargetingMethod, myMonsterId: EntryID) => void;
   onRoll: (rollNotice: Roll) => void;
 
-  turnFinishedPlaying: boolean;
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   showEnemySubmittedMessage: boolean;
   setShowSubmittedMoveMessage : React.Dispatch<React.SetStateAction<boolean>>;
   showSubmittedMoveMessage: boolean;
   showMessage: boolean;
-  setShowMessage: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 type MonsterState = {
@@ -57,42 +53,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
    setEvents,
    chooseMove,
    setChooseMove,
-   hasReceivedChooseMove,
+   setHasReceivedChooseMove,
    rollNotice,
    showRollMessage,
    buttonDisabled,
-   setbuttonDisabled,
    showDiceAnimation,
    diceRollResult,
    setShowDiceAnimation ,
    onSubmitMove,
    onRoll,
-   turnFinishedPlaying,
    setTurnFinishedPlaying,
    showEnemySubmittedMessage,
    setShowSubmittedMoveMessage,
    showSubmittedMoveMessage,
    showMessage,
-   setShowMessage,
   }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
-  // const [buttonDisabled, setbuttonDisabled] = useState(false);
-  // const [showMessage, setShowMessage] = useState(false);
-  // const [rollNotice, setRollNotice] = useState<Roll | null>(null);
-  // const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
-  // const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
-  // const [showRollMessage, setshowRollMessage] = useState(false);
-  // const [events, setEvents] = useState<any[]>([]);
   const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  // const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(false);
-  // const [hasReceivedChooseMove, setHasReceivedChooseMove] = useState(false);
-  // const [chooseMove, setChooseMove] = useState<ChooseMove|null>(null);
-  
-  // Dice animation state
-  // const [showDiceAnimation, setShowDiceAnimation] = useState(false);
-  // const [diceRollResult, setDiceRollResult] = useState(20);
 
   //#region initializations
   // Initialize monsters when matchData changes
@@ -164,7 +143,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     if (!myMonster) return;
     onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
     setShowSubmittedMoveMessage(true);
-    setbuttonDisabled(true);
+    setTurnFinishedPlaying(false)
+    setHasReceivedChooseMove(false)
     setChooseMove(null);
   };
 

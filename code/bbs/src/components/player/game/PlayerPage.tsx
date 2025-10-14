@@ -85,9 +85,8 @@ const PlayerContent = () => {
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
   const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
-  const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(false);
+  const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
-  const [buttonDisabled, setbuttonDisabled] = useState(false);
 
   const waitingTextRef = useRef<HTMLDivElement>(null);
 
@@ -215,19 +214,6 @@ const PlayerContent = () => {
   };
 
   //#region battleScreen props
-
-  // Listen for 'match-started' socket event
-  useEffect(() => {
-    if (!socket) return undefined;
-    const handleMatchStarted = (data: any) => {
-      console.log("Match started:", data);
-    };
-    socket.on("match-started", handleMatchStarted);
-    return () => {
-      socket.off("match-started", handleMatchStarted);
-    };
-  }, [socket]);
-
   //notice handler
   useEffect(() => {
     if (!socket) return;
@@ -294,9 +280,9 @@ const PlayerContent = () => {
       setshowEnemySubmittedMessage(true);
     };
 
-    socket.on("EnemySubmitted", handleEnemySubmitted);
+    socket.on("EnemySubmitted" as keyof PlayerServerToClientEvents, handleEnemySubmitted);
     return () => {
-      socket.off("EnemySubmitted", handleEnemySubmitted);
+      socket.off("EnemySubmitted" as keyof PlayerServerToClientEvents, handleEnemySubmitted);
     };
   }, [socket]);
 
@@ -311,18 +297,14 @@ const PlayerContent = () => {
       setshowEnemySubmittedMessage(false);
     };
 
-    socket.on("UnlockButton", handleUnlock);
+    socket.on("UnlockButton" as keyof PlayerServerToClientEvents, handleUnlock);
     return () => {
-      socket.off("UnlockButton", handleUnlock);
+      socket.off("UnlockButton" as keyof PlayerServerToClientEvents, handleUnlock);
     };
   }, [socket]);
 
   //button unlocker for when both client and server are ready
-  useEffect(() => {
-    if (hasReceivedChooseMove && turnFinishedPlaying) {
-      setbuttonDisabled(false);
-    }
-  }, [hasReceivedChooseMove, turnFinishedPlaying]);
+  const isButtonEnabled = hasReceivedChooseMove && turnFinishedPlaying;
 
   //function that executes roll on server
   function rollNow(rollNotice: Roll): void {
@@ -330,7 +312,7 @@ const PlayerContent = () => {
     // Execute the roll on server immediately
     setShowMessage(false);
     const params: Parameters<typeof rollNotice.callback> = [];
-    socket.emit("requestRoll", rollNotice.kind, params);
+    socket.emit("requestRoll", { kind: rollNotice.kind, params });
     setRollNotice(null);
     setShowRollMessage(false);
     // Note: dice animation will be triggered when we receive the roll event back from server
@@ -339,11 +321,21 @@ const PlayerContent = () => {
   //callback function to be passed into battleScrren and battlebottom to handle player actions
   const handleSubmitMove = (moveId: EntryID, targetMethod: TargetingMethod, myMonsterId: EntryID) => {
     if (!socket) return;
-    socket.emit("RequestSubmitMove", {
+    socket.emit("submitMove", {
       data: { moveId, targetMethod, myMonsterId },
     });
   };
   
+  // Debugging useEffect
+  useEffect(() => {
+    console.log(
+      "Button is now",
+      isButtonEnabled ? "ENABLED" : "DISABLED",
+      "| hasReceivedChooseMove =", hasReceivedChooseMove,
+      "| turnFinishedPlaying =", turnFinishedPlaying
+    );
+  }, [isButtonEnabled, hasReceivedChooseMove, turnFinishedPlaying]);
+
   //#endregion
 
   if (!isConnected) return <p>Connecting to server...</p>;
@@ -382,23 +374,20 @@ const PlayerContent = () => {
     setEvents={setEvents}
     chooseMove={chooseMove}
     setChooseMove={setChooseMove}
-    hasReceivedChooseMove={hasReceivedChooseMove}
+    setHasReceivedChooseMove = {setHasReceivedChooseMove}
     rollNotice={rollNotice}
     showRollMessage={showRollMessage}
-    buttonDisabled={buttonDisabled}
-    setbuttonDisabled={setbuttonDisabled}
+    buttonDisabled={!isButtonEnabled}
     showDiceAnimation={showDiceAnimation}
     diceRollResult={diceRollResult}
     setShowDiceAnimation={setShowDiceAnimation}
     onSubmitMove={handleSubmitMove}
     onRoll={rollNow}
-    turnFinishedPlaying={turnFinishedPlaying}
     setTurnFinishedPlaying={setTurnFinishedPlaying}
     showEnemySubmittedMessage={showEnemySubmittedMessage}
     showSubmittedMoveMessage={showSubmittedMoveMessage}
     setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
     showMessage={showMessage}
-    setShowMessage={setShowMessage}
   />;
 };
 //#endregion
