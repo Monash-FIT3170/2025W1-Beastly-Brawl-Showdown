@@ -67,6 +67,7 @@ export const usePlayerSocket = () => useContext(PlayerSocketContext);
 const PlayerContent = () => {
   const { socket, isConnected } = usePlayerSocket();
 
+  const [battleInstanceKey, setBattleInstanceKey] = useState(0);
   const [matchData, setMatchData] = useState<{ player1Monster: { template: MonsterTemplate; currentHp: number }; player2Monster: { template: MonsterTemplate; currentHp: number }; myid: number } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
@@ -111,6 +112,11 @@ const PlayerContent = () => {
     //#region Round Start
     socket.on("startRound", (data) => {
       setWaiting(false);
+
+      // Reset client-side event stream for the new match
+      setEvents([]);
+      setTurnFinishedPlaying(true);
+
       log_event("Received round-start data:", data);
 
       const player1TemplateName = data?.player1Monster;
@@ -138,6 +144,9 @@ const PlayerContent = () => {
         player2Monster: { template: player2Monster, currentHp: player2Monster.baseStats.health },
         myid: data.sideID,
       });
+
+      // Give a key for every new battle
+      setBattleInstanceKey((k) => k + 1);
 
       setAllReady(true);
     });
@@ -388,6 +397,7 @@ const PlayerContent = () => {
     showSubmittedMoveMessage={showSubmittedMoveMessage}
     setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
     showMessage={showMessage}
+    battleInstanceKey={battleInstanceKey}
   />;
 };
 //#endregion
