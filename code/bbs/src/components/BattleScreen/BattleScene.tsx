@@ -16,6 +16,7 @@ import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
 import { BattleMiddle } from "./BattleMiddle";
 import BattleMessage from "./BattleMessage";
+import { DiceRollAnimation } from "./DiceRollAnimation";
 
 interface BattleSceneProps {
   events: BaseEvent[];
@@ -69,6 +70,10 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       performMoveAnimation(moveId, actor)
     );
   };
+
+  // Dice roll animation state
+  const [showDiceAnimation, setShowDiceAnimation] = useState(false);
+  const [diceRollResult, setDiceRollResult] = useState<number | null>(null);
 
   // Clamp selected index
   const selectedTurnIndex = Number.isInteger(turnIndex)
@@ -314,7 +319,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       case "roll": {
-        // (optional) show roll results here
+        const rollEvent = ev as any;
+        if (rollEvent.source === myid) {
+          setDiceRollResult(rollEvent.result);
+          setShowDiceAnimation(true);
+        }
         break;
       }
 
@@ -471,6 +480,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       )}
       {showRollMessage && <BattleMessage message={"Time To Roll!"} />}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
+
+      {showDiceAnimation && (
+        <DiceRollAnimation
+          onComplete={() => setShowDiceAnimation(false)}
+          rollResult={diceRollResult ?? 20}
+        />
+      )}
     </div>
   );
 };
