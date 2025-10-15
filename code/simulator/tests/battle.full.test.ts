@@ -297,3 +297,94 @@ describe("Battle full flow", () => {
     expect(getComponent(knight.monster, "advantage")).not.toBeNull();
   });
 });
+
+describe("Battle full flow", () => {
+  test("FULL battle.run 4", async () => {
+    const battle = makeBattle(7777, [
+      { monsterId: "sea_urchin" },
+      { monsterId: "mystic_wryven" },
+    ]);
+    spawnAllMonsters(battle);
+    const seaUrchin = battle.sides[0];
+    const mysticWryven = battle.sides[1];
+
+    expect(getComponent(seaUrchin.monster, "thorns")).not.toBeNull();
+
+    const rngSequence = [0.95, 0.99, 0.6, 0.8, 0.4, 0.2];
+    let rngIndex = 0;
+    const originalNext = battle.rng.next;
+
+    battle.rng.next = () => {
+      if (rngIndex < rngSequence.length) {
+        const value = rngSequence[rngIndex];
+        rngIndex++;
+        return value;
+      } else {
+        return originalNext.call(battle.rng);
+      }
+    };
+
+    const gameTurns: Array<Record<number, { moveId: EntryID; targeting: TargetingData }>> = [
+      {
+        // turn 1
+        [seaUrchin.id]: { moveId: "defend" as EntryID, targeting: { targetingMethod: "self" } as TargetingData },
+        [mysticWryven.id]: { moveId: "attack-normal" as EntryID, targeting: targetEnemy(seaUrchin.id) },
+      },
+      {
+        // turn 2
+        [seaUrchin.id]: { moveId: "defend" as EntryID, targeting: { targetingMethod: "self" } as TargetingData },
+        [mysticWryven.id]: { moveId: "attack-normal" as EntryID, targeting: targetEnemy(seaUrchin.id) },
+      },
+    ];
+
+    const autoResolve = autoResolveRollsAndRerolls();
+    let turnIndex = 0;
+    let initialHealthAdjusted = false;
+    const scriptedListener = {
+      onPostNotice: (target: number, notice: any) => {
+        if (notice.kind === "chooseMove") {
+          if (turnIndex >= gameTurns.length) {
+            throw new Error(`No turn for index ${turnIndex}`);
+          }
+          if (!initialHealthAdjusted) {
+            seaUrchin.monster.health = 16;
+            initialHealthAdjusted = true;
+          }
+          const plan = gameTurns[turnIndex];
+          const action = plan[target];
+          notice.callback(action.moveId, action.targeting);
+          if (target === battle.sides.length - 1) {
+            turnIndex++;
+          }
+        } else {
+          autoResolve.onPostNotice(target, notice);
+        }
+      },
+      onRemoveNotice: autoResolve.onRemoveNotice,
+    };
+
+    battle.noticeBoard.subscribeListener(scriptedListener);
+
+    try {
+      await battle.run();
+    } finally {
+      battle.noticeBoard.unsubscribeListener(scriptedListener);
+      battle.rng.next = originalNext;
+    }
+
+    const moveFailedEvents = battle.eventHistory.events.filter((event) => event.name === "moveFailed");
+    expect(moveFailedEvents).toHaveLength(0);
+
+    const damageEvents = battle.eventHistory.events.filter(
+      (event): event is DamageEvent & { index: number } => event.name === "damage"
+    );
+    expect(damageEvents).toHaveLength(2);
+    expect(damageEvents.map((event) => ({ source: event.source, target: event.target, amount: event.amount }))).toEqual([
+      { source: mysticWryven.id, target: seaUrchin.id, amount: 12 },
+      { source: mysticWryven.id, target: seaUrchin.id, amount: 8 },
+    ]);
+
+    expect(mysticWryven.monster.health).toBe(48);
+    expect(seaUrchin.monster.health).toBeLessThanOrEqual(0);
+  });
+});
