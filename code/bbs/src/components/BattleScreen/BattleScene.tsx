@@ -18,6 +18,7 @@ import { BattleMiddle } from "./BattleMiddle";
 import BattleMessage from "./BattleMessage";
 
 interface BattleSceneProps {
+  battleInstanceKey: number
   events: BaseEvent[];
   turnIndex: number;
   isPlaying: boolean;
@@ -34,6 +35,7 @@ interface BattleSceneProps {
 console.log("BattleScene loaded");
 
 export const BattleScene: React.FC<BattleSceneProps> = ({
+  battleInstanceKey,
   events,
   turnIndex,
   isPlaying,
@@ -108,8 +110,27 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   const prevEventsRef = useRef(events);
   useEffect(() => {
     console.log('events identity changed:', prevEventsRef.current !== events);
+    const isNewArray = prevEventsRef.current !== events;
+    if (!isNewArray) return;
+
+    // Reset everything between battles
+    lastSnapCountRef.current = 0;
+    turnToPlayRef.current = [];
+    chainRef.current = Promise.resolve();
+
+    // Reset UI state & messages
+    setcurrentMessage("");
+    setShowAnimation(false);
+    setEnemySlash(false);
+    setPlayerSlash(false);
+    setEnemyShield(false);
+    setPlayerShield(false);
+    setEnemyAbility(false);
+    setPlayerAbility(false);
+    setRunTurnNow(false);
+
     prevEventsRef.current = events;
-  }, [events]);
+  }, [battleInstanceKey]);
 
   // useeffect to know when to play the turn
   useEffect(() => {
