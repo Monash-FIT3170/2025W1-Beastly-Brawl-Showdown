@@ -279,10 +279,10 @@ const PlayerContent = () => {
           setChooseMove(notice);
           break;
         }
-        // case "rerollOption": {
-        //   notice.callback(true);
-        //   break;
-        // }
+        case "rerollOption": {
+          notice.callback(true);
+          break;
+        }
         default: {
           console.warn("ERROR, UNHANDLED NOTICE TYPE");
           break;
