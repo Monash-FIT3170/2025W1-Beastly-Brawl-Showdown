@@ -11,6 +11,8 @@ import { MonsterPool, MonsterId } from "./monster/monster_pool";
 import { getIsBlockedFromMove, getStat, spawnMonster } from "./monster/monster";
 import { MovePool } from "./action/move/move_pool";
 
+
+
 export interface PlayerOptions {
   monsterId: MonsterId; //! Can change to list if needed later
 }
@@ -34,6 +36,8 @@ export class Battle {
   readonly eventHistory: EventHistory;
 
   readonly noticeBoard: NoticeBoard;
+
+  surrendered: boolean = false; 
 
   constructor(options: BattleOptions) {
     this.rng = new PRNG(options.seed);
@@ -77,7 +81,7 @@ export class Battle {
     this.eventHistory.addEvent(initialState);
 
     // TODO exit
-    while (this.sides.every((side) => side.monster.health > 0)) {
+    while (!this.surrendered && this.sides.some((side) => side.monster.health > 0)) {
       //#########################
       //# Start of turn trigger #
       //#########################
@@ -213,29 +217,41 @@ export class Battle {
 
   handleSurrender(surrenderingSideId: SideId) {
   const surrenderingSide = this.sides[surrenderingSideId];
-  if (!surrenderingSide) return;
+  if (!surrenderingSide) {
+    console.error(`[BATTLE] Invalid surrender: side ${surrenderingSideId} does not exist.`);
+    return;
+  }
 
-  // Find the surviving side (opposite of the surrendering side)
+  // Identify the winning side
   const winningSide = this.sides.find((s) => s.id !== surrenderingSideId);
+  if (!winningSide) {
+    console.error(`[BATTLE] Cannot determine winner for surrender from side ${surrenderingSideId}.`);
+    return;
+  }
 
-  // Reduce surrendering monster's health to 0
+  // Mark the surrendering monster as defeated
   surrenderingSide.monster.health = 0;
 
-  // Add a snapshot event to reflect surrender
-  const surrenderSnapshot = {
+  // Signal that the battle has ended due to surrender
+  this.surrendered = true;
+
+  // Take a snapshot for frontend updates
+  const snapshotEvent: SnapshotEvent = {
     name: "snapshot",
     sides: JSON.parse(JSON.stringify(this.sides)),
   };
-  this.eventHistory.addEvent(surrenderSnapshot);
+  this.eventHistory.addEvent(snapshotEvent);
 
-  // Add a battle over event
-  const battleOverEvent = {
-    name: "battleOver",
-  };
+  // Emit the standard battle-over event
+  const battleOverEvent: BattleOverEvent = { name: "battleOver" };
   this.eventHistory.addEvent(battleOverEvent);
 
   console.log(
-    `Battle: Side ${surrenderingSideId} surrendered. Side ${winningSide?.id} wins.`
+    `[BATTLE] Side ${surrenderingSideId} surrendered. Side ${winningSide.id} wins. Battle ended.`
   );
 }
+
+
+
+
 }
