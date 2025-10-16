@@ -159,7 +159,6 @@ describe("Battle.Move.perform.stun", () => {
 
       const stunner = battle.sides[0];
       const target = battle.sides[1];
-      stunner.monster.components.push(new AbilityChargeStunComponent(1));
 
       expect(getComponent(target.monster, "stunned")).toBeNull();
 

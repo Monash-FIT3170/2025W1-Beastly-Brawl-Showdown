@@ -388,3 +388,101 @@ describe("Battle full flow", () => {
     expect(seaUrchin.monster.health).toBeLessThanOrEqual(0);
   });
 });
+
+describe("Battle full flow", () => {
+  test("FULL battle.run 5", async () => {
+    const battle = makeBattle(6969, [
+      { monsterId: "stone_hide" },
+      { monsterId: "shadow_fang" },
+    ]);
+    spawnAllMonsters(battle);
+    const stoneHide = battle.sides[0];
+    const shadowFang = battle.sides[1];
+
+    const rngSequence = [0.9, 0.7, 0.6, 0.95, 0.8, 0.9];
+    let rngIndex = 0;
+    const originalNext = battle.rng.next;
+
+    battle.rng.next = () => {
+      if (rngIndex < rngSequence.length) {
+        const value = rngSequence[rngIndex];
+        rngIndex++;
+        return value;
+      } else {
+        return originalNext.call(battle.rng);
+      }
+    };
+
+    const gameTurns: Array<Record<number, { moveId: EntryID; targeting: TargetingData }>> = [
+      {
+        // turn 1
+        [stoneHide.id]: { moveId: "stun" as EntryID, targeting: targetEnemy(shadowFang.id) },
+        [shadowFang.id]: { moveId: "attack-normal" as EntryID, targeting: targetEnemy(stoneHide.id) },
+      },
+      {
+        // turn 2
+        [stoneHide.id]: { moveId: "stun" as EntryID, targeting: targetEnemy(shadowFang.id) },
+        [shadowFang.id]: { moveId: "defend" as EntryID, targeting: { targetingMethod: "self" } as TargetingData },
+      },
+      {
+        // turn 3
+        [stoneHide.id]: { moveId: "attack-normal" as EntryID, targeting: targetEnemy(shadowFang.id) },
+        [shadowFang.id]: { moveId: "defend" as EntryID, targeting: { targetingMethod: "self" } as TargetingData },
+      },
+    ];
+
+    const autoResolve = autoResolveRollsAndRerolls();
+    let turnIndex = 0;
+    let initialHealthAdjusted = false;
+    const scriptedListener = {
+      onPostNotice: (target: number, notice: any) => {
+        if (notice.kind === "chooseMove") {
+          if (turnIndex >= gameTurns.length) {
+            throw new Error(`No turn for index ${turnIndex}`);
+          }
+          if (!initialHealthAdjusted) {
+            shadowFang.monster.health = 8;
+            initialHealthAdjusted = true;
+          }
+          const plan = gameTurns[turnIndex];
+          const action = plan[target];
+          notice.callback(action.moveId, action.targeting);
+          if (target === battle.sides.length - 1) {
+            turnIndex++;
+          }
+        } else {
+          autoResolve.onPostNotice(target, notice);
+        }
+      },
+      onRemoveNotice: autoResolve.onRemoveNotice,
+    };
+
+    battle.noticeBoard.subscribeListener(scriptedListener);
+
+    try {
+      await battle.run();
+    } finally {
+      battle.noticeBoard.unsubscribeListener(scriptedListener);
+      battle.rng.next = originalNext;
+    }
+  
+    const abilityCharge = getComponent(stoneHide.monster, "abilityChargeStun");
+    expect(abilityCharge).not.toBeNull();
+    expect(abilityCharge!.charges).toBe(0);
+
+    const failedEvents = battle.eventHistory.events.filter((event) => event.name === "moveFailed");
+    expect(failedEvents).toHaveLength(1);
+    
+
+    const damageEvents = battle.eventHistory.events.filter(
+      (event): event is DamageEvent & { index: number } => event.name === "damage"
+    );
+    expect(damageEvents).toHaveLength(1);
+    expect(damageEvents.map((event) => ({ source: event.source, target: event.target, amount: event.amount }))).toEqual([
+      { source: stoneHide.id, target: shadowFang.id, amount: 8 },
+    ]);
+
+    expect(shadowFang.monster.health).toBeLessThanOrEqual(0);
+    expect(stoneHide.monster.health).toBe(60);
+  });
+});

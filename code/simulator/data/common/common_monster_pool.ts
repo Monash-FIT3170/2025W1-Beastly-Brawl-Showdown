@@ -5,6 +5,7 @@ import {
   AdvantageComponent,
   DamageReductionComponent,
   ThornsComponent,
+  AbilityChargeStunComponent,
 } from "../../core/monster/component/core_components";
 import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
@@ -119,7 +120,14 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "stun",
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> { 
+            world.sides[source].monster.components.push(new AbilityChargeStunComponent(1));
+          },
+        },
+      ],
     },
 
     fleet_foot: {
