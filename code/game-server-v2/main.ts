@@ -319,6 +319,27 @@ async function main(config: ServerConfig) {
       log_event("Player disconnected.");
     });
 
+    socket.on("surrender", () => {
+  const player = socket.data.player as Player;
+  if (!player) return;
+
+  const room = gameServer.rooms.get(player.roomId);
+  if (!room) return;
+
+  // Find the match the player is currently in
+  const match = room.tournamentManager.matches.find(
+    (m) =>
+      m.player1?.displayName === player.displayName ||
+      m.player2?.displayName === player.displayName
+  );
+
+  if (!match) return;
+
+  // Handle surrender
+  match.handleSurrender(player, room.playerChannel);
+});
+
+
     // #region Select Monster
     socket.on("submitMonster", (data: any) => {
       const player = socket.data.player as Player;

@@ -5,8 +5,14 @@ export type OrderedEvent = BaseEvent & {
   index: number;
 };
 
+/** Special event type for surrender */
+export type SurrenderEvent = BaseEvent & {
+  name: "surrender";
+  playerId: string;
+};
+
 type EventHistoryListener = {
-  onNewEvent(event: OrderedEvent): void;
+  onNewEvent(event: OrderedEvent | SurrenderEvent): void;
 };
 
 export class EventHistory {
@@ -21,20 +27,34 @@ export class EventHistory {
     this.listeners = [];
   }
 
+  /** Add a regular event */
   addEvent(event: BaseEvent) {
-    const orderedEvent = { ...event, index: this.events.length };
+    const orderedEvent: OrderedEvent = { ...event, index: this.events.length };
     this.events.push(orderedEvent);
     this.emitOnNewEvent(orderedEvent);
+  }
+
+  /** Add a surrender event */
+  addSurrenderEvent(playerId: string) {
+    const surrenderEvent: SurrenderEvent = {
+      name: "surrender",
+      playerId,
+    };
+    // Add to events array as ordered event as well
+    const orderedEvent: OrderedEvent = { ...surrenderEvent, index: this.events.length };
+    this.events.push(orderedEvent);
+    this.emitOnNewEvent(surrenderEvent);
   }
 
   subscribeListener(listener: EventHistoryListener) {
     this.listeners.push(listener);
   }
+
   unsubscribeListener(listener: EventHistoryListener) {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
-  private emitOnNewEvent(event: OrderedEvent) {
+  private emitOnNewEvent(event: OrderedEvent | SurrenderEvent) {
     this.listeners.forEach((listener) => {
       listener.onNewEvent(event);
     });

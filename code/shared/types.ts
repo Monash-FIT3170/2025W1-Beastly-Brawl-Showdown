@@ -32,6 +32,9 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   startRound: (data: any) => void;
   sendToWaiting: () => void;
   tournamentFinished: (data: any) => void;
+
+
+   MatchEnded: (data: { result: "win" | "lose" }) => void;
 };
 
 export type PlayerSocketData = {};

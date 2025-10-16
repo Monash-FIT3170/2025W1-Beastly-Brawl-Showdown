@@ -10,6 +10,8 @@ import { TargetingData } from "../simulator/core/action/targeting";
 import { EntryID } from "../simulator/core/utils";
 import { ChooseMove, Roll } from "../simulator/core/notice/notice";
 import { TargetingMethod } from "../simulator/core/action/targeting";
+import { SnapshotEvent } from "../simulator/core/event/core_events";
+
 
 export enum MatchType {
     DUEL,
@@ -230,5 +232,48 @@ export class Match {
             playerChannel.to(loser?.socketId).emit("sendToWaiting");
         }
     }
+
+     handleSurrender(surrenderingPlayer: Player, playerChannel: PlayerNamespace): void {
+    const winner = surrenderingPlayer === this.player1 ? this.player2 : this.player1;
+    if (!winner) {
+      log_event(`[MATCH] Surrender ignored: opponent not found.`);
+      return;
+    }
+
+    this.winner = winner;
+    this.matchType = MatchType.DUEL;
+
+    if (this.battle) {
+      // End current battle cleanly
+      this.battle.eventHistory.addEvent({ name: "battleOver" });
+
+      const snapshot: SnapshotEvent = {
+        name: "snapshot",
+        sides: JSON.parse(JSON.stringify(this.battle.sides)),
+      };
+      this.battle.eventHistory.addEvent(snapshot);
+
+      log_event(`[MATCH ${this.matchID}] Forcing battle termination due to surrender.`);
+      this.battle = undefined;
+    }
+
+    // Notify clients
+    playerChannel.to(surrenderingPlayer.socketId).emit("MatchEnded", { result: "lose" });
+    playerChannel.to(winner.socketId).emit("MatchEnded", { result: "win" });
+
+    // Optional: send both back to waiting room
+    playerChannel.to(surrenderingPlayer.socketId).emit("sendToWaiting");
+    playerChannel.to(winner.socketId).emit("sendToWaiting");
+
+    // Add loser as spectator
+    if (surrenderingPlayer.linkedAccountId) {
+      winner.addSpectator(surrenderingPlayer.linkedAccountId);
+    }
+
+    log_event(`[MATCH ${this.matchID}] Player ${surrenderingPlayer.displayName} surrendered. Winner: ${winner.displayName}`);
+  }
+
+
+
 
 }

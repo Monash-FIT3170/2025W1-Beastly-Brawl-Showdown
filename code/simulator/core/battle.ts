@@ -210,4 +210,32 @@ export class Battle {
     };
     this.eventHistory.addEvent(battleOverEvent);
   }
+
+  handleSurrender(surrenderingSideId: SideId) {
+  const surrenderingSide = this.sides[surrenderingSideId];
+  if (!surrenderingSide) return;
+
+  // Find the surviving side (opposite of the surrendering side)
+  const winningSide = this.sides.find((s) => s.id !== surrenderingSideId);
+
+  // Reduce surrendering monster's health to 0
+  surrenderingSide.monster.health = 0;
+
+  // Add a snapshot event to reflect surrender
+  const surrenderSnapshot = {
+    name: "snapshot",
+    sides: JSON.parse(JSON.stringify(this.sides)),
+  };
+  this.eventHistory.addEvent(surrenderSnapshot);
+
+  // Add a battle over event
+  const battleOverEvent = {
+    name: "battleOver",
+  };
+  this.eventHistory.addEvent(battleOverEvent);
+
+  console.log(
+    `Battle: Side ${surrenderingSideId} surrendered. Side ${winningSide?.id} wins.`
+  );
+}
 }
