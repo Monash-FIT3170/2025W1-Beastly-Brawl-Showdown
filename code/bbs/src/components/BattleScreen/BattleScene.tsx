@@ -29,7 +29,7 @@ interface BattleSceneProps {
   showSubmittedMoveMessage: boolean;
   showMessage: boolean;
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  showRollMessage: boolean;
+  // showRollMessage: boolean;
 }
 
 console.log("BattleScene loaded");
@@ -45,7 +45,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   showSubmittedMoveMessage,
   showMessage,
   setTurnFinishedPlaying,
-  showRollMessage,
+  // showRollMessage,
 }) => {
   // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
@@ -475,10 +475,10 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       {showEnemySubmittedMessage && (
         <BattleMessage message={"Enemy Has Submitted"} />
       )}
-      {showSubmittedMoveMessage && (
-        <BattleMessage message={"Your Move Has Been Submitted"} />
+      {!showEnemySubmittedMessage && showSubmittedMoveMessage && (
+        <BattleMessage message="Your Move Has Been Submitted" />
       )}
-      {showRollMessage && <BattleMessage message={"Time To Roll!"} />}
+      {/* {showRollMessage && <BattleMessage message={"Time To Roll!"} />} */}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
 
       {showDiceAnimation && (

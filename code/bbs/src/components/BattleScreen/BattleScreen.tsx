@@ -7,8 +7,6 @@ import { type TargetingMethod } from "../../../../simulator/core/action/targetin
 import BattleScene from "./BattleScene";
 import {
   type ChooseMove,
-  type Notice,
-  type Roll,
 } from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
@@ -25,8 +23,8 @@ interface BattleScreenProps {
   setChooseMove: React.Dispatch<React.SetStateAction<ChooseMove | null>>;
   setHasReceivedChooseMove: React.Dispatch<React.SetStateAction<boolean>>;
 
-  rollNotice: Roll | null;
-  showRollMessage: boolean;
+  // rollNotice: Roll | null;
+  // showRollMessage: boolean;
 
   buttonDisabled: boolean;
 
@@ -35,7 +33,7 @@ interface BattleScreenProps {
     targetMethod: TargetingMethod,
     myMonsterId: EntryID
   ) => void;
-  onRoll: (rollNotice: Roll) => void;
+  // onRoll: (rollNotice: Roll) => void;
 
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   showEnemySubmittedMessage: boolean;
@@ -57,11 +55,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   chooseMove,
   setChooseMove,
   setHasReceivedChooseMove,
-  rollNotice,
-  showRollMessage,
+  // rollNotice,
+  // showRollMessage,
   buttonDisabled,
   onSubmitMove,
-  onRoll,
+  // onRoll,
   setTurnFinishedPlaying,
   showEnemySubmittedMessage,
   setShowSubmittedMoveMessage,
@@ -167,13 +165,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           showSubmittedMoveMessage={showSubmittedMoveMessage}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
-          showRollMessage={showRollMessage}
+          // showRollMessage={showRollMessage}
         />
         <BattleBottom
           onAction={onAction}
-          onRoll={() => rollNotice && onRoll(rollNotice)}
+          // onRoll={() => rollNotice && onRoll(rollNotice)}
           disabled={buttonDisabled}
-          mode={rollNotice ? "roll" : "combat"}
+          // mode={rollNotice ? "roll" : "combat"}
           chooseMove={chooseMove}
           fallbackMoves={{
             attack: myMonster.template.attackActionId,

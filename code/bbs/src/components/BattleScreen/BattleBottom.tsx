@@ -17,9 +17,9 @@ type MoveButton = Button & {
 type BattleBottomProps = {
   onAction: (moveId: EntryID, targetMethod: TargetingMethod) => void;
   disabled?: boolean;
-  onRoll: () => void;
-  mode: "combat" | "roll";
   chooseMove: ChooseMove | null;
+  // onRoll,
+  // mode,
   fallbackMoves: {
     attack: EntryID;
     ability?: EntryID;
@@ -31,8 +31,8 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   onAction,
   disabled,
   chooseMove,
-  onRoll,
-  mode,
+  // onRoll,
+  // mode,
   fallbackMoves,
 }: BattleBottomProps) => {
   const getMove = (moveId: EntryID) => {
@@ -63,20 +63,20 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   };
 
 
-  // Added a button that isn't tied to the monster's actions
-  const buildNormalButton = (id: string, fallbackIcon: string) => {
-    return {
-      id,
-      icon: fallbackIcon,
-    } as Button;
-  };
+  // // Added a button that isn't tied to the monster's actions
+  // const buildNormalButton = (id: string, fallbackIcon: string) => {
+  //   return {
+  //     id,
+  //     icon: fallbackIcon,
+  //   } as Button;
+  // };
 
   let attackBtn: MoveButton | null = null;
   let defendBtn: MoveButton | null = null;
   let abilityBtn: MoveButton | null = null;
   
   // Build button configs dynamically
-  const rollBtn = buildNormalButton("roll", "/assets/img/d20.png");
+  // const rollBtn = buildNormalButton("roll", "/assets/img/d20.png");
 
   if (chooseMove?.data?.moveIdOptions) {
     for (const move of chooseMove.data.moveIdOptions) {
@@ -119,24 +119,22 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     </button>
   );
 
-  const renderButtonForRoll = (btn: Button) => (
-    <button key={btn.id} className="glb-btn" onClick={() => onRoll()}>
-      <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
-    </button>
-  );
+  // const renderButtonForRoll = (btn: Button) => (
+  //   <button key={btn.id} className="glb-btn" onClick={() => onRoll()}>
+  //     <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
+  //   </button>
+  // );
 
   return (
     <div className="battleScreenBottom">
-      {mode === "roll" ? (
-        renderButtonForRoll(rollBtn)
-      ) : (
+      (
         <>
           {attackBtn && renderButton(attackBtn)}
           {abilityBtn && renderButton(abilityBtn)}
           {defendBtn &&  renderButton(defendBtn)}
           {/* <div className="shield-uses"></div> */}
         </>
-      )}
+      )
     </div>
   );
 };

@@ -107,8 +107,8 @@ const PlayerContent = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
   const [hasReceivedChooseMove, setHasReceivedChooseMove] = useState(false);
-  const [rollNotice, setRollNotice] = useState<Roll | null>(null);
-  const [showRollMessage, setShowRollMessage] = useState(false);
+  // const [rollNotice, setRollNotice] = useState<Roll | null>(null);
+  // const [showRollMessage, setShowRollMessage] = useState(false);
   const [diceRollResult, setDiceRollResult] = useState<number>(20);
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] =
@@ -270,8 +270,9 @@ const PlayerContent = () => {
         case "roll": {
           setshowEnemySubmittedMessage(false);
           setshowSubmittedMoveMessage(false);
-          setRollNotice(notice);
-          setShowRollMessage(true);
+          rollNow(notice)
+          // setRollNotice(notice);
+          // setShowRollMessage(true);
           break;
         }
         case "chooseMove": {
@@ -364,8 +365,8 @@ const PlayerContent = () => {
     setShowMessage(false);
     const params: Parameters<typeof rollNotice.callback> = [];
     socket.emit("requestRoll", { kind: rollNotice.kind, params });
-    setRollNotice(null);
-    setShowRollMessage(false);
+    // setRollNotice(null);
+    // setShowRollMessage(false);
     // Note: dice animation will be triggered when we receive the roll event back from server
   }
 
@@ -439,11 +440,11 @@ const PlayerContent = () => {
       chooseMove={chooseMove}
       setChooseMove={setChooseMove}
       setHasReceivedChooseMove={setHasReceivedChooseMove}
-      rollNotice={rollNotice}
-      showRollMessage={showRollMessage}
+      // rollNotice={rollNotice}
+      // showRollMessage={showRollMessage}
       buttonDisabled={!isButtonEnabled}
       onSubmitMove={handleSubmitMove}
-      onRoll={rollNow}
+      // onRoll={rollNow}
       setTurnFinishedPlaying={setTurnFinishedPlaying}
       showEnemySubmittedMessage={showEnemySubmittedMessage}
       showSubmittedMoveMessage={showSubmittedMoveMessage}
