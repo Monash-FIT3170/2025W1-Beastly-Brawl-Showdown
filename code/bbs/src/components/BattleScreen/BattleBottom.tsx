@@ -18,8 +18,8 @@ type BattleBottomProps = {
   onAction: (moveId: EntryID, targetMethod: TargetingMethod) => void;
   disabled?: boolean;
   chooseMove: ChooseMove | null;
-  // onRoll,
-  // mode,
+  onReroll: (option:boolean) => void;
+  rerollMode: boolean;
   fallbackMoves: {
     attack: EntryID;
     ability?: EntryID;
@@ -31,8 +31,8 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   onAction,
   disabled,
   chooseMove,
-  // onRoll,
-  // mode,
+  onReroll,
+  rerollMode,
   fallbackMoves,
 }: BattleBottomProps) => {
   const getMove = (moveId: EntryID) => {
@@ -63,20 +63,21 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   };
 
 
-  // // Added a button that isn't tied to the monster's actions
-  // const buildNormalButton = (id: string, fallbackIcon: string) => {
-  //   return {
-  //     id,
-  //     icon: fallbackIcon,
-  //   } as Button;
-  // };
+  // Added a button that isn't tied to the monster's actions
+  const buildNormalButton = (id: string, fallbackIcon: string) => {
+    return {
+      id,
+      icon: fallbackIcon,
+    } as Button;
+  };
 
   let attackBtn: MoveButton | null = null;
   let defendBtn: MoveButton | null = null;
   let abilityBtn: MoveButton | null = null;
   
   // Build button configs dynamically
-  // const rollBtn = buildNormalButton("roll", "/assets/img/d20.png");
+  const rerollBtnY = buildNormalButton("rerollY", "/assets/img/d20.png");
+  const rerollBtnN = buildNormalButton("rerollN", "/assets/img/d20.png");
 
   if (chooseMove?.data?.moveIdOptions) {
     for (const move of chooseMove.data.moveIdOptions) {
@@ -119,22 +120,26 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
     </button>
   );
 
-  // const renderButtonForRoll = (btn: Button) => (
-  //   <button key={btn.id} className="glb-btn" onClick={() => onRoll()}>
-  //     <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
-  //   </button>
-  // );
+  const renderButtonForReroll = (btn: Button, option:boolean) => (
+    <button key={btn.id} className="glb-btn" onClick={() => onReroll(option)}>
+      <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
+    </button>
+  );
 
   return (
     <div className="battleScreenBottom">
-      (
+      {rerollMode ? (
+        <>
+          {renderButtonForReroll(rerollBtnY, true)}
+          {renderButtonForReroll(rerollBtnN, false)}
+        </>
+      ) : (
         <>
           {attackBtn && renderButton(attackBtn)}
           {abilityBtn && renderButton(abilityBtn)}
-          {defendBtn &&  renderButton(defendBtn)}
-          {/* <div className="shield-uses"></div> */}
+          {defendBtn && renderButton(defendBtn)}
         </>
-      )
+      )}
     </div>
   );
-};
+}

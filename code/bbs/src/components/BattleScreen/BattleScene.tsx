@@ -30,6 +30,8 @@ interface BattleSceneProps {
   showMessage: boolean;
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   // showRollMessage: boolean;
+  rerollMode: boolean
+  parentDiceRollResult : number | null;
 }
 
 console.log("BattleScene loaded");
@@ -46,6 +48,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   showMessage,
   setTurnFinishedPlaying,
   // showRollMessage,
+  rerollMode,
+  parentDiceRollResult,
+
 }) => {
   // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
@@ -318,6 +323,15 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         break;
       }
 
+      case "reroll": {
+        const rerollEvent = ev as any;
+        if (rerollEvent.source === myid) {
+          setDiceRollResult(rerollEvent.result);
+          setShowDiceAnimation(true);
+        }
+        break;
+      }
+      
       case "roll": {
         const rollEvent = ev as any;
         if (rollEvent.source === myid) {
@@ -472,11 +486,14 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         enemyAbilityName={template2.abilityName}
         playerAbilityName={template.abilityName}
       />
-      {showEnemySubmittedMessage && (
+      {!shouldShowMessage && showEnemySubmittedMessage && (
         <BattleMessage message={"Enemy Has Submitted"} />
       )}
-      {!showEnemySubmittedMessage && showSubmittedMoveMessage && (
+      {!shouldShowMessage && !showEnemySubmittedMessage && showSubmittedMoveMessage && (
         <BattleMessage message="Your Move Has Been Submitted" />
+      )}
+      {rerollMode && (
+        <BattleMessage message={`You rolled ${parentDiceRollResult}. Would you like to reroll?`} />
       )}
       {/* {showRollMessage && <BattleMessage message={"Time To Roll!"} />} */}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}

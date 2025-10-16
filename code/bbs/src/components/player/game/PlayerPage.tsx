@@ -15,6 +15,7 @@ import type {
   ChooseMove,
   Notice,
   Roll,
+  RerollOption,
 } from "../../../../../simulator/core/notice/notice";
 import type { EntryID } from "../../../../../simulator/core/utils";
 import type { TargetingMethod } from "../../../../../simulator/core/action/targeting";
@@ -109,8 +110,9 @@ const PlayerContent = () => {
   const [hasReceivedChooseMove, setHasReceivedChooseMove] = useState(false);
   // const [rollNotice, setRollNotice] = useState<Roll | null>(null);
   // const [showRollMessage, setShowRollMessage] = useState(false);
-  const [diceRollResult, setDiceRollResult] = useState<number>(20);
-  const [showDiceAnimation, setShowDiceAnimation] = useState(false);
+  const [parentDiceRollResult, setParentDiceRollResult] = useState<number | null>(null);
+  const [rerollNotice, setRerollNotice] = useState<RerollOption | null>(null);
+  const [rerollMode, setRerollMode] = useState<boolean>(false);
   const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] =
     useState(false);
   const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] =
@@ -281,7 +283,8 @@ const PlayerContent = () => {
           break;
         }
         case "rerollOption": {
-          notice.callback(true);
+          setRerollNotice(notice)
+          setRerollMode(true)
           break;
         }
         default: {
@@ -301,10 +304,17 @@ const PlayerContent = () => {
     if (!socket) return;
 
     const handleNewEvent = (ev: any) => {
-      // Check if this is a roll event for the current player
-
+      // Check if this is a roll event for the current player, if so save the roll result for use in reroll
+      if (ev.name == "roll"){
+        const rollEvent = ev as any;
+        if (rollEvent.source === matchData?.myid) {
+          setParentDiceRollResult(rollEvent.result);
+        }
+      }
+      
       setEvents((prev) => {
         const next = [...prev, ev];
+        console.log("All events after adding:", next.map(e => e.name));
         return next;
       });
     };
@@ -368,6 +378,14 @@ const PlayerContent = () => {
     // setRollNotice(null);
     // setShowRollMessage(false);
     // Note: dice animation will be triggered when we receive the roll event back from server
+  }
+
+  function rerollNow(optionChosen: boolean):void {
+    if (!socket) return;
+    socket.emit("requestReroll", optionChosen)
+    setParentDiceRollResult(null)
+    setRerollNotice(null)
+    setRerollMode(false)
   }
 
   //callback function to be passed into battleScrren and battlebottom to handle player actions
@@ -450,6 +468,9 @@ const PlayerContent = () => {
       showSubmittedMoveMessage={showSubmittedMoveMessage}
       setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
       showMessage={showMessage}
+      onReroll={rerollNow}
+      rerollMode={rerollMode}
+      parentDiceRollResult = {parentDiceRollResult}
     />
   );
 };

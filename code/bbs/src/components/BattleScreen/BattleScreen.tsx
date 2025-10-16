@@ -40,6 +40,10 @@ interface BattleScreenProps {
   setShowSubmittedMoveMessage: React.Dispatch<React.SetStateAction<boolean>>;
   showSubmittedMoveMessage: boolean;
   showMessage: boolean;
+
+  onReroll: (option: boolean) => void;
+  rerollMode: boolean
+  parentDiceRollResult : number | null;
 }
 
 type MonsterState = {
@@ -65,6 +69,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   setShowSubmittedMoveMessage,
   showSubmittedMoveMessage,
   showMessage,
+  onReroll,
+  rerollMode,
+  parentDiceRollResult,
 }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -166,6 +173,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
           // showRollMessage={showRollMessage}
+          rerollMode={rerollMode}
+          parentDiceRollResult = {parentDiceRollResult}
         />
         <BattleBottom
           onAction={onAction}
@@ -178,6 +187,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
             ability: myMonster.template.abilityActionId,
             defend: myMonster.template.defendActionId,
           }}
+          onReroll={onReroll}
+          rerollMode = {rerollMode}
         />
       </div>
     </>
