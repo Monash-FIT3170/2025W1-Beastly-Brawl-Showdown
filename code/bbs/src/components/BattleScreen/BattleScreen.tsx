@@ -39,6 +39,7 @@ interface BattleScreenProps {
   setShowSubmittedMoveMessage : React.Dispatch<React.SetStateAction<boolean>>;
   showSubmittedMoveMessage: boolean;
   showMessage: boolean;
+  battleInstanceKey: number;
 }
 
 type MonsterState = {
@@ -67,6 +68,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
    setShowSubmittedMoveMessage,
    showSubmittedMoveMessage,
    showMessage,
+   battleInstanceKey
   }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -139,6 +141,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setEvents([snapshot]);
   }, [matchData]);
 
+  // Whenever there is new matchdata, reset the turn index
+  useEffect(() => {
+    if (!matchData) return;
+    setTurnIndex(0);
+    setIsPlaying(true);
+  }, [matchData]);
+
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
     onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
@@ -160,6 +169,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       <div className="canvas-body" id="battle-screen-body">
         <BattleTop />
         <BattleScene
+          battleInstanceKey={battleInstanceKey}
           events={events}
           turnIndex={turnIndex}
           isPlaying={isPlaying}
