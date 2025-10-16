@@ -233,47 +233,47 @@ export class Match {
         }
     }
 
-     handleSurrender(surrenderingPlayer: Player, playerChannel: PlayerNamespace): void {
-    const winner = surrenderingPlayer === this.player1 ? this.player2 : this.player1;
-    if (!winner) {
-      log_event(`[MATCH] Surrender ignored: opponent not found.`);
-      return;
-    }
+    handleSurrender(surrenderingPlayer: Player, playerChannel: PlayerNamespace): void {
+        // Check if battle exists and match is valid
+        if (!this.battle || this.matchType === MatchType.BYE) {
+            log_event(`[MATCH ${this.matchID}] No active battle — cannot surrender.`);
+            return;
+        }
 
-    this.winner = winner;
-    this.matchType = MatchType.DUEL;
+        // Get the side ID of the surrendering player
+        const surrenderingSideId = this.getSideForPlayer(surrenderingPlayer) as SideId;
 
-    if (this.battle) {
-      // End current battle cleanly
-      this.battle.eventHistory.addEvent({ name: "battleOver" });
+        // Mark the battle as surrendered and update internal state
+        this.battle.handleSurrender(surrenderingSideId);
 
-      const snapshot: SnapshotEvent = {
-        name: "snapshot",
-        sides: JSON.parse(JSON.stringify(this.battle.sides)),
-      };
-      this.battle.eventHistory.addEvent(snapshot);
+        // Immediately determine winner and loser
+        const survivingSide = this.battle.sides.find((side) => side.monster.health > 0);
+        if (!survivingSide) {
+            log_event(`[MATCH ${this.matchID}] Error determining winner after surrender.`);
+            return;
+        }
 
-      log_event(`[MATCH ${this.matchID}] Forcing battle termination due to surrender.`);
-      this.battle = undefined;
-    }
+        const winnerIndex = this.battle.sides.indexOf(survivingSide);
+        const winner = winnerIndex === 0 ? this.player1 : this.player2!;
+        const loser = winnerIndex === 0 ? this.player2 : this.player1;
 
-    // Notify clients
-    playerChannel.to(surrenderingPlayer.socketId).emit("MatchEnded", { result: "lose" });
-    playerChannel.to(winner.socketId).emit("MatchEnded", { result: "win" });
+        // Set winner for this match
+        this.winner = winner;
 
-    // Optional: send both back to waiting room
-    playerChannel.to(surrenderingPlayer.socketId).emit("sendToWaiting");
-    playerChannel.to(winner.socketId).emit("sendToWaiting");
+        // Add loser as spectator if linked
+        if (loser?.linkedAccountId) {
+            winner.addSpectator(loser.linkedAccountId);
+        }
 
-    // Add loser as spectator
-    if (surrenderingPlayer.linkedAccountId) {
-      winner.addSpectator(surrenderingPlayer.linkedAccountId);
-    }
+        // Notify both players to move to waiting immediately
+        playerChannel.to(winner.socketId).emit("sendToWaiting");
+        if (loser) {
+            playerChannel.to(loser.socketId).emit("sendToWaiting");
+        }
 
-    log_event(`[MATCH ${this.matchID}] Player ${surrenderingPlayer.displayName} surrendered. Winner: ${winner.displayName}`);
-  }
-
-
-
+        // Logging for clarity and debugging
+        log_event(`[MATCH ${this.matchID}] Player ${loser?.displayName} surrendered. Winner: ${winner.displayName}`);
+        log_event(`[MATCH ${this.matchID}] Surrender processed successfully — tournament flow continues.`);
+        }
 
 }
