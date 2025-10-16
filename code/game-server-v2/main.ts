@@ -454,7 +454,7 @@ async function main(config: ServerConfig) {
           const targetSide = sourceSide === 1 ? 0 : 1;
           match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
           break;
-        case "ability": {
+        default: { // TODO: Alternate way to identify abilities other than move ID
           const abilityMoveId = match.getMonsterAbility(player);
           if (!abilityMoveId) return;
 
@@ -472,7 +472,7 @@ async function main(config: ServerConfig) {
             default:
               targetSide = match.getSideForPlayer(player) as SideId;
           }
-
+          log_attention(`Ability ${abilityMoveId} being submitted by ${player} targeting ${targetSide}`);
           match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId);
           break;
         }
