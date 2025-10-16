@@ -4,15 +4,14 @@ import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../core/a
 import { Battle } from "../../core/battle";
 import { BuffEvent, MoveFailedEvent } from "../../core/event/core_events";
 import {
-  AbilityChargeStunComponent,
+  AbilityChargeComponent,
   DefendComponent,
-  DodgeChargeComponent,
   DodgeStateComponent,
   NextAttacksBonusComponent,
   PermanentStatBuffComponent,
   StunnedStateComponent,
 } from "../../core/monster/component/core_components";
-import { getComponent, Monster } from "../../core/monster/monster";
+import { getComponent, getComponents, Monster } from "../../core/monster/monster";
 import { SideId } from "../../core/side";
 import { COMMON_MONSTER_POOL } from "./common_monster_pool";
 
@@ -30,7 +29,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     perform: async function (battle: Battle, source: SideId, targetingData: TargetingData) {
       throw new Error("This action should not be used EVER.");
     },
-    onFail: async function (battle: Battle, source: SideId): Promise<void> {},
+    onFail: async function (battle: Battle, source: SideId): Promise<void> { },
   },
 
   "attack-normal": {
@@ -67,7 +66,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       await default_attack(this, battle, source, target);
     },
 
-    onFail: async function (battle: Battle, source: SideId): Promise<void> {},
+    onFail: async function (battle: Battle, source: SideId): Promise<void> { },
   },
 
   defend: {
@@ -117,8 +116,10 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     async perform(battle: Battle, source: SideId, targetingData: SelfTargeting): Promise<void> {
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      const dodgeChargeComponent: DodgeChargeComponent | null = getComponent(sourceMonster, "dodgeCharges");
-      if (!dodgeChargeComponent) {
+      const abilityChargeComponent: AbilityChargeComponent | null = getComponents(sourceMonster, "abilityCharges")
+        .find(c => c.abilityId === this.moveId) || null;
+
+      if (!abilityChargeComponent || abilityChargeComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
           source: source,
@@ -129,6 +130,8 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         battle.eventHistory.addEvent(failedEvent);
         return;
       }
+      --abilityChargeComponent.charges;
+
 
       const dodgeComponent: DodgeStateComponent | null = getComponent(sourceMonster, "dodging");
       if (!dodgeComponent) {
@@ -137,6 +140,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         dodgeComponent.remainingDuration++;
       }
     },
+
     onFail: function (battle: Battle, source: SideId): Promise<void> {
       throw new Error("Function not implemented.");
     },
@@ -157,8 +161,10 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
       postStartMoveEvent(battle, source, target, this, 1);
 
-      const abilityChargeStunComponent: AbilityChargeStunComponent | null = getComponent(sourceMonster, "abilityChargeStun");
-      if (!abilityChargeStunComponent || abilityChargeStunComponent.charges <= 0) {
+      const abilityChargeComponent: AbilityChargeComponent | null = getComponents(sourceMonster, "abilityCharges")
+        .find(c => c.abilityId === this.moveId) || null;
+
+      if (!abilityChargeComponent || abilityChargeComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
           source: source,
@@ -169,7 +175,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
         battle.eventHistory.addEvent(failedEvent);
         return;
       }
-      --abilityChargeStunComponent.charges;
+      --abilityChargeComponent.charges;
 
       const stunnedComponent: StunnedStateComponent | null = getComponent(targetMonster, "stunned");
       if (!stunnedComponent) {
@@ -179,7 +185,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       }
 
       postMoveSuccessEvent(battle, source, target, this);
-      
+
     },
     onFail: async function (battle: Battle, source: SideId): Promise<void> {
       throw new Error("Function not implemented.");
@@ -274,18 +280,20 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     perform: async function (battle: Battle, source: SideId) {
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      // Track usage per battle
-      if ((sourceMonster as any)._battleCryUsed) {
+      const abilityChargeComponent: AbilityChargeComponent | null = getComponents(sourceMonster, "abilityCharges")
+        .find(c => c.abilityId === this.moveId) || null;
+      if (!abilityChargeComponent || abilityChargeComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
-          source,
+          source: source,
           target: source,
           moveId: this.moveId,
-          reason: "Battle Cry already used",
+          reason: undefined,
         };
         battle.eventHistory.addEvent(failedEvent);
         return;
       }
+      --abilityChargeComponent.charges;
 
       // Mark as used
       (sourceMonster as any)._battleCryUsed = true;
