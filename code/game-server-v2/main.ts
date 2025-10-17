@@ -459,7 +459,6 @@ async function main(config: ServerConfig) {
           if (!abilityMoveId) return;
 
           const moveData = COMMON_MOVE_POOL[abilityMoveId];
-
           // Check if the move ID exists in the move pool
           if (!moveData) {
             throw new Error(`Unknown move ID: ${abilityMoveId}. Check that this ability is registered in COMMON_MOVE_POOL.`);
