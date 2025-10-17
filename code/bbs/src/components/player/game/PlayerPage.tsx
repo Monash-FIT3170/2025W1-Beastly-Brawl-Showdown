@@ -117,6 +117,8 @@ const PlayerContent = () => {
     useState(false);
   const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] =
     useState(false);
+  const [isWaiting, setIsWaiting] =
+    useState(false);
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
 
@@ -279,6 +281,7 @@ const PlayerContent = () => {
         }
         case "chooseMove": {
           setHasReceivedChooseMove(true);
+          setIsWaiting(false)
           setChooseMove(notice);
           break;
         }
@@ -299,31 +302,36 @@ const PlayerContent = () => {
     };
   }, [socket]);
 
-  //event handler
-  useEffect(() => {
-    if (!socket) return;
+useEffect(() => {
+  if (!socket) return;
 
-    const handleNewEvent = (ev: any) => {
-      // Check if this is a roll event for the current player, if so save the roll result for use in reroll
-      if (ev.name == "roll"){
+  const handleNewEvent = (ev: any) => {
+    setEvents((prev) => {
+      const lastEvent = prev[prev.length - 1];
+
+      if (ev.name === "roll" && lastEvent?.name === "startMove") {
         const rollEvent = ev as any;
         if (rollEvent.source === matchData?.myid) {
           setParentDiceRollResult(rollEvent.result);
         }
       }
-      
-      setEvents((prev) => {
-        const next = [...prev, ev];
-        console.log("All events after adding:", next.map(e => e.name));
-        return next;
-      });
-    };
 
-    socket.on("newEvent", handleNewEvent);
-    return () => {
-      socket.off("newEvent", handleNewEvent);
-    };
-  }, [socket, matchData?.myid]);
+      const next = [...prev, ev];
+      console.log(
+        "All events after adding:",
+        next.map((e) =>
+          e.name === "roll" ? `${e.name} (source: ${e.source})` : e.name
+        )
+      );
+      return next;
+    });
+  };
+
+  socket.on("newEvent", handleNewEvent);
+  return () => {
+    socket.off("newEvent", handleNewEvent);
+  };
+}, [socket, matchData?.myid]);
 
   //listen for enemy submitting messages
   useEffect(() => {
@@ -348,10 +356,12 @@ const PlayerContent = () => {
   //UnlockButton responder, so we know when server is ready to unlock the button
   useEffect(() => {
     if (!socket) return;
+    console.log("this is reached")
 
     const handleUnlock = () => {
       setTurnFinishedPlaying(false);
       setShowMessage(false);
+      setIsWaiting(false)
       setshowSubmittedMoveMessage(false);
       setshowEnemySubmittedMessage(false);
     };
@@ -383,7 +393,7 @@ const PlayerContent = () => {
   function rerollNow(optionChosen: boolean):void {
     if (!socket) return;
     socket.emit("requestReroll", optionChosen)
-    setParentDiceRollResult(null)
+    // setParentDiceRollResult(null)
     setRerollNotice(null)
     setRerollMode(false)
   }
@@ -411,6 +421,10 @@ const PlayerContent = () => {
       turnFinishedPlaying
     );
   }, [isButtonEnabled, hasReceivedChooseMove, turnFinishedPlaying]);
+
+  useEffect(() => {
+    console.log("isWaiting changed:", isWaiting);
+  }, [isWaiting]);
 
   //#endregion
 
@@ -464,13 +478,12 @@ const PlayerContent = () => {
       onSubmitMove={handleSubmitMove}
       // onRoll={rollNow}
       setTurnFinishedPlaying={setTurnFinishedPlaying}
-      showEnemySubmittedMessage={showEnemySubmittedMessage}
-      showSubmittedMoveMessage={showSubmittedMoveMessage}
-      setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
       showMessage={showMessage}
       onReroll={rerollNow}
       rerollMode={rerollMode}
       parentDiceRollResult = {parentDiceRollResult}
+      isWaiting = {isWaiting}
+      setIsWaiting = {setIsWaiting}
     />
   );
 };

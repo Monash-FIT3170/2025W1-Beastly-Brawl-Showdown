@@ -77,7 +77,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   
   // Build button configs dynamically
   const rerollBtnY = buildNormalButton("rerollY", "/assets/img/d20.png");
-  const rerollBtnN = buildNormalButton("rerollN", "/assets/img/d20.png");
+  const rerollBtnN = buildNormalButton("rerollN", "/assets/img/placeholder_monster_1.png");
 
   if (chooseMove?.data?.moveIdOptions) {
     for (const move of chooseMove.data.moveIdOptions) {

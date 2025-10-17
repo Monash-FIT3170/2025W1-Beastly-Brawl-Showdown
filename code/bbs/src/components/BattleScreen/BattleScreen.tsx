@@ -36,14 +36,14 @@ interface BattleScreenProps {
   // onRoll: (rollNotice: Roll) => void;
 
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  showEnemySubmittedMessage: boolean;
-  setShowSubmittedMoveMessage: React.Dispatch<React.SetStateAction<boolean>>;
-  showSubmittedMoveMessage: boolean;
   showMessage: boolean;
 
   onReroll: (option: boolean) => void;
   rerollMode: boolean
   parentDiceRollResult : number | null;
+
+  isWaiting: boolean;
+  setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 type MonsterState = {
@@ -65,13 +65,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   onSubmitMove,
   // onRoll,
   setTurnFinishedPlaying,
-  showEnemySubmittedMessage,
-  setShowSubmittedMoveMessage,
-  showSubmittedMoveMessage,
   showMessage,
   onReroll,
   rerollMode,
   parentDiceRollResult,
+  isWaiting,
+  setIsWaiting,
 }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -147,7 +146,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
     onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
-    setShowSubmittedMoveMessage(true);
+    setIsWaiting(true)
     setTurnFinishedPlaying(false);
     setHasReceivedChooseMove(false);
     setChooseMove(null);
@@ -168,13 +167,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
             setTurnIndex(next)
           }
           myid={matchData.myid}
-          showEnemySubmittedMessage={showEnemySubmittedMessage}
-          showSubmittedMoveMessage={showSubmittedMoveMessage}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
           // showRollMessage={showRollMessage}
           rerollMode={rerollMode}
           parentDiceRollResult = {parentDiceRollResult}
+          isWaiting={isWaiting}
         />
         <BattleBottom
           onAction={onAction}

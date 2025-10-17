@@ -11,6 +11,8 @@ import type {
   MoveFailedEvent,
   BlockedEvent,
   MoveEvadedEvent,
+  RerollEvent,
+  RollEvent,
 } from "../../../../simulator/core/event/core_events";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
@@ -25,13 +27,12 @@ interface BattleSceneProps {
   autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
   myid: number;
-  showEnemySubmittedMessage: boolean;
-  showSubmittedMoveMessage: boolean;
   showMessage: boolean;
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   // showRollMessage: boolean;
   rerollMode: boolean
   parentDiceRollResult : number | null;
+  isWaiting:boolean;
 }
 
 console.log("BattleScene loaded");
@@ -43,13 +44,12 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   autoAdvance,
   onAdvanceTurn,
   myid,
-  showEnemySubmittedMessage,
-  showSubmittedMoveMessage,
   showMessage,
   setTurnFinishedPlaying,
   // showRollMessage,
   rerollMode,
   parentDiceRollResult,
+  isWaiting
 
 }) => {
   // Build turns from raw events
@@ -218,6 +218,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     }
   };
 
+  // Keep track of the previous event
+  let previousEvent: BaseEvent | null = null;
+
   // Updates the visible state based on the event
   async function applyEventToVisible(
     state: typeof initialTurnState,
@@ -324,19 +327,31 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       case "reroll": {
-        const rerollEvent = ev as any;
+        const rerollEvent = ev as RerollEvent;
         if (rerollEvent.source === myid) {
-          setDiceRollResult(rerollEvent.result);
-          setShowDiceAnimation(true);
+          const message = `You would have rolled ${parentDiceRollResult} to hit but instead you rerolled and got ${rerollEvent.result}`;
+          setcurrentMessage(message);
+          // setDiceRollResult(rerollEvent.result);
+          // setShowDiceAnimation(true);
         }
         break;
       }
       
       case "roll": {
-        const rollEvent = ev as any;
+        const rollEvent = ev as RollEvent;
         if (rollEvent.source === myid) {
-          setDiceRollResult(rollEvent.result);
-          setShowDiceAnimation(true);
+          let message: string;
+
+          if (previousEvent?.name === "startMove") {
+            message = `You rolled ${rollEvent.result} to hit`;
+          } else if (previousEvent?.name === "moveSuccess") {
+            message = `You rolled ${rollEvent.result} to damage`;
+          } else {
+            message = `You rolled ${rollEvent.result}`;
+          }
+          setcurrentMessage(message);
+          // setDiceRollResult(rollEvent.result);
+          // setShowDiceAnimation(true);
         }
         break;
       }
@@ -353,6 +368,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
     }
 
+    // Update previous event after processing
+    previousEvent = ev;
     return state;
   }
 
@@ -400,7 +417,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         console.log("Rendering:", ev.name);
 
         // Small delay between events
-        await new Promise((r) => setTimeout(r, 600));
+        await new Promise((r) => setTimeout(r, 900));
         if (cancelled) return;
       }
 
@@ -486,14 +503,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         enemyAbilityName={template2.abilityName}
         playerAbilityName={template.abilityName}
       />
-      {!shouldShowMessage && showEnemySubmittedMessage && (
-        <BattleMessage message={"Enemy Has Submitted"} />
-      )}
-      {!shouldShowMessage && !showEnemySubmittedMessage && showSubmittedMoveMessage && (
-        <BattleMessage message="Your Move Has Been Submitted" />
-      )}
       {rerollMode && (
-        <BattleMessage message={`You rolled ${parentDiceRollResult}. Would you like to reroll?`} />
+        <BattleMessage message={`You rolled ${parentDiceRollResult} to hit. Would you like to reroll?`} />
+      )}
+      {isWaiting && !rerollMode && !runTurnNow &&(
+        <BattleMessage message="Wating for Enemy..." />
       )}
       {/* {showRollMessage && <BattleMessage message={"Time To Roll!"} />} */}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
