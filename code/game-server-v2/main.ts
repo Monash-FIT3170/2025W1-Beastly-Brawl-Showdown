@@ -16,8 +16,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
 import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
-import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
-import { log } from "console";
+import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
@@ -446,6 +445,7 @@ async function main(config: ServerConfig) {
       log_event(`Player ${player.displayName} submitted move ${moveId} with targeting method ${targetMethod} from side ${sourceSide} and monster ${player.monster}`);
 
       // Handle different move types
+
       switch (moveId) {
         case "defend":
           match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
@@ -459,6 +459,12 @@ async function main(config: ServerConfig) {
           if (!abilityMoveId) return;
 
           const moveData = COMMON_MOVE_POOL[abilityMoveId];
+          
+          // Check if the move ID exists in the move pool
+          if (!moveData) {
+            throw new Error(`Unknown move ID: ${abilityMoveId}. Check that this ability is registered in COMMON_MOVE_POOL.`);
+          }
+
           const opponentSide = (match.getSideForPlayer(player) === 0 ? 1 : 0) as SideId;
 
           let targetSide: SideId;

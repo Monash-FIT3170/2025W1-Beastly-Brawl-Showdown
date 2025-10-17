@@ -11,7 +11,7 @@ import {
   PermanentStatBuffComponent,
   StunnedStateComponent,
 } from "../../core/monster/component/core_components";
-import { getComponent, getComponents, Monster } from "../../core/monster/monster";
+import { getComponent, Monster } from "../../core/monster/monster";
 import { SideId } from "../../core/side";
 import { COMMON_MONSTER_POOL } from "./common_monster_pool";
 
@@ -116,8 +116,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     async perform(battle: Battle, source: SideId, targetingData: SelfTargeting): Promise<void> {
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      const abilityChargeComponent: AbilityChargeComponent | null = getComponents(sourceMonster, "abilityCharges")
-        .find(c => c.abilityId === this.moveId) || null;
+      const abilityChargeComponent: AbilityChargeComponent | null = getComponent(sourceMonster, "abilityCharges");
 
       if (!abilityChargeComponent || abilityChargeComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
@@ -125,7 +124,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
           source: source,
           target: source,
           moveId: this.moveId,
-          reason: undefined,
+          reason: "dodge has no charges left",
         };
         battle.eventHistory.addEvent(failedEvent);
         return;
@@ -161,8 +160,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
 
       postStartMoveEvent(battle, source, target, this, 1);
 
-      const abilityChargeComponent: AbilityChargeComponent | null = getComponents(sourceMonster, "abilityCharges")
-        .find(c => c.abilityId === this.moveId) || null;
+      const abilityChargeComponent: AbilityChargeComponent | null = getComponent(sourceMonster, "abilityCharges");
 
       if (!abilityChargeComponent || abilityChargeComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
@@ -280,15 +278,14 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
     perform: async function (battle: Battle, source: SideId) {
       const sourceMonster: Monster = battle.sides[source].monster;
 
-      const abilityChargeComponent: AbilityChargeComponent | null = getComponents(sourceMonster, "abilityCharges")
-        .find(c => c.abilityId === this.moveId) || null;
+      const abilityChargeComponent: AbilityChargeComponent | null = getComponent(sourceMonster, "abilityCharges");
       if (!abilityChargeComponent || abilityChargeComponent.charges <= 0) {
         const failedEvent: MoveFailedEvent = {
           name: "moveFailed",
           source: source,
           target: source,
           moveId: this.moveId,
-          reason: undefined,
+          reason: "No charges remaining",
         };
         battle.eventHistory.addEvent(failedEvent);
         return;
