@@ -87,6 +87,10 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     });
   }
 
+  function waitDiceDuration(ms = 4800): Promise<void> {
+    return new Promise((res) => setTimeout(res, ms));
+  }
+
   // Clamp selected index
   const selectedTurnIndex = Number.isInteger(turnIndex)
     ? clamp(turnIndex, 0, Math.max(0, turns.length - 1))
@@ -230,6 +234,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     state: typeof initialTurnState,
     ev: BaseEvent
   ) {
+    if (ev.name !== "roll") {
+      await chainRef.current;
+    }
     switch (ev.name) {
       case "moveSuccess": {
         const successEvent = ev as MoveSuccessEvent;
@@ -331,12 +338,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       case "roll": {
-        const rollEvent = ev as any;
-        if (rollEvent.source === myid) {
-          chainRef.current = chainRef.current.then(() =>
-            playDiceAnimation(rollEvent.result)
-          );
-        }
+        const rollEvent = ev as any; // use your RollEvent type if available
+        const isMine = rollEvent.source === myid;
+        chainRef.current = chainRef.current.then(() =>
+          isMine ? playDiceAnimation(rollEvent.result) : waitDiceDuration()
+        );
         break;
       }
 
@@ -405,9 +411,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       await chainRef.current;
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
-
-      lastSnapCountRef.current += 1;
-      setTurnFinishedPlaying(true);
+      chainRef.current = Promise.resolve();
       console.log("Turn finished playing");
 
       setRunTurnNow(false);
