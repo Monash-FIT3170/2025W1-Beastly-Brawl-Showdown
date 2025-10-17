@@ -74,6 +74,18 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   // Dice roll animation state
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [diceRollResult, setDiceRollResult] = useState<number | null>(null);
+  const diceResolveRef = useRef<(() => void) | null>(null);
+
+  function playDiceAnimation(result: number): Promise<void> {
+    setDiceRollResult(result);
+    setShowDiceAnimation(true);
+    return new Promise<void>((resolve) => {
+      diceResolveRef.current = () => {
+        resolve();
+        diceResolveRef.current = null;
+      };
+    });
+  }
 
   // Clamp selected index
   const selectedTurnIndex = Number.isInteger(turnIndex)
@@ -321,8 +333,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       case "roll": {
         const rollEvent = ev as any;
         if (rollEvent.source === myid) {
-          setDiceRollResult(rollEvent.result);
-          setShowDiceAnimation(true);
+          chainRef.current = chainRef.current.then(() =>
+            playDiceAnimation(rollEvent.result)
+          );
         }
         break;
       }
@@ -372,8 +385,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       console.log("APPLYING EVENTS");
-      let animChain = Promise.resolve();
-
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
 
@@ -391,7 +402,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       // <-- WAIT FOR ALL ENQUEUED ANIMATIONS
-      await animChain;
+      await chainRef.current;
+      lastSnapCountRef.current += 1;
+      setTurnFinishedPlaying(true);
 
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
@@ -483,8 +496,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       {showDiceAnimation && (
         <DiceRollAnimation
-          onComplete={() => setShowDiceAnimation(false)}
           rollResult={diceRollResult ?? 20}
+          onComplete={() => {
+            setShowDiceAnimation(false);
+            diceResolveRef.current?.();
+          }}
         />
       )}
     </div>
