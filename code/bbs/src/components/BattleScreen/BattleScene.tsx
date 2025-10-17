@@ -21,6 +21,7 @@ import BattleMessage from "./BattleMessage";
 import { DiceRollAnimation } from "./DiceRollAnimation";
 
 interface BattleSceneProps {
+  battleInstanceKey: number
   events: BaseEvent[];
   turnIndex: number;
   isPlaying: boolean;
@@ -38,6 +39,7 @@ interface BattleSceneProps {
 console.log("BattleScene loaded");
 
 export const BattleScene: React.FC<BattleSceneProps> = ({
+  battleInstanceKey,
   events,
   turnIndex,
   isPlaying,
@@ -115,9 +117,36 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     return idxs;
   }, [events]);
 
+  const prevEventsRef = useRef(events);
+  useEffect(() => {
+    console.log('events identity changed:', prevEventsRef.current !== events);
+    const isNewArray = prevEventsRef.current !== events;
+    if (!isNewArray) return;
+
+    // Reset everything between battles
+    lastSnapCountRef.current = 0;
+    turnToPlayRef.current = [];
+    chainRef.current = Promise.resolve();
+
+    // Reset UI state & messages
+    setcurrentMessage("");
+    setShowAnimation(false);
+    setEnemySlash(false);
+    setPlayerSlash(false);
+    setEnemyShield(false);
+    setPlayerShield(false);
+    setEnemyAbility(false);
+    setPlayerAbility(false);
+    setRunTurnNow(false);
+
+    prevEventsRef.current = events;
+  }, [battleInstanceKey]);
+
   // useeffect to know when to play the turn
   useEffect(() => {
     let completedTurns = snapshotIdxs.length - 1;
+    console.log("EVENTS:", JSON.stringify(events))
+    console.log(turns)
 
     // If our playback counter is ahead, reset it so it never blocks turns from running
     if (lastSnapCountRef.current > completedTurns) {
