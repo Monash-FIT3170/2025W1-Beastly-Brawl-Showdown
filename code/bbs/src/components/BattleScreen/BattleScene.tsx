@@ -18,6 +18,7 @@ import { BattleMiddle } from "./BattleMiddle";
 import BattleMessage from "./BattleMessage";
 
 interface BattleSceneProps {
+  battleInstanceKey: number
   events: BaseEvent[];
   turnIndex: number;
   isPlaying: boolean;
@@ -34,6 +35,7 @@ interface BattleSceneProps {
 console.log("BattleScene loaded");
 
 export const BattleScene: React.FC<BattleSceneProps> = ({
+  battleInstanceKey,
   events,
   turnIndex,
   isPlaying,
@@ -105,9 +107,36 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     return idxs;
   }, [events]);
 
+  const prevEventsRef = useRef(events);
+  useEffect(() => {
+    console.log('events identity changed:', prevEventsRef.current !== events);
+    const isNewArray = prevEventsRef.current !== events;
+    if (!isNewArray) return;
+
+    // Reset everything between battles
+    lastSnapCountRef.current = 0;
+    turnToPlayRef.current = [];
+    chainRef.current = Promise.resolve();
+
+    // Reset UI state & messages
+    setcurrentMessage("");
+    setShowAnimation(false);
+    setEnemySlash(false);
+    setPlayerSlash(false);
+    setEnemyShield(false);
+    setPlayerShield(false);
+    setEnemyAbility(false);
+    setPlayerAbility(false);
+    setRunTurnNow(false);
+
+    prevEventsRef.current = events;
+  }, [battleInstanceKey]);
+
   // useeffect to know when to play the turn
   useEffect(() => {
     let completedTurns = snapshotIdxs.length - 1;
+    console.log("EVENTS:", JSON.stringify(events))
+    console.log(turns)
 
     // If our playback counter is ahead, reset it so it never blocks turns from running
     if (lastSnapCountRef.current > completedTurns) {
@@ -345,8 +374,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   // Step through events of the selected turn and update the panels live
   useEffect(() => {
-    if (!runTurnNow) return;
-    if (!isPlaying) return;
+    if (!runTurnNow || !isPlaying) return;
 
     let cancelled = false;
 
@@ -354,7 +382,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       const turnToPlay = turnToPlayRef.current;
       if (!turnToPlay.length) return;
 
-      // Reset to the snapshot at start of the slice
+      // Reset to the snapshot at the start of the turn
       let i = 0;
       if (turnToPlay[0]?.name === "snapshot") {
         const snapState = parseSnapshot(turnToPlay[0] as SnapshotEvent);
@@ -364,32 +392,33 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       console.log("APPLYING EVENTS");
+      let animChain = Promise.resolve();
 
-      // Apply the rest of the events in this completed turn
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
-        const ev = turnToPlay[i];
 
+        const ev = turnToPlay[i];
         const base = cloneState(latestVisibleRef.current);
         const next = await applyEventToVisible(base, ev);
-        console.log("Rendering:", ev.name);
-
         latestVisibleRef.current = next;
         setVisibleState(next);
 
-        // When you add animations, put your delay here:
+        console.log("Rendering:", ev.name);
+
+        // Small delay between events
         await new Promise((r) => setTimeout(r, 600));
         if (cancelled) return;
       }
 
-      // Mark this turn as played and lower the flag
+      // <-- WAIT FOR ALL ENQUEUED ANIMATIONS
+      await animChain;
+
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
       console.log("Turn finished playing");
+
       setRunTurnNow(false);
-      setTimeout(() => {
-        setcurrentMessage("");
-      }, 1200);
+      setTimeout(() => setcurrentMessage(""), 1200);
     })();
 
     return () => {
