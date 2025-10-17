@@ -11,7 +11,7 @@ import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_poo
 import { TargetingMethod } from "../simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
 import { TournamentType } from "./tournament_manager";
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
@@ -281,7 +281,7 @@ async function main(config: ServerConfig) {
     }
 
     try {
-      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
+      gameServer.joinRoom(socket.id, roomId, auth.displayName);
 
       // Attach the actual player instance to the socket
       const room = gameServer.rooms.get(roomId);

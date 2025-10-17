@@ -5,28 +5,26 @@ export class Player {
   roomId: RoomId;
   socketId: string;
   displayName: string;
-  linkedAccountId?: string;
-  spectators: string[];
+  spectators: Player[];
   monster?: MonsterTemplate;
   selectedMonsterTemplateName?: string;
   isReady: boolean = false;
   submittedMove: boolean = false;
   currentMonsterPool?: string[];
 
-  constructor(roomId: RoomId, socketId: string, displayName: string, linkedAccountId: string | undefined) {
+  constructor(roomId: RoomId, socketId: string, displayName: string) {
     this.roomId = roomId;
     this.socketId = socketId;
     this.displayName = displayName;
-    this.linkedAccountId = linkedAccountId;
     this.spectators = [];
   }
 
-  getSpectators(): string[] {
+  getSpectators(): Player[] {
     return this.spectators;
   }
 
-  addSpectator(id: string) {
-    this.spectators.push(id);
+  addSpectator(player: Player) {
+    this.spectators.push(player);
   }
 
   hasMonster(): boolean {
