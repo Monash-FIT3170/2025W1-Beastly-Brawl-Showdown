@@ -4,7 +4,7 @@ import { Battle, BattleOptions } from "../simulator/core/battle";
 import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
-import { log_attention, log_event } from "./utils";
+import { log_attention, log_event, log_notice } from "./utils";
 import { MonsterId } from "../simulator/core/monster/monster_pool";
 import { TargetingData } from "../simulator/core/action/targeting";
 import { EntryID } from "../simulator/core/utils";
@@ -20,7 +20,7 @@ export class Match {
     player1: Player;
     player2?: Player;
     winner?: Player;
-    spectators: AccountId[];
+    spectators: Player[];
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
@@ -232,6 +232,7 @@ export class Match {
             player2name: this.player2?.displayName,
             sideID: 0,
         })
+
         if (this.player2) {
             playerChannel.to(this.player2?.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
@@ -242,6 +243,12 @@ export class Match {
             })
         };
 
+        // TODO: Emit socket for all spectators for each player
+        log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
+        this.spectators.forEach(player => {
+            console.log(player.displayName);
+        });
+        
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
@@ -254,9 +261,7 @@ export class Match {
         const loser = winnerIndex === 0 ? this.player2 : this.player1;
 
         if (loser) {
-            if (loser.linkedAccountId) {
-                this.winner?.addSpectator(loser.linkedAccountId);
-            }
+            this.winner?.addSpectator(loser);
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
         if (this.winner && loser) {
