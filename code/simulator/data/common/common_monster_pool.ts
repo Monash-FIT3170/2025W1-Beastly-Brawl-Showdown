@@ -1,7 +1,6 @@
 import { Battle } from "../../core/battle";
 import {
   RerollChargeComponent,
-  AdvantageComponent,
   DamageReductionComponent,
   ThornsComponent,
   AbilityChargeComponent,
@@ -15,10 +14,8 @@ type MONSTER_IDS =
   | "shadow_fang"
   | "stone_hide"
   | "fleet_foot"
-  | "knight"
   | "sea_urchin"
   | "lion"
-  | "bear"
   | "shield";
 export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
   name: "common_monster_pool",
@@ -162,35 +159,6 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       ],
     },
 
-    knight: {
-      templateId: "knight",
-      name: "Knight",
-      description:
-        "A brave and noble warrior. A Balanced Monster that always makes advantageous decisions.",
-      imageUrl: "/assets/monsters/knight.png",
-      baseStats: {
-        health: 50,
-        armour: 10,
-        attack: 2,
-        speed: 4,
-        crit_chance: 5,
-        crit_damage: 2,
-      },
-      attackActionId: "attack-normal",
-      defendActionId: "defend",
-      maxAttackCharges: 3,
-      onSpawnActions: [
-        {
-          type: "spawnAction",
-          do: async function (world: Battle, source: SideId): Promise<void> {
-            world.sides[source].monster.components.push(
-              new AdvantageComponent()
-            );
-          },
-        },
-      ],
-    },
-
     sea_urchin: {
       templateId: "sea_urchin",
       name: "Sea Urchin",
@@ -242,36 +210,6 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
           do: async function (world: Battle, source: SideId): Promise<void> {
             world.sides[source].monster.components.push(
               new AbilityChargeComponent("attack-bonus-next3", 1)
-            );
-          },
-        },
-      ],
-    },
-
-    bear: {
-      templateId: "bear",
-      name: "Bear",
-      description:
-        "A strong and resilient creature. A Balanced Monster that sets up to go berserk.",
-      imageUrl: "/assets/monsters/bear.png",
-      baseStats: {
-        health: 50,
-        armour: 9,
-        attack: 2,
-        speed: 4,
-        crit_chance: 5,
-        crit_damage: 2,
-      },
-      attackActionId: "attack-normal",
-      defendActionId: "defend",
-      maxAttackCharges: 3,
-      abilityActionId: "battle-cry",
-      onSpawnActions: [
-        {
-          type: "spawnAction",
-          do: async function (world: Battle, source: SideId): Promise<void> {
-            world.sides[source].monster.components.push(
-              new AbilityChargeComponent("battle-cry", 3)
             );
           },
         },
