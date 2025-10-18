@@ -16,24 +16,23 @@ import type {
 } from "../../../../simulator/core/event/core_events";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
-import { BattleMiddle } from "./BattleMiddle";
+import MonsterHealthRing from "./MonsterHealthRing";
 import BattleMessage from "./BattleMessage";
 import { DiceRollAnimation } from "./DiceRollAnimation";
 
 interface BattleSceneProps {
-  battleInstanceKey: number
+  battleInstanceKey: number;
   events: BaseEvent[];
   turnIndex: number;
   isPlaying: boolean;
-  autoAdvance?: boolean; // play subsequent turns automatically
-  onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
+  autoAdvance?: boolean;
+  onAdvanceTurn?: (nextIndex: number) => void;
   myId: number;
   showMessage: boolean;
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  // showRollMessage: boolean;
-  rerollMode: boolean
-  parentDiceRollResult : number | null;
-  isWaiting:boolean;
+  rerollMode: boolean;
+  parentDiceRollResult: number | null;
+  isWaiting: boolean;
 }
 
 console.log("BattleScene loaded");
@@ -48,19 +47,15 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   myId,
   showMessage,
   setTurnFinishedPlaying,
-  // showRollMessage,
   rerollMode,
   parentDiceRollResult,
-  isWaiting
-
+  isWaiting,
 }) => {
-  // Build turns from raw events
+  // === Turn parsing and state ===
   const turns = useMemo(() => parseTurns(events), [events]);
-
-  //setup the battle messages
   const [currentMessage, setcurrentMessage] = useState("");
 
-  // === Animation state (migrated from BattleScreen) ===
+  // === Animation state ===
   const [showAnimation, setShowAnimation] = useState(false);
   const [enemySlash, setEnemySlash] = useState(false);
   const [playerSlash, setPlayerSlash] = useState(false);
@@ -69,46 +64,37 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   const [enemyAbility, setEnemyAbility] = useState(false);
   const [playerAbility, setPlayerAbility] = useState(false);
 
-  // animation sequencing (same pattern as BattleScreen)
   const chainRef = useRef<Promise<void>>(Promise.resolve());
-
   const enqueueAnim = (moveId: string, actor: "player1" | "player2") => {
     chainRef.current = chainRef.current.then(() =>
       performMoveAnimation(moveId, actor)
     );
   };
 
-  // Dice roll animation state
+  // === Dice animation ===
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [diceRollResult, setDiceRollResult] = useState<number | null>(null);
 
-  // Clamp selected index
+  // === Turn index handling ===
   const selectedTurnIndex = Number.isInteger(turnIndex)
     ? clamp(turnIndex, 0, Math.max(0, turns.length - 1))
     : Math.max(0, turns.length - 1);
 
-  // Determine the current turn and its start-of-turn snapshot
   const currentTurn = turns[selectedTurnIndex];
   const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
 
-  // Parsed snapshot at the start of the selected turn
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
     [currentSnapshot]
   );
 
-  // What the panels currently show as events are applied
   const [visibleState, setVisibleState] = useState(initialTurnState);
-
-  // Keep a ref to avoid stale closures inside the async loop
   const latestVisibleRef = useRef(initialTurnState);
 
-  // New stuff to know when to play out the turn
   const [runTurnNow, setRunTurnNow] = useState(false);
   const lastSnapCountRef = useRef(0);
   const turnToPlayRef = useRef<BaseEvent[]>([]);
 
-  // Keep track of the snapshot events' indices
   const snapshotIdxs = useMemo(() => {
     const idxs: number[] = [];
     for (let i = 0; i < events.length; i++) {
@@ -117,18 +103,14 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     return idxs;
   }, [events]);
 
+  // Reset between battles
   const prevEventsRef = useRef(events);
   useEffect(() => {
-    console.log('events identity changed:', prevEventsRef.current !== events);
     const isNewArray = prevEventsRef.current !== events;
     if (!isNewArray) return;
-
-    // Reset everything between battles
     lastSnapCountRef.current = 0;
     turnToPlayRef.current = [];
     chainRef.current = Promise.resolve();
-
-    // Reset UI state & messages
     setcurrentMessage("");
     setShowAnimation(false);
     setEnemySlash(false);
@@ -138,24 +120,16 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     setEnemyAbility(false);
     setPlayerAbility(false);
     setRunTurnNow(false);
-
     prevEventsRef.current = events;
   }, [battleInstanceKey]);
 
-  // useeffect to know when to play the turn
+  // Determine if turn should play
   useEffect(() => {
     let completedTurns = snapshotIdxs.length - 1;
-    console.log("EVENTS:", JSON.stringify(events))
-    console.log(turns)
-
-    // If our playback counter is ahead, reset it so it never blocks turns from running
     if (lastSnapCountRef.current > completedTurns) {
       lastSnapCountRef.current = Math.max(0, completedTurns);
     }
-
     const alreadyPlayed = lastSnapCountRef.current;
-    console.log({ completedTurns, alreadyPlayed, snapshotIdxs });
-
     if (completedTurns <= alreadyPlayed) return;
 
     const start = snapshotIdxs[alreadyPlayed];
@@ -166,10 +140,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   // This is to prevent replaying the turn when autoplay is toggled
   const onAdvanceRef = useRef(onAdvanceTurn);
+
   useEffect(() => {
     onAdvanceRef.current = onAdvanceTurn;
   }, [onAdvanceTurn]);
+
   const autoAdvanceRef = useRef(autoAdvance);
+  
   useEffect(() => {
     autoAdvanceRef.current = autoAdvance;
   }, [autoAdvance]);
@@ -181,7 +158,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     setcurrentMessage("");
   }, [initialTurnState, isPlaying]);
 
-  // Helper function to get move name from moveId
+  // === Helper functions ===
   const getMoveDisplayName = (moveId: string, sourceId: number): string => {
     if (!currentSnapshot) return moveId;
     const sourceMonster = currentSnapshot.sides[sourceId].monster;
@@ -189,16 +166,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       COMMON_MONSTER_POOL.monsters[
         sourceMonster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
       ];
-
     if (!template) return moveId;
-
     if (moveId === template.attackActionId) return "attack";
     if (moveId === template.defendActionId) return "defend";
     if (moveId === template.abilityActionId) return "ability";
     return moveId;
   };
 
-  // Helper to fetch the acting monster template by sourceId
   const getTemplateForSource = (sourceId: number) => {
     if (!currentSnapshot) return undefined;
     const src = currentSnapshot.sides[sourceId].monster;
@@ -207,17 +181,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     ];
   };
 
-  // === Perform the same animations BattleScreen had ===
   const performMoveAnimation = async (
     moveId: string,
     actor: "player1" | "player2"
   ) => {
     if (!currentSnapshot) return;
-
     const template =
       actor === "player1" ? getTemplateForSource(0) : getTemplateForSource(1);
-
-    // Set which animation toggles to fire based on the moveId
     if (template) {
       if (moveId === template.attackActionId) {
         if (actor === "player1") setEnemySlash(true);
@@ -230,12 +200,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         else setEnemyAbility(true);
       }
     }
-
     setShowAnimation(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setShowAnimation(false);
-
-    // Reset toggles like BattleScreen did
     if (actor === "player1") {
       setPlayerSlash(false);
       setPlayerShield(false);
@@ -247,10 +214,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     }
   };
 
-  // Keep track of the previous event
+  // === Event application ===
   let previousEvent: BaseEvent | null = null;
-
-  // Updates the visible state based on the event
   async function applyEventToVisible(
     state: typeof initialTurnState,
     ev: BaseEvent
@@ -263,16 +228,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           successEvent.moveId,
           successEvent.source
         );
-
         const message = isPlayer
           ? `You ${moveName} successfully!`
           : `Enemy ${moveName}s successfully!`;
-
         setcurrentMessage(message);
         enqueueAnim(successEvent.moveId, isPlayer ? "player1" : "player2");
         break;
       }
-
       case "moveFailed": {
         const failedEvent = ev as MoveFailedEvent;
         const isPlayer = failedEvent.source === myId;
@@ -280,19 +242,15 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           failedEvent.moveId,
           failedEvent.source
         );
-
         let message = isPlayer
           ? `Your ${moveName} failed!`
           : `Enemy ${moveName} failed!`;
-
         if (failedEvent.moveId === "defend") {
           message += " No charges left!";
         }
-
         setcurrentMessage(message);
         break;
       }
-
       case "blocked": {
         const blockedEvent = ev as BlockedEvent;
         const isPlayerAttacking = blockedEvent.source === myId;
@@ -304,7 +262,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         setcurrentMessage(message);
         break;
       }
-
       case "evaded": {
         const evadedEvent = ev as MoveEvadedEvent;
         const isPlayerAttacking = evadedEvent.source === myId;
@@ -316,7 +273,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         setcurrentMessage(message);
         break;
       }
-
       case "damage": {
         const damageEvent = ev as DamageEvent;
         const isPlayerTakingDamage = damageEvent.target === myId;
@@ -332,18 +288,14 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         state[playerId].health -= damageEvent.amount;
         break;
       }
-
       case "buff": {
         const buffEvent = ev as BuffEvent;
         const isPlayer = buffEvent.source === myId;
-
         if (buffEvent.buffs.armour && buffEvent.source === buffEvent.target) {
           const message = isPlayer
             ? `You gained +${buffEvent.buffs.armour} armor!`
             : `Enemy gained +${buffEvent.buffs.armour} armor!`;
-
           setcurrentMessage(message);
-
           const actor = isPlayer ? "player1" : "player2";
           const template = getTemplateForSource(buffEvent.source);
           if (template) enqueueAnim(template.defendActionId, actor);
@@ -354,7 +306,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         state[playerId].defendActionCharge -= 1;
         break;
       }
-
       case "reroll": {
         const rerollEvent = ev as RerollEvent;
         if (rerollEvent.source === myId) {
@@ -365,45 +316,37 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         }
         break;
       }
-      
       case "roll": {
         const rollEvent = ev as RollEvent;
         if (rollEvent.source === myId) {
           let message: string;
-          switch (previousEvent?.name){
-            case ("startMove") : {
+          switch (previousEvent?.name) {
+            case "startMove": {
               message = `You rolled ${rollEvent.result} to hit`;
-              break
+              break;
             }
-            case ("startMove") : {
+            case "moveSuccess": {
               message = `You rolled ${rollEvent.result} to damage`;
-              break
+              break;
             }
-            default : {
+            default: {
               message = `You rolled ${rollEvent.result}`;
-              break
+              break;
             }
           }
           setcurrentMessage(message);
-          // setDiceRollResult(rollEvent.result);
-          // setShowDiceAnimation(true);
         }
         break;
       }
-
       case "battleOver": {
         setcurrentMessage("Battle Over!");
         break;
       }
-
       default: {
-        // Handle unhandled event types
         console.log(`Unhandled event: ${ev.name}`);
         break;
       }
     }
-
-    // Update previous event after processing
     previousEvent = ev;
     return state;
   }
@@ -418,17 +361,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     }
   }
 
-  // Step through events of the selected turn and update the panels live
+  // === Turn playback ===
   useEffect(() => {
     if (!runTurnNow || !isPlaying) return;
-
     let cancelled = false;
-
     (async () => {
       const turnToPlay = turnToPlayRef.current;
       if (!turnToPlay.length) return;
-
-      // Reset to the snapshot at the start of the turn
       let i = 0;
       if (turnToPlay[0]?.name === "snapshot") {
         const snapState = parseSnapshot(turnToPlay[0] as SnapshotEvent);
@@ -436,37 +375,23 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         setVisibleState(snapState);
         i = 1;
       }
-
-      console.log("APPLYING EVENTS");
       let animChain = Promise.resolve();
-
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
-
         const ev = turnToPlay[i];
         const base = cloneState(latestVisibleRef.current);
         const next = await applyEventToVisible(base, ev);
         latestVisibleRef.current = next;
         setVisibleState(next);
-
-        console.log("Rendering:", ev.name);
-
-        // Small delay between events
         await new Promise((r) => setTimeout(r, 900));
         if (cancelled) return;
       }
-
-      // <-- WAIT FOR ALL ENQUEUED ANIMATIONS
       await animChain;
-
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
-      console.log("Turn finished playing");
-
       setRunTurnNow(false);
       setTimeout(() => setcurrentMessage(""), 1200);
     })();
-
     return () => {
       cancelled = true;
     };
@@ -496,57 +421,60 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     ];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
-  // Clear names for what the UI reads:asd
   const visiblePlayer1 = visibleState[myId];
   const visiblePlayer2 = visibleState[1 - myId];
-  const myMonsterImage = visibleState[myId].image;
-  const enemyMonsterImage = visibleState[1 - myId].image;
+  const myMonsterImage = visiblePlayer1.image;
+  const enemyMonsterImage = visiblePlayer2.image;
   const shouldShowMessage = showMessage || currentMessage !== "";
 
   return (
     <div className="canvas-body" id="battle-screen-body">
-      <BattleMiddle
-        enemyHp={visiblePlayer2.health ?? 0}
-        enemyMaxHp={player2MaxHp}
-        playerHp={visiblePlayer1.health ?? 0}
-        playerMaxHp={player1MaxHp}
-        enemyImgSrc={enemyMonsterImage}
-        playerImgSrc={myMonsterImage}
-        showAnimation={showAnimation}
-        enemySlashVisible={enemySlash}
-        onEnemySlashComplete={() => setEnemySlash(false)}
-        playerSlashVisible={playerSlash}
-        onPlayerSlashComplete={() => setPlayerSlash(false)}
-        enemyShieldVisible={enemyShield}
-        onEnemyShieldComplete={() => setEnemyShield(false)}
-        playerShieldVisible={playerShield}
-        onPlayerShieldComplete={() => setPlayerShield(false)}
-        enemyAbilityVisible={enemyAbility}
-        onEnemyAbilityComplete={() => setEnemyAbility(false)}
-        playerAbilityVisible={playerAbility}
-        onPlayerAbilityComplete={() => setPlayerAbility(false)}
-        enemyMonsterName={template2.name}
-        enemyBaseStats={{
-          attack: template2.baseStats.attack,
-          defense: template2.baseStats.armour,
-        }}
-        playerMonsterName={template.name}
-        playerBaseStats={{
-          attack: template.baseStats.attack,
-          defense: template.baseStats.armour,
-        }}
-        enemyAbilityName={template2.abilityName}
-        playerAbilityName={template.abilityName}
-      />
+      <div className="combat-arena">
+        <MonsterHealthRing
+          currentHealth={visiblePlayer2.health ?? 0}
+          maxHealth={player2MaxHp}
+          imageSrc={enemyMonsterImage}
+          showSlash={enemySlash}
+          onSlashComplete={() => setEnemySlash(false)}
+          showShield={enemyShield}
+          onShieldComplete={() => setEnemyShield(false)}
+          showAbility={enemyAbility}
+          onAbilityComplete={() => setEnemyAbility(false)}
+          monsterName={template2.name}
+          baseStats={{
+            attack: template2.baseStats.attack,
+            defense: template2.baseStats.armour,
+          }}
+          abilityName={template2.abilityName}
+        />
+        <MonsterHealthRing
+          currentHealth={visiblePlayer1.health ?? 0}
+          maxHealth={player1MaxHp}
+          imageSrc={myMonsterImage}
+          showSlash={playerSlash}
+          onSlashComplete={() => setPlayerSlash(false)}
+          showShield={playerShield}
+          onShieldComplete={() => setPlayerShield(false)}
+          showAbility={playerAbility}
+          onAbilityComplete={() => setPlayerAbility(false)}
+          monsterName={template.name}
+          baseStats={{
+            attack: template.baseStats.attack,
+            defense: template.baseStats.armour,
+          }}
+          abilityName={template.abilityName}
+        />
+      </div>
+
       {rerollMode && (
-        <BattleMessage message={`You rolled ${parentDiceRollResult} to hit. Would you like to reroll?`} />
+        <BattleMessage
+          message={`You rolled ${parentDiceRollResult} to hit. Would you like to reroll?`}
+        />
       )}
-      {isWaiting && !rerollMode && !runTurnNow &&(
+      {isWaiting && !rerollMode && !runTurnNow && (
         <BattleMessage message="Wating for Enemy..." />
       )}
-      {/* {showRollMessage && <BattleMessage message={"Time To Roll!"} />} */}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
-
       {showDiceAnimation && (
         <DiceRollAnimation
           onComplete={() => setShowDiceAnimation(false)}
