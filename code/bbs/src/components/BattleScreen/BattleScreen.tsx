@@ -14,7 +14,7 @@ interface BattleScreenProps {
   matchData: {
     player1Monster: { template: MonsterTemplate; currentHp: number };
     player2Monster: { template: MonsterTemplate; currentHp: number };
-    myid: number;
+    myId: number;
   };
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
@@ -84,7 +84,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   useEffect(() => {
     if (!matchData) return;
 
-    const isPlayer1 = matchData.myid === 0;
+    const isPlayer1 = matchData.myId === 0;
 
     const myMonsterData = isPlayer1
       ? matchData.player1Monster
@@ -98,14 +98,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       template: myMonsterData.template,
       currentHp:
         myMonsterData.currentHp ?? myMonsterData.template.baseStats.health,
-      playerId: matchData.myid.toString(),
+      playerId: matchData.myId.toString(),
     });
     setEnemyMonster({
       template: enemyMonsterData.template,
       currentHp:
         enemyMonsterData.currentHp ??
         enemyMonsterData.template.baseStats.health,
-      playerId: matchData.myid.toString(),
+      playerId: matchData.myId.toString(),
     });
 
     // Build snapshot JSON
@@ -176,7 +176,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           onAdvanceTurn={(next: React.SetStateAction<number>) =>
             setTurnIndex(next)
           }
-          myid={matchData.myid}
+          myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
           // showRollMessage={showRollMessage}

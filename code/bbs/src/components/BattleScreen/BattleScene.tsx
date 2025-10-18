@@ -27,7 +27,7 @@ interface BattleSceneProps {
   isPlaying: boolean;
   autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
-  myid: number;
+  myId: number;
   showMessage: boolean;
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   // showRollMessage: boolean;
@@ -45,7 +45,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   isPlaying,
   autoAdvance,
   onAdvanceTurn,
-  myid,
+  myId,
   showMessage,
   setTurnFinishedPlaying,
   // showRollMessage,
@@ -258,7 +258,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     switch (ev.name) {
       case "moveSuccess": {
         const successEvent = ev as MoveSuccessEvent;
-        const isPlayer = successEvent.source === myid;
+        const isPlayer = successEvent.source === myId;
         const moveName = getMoveDisplayName(
           successEvent.moveId,
           successEvent.source
@@ -275,7 +275,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "moveFailed": {
         const failedEvent = ev as MoveFailedEvent;
-        const isPlayer = failedEvent.source === myid;
+        const isPlayer = failedEvent.source === myId;
         const moveName = getMoveDisplayName(
           failedEvent.moveId,
           failedEvent.source
@@ -295,7 +295,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "blocked": {
         const blockedEvent = ev as BlockedEvent;
-        const isPlayerAttacking = blockedEvent.source === myid;
+        const isPlayerAttacking = blockedEvent.source === myId;
 
         const message = isPlayerAttacking
           ? "Your attack was blocked!"
@@ -307,7 +307,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "evaded": {
         const evadedEvent = ev as MoveEvadedEvent;
-        const isPlayerAttacking = evadedEvent.source === myid;
+        const isPlayerAttacking = evadedEvent.source === myId;
 
         const message = isPlayerAttacking
           ? "Your attack was evaded!"
@@ -319,7 +319,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "damage": {
         const damageEvent = ev as DamageEvent;
-        const isPlayerTakingDamage = damageEvent.target === myid;
+        const isPlayerTakingDamage = damageEvent.target === myId;
 
         const message = isPlayerTakingDamage
           ? `You took ${damageEvent.amount} damage!`
@@ -335,7 +335,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "buff": {
         const buffEvent = ev as BuffEvent;
-        const isPlayer = buffEvent.source === myid;
+        const isPlayer = buffEvent.source === myId;
 
         if (buffEvent.buffs.armour && buffEvent.source === buffEvent.target) {
           const message = isPlayer
@@ -357,7 +357,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "reroll": {
         const rerollEvent = ev as RerollEvent;
-        if (rerollEvent.source === myid) {
+        if (rerollEvent.source === myId) {
           const message = `You would have rolled ${parentDiceRollResult} to hit but instead you rerolled and got ${rerollEvent.result}`;
           setcurrentMessage(message);
           // setDiceRollResult(rerollEvent.result);
@@ -368,15 +368,21 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       
       case "roll": {
         const rollEvent = ev as RollEvent;
-        if (rollEvent.source === myid) {
+        if (rollEvent.source === myId) {
           let message: string;
-
-          if (previousEvent?.name === "startMove") {
-            message = `You rolled ${rollEvent.result} to hit`;
-          } else if (previousEvent?.name === "moveSuccess") {
-            message = `You rolled ${rollEvent.result} to damage`;
-          } else {
-            message = `You rolled ${rollEvent.result}`;
+          switch (previousEvent?.name){
+            case ("startMove") : {
+              message = `You rolled ${rollEvent.result} to hit`;
+              break
+            }
+            case ("startMove") : {
+              message = `You rolled ${rollEvent.result} to damage`;
+              break
+            }
+            default : {
+              message = `You rolled ${rollEvent.result}`;
+              break
+            }
           }
           setcurrentMessage(message);
           // setDiceRollResult(rollEvent.result);
@@ -478,23 +484,23 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   //have to get maxhp to pass to battlemiddle
   const template =
     COMMON_MONSTER_POOL.monsters[
-      currentSnapshot.sides[myid].monster
+      currentSnapshot.sides[myId].monster
         .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
 
   const template2 =
     COMMON_MONSTER_POOL.monsters[
-      currentSnapshot.sides[1 - myid].monster
+      currentSnapshot.sides[1 - myId].monster
         .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
   // Clear names for what the UI reads:asd
-  const visiblePlayer1 = visibleState[myid];
-  const visiblePlayer2 = visibleState[1 - myid];
-  const myMonsterImage = visibleState[myid].image;
-  const enemyMonsterImage = visibleState[1 - myid].image;
+  const visiblePlayer1 = visibleState[myId];
+  const visiblePlayer2 = visibleState[1 - myId];
+  const myMonsterImage = visibleState[myId].image;
+  const enemyMonsterImage = visibleState[1 - myId].image;
   const shouldShowMessage = showMessage || currentMessage !== "";
 
   return (

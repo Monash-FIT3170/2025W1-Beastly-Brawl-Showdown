@@ -96,7 +96,7 @@ const PlayerContent = () => {
   const [matchData, setMatchData] = useState<{
     player1Monster: { template: MonsterTemplate; currentHp: number };
     player2Monster: { template: MonsterTemplate; currentHp: number };
-    myid: number;
+    myId: number;
   } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
@@ -188,7 +188,7 @@ const PlayerContent = () => {
           template: player2Monster,
           currentHp: player2Monster.baseStats.health,
         },
-        myid: data.sideID,
+        myId: data.sideID,
       });
 
       // Give a key for every new battle
@@ -320,7 +320,7 @@ useEffect(() => {
 
       if (ev.name === "roll" && lastEvent?.name === "startMove") {
         const rollEvent = ev as any;
-        if (rollEvent.source === matchData?.myid) {
+        if (rollEvent.source === matchData?.myId) {
           setParentDiceRollResult(rollEvent.result);
         }
       }
@@ -340,7 +340,7 @@ useEffect(() => {
   return () => {
     socket.off("newEvent", handleNewEvent);
   };
-}, [socket, matchData?.myid]);
+}, [socket, matchData?.myId]);
 
   //listen for enemy submitting messages
   useEffect(() => {
