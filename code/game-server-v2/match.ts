@@ -8,7 +8,7 @@ import { log_attention, log_event } from "./utils";
 import { MonsterId } from "../simulator/core/monster/monster_pool";
 import { TargetingData } from "../simulator/core/action/targeting";
 import { EntryID } from "../simulator/core/utils";
-import { ChooseMove, Roll } from "../simulator/core/notice/notice";
+import { ChooseMove, RerollOption, Roll } from "../simulator/core/notice/notice";
 import { TargetingMethod } from "../simulator/core/action/targeting";
 
 export enum MatchType {
@@ -124,7 +124,7 @@ export class Match {
         chooseMoveNotice.callback(moveId, targetData);
     }
 
-    // Called by main when a player submits a move
+    // Called by main when a player submits roll notice
     submitRoll(player: Player): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit rolls to.`);
@@ -138,6 +138,22 @@ export class Match {
             throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no roll notice.`);
         }
         rollNotice.callback();
+    }
+
+    // Called by main when a player submits reroll notice
+    submitReroll(player: Player, option : boolean): void {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to submit rerolls to.`);
+        }
+
+        const sideIndex = this.getSideForPlayer(player);
+        const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
+        const rerollNotice = noticeMap.get("rerollOption") as RerollOption | undefined;
+
+        if (!rerollNotice) {
+            throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no reroll notice.`);
+        }
+        rerollNotice.callback(option);
     }
 
 

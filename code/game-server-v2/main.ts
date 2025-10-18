@@ -420,6 +420,20 @@ async function main(config: ServerConfig) {
 
     socket.on("requestRoll", handleRollNotice);
 
+    function handleRerollNotice( option : boolean) {
+      log_notice("Reroll notice is being handled");
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
+      const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
+      if (!match) return;
+
+      match.submitReroll(player, option);
+    }
+
+    socket.on("requestReroll", handleRerollNotice);
+
+
     // #region Submit Move
     socket.on("submitMove", (msg: { data: any }) => {
       log_event("Test move submission log");

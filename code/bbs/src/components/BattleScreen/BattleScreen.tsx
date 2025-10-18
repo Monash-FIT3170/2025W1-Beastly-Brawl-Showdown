@@ -1,44 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { BattleTop } from "./BattleTop";
 import { BattleBottom } from "./BattleBottom";
-import { DiceRollAnimation } from "./DiceRollAnimation";
 import { type MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
-import { type ChooseMove, type Notice, type Roll } from "../../../../simulator/core/notice/notice";
+import {
+  type ChooseMove,
+} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
 interface BattleScreenProps {
   matchData: {
     player1Monster: { template: MonsterTemplate; currentHp: number };
     player2Monster: { template: MonsterTemplate; currentHp: number };
-    myid: number;
+    myId: number;
   };
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
 
   chooseMove: ChooseMove | null;
-  setChooseMove:React.Dispatch<React.SetStateAction<ChooseMove | null>>;
-  setHasReceivedChooseMove : React.Dispatch<React.SetStateAction<boolean>>;
+  setChooseMove: React.Dispatch<React.SetStateAction<ChooseMove | null>>;
+  setHasReceivedChooseMove: React.Dispatch<React.SetStateAction<boolean>>;
 
-  rollNotice: Roll | null;
-  showRollMessage: boolean;
+  // rollNotice: Roll | null;
+  // showRollMessage: boolean;
 
-  buttonDisabled : boolean;
+  buttonDisabled: boolean;
 
-  showDiceAnimation: boolean;
-  diceRollResult: number;
-  setShowDiceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
-
-  onSubmitMove: (moveId: EntryID, targetMethod: TargetingMethod, myMonsterId: EntryID) => void;
-  onRoll: (rollNotice: Roll) => void;
+  onSubmitMove: (
+    moveId: EntryID,
+    targetMethod: TargetingMethod,
+    myMonsterId: EntryID
+  ) => void;
+  // onRoll: (rollNotice: Roll) => void;
 
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  showEnemySubmittedMessage: boolean;
-  setShowSubmittedMoveMessage : React.Dispatch<React.SetStateAction<boolean>>;
-  showSubmittedMoveMessage: boolean;
   showMessage: boolean;
+
+  onReroll: (option: boolean) => void;
+  rerollMode: boolean
+  parentDiceRollResult : number | null;
+
+  isWaiting: boolean;
+  setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
   battleInstanceKey: number;
 }
 
@@ -49,27 +54,26 @@ type MonsterState = {
 };
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({
-   matchData,
-   events,
-   setEvents,
-   chooseMove,
-   setChooseMove,
-   setHasReceivedChooseMove,
-   rollNotice,
-   showRollMessage,
-   buttonDisabled,
-   showDiceAnimation,
-   diceRollResult,
-   setShowDiceAnimation ,
-   onSubmitMove,
-   onRoll,
-   setTurnFinishedPlaying,
-   showEnemySubmittedMessage,
-   setShowSubmittedMoveMessage,
-   showSubmittedMoveMessage,
-   showMessage,
-   battleInstanceKey
-  }) => {
+  matchData,
+  events,
+  setEvents,
+  chooseMove,
+  setChooseMove,
+  setHasReceivedChooseMove,
+  // rollNotice,
+  // showRollMessage,
+  buttonDisabled,
+  onSubmitMove,
+  // onRoll,
+  setTurnFinishedPlaying,
+  showMessage,
+  onReroll,
+  rerollMode,
+  parentDiceRollResult,
+  isWaiting,
+  setIsWaiting,
+  battleInstanceKey
+}) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
   const [turnIndex, setTurnIndex] = useState(0);
@@ -80,7 +84,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   useEffect(() => {
     if (!matchData) return;
 
-    const isPlayer1 = matchData.myid === 0;
+    const isPlayer1 = matchData.myId === 0;
 
     const myMonsterData = isPlayer1
       ? matchData.player1Monster
@@ -89,20 +93,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     const enemyMonsterData = isPlayer1
       ? matchData.player2Monster
       : matchData.player1Monster;
-      
+
     setMyMonster({
       template: myMonsterData.template,
       currentHp:
         myMonsterData.currentHp ?? myMonsterData.template.baseStats.health,
-      playerId: matchData.myid.toString(),  
+      playerId: matchData.myId.toString(),
     });
     setEnemyMonster({
       template: enemyMonsterData.template,
       currentHp:
-        enemyMonsterData.currentHp ?? enemyMonsterData.template.baseStats.health,
-      playerId: matchData.myid.toString(),
+        enemyMonsterData.currentHp ??
+        enemyMonsterData.template.baseStats.health,
+      playerId: matchData.myId.toString(),
     });
-
 
     // Build snapshot JSON
     const snapshot = {
@@ -151,16 +155,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
     onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
-    setShowSubmittedMoveMessage(true);
-    setTurnFinishedPlaying(false)
-    setHasReceivedChooseMove(false)
+    setIsWaiting(true)
+    setTurnFinishedPlaying(false);
+    setHasReceivedChooseMove(false);
     setChooseMove(null);
   };
-
-  const handleDiceAnimationComplete = () => {
-  setShowDiceAnimation(false);
-  };
-
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
@@ -174,34 +173,32 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) => setTurnIndex(next)}
-          myid={matchData.myid}
-          showEnemySubmittedMessage={showEnemySubmittedMessage}
-          showSubmittedMoveMessage={showSubmittedMoveMessage}
+          onAdvanceTurn={(next: React.SetStateAction<number>) =>
+            setTurnIndex(next)
+          }
+          myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
-          showRollMessage={showRollMessage}
+          // showRollMessage={showRollMessage}
+          rerollMode={rerollMode}
+          parentDiceRollResult = {parentDiceRollResult}
+          isWaiting={isWaiting}
         />
         <BattleBottom
           onAction={onAction}
-          onRoll={() => rollNotice && onRoll(rollNotice)}
+          // onRoll={() => rollNotice && onRoll(rollNotice)}
           disabled={buttonDisabled}
-          mode={rollNotice ? "roll" : "combat"}
-          chooseMove = {chooseMove}
+          // mode={rollNotice ? "roll" : "combat"}
+          chooseMove={chooseMove}
           fallbackMoves={{
             attack: myMonster.template.attackActionId,
             ability: myMonster.template.abilityActionId,
             defend: myMonster.template.defendActionId,
           }}
+          onReroll={onReroll}
+          rerollMode = {rerollMode}
         />
       </div>
-      {/* Dice Roll Animation Overlay */}
-      {showDiceAnimation && (
-        <DiceRollAnimation
-          onComplete={handleDiceAnimationComplete}
-          rollResult={diceRollResult}
-        />
-      )}
     </>
   );
 };

@@ -20,6 +20,7 @@ export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   submitMonster: (data: any) => void;
   submitMove: (data: any) => void;
   requestRoll: (data: any) => void;
+  requestReroll: (data: any) => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
