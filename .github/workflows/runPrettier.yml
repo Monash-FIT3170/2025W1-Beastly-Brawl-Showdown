@@ -10,11 +10,11 @@ permissions:
 
 jobs:
   prettier-beastly-brawl:
-    name: Prettier - Frontend (beastly-brawl-showdown)
+    name: Prettier - Frontend (bbs)
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: code/beastly-brawl-showdown
+        working-directory: code/bbs
 
     steps:
       - name: Checkout repository
