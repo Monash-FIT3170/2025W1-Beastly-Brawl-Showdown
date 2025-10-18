@@ -17,10 +17,7 @@ import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
 import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, IGameServerRegistryEntry, PlayerNamespace } from "../shared/types";
 
-const MONGO_IP = "localhost";
-const MONGO_PORT = "27017";
-const MONGO_NAME = "RoomLocation";
-const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
+const MONGO_URI = process.env["MONGO_URI"] ?? `mongodb://localhost:27017/RoomLocation`;
 
 async function connectToDatabase(): Promise<typeof mongoose> {
   try {
@@ -111,7 +108,7 @@ async function main(config: ServerConfig) {
       { serverNumber: config.serverNumber },
       {
         serverNumber: config.serverNumber,
-        serverUrl:  `${config.serverIp}:${config.serverPort}`,
+        serverUrl: `${config.serverIp}:${config.serverPort}`,
         lastUpdated: new Date(),
       },
       { upsert: true, new: true }
@@ -194,16 +191,12 @@ async function main(config: ServerConfig) {
         // Set tournament type in the room
         const room = gameServer.rooms.get(roomId);
         if (room) {
-          room.tournamentManager.tournamentType =
-            data.type === "random"
-              ? TournamentType.Random
-              : TournamentType.Standard;
+          room.tournamentManager.tournamentType = data.type === "random" ? TournamentType.Random : TournamentType.Standard;
         }
 
         socket.emit("requestRoomResponse", { roomId, joinCode });
-        log_notice(
-          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
-        );      } catch {
+        log_notice(`Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`);
+      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
@@ -226,9 +219,7 @@ async function main(config: ServerConfig) {
           log_event("Random Pool: ");
           console.log(pool);
         } else {
-          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
-            (k) => k !== "blank"
-          ); // Standard mode, exclude BlankMon
+          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter((k) => k !== "blank"); // Standard mode, exclude BlankMon
         }
 
         player.currentMonsterPool = pool;
@@ -387,14 +378,11 @@ async function main(config: ServerConfig) {
       if (data.data.selections == 1) {
         // Read from all players in room
         log_notice("Reading ready from all players");
-        allReady = Array.from(room.players.values()).every(
-          (p) => p.isReady
-        );
-      } else { // Read from winners only
+        allReady = Array.from(room.players.values()).every((p) => p.isReady);
+      } else {
+        // Read from winners only
         log_notice("Reading ready from winners");
-        allReady = Array.from(room.tournamentManager.winners.values()).every(
-          (p) => p.isReady
-        );
+        allReady = Array.from(room.tournamentManager.winners.values()).every((p) => p.isReady);
       }
       if (!allReady) {
         log_notice("Waiting for all players to submit their monsters...");
@@ -422,7 +410,7 @@ async function main(config: ServerConfig) {
 
           // //P2: send a copy/start (invert sides?)
           // if (match.player2) {
-          //   room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
+          //   room.playerChannel.to(match.player2?.socketId).emit("startRound", {
           //     player1Monster: match.player1?.selectedMonsterTemplateName,
           //     player2Monster: match.player2?.selectedMonsterTemplateName,
           //     sideID: 1,
@@ -461,10 +449,8 @@ async function main(config: ServerConfig) {
       const sourceSide = match.getSideForPlayer(player);
       player.submittedMove = true;
 
-      if (player1 && player1.submittedMove && player2?.socketId)
-        playerChannel.to(player2.socketId).emit("enemyMoveSubmitted")
-      if (player2 && player2.submittedMove && player1?.socketId)
-        playerChannel.to(player1.socketId).emit("enemyMoveSubmitted")
+      if (player1 && player1.submittedMove && player2?.socketId) playerChannel.to(player2.socketId).emit("enemyMoveSubmitted");
+      if (player2 && player2.submittedMove && player1?.socketId) playerChannel.to(player1.socketId).emit("enemyMoveSubmitted");
 
       switch (moveId) {
         case "defend":

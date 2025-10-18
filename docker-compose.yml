@@ -4,7 +4,7 @@ services:
 # - `mongosh "mongodb://localhost:27017"` is sucessful
   mongo:
     image: mongo:latest
-    container_name: mongo-game_locator
+    container_name: mongo-game_server_registries
     ports:
       - "27017:27017"
     environment:
@@ -19,8 +19,6 @@ services:
     build:
       context: ./code
       dockerfile: ./server-locator/Dockerfile
-    volumes:
-      - ./code/bbs/imports/simulator:/app/simulator
     ports:
       - "8000:8000"
     depends_on:
@@ -34,8 +32,6 @@ services:
     build:
       context: ./code
       dockerfile: ./game-server-v2/Dockerfile
-    volumes:
-      - ./code/bbs/imports/simulator:/app/simulator
     ports:
       - "8080:8080"
     depends_on:
@@ -47,17 +43,19 @@ services:
 # `docker compose logs web-app`
   web-app:
     build:
-      context: ./code/bbs
+      context: ./code
+      dockerfile: ./bbs/Dockerfile
     depends_on:
-      - game-server
       - mongo
+      - game-server
+      - server-locator
     ports:
       - "3000:3000"
     environment:
-      - MONGO_URL=mongodb://mongo:27017/game_server_registries?tls=false
       - ROOT_URL=http://localhost
       - PORT=3000
       - GAME_SERVER_URL=http://game-server:8080
+      - SERVER_LOCATOR_URL=http://server-locator:8000
 
   nginx:
     image: nginx:latest
@@ -69,3 +67,4 @@ services:
     depends_on:
       - web-app
       - game-server
+      - server-locator
