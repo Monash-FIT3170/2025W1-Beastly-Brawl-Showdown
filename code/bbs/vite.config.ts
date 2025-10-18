@@ -6,6 +6,6 @@ import { env } from "process";
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: Number(env.APP_PORT) ?? 5173,
+    port: Number(env.PORT) ?? 5173,
   },
 });
