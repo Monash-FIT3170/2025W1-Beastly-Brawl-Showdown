@@ -150,7 +150,16 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "double-attack",
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(
+              new AbilityChargeComponent("double-attack", 1)
+            );
+          },
+        },
+      ],
     },
 
     knight: {
@@ -227,7 +236,16 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "attack-bonus-next3",
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(
+              new AbilityChargeComponent("attack-bonus-next3", 1)
+            );
+          },
+        },
+      ],
     },
 
     bear: {
