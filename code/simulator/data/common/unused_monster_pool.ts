@@ -9,8 +9,8 @@ import { SideId } from "../../core/side";
 type MONSTER_IDS =
     | "knight"
     | "bear"
-export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
-    name: "common_monster_pool",
+export const UNUSED_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
+    name: "unused_monster_pool",
     monsters: {
         knight: {
             templateId: "knight",
