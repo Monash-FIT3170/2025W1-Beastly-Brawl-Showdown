@@ -1,10 +1,10 @@
 import { Battle } from "../../core/battle";
 import {
   RerollChargeComponent,
-  DodgeChargeComponent,
   AdvantageComponent,
   DamageReductionComponent,
   ThornsComponent,
+  AbilityChargeComponent,
 } from "../../core/monster/component/core_components";
 import { MonsterPool } from "../../core/monster/monster_pool";
 import { SideId } from "../../core/side";
@@ -94,7 +94,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
           type: "spawnAction",
           do: async function (world: Battle, source: SideId): Promise<void> {
             world.sides[source].monster.components.push(
-              new DodgeChargeComponent(1)
+              new AbilityChargeComponent("dodge", 1)
             );
           },
         },
@@ -119,7 +119,17 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "stun",
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            // Give Stone Hide 3 ability charges for stun
+            world.sides[source].monster.components.push(
+              new AbilityChargeComponent("stun", 3)
+            );
+          },
+        },
+      ],
     },
 
     fleet_foot: {
@@ -140,7 +150,16 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "double-attack",
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(
+              new AbilityChargeComponent("double-attack", 1)
+            );
+          },
+        },
+      ],
     },
 
     knight: {
@@ -217,7 +236,16 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "attack-bonus-next3",
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(
+              new AbilityChargeComponent("attack-bonus-next3", 1)
+            );
+          },
+        },
+      ],
     },
 
     bear: {
@@ -238,7 +266,16 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "battle-cry",
-      onSpawnActions: [],
+      onSpawnActions: [
+        {
+          type: "spawnAction",
+          do: async function (world: Battle, source: SideId): Promise<void> {
+            world.sides[source].monster.components.push(
+              new AbilityChargeComponent("battle-cry", 3)
+            );
+          },
+        },
+      ],
     },
 
     shield: {

@@ -162,3 +162,24 @@ export async function default_attack(parentMove: MoveData, battle: Battle, sourc
     thornsComponent.onHit(battle, target, source);
   }
 }
+
+export function postStartMoveEvent(battle: Battle, source: SideId, target: SideId, move: MoveData, attackChargesConsumed: number = 0): void {
+  const startMoveEvent: StartMoveEvent = {
+    name: "startMove",
+    source,
+    target,
+    moveId: move.moveId,
+    attackChargesConsumed,
+  };
+  battle.eventHistory.addEvent(startMoveEvent);
+}
+
+export function postMoveSuccessEvent(battle: Battle, source: SideId, target: SideId, move: MoveData): void {
+  const moveSuccessEvent: MoveSuccessEvent = {
+    name: "moveSuccess",
+    source,
+    target,
+    moveId: move.moveId,
+  };
+  battle.eventHistory.addEvent(moveSuccessEvent);
+}
