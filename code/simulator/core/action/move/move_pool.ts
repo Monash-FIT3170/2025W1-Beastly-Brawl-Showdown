@@ -1,5 +1,5 @@
-import { LookupTable } from "../../utils";
-import { MoveData } from "./move";
+import type { LookupTable } from "../../utils";
+import type { MoveData } from "./move";
 
 export type MoveId = Lowercase<string>;
 

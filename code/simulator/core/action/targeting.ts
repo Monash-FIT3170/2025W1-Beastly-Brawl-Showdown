@@ -1,4 +1,4 @@
-import { SideId } from "../side";
+import type { SideId } from "../side";
 
 /**
  * The following targeting methods are availible

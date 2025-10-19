@@ -1,12 +1,11 @@
-import { Battle } from "../../battle";
-import { StartMoveEvent, MoveEvadedEvent, RollEvent, RerollEvent, BlockedEvent, MoveSuccessEvent, DamageEvent } from "../../event/core_events";
-import { DodgeStateComponent, RerollChargeComponent } from "../../monster/component/core_components";
-import { Monster, getComponent, getStat } from "../../monster/monster";
-import { NextAttacksBonusComponent } from "../../monster/component/core_components";
-import { removeComponent } from "../../monster/monster";
+import type { Battle } from "../../battle";
+import type { StartMoveEvent, MoveEvadedEvent, RollEvent, RerollEvent, BlockedEvent, MoveSuccessEvent, DamageEvent } from "../../event/core_events";
+import type { DodgeStateComponent, RerollChargeComponent, NextAttacksBonusComponent } from "../../monster/component/core_components";
+import type { Monster } from "../../monster/monster";
+import { getComponent, getStat, removeComponent } from "../../monster/monster";
 import { roll } from "../../roll";
-import { SideId } from "../../side";
-import { MoveData } from "./move";
+import type { SideId } from "../../side";
+import type { MoveData } from "./move";
 
 // Helper function to handle advantage rolls
 function rollWithAdvantage(monster: Monster, rng: Battle["rng"], faces: number): number {

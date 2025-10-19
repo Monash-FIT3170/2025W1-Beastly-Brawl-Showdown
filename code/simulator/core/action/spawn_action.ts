@@ -1,6 +1,6 @@
-import { Battle } from "../battle";
-import { SideId } from "../side";
-import { Action } from "./action";
+import type { Battle } from "../battle";
+import type { SideId } from "../side";
+import type { Action } from "./action";
 
 export interface SpawnAction extends Action<"spawnAction"> {
   do(battle: Battle, source: SideId): void;

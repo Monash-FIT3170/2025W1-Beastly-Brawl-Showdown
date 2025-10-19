@@ -1,15 +1,15 @@
-import { Side, SideId } from "./side";
-import { ChooseMove as chooseMove } from "./notice/notice";
+import type { Side, SideId } from "./side";
+import type { ChooseMove as chooseMove } from "./notice/notice";
 import { NoticeBoard } from "./notice/notice_board";
 import { EventHistory } from "./event/event_history";
-import { BattleOverEvent, SnapshotEvent } from "./event/core_events";
-import { MoveData, MoveRequest } from "./action/move/move";
-import { EntryID } from "./utils";
-import { TargetingData } from "./action/targeting";
+import type { BattleOverEvent, SnapshotEvent } from "./event/core_events";
+import type { MoveData, MoveRequest } from "./action/move/move";
+import type { EntryID } from "./utils";
+import type { TargetingData } from "./action/targeting";
 import { PRNG } from "./prng";
-import { MonsterPool, MonsterId } from "./monster/monster_pool";
+import type { MonsterPool, MonsterId } from "./monster/monster_pool";
 import { getIsBlockedFromMove, getStat, spawnMonster } from "./monster/monster";
-import { MovePool } from "./action/move/move_pool";
+import type { MovePool } from "./action/move/move_pool";
 
 export interface PlayerOptions {
   monsterId: MonsterId; //! Can change to list if needed later

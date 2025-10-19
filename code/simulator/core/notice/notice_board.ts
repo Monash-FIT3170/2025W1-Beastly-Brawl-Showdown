@@ -1,4 +1,4 @@
-import { NoticeKind, Notice } from "./notice";
+import type { NoticeKind, Notice } from "./notice";
 
 type NoticeBoardListener = {
   onPostNotice(target: number, notice: Notice): void;

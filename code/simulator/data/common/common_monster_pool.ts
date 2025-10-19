@@ -1,4 +1,4 @@
-import { Battle } from "../../core/battle";
+import type { Battle } from "../../core/battle";
 import {
   RerollChargeComponent,
   DodgeChargeComponent,
@@ -7,8 +7,8 @@ import {
   ThornsComponent,
   AbilityChargeStunComponent,
 } from "../../core/monster/component/core_components";
-import { MonsterPool } from "../../core/monster/monster_pool";
-import { SideId } from "../../core/side";
+import type { MonsterPool } from "../../core/monster/monster_pool";
+import type { SideId } from "../../core/side";
 
 type MONSTER_IDS =
   | "blank"

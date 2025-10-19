@@ -1,8 +1,8 @@
-import { MovePool } from "../../core/action/move/move_pool";
+import type { MovePool } from "../../core/action/move/move_pool";
 import { default_attack } from "../../core/action/move/move_utils";
-import { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../core/action/targeting";
-import { Battle } from "../../core/battle";
-import { BuffEvent, MoveFailedEvent } from "../../core/event/core_events";
+import type { SelfTargeting, SingleEnemyTargeting, TargetingData } from "../../core/action/targeting";
+import type { Battle } from "../../core/battle";
+import type { BuffEvent, MoveFailedEvent } from "../../core/event/core_events";
 import {
   AbilityChargeStunComponent,
   DefendComponent,
@@ -12,8 +12,9 @@ import {
   PermanentStatBuffComponent,
   StunnedStateComponent,
 } from "../../core/monster/component/core_components";
-import { getComponent, Monster } from "../../core/monster/monster";
-import { SideId } from "../../core/side";
+import { getComponent } from "../../core/monster/monster";
+import type { Monster } from "../../core/monster/monster";
+import type { SideId } from "../../core/side";
 import { COMMON_MONSTER_POOL } from "./common_monster_pool";
 
 export type COMMON_MOVE_NAMES = "nothing" | "attack-normal" | "defend" | "dodge" | "stun" | "double-attack" | "attack-bonus-next3" | "battle-cry";

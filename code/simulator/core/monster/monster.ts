@@ -1,9 +1,9 @@
-import { Battle } from "../battle";
-import { SideId } from "../side";
-import { EntryID } from "../utils";
-import { BaseComponent } from "./component/component";
-import { ComponentKindMap } from "./component/core_components";
-import { MonsterPool } from "./monster_pool";
+import type { Battle } from "../battle";
+import type { SideId } from "../side";
+import type { EntryID } from "../utils";
+import type { BaseComponent } from "./component/component";
+import type { ComponentKindMap } from "./component/core_components";
+import type { MonsterPool } from "./monster_pool";
 import type { MonsterStatType } from "./monster_stats";
 import type { MonsterTemplate } from "./monster_template";
 

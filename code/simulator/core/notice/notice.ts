@@ -1,5 +1,5 @@
-import { TargetingData } from "../action/targeting";
-import { EntryID } from "../utils";
+import type { TargetingData } from "../action/targeting";
+import type { EntryID } from "../utils";
 
 interface BaseNotice<TKind extends string = string, TData = unknown, TCallback = (...args: unknown[]) => void> {
   readonly kind: TKind;

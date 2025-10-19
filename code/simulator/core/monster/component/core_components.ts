@@ -1,8 +1,8 @@
-import { Battle } from "../../battle";
-import { SideId } from "../../side";
+import type { Battle } from "../../battle";
+import type { SideId } from "../../side";
 import { removeComponent } from "../monster";
-import { MonsterStatType } from "../monster_stats";
-import { BaseComponent } from "./component";
+import type { MonsterStatType } from "../monster_stats";
+import type { BaseComponent } from "./component";
 
 export class RerollChargeComponent implements BaseComponent<"reroll"> {
   kind = "reroll" as const;
@@ -179,4 +179,3 @@ type ComponentInstanceType = InstanceType<CommonComponentTypes>;
 export type ComponentKindMap = {
   [K in ComponentInstanceType["kind"]]: Extract<ComponentInstanceType, { kind: K }>;
 };
-

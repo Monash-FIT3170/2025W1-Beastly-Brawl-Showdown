@@ -1,6 +1,6 @@
-import { Battle } from "../../battle";
-import { SideId } from "../../side";
-import { MonsterStatType } from "../monster_stats";
+import type { Battle } from "../../battle";
+import type { SideId } from "../../side";
+import type { MonsterStatType } from "../monster_stats";
 
 /**
  * A component that can be attached to a monster.

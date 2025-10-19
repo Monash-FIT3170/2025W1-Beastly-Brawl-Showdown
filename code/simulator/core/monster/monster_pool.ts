@@ -1,5 +1,5 @@
-import { LookupTable } from "../utils";
-import { MonsterTemplate } from "./monster_template";
+import type { LookupTable } from "../utils";
+import type { MonsterTemplate } from "./monster_template";
 
 export type MonsterId = Lowercase<string>;
 

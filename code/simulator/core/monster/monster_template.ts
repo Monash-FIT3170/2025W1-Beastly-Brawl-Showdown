@@ -1,7 +1,7 @@
-import { SpawnAction } from "../action/spawn_action";
-import { EntryID } from "../utils";
-import { MonsterId } from "./monster_pool";
-import { MonsterStats } from "./monster_stats";
+import type { SpawnAction } from "../action/spawn_action";
+import type { EntryID } from "../utils";
+import type { MonsterId } from "./monster_pool";
+import type { MonsterStats } from "./monster_stats";
 
 /**
  * A base template for a monster
@@ -47,4 +47,3 @@ export type MonsterTemplate = {
    */
   onSpawnActions: SpawnAction[];
 };
-

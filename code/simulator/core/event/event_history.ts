@@ -1,4 +1,4 @@
-import { BaseEvent } from "./base_event";
+import type { BaseEvent } from "./base_event";
 
 export type OrderedEvent = BaseEvent & {
   /** The index in history this number exists as */
