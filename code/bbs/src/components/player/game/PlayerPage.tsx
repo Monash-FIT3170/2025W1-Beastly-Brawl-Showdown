@@ -9,6 +9,7 @@ import type { ChooseMove, Notice, Roll } from "../../../../../simulator/core/not
 import type { EntryID } from "../../../../../simulator/core/utils";
 import type { TargetingMethod } from "../../../../../simulator/core/action/targeting";
 import type { PlayerClientToServerEvents, PlayerServerToClientEvents } from "../../../../../shared/types"
+import { HomePage } from "../../HomePage";
 
 type PlayerSocket = Socket<PlayerServerToClientEvents, PlayerClientToServerEvents>;
 
@@ -160,7 +161,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);
+      setWinner(data);  
     });
     //#endregion
 
@@ -374,8 +375,9 @@ const PlayerContent = () => {
   if (!startSelection) return <WaitingScreen />;
   if (!monsterSelected) return <MonsterSelectionScreen monsterPool={randomMonsterPool} setSelectedMonsterCallback={handleMonsterSelection} />;
   if (!allReady || waiting) return <WaitingScreen />;
-  // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
+  // TODO: PLACEHOLDER for battlescene page until i can figure out what variables it needs
+  if (matchData?.myid == 2) return <HomePage/>
 
   return <BattleScreen 
     matchData={matchData!} 
