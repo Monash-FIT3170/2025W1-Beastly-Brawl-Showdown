@@ -23,6 +23,7 @@ import type {
   PlayerClientToServerEvents,
   PlayerServerToClientEvents,
 } from "../../../../../shared/types";
+import WaitingScreen from "../../transitionScreens/WaitingScreen";
 
 type PlayerSocket = Socket<
   PlayerServerToClientEvents,
@@ -123,7 +124,7 @@ const PlayerContent = () => {
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
 
-  const waitingTextRef = useRef<HTMLDivElement>(null);
+  // const waitingTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!socket) return;
@@ -218,33 +219,33 @@ const PlayerContent = () => {
     };
   }, [socket]);
 
-  useEffect(() => {
-    if (!isConnected) return;
+  // useEffect(() => {
+  //   if (!isConnected) return;
 
-    const restartAnimation = () => {
-      if (waitingTextRef.current) {
-        const letters =
-          waitingTextRef.current.querySelectorAll(".bounce-letter");
-        letters.forEach((letter, index) => {
-          const element = letter as HTMLElement;
-          element.style.animation = "none";
-          requestAnimationFrame(() => {
-            element.style.animation = `bounce 0.6s ease-in-out ${
-              index * 0.1
-            }s both`;
-          });
-        });
-      }
-    };
+  //   const restartAnimation = () => {
+  //     if (waitingTextRef.current) {
+  //       const letters =
+  //         waitingTextRef.current.querySelectorAll(".bounce-letter");
+  //       letters.forEach((letter, index) => {
+  //         const element = letter as HTMLElement;
+  //         element.style.animation = "none";
+  //         requestAnimationFrame(() => {
+  //           element.style.animation = `bounce 0.6s ease-in-out ${
+  //             index * 0.1
+  //           }s both`;
+  //         });
+  //       });
+  //     }
+  //   };
 
-    const initialTimeout = setTimeout(restartAnimation, 100);
-    const interval = setInterval(restartAnimation, 2000);
+  //   const initialTimeout = setTimeout(restartAnimation, 100);
+  //   const interval = setInterval(restartAnimation, 2000);
 
-    return () => {
-      clearTimeout(initialTimeout);
-      clearInterval(interval);
-    };
-  }, [isConnected]);
+  //   return () => {
+  //     clearTimeout(initialTimeout);
+  //     clearInterval(interval);
+  //   };
+  // }, [isConnected]);
 
   const handleMonsterSelection = (monsterName: string) => {
     // Find the monster in COMMON_MONSTER_POOL by name
@@ -439,27 +440,27 @@ useEffect(() => {
 
   if (!isConnected) return <p>Connecting to server...</p>;
 
-  const WaitingScreen = () => (
-    <div className="waiting-screen">
-      <div className="logo" />
-      <div className="waiting-wrapper">
-        <div className="waiting-line" />
-        <div className="waiting-text" ref={waitingTextRef}>
-          <span className="bounce-letter">W</span>
-          <span className="bounce-letter">a</span>
-          <span className="bounce-letter">i</span>
-          <span className="bounce-letter">t</span>
-          <span className="bounce-letter">i</span>
-          <span className="bounce-letter">n</span>
-          <span className="bounce-letter">g</span>
-          <span className="bounce-letter">.</span>
-          <span className="bounce-letter">.</span>
-          <span className="bounce-letter">.</span>
-        </div>
-        <div className="waiting-line" />
-      </div>
-    </div>
-  );
+  // const WaitingScreen = () => (
+  //   <div className="waiting-screen">
+  //     <div className="logo" />
+  //     <div className="waiting-wrapper">
+  //       <div className="waiting-line" />
+  //       <div className="waiting-text" ref={waitingTextRef}>
+  //         <span className="bounce-letter">W</span>
+  //         <span className="bounce-letter">a</span>
+  //         <span className="bounce-letter">i</span>
+  //         <span className="bounce-letter">t</span>
+  //         <span className="bounce-letter">i</span>
+  //         <span className="bounce-letter">n</span>
+  //         <span className="bounce-letter">g</span>
+  //         <span className="bounce-letter">.</span>
+  //         <span className="bounce-letter">.</span>
+  //         <span className="bounce-letter">.</span>
+  //       </div>
+  //       <div className="waiting-line" />
+  //     </div>
+  //   </div>
+  // );
 
   if (!startSelection) return <WaitingScreen />;
   if (!monsterSelected)
