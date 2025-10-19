@@ -16,9 +16,10 @@ import type {
 } from "../../../../simulator/core/event/core_events";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
-import MonsterHealthRing from "./MonsterHealthRing";
-import BattleMessage from "./BattleMessage";
-import { DiceRollAnimation } from "./DiceRollAnimation";
+import MonsterHealthRing from "./Components/MonsterHealthRing";
+import BattleMessage from "./Components/BattleMessage";
+import { DiceRollAnimation } from "./Components/DiceRollAnimation";
+import { useBattleAnimations } from "./hooks/useBattleAnimations";
 
 interface BattleSceneProps {
   battleInstanceKey: number;
@@ -55,14 +56,23 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   const turns = useMemo(() => parseTurns(events), [events]);
   const [currentMessage, setcurrentMessage] = useState("");
 
-  // === Animation state ===
-  const [showAnimation, setShowAnimation] = useState(false);
-  const [enemySlash, setEnemySlash] = useState(false);
-  const [playerSlash, setPlayerSlash] = useState(false);
-  const [enemyShield, setEnemyShield] = useState(false);
-  const [playerShield, setPlayerShield] = useState(false);
-  const [enemyAbility, setEnemyAbility] = useState(false);
-  const [playerAbility, setPlayerAbility] = useState(false);
+  // === Animation logic handled by hook ===
+  const {
+    enemySlash,
+    setEnemySlash,
+    playerSlash,
+    setPlayerSlash,
+    enemyShield,
+    setEnemyShield,
+    playerShield,
+    setPlayerShield,
+    enemyAbility,
+    setEnemyAbility,
+    playerAbility,
+    setPlayerAbility,
+    performMoveAnimation,
+    resetAnimations,
+  } = useBattleAnimations();
 
   const chainRef = useRef<Promise<void>>(Promise.resolve());
   const enqueueAnim = (moveId: string, actor: "player1" | "player2") => {
@@ -112,13 +122,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     turnToPlayRef.current = [];
     chainRef.current = Promise.resolve();
     setcurrentMessage("");
-    setShowAnimation(false);
-    setEnemySlash(false);
-    setPlayerSlash(false);
-    setEnemyShield(false);
-    setPlayerShield(false);
-    setEnemyAbility(false);
-    setPlayerAbility(false);
+    resetAnimations();
     setRunTurnNow(false);
     prevEventsRef.current = events;
   }, [battleInstanceKey]);
@@ -140,13 +144,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   // This is to prevent replaying the turn when autoplay is toggled
   const onAdvanceRef = useRef(onAdvanceTurn);
-
   useEffect(() => {
     onAdvanceRef.current = onAdvanceTurn;
   }, [onAdvanceTurn]);
 
   const autoAdvanceRef = useRef(autoAdvance);
-  
   useEffect(() => {
     autoAdvanceRef.current = autoAdvance;
   }, [autoAdvance]);
@@ -164,7 +166,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     const sourceMonster = currentSnapshot.sides[sourceId].monster;
     const template =
       COMMON_MONSTER_POOL.monsters[
-        sourceMonster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+      sourceMonster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
       ];
     if (!template) return moveId;
     if (moveId === template.attackActionId) return "attack";
@@ -179,39 +181,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     return COMMON_MONSTER_POOL.monsters[
       src.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
-  };
-
-  const performMoveAnimation = async (
-    moveId: string,
-    actor: "player1" | "player2"
-  ) => {
-    if (!currentSnapshot) return;
-    const template =
-      actor === "player1" ? getTemplateForSource(0) : getTemplateForSource(1);
-    if (template) {
-      if (moveId === template.attackActionId) {
-        if (actor === "player1") setEnemySlash(true);
-        else setPlayerSlash(true);
-      } else if (moveId === template.defendActionId) {
-        if (actor === "player1") setPlayerShield(true);
-        else setEnemyShield(true);
-      } else if (moveId === template.abilityActionId) {
-        if (actor === "player1") setPlayerAbility(true);
-        else setEnemyAbility(true);
-      }
-    }
-    setShowAnimation(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setShowAnimation(false);
-    if (actor === "player1") {
-      setPlayerSlash(false);
-      setPlayerShield(false);
-      setPlayerAbility(false);
-    } else {
-      setEnemySlash(false);
-      setEnemyShield(false);
-      setEnemyAbility(false);
-    }
   };
 
   // === Event application ===
@@ -254,36 +223,28 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       case "blocked": {
         const blockedEvent = ev as BlockedEvent;
         const isPlayerAttacking = blockedEvent.source === myId;
-
         const message = isPlayerAttacking
           ? "Your attack was blocked!"
           : "You blocked the enemy's attack!";
-
         setcurrentMessage(message);
         break;
       }
       case "evaded": {
         const evadedEvent = ev as MoveEvadedEvent;
         const isPlayerAttacking = evadedEvent.source === myId;
-
         const message = isPlayerAttacking
           ? "Your attack was evaded!"
           : "You evaded the enemy's attack!";
-
         setcurrentMessage(message);
         break;
       }
       case "damage": {
         const damageEvent = ev as DamageEvent;
         const isPlayerTakingDamage = damageEvent.target === myId;
-
         const message = isPlayerTakingDamage
           ? `You took ${damageEvent.amount} damage!`
           : `Enemy took ${damageEvent.amount} damage!`;
-
         setcurrentMessage(message);
-
-        // Update health in state
         let playerId = Number(damageEvent.target);
         state[playerId].health -= damageEvent.amount;
         break;
@@ -300,8 +261,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           const template = getTemplateForSource(buffEvent.source);
           if (template) enqueueAnim(template.defendActionId, actor);
         }
-
-        // Update defend charges in state
         let playerId = Number(buffEvent.source);
         state[playerId].defendActionCharge -= 1;
         break;
@@ -311,8 +270,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         if (rerollEvent.source === myId) {
           const message = `You would have rolled ${parentDiceRollResult} to hit but instead you rerolled and got ${rerollEvent.result}`;
           setcurrentMessage(message);
-          // setDiceRollResult(rerollEvent.result);
-          // setShowDiceAnimation(true);
         }
         break;
       }
@@ -321,18 +278,14 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         if (rollEvent.source === myId) {
           let message: string;
           switch (previousEvent?.name) {
-            case "startMove": {
+            case "startMove":
               message = `You rolled ${rollEvent.result} to hit`;
               break;
-            }
-            case "moveSuccess": {
+            case "moveSuccess":
               message = `You rolled ${rollEvent.result} to damage`;
               break;
-            }
-            default: {
+            default:
               message = `You rolled ${rollEvent.result}`;
-              break;
-            }
           }
           setcurrentMessage(message);
         }
@@ -344,21 +297,16 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
       default: {
         console.log(`Unhandled event: ${ev.name}`);
-        break;
       }
     }
     previousEvent = ev;
     return state;
   }
 
-  function cloneState(
-    state: ReturnType<typeof parseSnapshot>
-  ): ReturnType<typeof parseSnapshot> {
-    if (typeof structuredClone === "function") {
-      return structuredClone(state);
-    } else {
-      return JSON.parse(JSON.stringify(state));
-    }
+  function cloneState(state: ReturnType<typeof parseSnapshot>) {
+    return typeof structuredClone === "function"
+      ? structuredClone(state)
+      : JSON.parse(JSON.stringify(state));
   }
 
   // === Turn playback ===
@@ -375,7 +323,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         setVisibleState(snapState);
         i = 1;
       }
-      let animChain = Promise.resolve();
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
         const ev = turnToPlay[i];
@@ -386,38 +333,30 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         await new Promise((r) => setTimeout(r, 900));
         if (cancelled) return;
       }
-      await animChain;
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
       setRunTurnNow(false);
-      setTimeout(() => setcurrentMessage(""), 1200);
+      setTimeout(() => setcurrentMessage(""), 1500);
     })();
     return () => {
       cancelled = true;
     };
   }, [runTurnNow, isPlaying]);
 
-  // Check if there are 2 players
-  if (visibleState.length < 2) {
-    return <p>Waiting for game data...</p>;
-  }
+  if (visibleState.length < 2) return <p>Waiting for game data...</p>;
+  if (!currentSnapshot) return null;
 
-  if (!currentSnapshot) {
-    return null;
-  }
-
-  //have to get maxhp to pass to battlemiddle
   const template =
     COMMON_MONSTER_POOL.monsters[
-      currentSnapshot.sides[myId].monster
-        .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+    currentSnapshot.sides[myId].monster
+      .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
 
   const template2 =
     COMMON_MONSTER_POOL.monsters[
-      currentSnapshot.sides[1 - myId].monster
-        .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+    currentSnapshot.sides[1 - myId].monster
+      .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
