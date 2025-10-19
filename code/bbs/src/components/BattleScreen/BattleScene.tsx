@@ -3,23 +3,14 @@ import { parseSnapshot } from "./Components/snapshot_parser";
 import { parseTurns } from "./Components/turns_array_maker";
 import { clamp } from "./Components/utils/clamp";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
-import type {
-  BuffEvent,
-  DamageEvent,
-  SnapshotEvent,
-  MoveSuccessEvent,
-  MoveFailedEvent,
-  BlockedEvent,
-  MoveEvadedEvent,
-  RerollEvent,
-  RollEvent,
-} from "../../../../simulator/core/event/core_events";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
 import MonsterHealthRing from "./Components/MonsterHealthRing";
 import BattleMessage from "./Components/BattleMessage";
 import { DiceRollAnimation } from "./Components/DiceRollAnimation";
 import { useBattleAnimations } from "./hooks/useBattleAnimations";
+import { useBattleEvents } from "./hooks/useBattleEvents";
+import type { SnapshotEvent } from "../../../../simulator/core/event/core_events";
 
 interface BattleSceneProps {
   battleInstanceKey: number;
@@ -54,22 +45,15 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 }) => {
   // === Turn parsing and state ===
   const turns = useMemo(() => parseTurns(events), [events]);
-  const [currentMessage, setcurrentMessage] = useState("");
 
   // === Animation logic handled by hook ===
   const {
-    enemySlash,
-    setEnemySlash,
-    playerSlash,
-    setPlayerSlash,
-    enemyShield,
-    setEnemyShield,
-    playerShield,
-    setPlayerShield,
-    enemyAbility,
-    setEnemyAbility,
-    playerAbility,
-    setPlayerAbility,
+    enemySlash, setEnemySlash,
+    playerSlash, setPlayerSlash,
+    enemyShield, setEnemyShield,
+    playerShield, setPlayerShield,
+    enemyAbility, setEnemyAbility,
+    playerAbility, setPlayerAbility,
     performMoveAnimation,
     resetAnimations,
   } = useBattleAnimations();
@@ -81,9 +65,27 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     );
   };
 
-  // === Dice animation ===
+  // === Battle event handling hook ===
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [diceRollResult, setDiceRollResult] = useState<number | null>(null);
+  const [diceRollAnimationComplete, setDiceRollAnimationComplete] = useState<(() => void) | null>(null);
+
+  const onDiceRoll = (roll: number) => {
+    return new Promise<void>((resolve) => {
+      setDiceRollResult(roll);
+      setShowDiceAnimation(true);
+
+      const handleComplete = () => {
+        setShowDiceAnimation(false);
+        resolve();
+      };
+
+      setDiceRollAnimationComplete(() => handleComplete);
+    });
+  };
+
+  const { applyEventToVisible, currentMessage, setCurrentMessage, cloneState } =
+    useBattleEvents({ myId, parentDiceRollResult, enqueueAnim, showDiceRoll: onDiceRoll });
 
   // === Turn index handling ===
   const selectedTurnIndex = Number.isInteger(turnIndex)
@@ -121,7 +123,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     lastSnapCountRef.current = 0;
     turnToPlayRef.current = [];
     chainRef.current = Promise.resolve();
-    setcurrentMessage("");
+    setCurrentMessage("");
     resetAnimations();
     setRunTurnNow(false);
     prevEventsRef.current = events;
@@ -157,157 +159,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   useEffect(() => {
     setVisibleState(initialTurnState);
     latestVisibleRef.current = initialTurnState;
-    setcurrentMessage("");
+    setCurrentMessage("");
   }, [initialTurnState, isPlaying]);
 
-  // === Helper functions ===
-  const getMoveDisplayName = (moveId: string, sourceId: number): string => {
-    if (!currentSnapshot) return moveId;
-    const sourceMonster = currentSnapshot.sides[sourceId].monster;
-    const template =
-      COMMON_MONSTER_POOL.monsters[
-      sourceMonster.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
-      ];
-    if (!template) return moveId;
-    if (moveId === template.attackActionId) return "attack";
-    if (moveId === template.defendActionId) return "defend";
-    if (moveId === template.abilityActionId) return "ability";
-    return moveId;
-  };
-
-  const getTemplateForSource = (sourceId: number) => {
-    if (!currentSnapshot) return undefined;
-    const src = currentSnapshot.sides[sourceId].monster;
-    return COMMON_MONSTER_POOL.monsters[
-      src.baseID as keyof typeof COMMON_MONSTER_POOL.monsters
-    ];
-  };
-
-  // === Event application ===
-  let previousEvent: BaseEvent | null = null;
-  async function applyEventToVisible(
-    state: typeof initialTurnState,
-    ev: BaseEvent
-  ) {
-    switch (ev.name) {
-      case "moveSuccess": {
-        const successEvent = ev as MoveSuccessEvent;
-        const isPlayer = successEvent.source === myId;
-        const moveName = getMoveDisplayName(
-          successEvent.moveId,
-          successEvent.source
-        );
-        const message = isPlayer
-          ? `You ${moveName} successfully!`
-          : `Enemy ${moveName}s successfully!`;
-        setcurrentMessage(message);
-        enqueueAnim(successEvent.moveId, isPlayer ? "player1" : "player2");
-        break;
-      }
-      case "moveFailed": {
-        const failedEvent = ev as MoveFailedEvent;
-        const isPlayer = failedEvent.source === myId;
-        const moveName = getMoveDisplayName(
-          failedEvent.moveId,
-          failedEvent.source
-        );
-        let message = isPlayer
-          ? `Your ${moveName} failed!`
-          : `Enemy ${moveName} failed!`;
-        if (failedEvent.moveId === "defend") {
-          message += " No charges left!";
-        }
-        setcurrentMessage(message);
-        break;
-      }
-      case "blocked": {
-        const blockedEvent = ev as BlockedEvent;
-        const isPlayerAttacking = blockedEvent.source === myId;
-        const message = isPlayerAttacking
-          ? "Your attack was blocked!"
-          : "You blocked the enemy's attack!";
-        setcurrentMessage(message);
-        break;
-      }
-      case "evaded": {
-        const evadedEvent = ev as MoveEvadedEvent;
-        const isPlayerAttacking = evadedEvent.source === myId;
-        const message = isPlayerAttacking
-          ? "Your attack was evaded!"
-          : "You evaded the enemy's attack!";
-        setcurrentMessage(message);
-        break;
-      }
-      case "damage": {
-        const damageEvent = ev as DamageEvent;
-        const isPlayerTakingDamage = damageEvent.target === myId;
-        const message = isPlayerTakingDamage
-          ? `You took ${damageEvent.amount} damage!`
-          : `Enemy took ${damageEvent.amount} damage!`;
-        setcurrentMessage(message);
-        let playerId = Number(damageEvent.target);
-        state[playerId].health -= damageEvent.amount;
-        break;
-      }
-      case "buff": {
-        const buffEvent = ev as BuffEvent;
-        const isPlayer = buffEvent.source === myId;
-        if (buffEvent.buffs.armour && buffEvent.source === buffEvent.target) {
-          const message = isPlayer
-            ? `You gained +${buffEvent.buffs.armour} armor!`
-            : `Enemy gained +${buffEvent.buffs.armour} armor!`;
-          setcurrentMessage(message);
-          const actor = isPlayer ? "player1" : "player2";
-          const template = getTemplateForSource(buffEvent.source);
-          if (template) enqueueAnim(template.defendActionId, actor);
-        }
-        let playerId = Number(buffEvent.source);
-        state[playerId].defendActionCharge -= 1;
-        break;
-      }
-      case "reroll": {
-        const rerollEvent = ev as RerollEvent;
-        if (rerollEvent.source === myId) {
-          const message = `You would have rolled ${parentDiceRollResult} to hit but instead you rerolled and got ${rerollEvent.result}`;
-          setcurrentMessage(message);
-        }
-        break;
-      }
-      case "roll": {
-        const rollEvent = ev as RollEvent;
-        if (rollEvent.source === myId) {
-          let message: string;
-          switch (previousEvent?.name) {
-            case "startMove":
-              message = `You rolled ${rollEvent.result} to hit`;
-              break;
-            case "moveSuccess":
-              message = `You rolled ${rollEvent.result} to damage`;
-              break;
-            default:
-              message = `You rolled ${rollEvent.result}`;
-          }
-          setcurrentMessage(message);
-        }
-        break;
-      }
-      case "battleOver": {
-        setcurrentMessage("Battle Over!");
-        break;
-      }
-      default: {
-        console.log(`Unhandled event: ${ev.name}`);
-      }
-    }
-    previousEvent = ev;
-    return state;
-  }
-
-  function cloneState(state: ReturnType<typeof parseSnapshot>) {
-    return typeof structuredClone === "function"
-      ? structuredClone(state)
-      : JSON.parse(JSON.stringify(state));
-  }
 
   // === Turn playback ===
   useEffect(() => {
@@ -326,8 +180,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
         const ev = turnToPlay[i];
-        const base = cloneState(latestVisibleRef.current);
-        const next = await applyEventToVisible(base, ev);
+        const base = cloneState(latestVisibleRef.current);  // hook version
+        const next = await applyEventToVisible(base, ev);   // hook version
         latestVisibleRef.current = next;
         setVisibleState(next);
         await new Promise((r) => setTimeout(r, 900));
@@ -336,7 +190,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
       setRunTurnNow(false);
-      setTimeout(() => setcurrentMessage(""), 1500);
+      setTimeout(() => setCurrentMessage(""), 1500); // hook version
     })();
     return () => {
       cancelled = true;
@@ -416,8 +270,10 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
       {showDiceAnimation && (
         <DiceRollAnimation
-          onComplete={() => setShowDiceAnimation(false)}
           rollResult={diceRollResult ?? 20}
+          onComplete={() => {
+            if (diceRollAnimationComplete) diceRollAnimationComplete();
+          }}
         />
       )}
     </div>
