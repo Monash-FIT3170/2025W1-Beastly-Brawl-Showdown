@@ -10,6 +10,7 @@ import type { EntryID } from "../../../../../simulator/core/utils";
 import type { TargetingMethod } from "../../../../../simulator/core/action/targeting";
 import type { PlayerClientToServerEvents, PlayerServerToClientEvents } from "../../../../../shared/types";
 import WaitingScreen from "../../transitionScreens/WaitingScreen";
+import { HomePage } from "../../HomePage";
 
 type PlayerSocket = Socket<
   PlayerServerToClientEvents,
@@ -215,7 +216,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);
+      setWinner(data);  
     });
     //#endregion
 
@@ -433,7 +434,6 @@ const PlayerContent = () => {
     );
   // if (!allReady || waiting) return <WaitingScreen />;
   if (!allReady || waiting) return <WaitingScreen />;
-  // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
   
   console.log("Rendering BattleScreen with matchData:", matchData);

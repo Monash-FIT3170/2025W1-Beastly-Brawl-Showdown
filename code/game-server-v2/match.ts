@@ -247,6 +247,11 @@ export class Match {
         log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
         this.spectators.forEach(player => {
             console.log(player.displayName);
+            playerChannel.to(player.socketId).emit("startRound", {
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 2,
+            });
         });
         
 
