@@ -221,7 +221,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   const shouldShowMessage = showMessage || currentMessage !== "";
 
   return (
-    <div className="canvas-body" id="battle-screen-body">
+    <div className="battle-scene">
       <div className="combat-arena">
         <MonsterHealthRing
           currentHealth={visiblePlayer2.health ?? 0}
