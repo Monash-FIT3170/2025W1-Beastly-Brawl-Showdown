@@ -74,7 +74,7 @@ async function main() {
   });
 
   //# Listen
-  const port: number = 8000;
+  const port: number = parseInt(process.env.PORT || '8000', 10);;
   app.listen(port);
   console.log(`Listening @ port ${port}`);
 
