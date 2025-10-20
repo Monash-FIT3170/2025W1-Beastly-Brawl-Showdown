@@ -222,8 +222,16 @@ export class Match {
                     log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
                     playerChannel.to(this.player2.socketId).emit("newEvent", event);
                 }
+
+                // Broadcast to spectators
+                this.spectators.forEach(spectator => {
+                    log_event(`[EVENT] Sending event to spectator (${spectator.displayName})`);
+                    playerChannel.to(spectator.socketId).emit("newEvent", event);
+                })
             },
         });
+
+        
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
@@ -245,9 +253,8 @@ export class Match {
 
         // TODO: Emit socket for all spectators for each player
         log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
-        this.spectators.forEach(player => {
-            console.log(player.displayName);
-            playerChannel.to(player.socketId).emit("startRound", {
+        this.spectators.forEach(spectator => {
+            playerChannel.to(spectator.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
                 sideID: 0,
@@ -273,6 +280,9 @@ export class Match {
         if (this.winner && loser) {
             playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
             playerChannel.to(loser?.socketId).emit("sendToWaiting");
+            this.spectators.forEach(spectator => {
+                playerChannel.to(spectator.socketId).emit("sendToWaiting");
+            })
         }
     }
 
