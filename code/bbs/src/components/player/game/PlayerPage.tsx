@@ -100,6 +100,8 @@ const PlayerContent = () => {
     player1Monster: { template: MonsterTemplate; currentHp: number };
     player2Monster: { template: MonsterTemplate; currentHp: number };
     myId: number;
+    player1Name: string;
+    player2Name: string;
   } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
@@ -154,6 +156,8 @@ const PlayerContent = () => {
 
       log_event("Received round-start data:", data);
 
+      const player1Name = data?.player1Name;
+      const player2Name = data?.player2Name;
       const player1TemplateName = data?.player1Monster;
       const player2TemplateName = data?.player2Monster;
 
@@ -190,6 +194,8 @@ const PlayerContent = () => {
           currentHp: player2Monster.baseStats.health,
         },
         myId: data.sideID,
+        player1Name: data.player1Name,
+        player2Name: data.player2Name,
       });
 
       // Give a key for every new battle

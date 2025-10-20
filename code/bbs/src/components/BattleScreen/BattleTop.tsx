@@ -1,17 +1,42 @@
 import React from "react";
 import { useNavigate } from "react-router";
 
-//literally just a div, like nothing to see here
-export const BattleTop: React.FC = () => {
+interface BattleTopProps {
+  turnNumber: number;
+  playerName: string;
+  opponentName: string;
+}
+
+export const BattleTop: React.FC<BattleTopProps> = ({
+  turnNumber,
+  playerName,
+  opponentName,
+}) => {
   const navigate = useNavigate();
 
   return (
-    <button
-      onClick={() => navigate("/main")}
-      className="glb-btn"
-      id="battleScreenTop-btn"
-    >
-      Surrender
-    </button>
+    <div className="battle-top-bar">
+      {/* Left side: Turn number */}
+      <div className="battle-top-left">
+        <span className="turn-label">Turn {turnNumber}</span>
+      </div>
+
+      {/* Center: Player vs Opponent */}
+      <div className="battle-top-center">
+        <span className="player-name">{playerName}</span>
+        <span className="vs-text"> VS </span>
+        <span className="opponent-name">{opponentName}</span>
+      </div>
+
+      {/* Right side: Surrender */}
+      <div className="battle-top-right">
+        <button
+          onClick={() => navigate("/main")}
+          className="glb-btn surrender-btn"
+        >
+          Surrender
+        </button>
+      </div>
+    </div>
   );
 };
