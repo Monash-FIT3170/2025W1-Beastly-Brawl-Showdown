@@ -9,10 +9,10 @@ interface BattleTopProps {
 
 export const BattleTop: React.FC<BattleTopProps> = ({
   turnNumber,
-  playerName,
-  opponentName,
+  // playerName,
+  // opponentName,
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   return (
     <div className="battle-top-bar">
@@ -22,21 +22,21 @@ export const BattleTop: React.FC<BattleTopProps> = ({
       </div>
 
       {/* Center: Player vs Opponent */}
-      <div className="battle-top-center">
+      {/* <div className="battle-top-center">
         <span className="player-name">{playerName}</span>
         <span className="vs-text"> VS </span>
         <span className="opponent-name">{opponentName}</span>
-      </div>
+      </div> */}
 
       {/* Right side: Surrender */}
-      <div className="battle-top-right">
+      {/* <div className="battle-top-right">
         <button
           onClick={() => navigate("/main")}
           className="glb-btn surrender-btn"
         >
           Surrender
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

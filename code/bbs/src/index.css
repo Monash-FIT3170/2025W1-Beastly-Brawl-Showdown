@@ -1237,20 +1237,18 @@ input:focus {
 /* ################################################## */
 /* Battle Screen styles */
 #battle-screen-body {
-  position: relative;
+  /* position: relative; */
   background-image: url("/assets/combat-bg.png");
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   height: 100vh;
 }
 
-.battleScreenTop {
-  position: relative;
-  display: block;
-  background-color: red;
-  width: 100%;
-  height: 8%;
-  top: 0px;
+.battle-top-bar {
+  display: flex;
+  height: auto;
+  margin-top: 5%;
 }
 
 #battleScreenTop-btn {
@@ -1261,6 +1259,10 @@ input:focus {
   margin: 0;
 }
 
+.battle-scene {
+  margin-top: 15%;
+  width: 100%;
+}
 .battleMiddle {
   position: relative;
   flex: 1;
@@ -1281,7 +1283,6 @@ input:focus {
   gap: 20px;
   padding: 20px;
   background: transparent;
-  position: absolute;
   bottom: 0;
   width: 100%;
 }
