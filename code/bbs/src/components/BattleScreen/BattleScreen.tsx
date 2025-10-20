@@ -168,20 +168,24 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   if (isSpectator) {
   return (
-    <BattleScene
-      battleInstanceKey={battleInstanceKey}
-      events={events}
-      turnIndex={turnIndex}
-      isPlaying={isPlaying}
-      autoAdvance={false}
-      onAdvanceTurn={() => {}}
-      myid={matchData.myid}
-      showEnemySubmittedMessage={false}
-      showSubmittedMoveMessage={false}
-      showMessage={false}
-      setTurnFinishedPlaying={() => {}}
-      showRollMessage={false}
-    />
+    <>
+      <div className="canvas-body" id="battle-screen-body">
+        <BattleScene
+          battleInstanceKey={battleInstanceKey}
+          events={events}
+          turnIndex={turnIndex}
+          isPlaying={isPlaying}
+          autoAdvance={false}
+          onAdvanceTurn={(next: React.SetStateAction<number>) => setTurnIndex(next)}
+          myid={matchData.myid}
+          showEnemySubmittedMessage={showEnemySubmittedMessage}
+          showSubmittedMoveMessage={showSubmittedMoveMessage}
+          showMessage={showMessage}
+          setTurnFinishedPlaying={setTurnFinishedPlaying}
+          showRollMessage={showRollMessage}
+        />
+      </div>
+    </>
   );
 }
   
