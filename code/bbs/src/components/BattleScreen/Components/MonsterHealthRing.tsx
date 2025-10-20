@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import SlashAnimation from "./SlashAnimation";
 import ShieldAnimation from "./ShieldAnimation";
 import AbilityAnimation from "./AbilityAnimation";
-import MonsterTooltip from "../MonsterToolTip";
+import MonsterTooltip from "../../MonsterToolTip";
 
 type BaseStats = {
   attack: number;
