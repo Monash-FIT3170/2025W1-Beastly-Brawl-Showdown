@@ -96,6 +96,7 @@ const PlayerContent = () => {
   const [waiting, setWaiting] = useState(false);
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
+  const [isSpectator, setIsSpectator] = useState(false);
 
   const [events, setEvents] = useState<any[]>([]);
   const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
@@ -183,7 +184,10 @@ const PlayerContent = () => {
         myId: data.sideID,
       });
 
-      console.log("Match data set:", { data });
+      // Check if player is spectator
+      if (data.spectator) {
+        setIsSpectator(true);
+      }
 
       // Give a key for every new battle
       setBattleInstanceKey((k) => k + 1);
@@ -435,29 +439,30 @@ const PlayerContent = () => {
   // if (!allReady || waiting) return <WaitingScreen />;
   if (!allReady || waiting) return <WaitingScreen />;
   if (winner) return <WinnerScreen winnerName={winner} />;
-  
-  console.log("Rendering BattleScreen with matchData:", matchData);
 
-  return (
-    <BattleScreen
-      matchData={matchData!}
-      events={events}
-      setEvents={setEvents}
-      chooseMove={chooseMove}
-      setChooseMove={setChooseMove}
-      setHasReceivedChooseMove={setHasReceivedChooseMove}
-      buttonDisabled={!isButtonEnabled}
-      onSubmitMove={handleSubmitMove}
-      setTurnFinishedPlaying={setTurnFinishedPlaying}
-      showMessage={showMessage}
-      onReroll={rerollNow}
-      rerollMode={rerollMode}
-      parentDiceRollResult={parentDiceRollResult}
-      isWaiting={isWaiting}
-      setIsWaiting={setIsWaiting}
-      battleInstanceKey={battleInstanceKey}
-    />
-  );
+  return <BattleScreen 
+    matchData={matchData!} 
+    events={events}
+    setEvents={setEvents}
+    chooseMove={chooseMove}
+    setChooseMove={setChooseMove}
+    setHasReceivedChooseMove = {setHasReceivedChooseMove}
+    rollNotice={rollNotice}
+    showRollMessage={showRollMessage}
+    buttonDisabled={!isButtonEnabled}
+    showDiceAnimation={showDiceAnimation}
+    diceRollResult={diceRollResult}
+    setShowDiceAnimation={setShowDiceAnimation}
+    onSubmitMove={handleSubmitMove}
+    onRoll={rollNow}
+    setTurnFinishedPlaying={setTurnFinishedPlaying}
+    showEnemySubmittedMessage={showEnemySubmittedMessage}
+    showSubmittedMoveMessage={showSubmittedMoveMessage}
+    setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
+    showMessage={showMessage}
+    battleInstanceKey={battleInstanceKey}
+    isSpectator={isSpectator}
+  />;
 };
 //#endregion
 

@@ -250,7 +250,8 @@ export class Match {
             playerChannel.to(player.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
-                sideID: 2,
+                sideID: 0,
+                spectator: true
             });
         });
         
