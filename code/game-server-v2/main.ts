@@ -16,6 +16,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
 import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, IGameServerRegistryEntry, PlayerNamespace } from "../shared/types";
+import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 
 const MONGO_URI = process.env["MONGO_URI"] ?? `mongodb://localhost:27017/RoomLocation`;
 
@@ -466,6 +467,10 @@ async function main(config: ServerConfig) {
       if (player1 && player1.submittedMove && player2?.socketId) playerChannel.to(player2.socketId).emit("enemyMoveSubmitted");
       if (player2 && player2.submittedMove && player1?.socketId) playerChannel.to(player1.socketId).emit("enemyMoveSubmitted");
 
+      log_event(`Player ${player.displayName} submitted move ${moveId} with targeting method ${targetMethod} from side ${sourceSide} and monster ${player.monster}`);
+
+      // Handle different move types
+
       switch (moveId) {
         case "defend":
           match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
@@ -474,16 +479,39 @@ async function main(config: ServerConfig) {
           const targetSide = sourceSide === 1 ? 0 : 1;
           match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
           break;
+        default: { // TODO: Alternate way to identify abilities other than move ID
+          const abilityMoveId = match.getMonsterAbility(player);
+          if (!abilityMoveId) return;
+
+          const moveData = COMMON_MOVE_POOL[abilityMoveId];
+          // Check if the move ID exists in the move pool
+          if (!moveData) {
+            throw new Error(`Unknown move ID: ${abilityMoveId}. Check that this ability is registered in COMMON_MOVE_POOL.`);
+          }
+
+          const opponentSide = (match.getSideForPlayer(player) === 0 ? 1 : 0) as SideId;
+
+          let targetSide: SideId;
+          switch (moveData.targetingMethod) {
+            case "self":
+              targetSide = match.getSideForPlayer(player) as SideId;
+              break;
+            case "single-enemy":
+              targetSide = opponentSide;
+              break;
+            default:
+              throw new Error(`Unknown targeting method: ${moveData.targetingMethod} for move ${abilityMoveId}`);
+          }
+          log_attention(`Ability ${abilityMoveId} being submitted by ${player} targeting ${targetSide}`);
+          match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId);
+          break;
+        }
       }
 
       const allSubmitted = player1.submittedMove && player2?.submittedMove;
 
       if (allSubmitted) {
         [player1.submittedMove, player2.submittedMove] = [false, false];
-
-        // Prepare move data for client
-        const player1Move = match.getPlayerMove(player1); // or store last submitted move somewhere
-        const player2Move = match.getPlayerMove(player2);
 
         playerChannel.to(player1.socketId).emit("unlockButton");
         playerChannel.to(player2.socketId).emit("unlockButton");
