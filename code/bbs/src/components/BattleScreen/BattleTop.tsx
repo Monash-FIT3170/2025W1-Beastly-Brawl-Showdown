@@ -12,7 +12,7 @@ export const BattleTop: React.FC<BattleTopProps> = ({
   // playerName,
   opponentName,
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   return (
     <div className="battle-top-bar">
@@ -33,14 +33,14 @@ export const BattleTop: React.FC<BattleTopProps> = ({
       {/* <div style={{flex: 1}}></div> */}
 
       {/* Right side: Surrender */}
-      <div className="battle-top-right">
+      {/* <div className="battle-top-right">
         <button
           onClick={() => navigate("/main")}
           className="surrender-btn"
         >
           &#x21A9;
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

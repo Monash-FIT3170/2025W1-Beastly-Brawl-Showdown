@@ -1262,6 +1262,7 @@ input:focus {
 /* Battle Screen styles */
 #battle-screen-body {
   /* position: relative; */
+  /* position: relative; */
   background-image: url("/assets/combat-bg.png");
   display: flex;
   flex-direction: column;
