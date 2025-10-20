@@ -6,7 +6,7 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
-import { type ChooseMove, type Notice, type Roll } from "../../../../simulator/core/notice/notice";
+import { type ChooseMove, type Roll } from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
 interface BattleScreenProps {
@@ -40,6 +40,7 @@ interface BattleScreenProps {
   showSubmittedMoveMessage: boolean;
   showMessage: boolean;
   battleInstanceKey: number;
+  isSpectator?: boolean;
 }
 
 type MonsterState = {
@@ -68,7 +69,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
    setShowSubmittedMoveMessage,
    showSubmittedMoveMessage,
    showMessage,
-   battleInstanceKey
+   battleInstanceKey,
+   isSpectator
   }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -164,6 +166,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
+  if (isSpectator) {
+  return (
+    <BattleScene
+      battleInstanceKey={battleInstanceKey}
+      events={events}
+      turnIndex={turnIndex}
+      isPlaying={isPlaying}
+      autoAdvance={false}
+      onAdvanceTurn={() => {}}
+      myid={matchData.myid}
+      showEnemySubmittedMessage={false}
+      showSubmittedMoveMessage={false}
+      showMessage={false}
+      setTurnFinishedPlaying={() => {}}
+      showRollMessage={false}
+    />
+  );
+}
+  
   return (
     <>
       <div className="canvas-body" id="battle-screen-body">

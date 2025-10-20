@@ -9,7 +9,6 @@ import type { ChooseMove, Notice, Roll } from "../../../../../simulator/core/not
 import type { EntryID } from "../../../../../simulator/core/utils";
 import type { TargetingMethod } from "../../../../../simulator/core/action/targeting";
 import type { PlayerClientToServerEvents, PlayerServerToClientEvents } from "../../../../../shared/types"
-import { HomePage } from "../../HomePage";
 
 type PlayerSocket = Socket<PlayerServerToClientEvents, PlayerClientToServerEvents>;
 
@@ -77,6 +76,7 @@ const PlayerContent = () => {
   const [waiting, setWaiting] = useState(false);
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
+  const [isSpectator, setIsSpectator] = useState(false);
 
   const [events, setEvents] = useState<any[]>([]);
   const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
@@ -145,6 +145,11 @@ const PlayerContent = () => {
         player2Monster: { template: player2Monster, currentHp: player2Monster.baseStats.health },
         myid: data.sideID,
       });
+
+      // Check if player is spectator
+      if (data.spectator) {
+        setIsSpectator(true);
+      }
 
       // Give a key for every new battle
       setBattleInstanceKey((k) => k + 1);
@@ -376,8 +381,6 @@ const PlayerContent = () => {
   if (!monsterSelected) return <MonsterSelectionScreen monsterPool={randomMonsterPool} setSelectedMonsterCallback={handleMonsterSelection} />;
   if (!allReady || waiting) return <WaitingScreen />;
   if (winner) return <WinnerScreen winnerName={winner} />;
-  // TODO: PLACEHOLDER for battlescene page until i can figure out what variables it needs
-  if (matchData?.myid == 2) return <HomePage/>
 
   return <BattleScreen 
     matchData={matchData!} 
@@ -400,6 +403,7 @@ const PlayerContent = () => {
     setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
     showMessage={showMessage}
     battleInstanceKey={battleInstanceKey}
+    isSpectator={isSpectator}
   />;
 };
 //#endregion
