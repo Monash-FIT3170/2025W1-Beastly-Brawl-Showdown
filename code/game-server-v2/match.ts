@@ -1,15 +1,15 @@
 import { Player } from "./player";
-import { AccountId } from "../shared/types";
-import { Battle, BattleOptions } from "../beastly-brawl-showdown/imports/simulator/core/battle";
-import { SideId } from "../beastly-brawl-showdown/imports/simulator/core/side";
-import { COMMON_MONSTER_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_monster_pool";
-import { COMMON_MOVE_POOL } from "../beastly-brawl-showdown/imports/simulator/data/common/common_move_pool";
+import { AccountId, PlayerNamespace } from "../shared/types";
+import { Battle, BattleOptions } from "../simulator/core/battle";
+import { SideId } from "../simulator/core/side";
+import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 import { log_attention, log_event } from "./utils";
-import { MonsterId } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_pool";
-import { TargetingData } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
-import { EntryID } from "../beastly-brawl-showdown/imports/simulator/core/utils";
-import { ChooseMove, Roll } from "../beastly-brawl-showdown/imports/simulator/core/notice/notice";
-import { TargetingMethod } from "../beastly-brawl-showdown/imports/simulator/core/action/targeting";
+import { MonsterId } from "../simulator/core/monster/monster_pool";
+import { TargetingData } from "../simulator/core/action/targeting";
+import { EntryID } from "../simulator/core/utils";
+import { ChooseMove, RerollOption, Roll } from "../simulator/core/notice/notice";
+import { TargetingMethod } from "../simulator/core/action/targeting";
 
 export enum MatchType {
     DUEL,
@@ -104,6 +104,7 @@ export class Match {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
 
+        console.log(`[MATCH DEBUG] submitMove called for ${player.displayName} with moveId ${moveId}, targetMethod ${targetMethod}, targetSide ${targetSide}`);
         // Store move
         this.submittedMoves.set(player, { moveId, targetSide, targetMethod });
 
@@ -120,11 +121,13 @@ export class Match {
             targetingMethod: targetMethod,
             target: targetSide,
         };
-
+        console.log(`[MATCH DEBUG] Submitting move ${moveId} (${targetMethod}) for ${player.displayName}`);
+        console.log(`[MATCH DEBUG] chooseMoveNotice exists?`, !!chooseMoveNotice);
         chooseMoveNotice.callback(moveId, targetData);
+        console.log(`[MATCH DEBUG] Callback called for ${player.displayName}`);
     }
 
-    // Called by main when a player submits a move
+    // Called by main when a player submits roll notice
     submitRoll(player: Player): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit rolls to.`);
@@ -140,9 +143,36 @@ export class Match {
         rollNotice.callback();
     }
 
+    // Called by main when a player submits reroll notice
+    submitReroll(player: Player, option : boolean): void {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to submit rerolls to.`);
+        }
+
+        const sideIndex = this.getSideForPlayer(player);
+        const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
+        const rerollNotice = noticeMap.get("rerollOption") as RerollOption | undefined;
+
+        if (!rerollNotice) {
+            throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no reroll notice.`);
+        }
+        rerollNotice.callback(option);
+    }
+
 
     getPlayerMove(player: Player) {
         return this.submittedMoves.get(player);
+    }
+
+    getMonsterAbility(player: Player): COMMON_MOVE_NAMES | null {
+        if (!this.battle) return null;
+
+        const sideId = this.getSideForPlayer(player);
+        const monster = this.battle.sides[sideId].monster;
+        if (!monster) return null;
+
+        const template = this.battle.monsterPool.monsters[monster.baseID as keyof typeof this.battle.monsterPool.monsters];
+        return (template?.abilityActionId ?? null) as COMMON_MOVE_NAMES | null;
     }
 
 
@@ -154,7 +184,7 @@ export class Match {
      * @param playersByAccountId Hashmap of players in the tournament
      * @returns None
      */
-    async runBattle(playerChannel: any): Promise<void> {
+    async runBattle(playerChannel: PlayerNamespace): Promise<void> {
         if (this.matchType === MatchType.BYE) {
             this.winner = this.player1;
             log_attention(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
@@ -194,24 +224,23 @@ export class Match {
                 }
             },
         });
-        
-        // switch displayed page to battle screen
-        // playerChannel.to(this.player1.socketId).emit("return-from-waiting");
-        // playerChannel.to(this.player2?.socketId).emit("return-from-waiting");
-        playerChannel.to(this.player1.socketId).emit("round-start", {
-          myMonster: this.player1.selectedMonsterTemplateName,
-          enemyMonster: this.player2?.selectedMonsterTemplateName, // not option if bye
-          sideID: 0,
+
+        playerChannel.to(this.player1.socketId).emit("startRound", {
+            player1Monster: this.player1?.selectedMonsterTemplateName,
+            player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
+            sideID: 0,
         })
-          playerChannel.to(this.player2?.socketId).emit("round-start", {
-            myMonster: this.player2?.selectedMonsterTemplateName,
-            enemyMonster: this.player1.selectedMonsterTemplateName,
-            sideID: 1,
-          });
+        if (this.player2) {
+            playerChannel.to(this.player2?.socketId).emit("startRound", {
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 1,
+            })
+        };
 
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
-        await this.battle.run(); 
+        await this.battle.run();
         log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
@@ -226,9 +255,10 @@ export class Match {
             }
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
-        
-        playerChannel.to(this.winner?.socketId).emit("send-to-waiting");
-        playerChannel.to(loser?.socketId).emit("send-to-waiting");
+        if (this.winner && loser) {
+            playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
+            playerChannel.to(loser?.socketId).emit("sendToWaiting");
+        }
     }
 
 }

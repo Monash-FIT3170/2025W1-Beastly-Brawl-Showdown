@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router";
 import { SocketProvider } from "./socket/socket_provider";
 import PlayerConnectionPage from "./pages/player_connection_page";
 import GamePage from "./pages/game_page";

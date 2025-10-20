@@ -19,7 +19,7 @@ export interface MoveData
   extends Action<"move">,
     Readonly<{
       moveId: MoveId;
-
+      moveCat: string;
       name: string;
       description: string;
       icon?: string;

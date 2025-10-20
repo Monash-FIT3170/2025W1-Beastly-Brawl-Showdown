@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { SocketContext } from "../socket/socket_context";
 import BattleControls from "../../../../../extensions/visualiser/src/Components/battle_controls";
 import type { Notice } from "../../../../../core/notice/notice";

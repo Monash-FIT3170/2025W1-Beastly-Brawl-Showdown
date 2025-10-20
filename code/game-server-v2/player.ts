@@ -1,4 +1,4 @@
-import { MonsterTemplate } from "../beastly-brawl-showdown/imports/simulator/core/monster/monster_template";
+import { MonsterTemplate } from "../simulator/core/monster/monster_template";
 import { RoomId } from "./types";
 
 export class Player {
@@ -11,6 +11,7 @@ export class Player {
   selectedMonsterTemplateName?: string;
   isReady: boolean = false;
   submittedMove: boolean = false;
+  currentMonsterPool?: string[];
 
   constructor(roomId: RoomId, socketId: string, displayName: string, linkedAccountId: string | undefined) {
     this.roomId = roomId;
