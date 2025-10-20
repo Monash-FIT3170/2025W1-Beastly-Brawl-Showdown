@@ -1,26 +1,30 @@
 FROM node:18-bullseye
 
-# Set the root workdir
 WORKDIR /app
 
-# Copy package files and install deps
-COPY game-server-v2/package*.json ./game-server-v2/
-WORKDIR /app/game-server-v2
+# Copy the game-server-v2 files
+COPY game-server-v2/package*.json ./
 RUN npm install
 
-# Copy required code and dependencies
-COPY beastly-brawl-showdown/imports/simulator/ /app/beastly-brawl-showdown/imports/simulator/
-COPY game-server-v2/ /app/game-server-v2/
-COPY shared/ /app/shared/
-COPY simulator/ /app/simulator/
+# Copy the source code and shared dependencies
+COPY game-server-v2/ ./game-server-v2/
+COPY shared/ ./shared/
+COPY simulator/ ./simulator/
 
-# Install global tools
+# Set the final working directory to the game-server code
+WORKDIR /app/game-server-v2
+
+# Install ts-node and typescript
 RUN npm install -g ts-node typescript
+
+# Copy everything
+COPY . .
+
+# Install project dependencies
+RUN npm install
 
 # Expose port
 EXPOSE 8080
 
-# RUN ls -l /app/beastly-brawl-showdown/imports/simulator/core/side.ts
-
-# Start server
+# Run with ts-node
 CMD ["npm", "start"]
