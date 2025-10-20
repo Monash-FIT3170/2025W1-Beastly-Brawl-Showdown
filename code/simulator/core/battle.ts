@@ -77,7 +77,7 @@ export class Battle {
     this.eventHistory.addEvent(initialState);
 
     // TODO exit
-    while (this.sides.every((side) => side.monster.health > 0)) {
+    while (true) {
       //#########################
       //# Start of turn trigger #
       //#########################
@@ -203,6 +203,14 @@ export class Battle {
         sides: JSON.parse(JSON.stringify(this.sides)),
       };
       this.eventHistory.addEvent(endOfTurnSnapshotEvent);
+
+      // If any monster has fainted, break the loop after a short delay
+      const isBattleOver = this.sides.some((side) => side.monster.health <= 0);
+      if (isBattleOver) {
+        console.log("Battle ended, waiting before finalizing...");
+        await new Promise((resolve) => setTimeout(resolve, 10000)); // <-- delay for animations
+        break;
+      }
     }
 
     const battleOverEvent: BattleOverEvent = {

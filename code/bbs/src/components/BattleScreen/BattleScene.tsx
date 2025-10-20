@@ -438,7 +438,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       console.log("APPLYING EVENTS");
-      let animChain = Promise.resolve();
 
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
@@ -457,7 +456,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
 
       // <-- WAIT FOR ALL ENQUEUED ANIMATIONS
-      await animChain;
+      const animChainAtFinish = chainRef.current; // capture the chain as it stands now
+      await animChainAtFinish;
 
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
