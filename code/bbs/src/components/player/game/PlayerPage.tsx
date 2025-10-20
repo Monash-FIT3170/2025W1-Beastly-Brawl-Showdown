@@ -98,6 +98,8 @@ const PlayerContent = () => {
     player1Monster: { template: MonsterTemplate; currentHp: number };
     player2Monster: { template: MonsterTemplate; currentHp: number };
     myId: number;
+    player1Name: string;
+    player2Name: string;
   } | null>(null);
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
@@ -152,6 +154,8 @@ const PlayerContent = () => {
 
       log_event("Received round-start data:", data);
 
+      const player1Name = data?.player1Name;
+      const player2Name = data?.player2Name;
       const player1TemplateName = data?.player1Monster;
       const player2TemplateName = data?.player2Monster;
 
@@ -167,11 +171,11 @@ const PlayerContent = () => {
       // Create Monster instances for BattleScreen
       const player1Monster =
         COMMON_MONSTER_POOL.monsters[
-          player1TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        player1TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
       const player2Monster =
         COMMON_MONSTER_POOL.monsters[
-          player2TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        player2TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
 
       if (typeof data?.sideID !== "number") {
@@ -188,6 +192,8 @@ const PlayerContent = () => {
           currentHp: player2Monster.baseStats.health,
         },
         myId: data.sideID,
+        player1Name: data.player1Name,
+        player2Name: data.player2Name,
       });
 
       // Give a key for every new battle
@@ -282,36 +288,36 @@ const PlayerContent = () => {
     };
   }, [socket]);
 
-useEffect(() => {
-  if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  const handleNewEvent = (ev: any) => {
-    setEvents((prev) => {
-      const lastEvent = prev[prev.length - 1];
+    const handleNewEvent = (ev: any) => {
+      setEvents((prev) => {
+        const lastEvent = prev[prev.length - 1];
 
-      if (ev.name === "roll" && lastEvent?.name === "startMove") {
-        const rollEvent = ev as any;
-        if (rollEvent.source === matchData?.myId) {
-          setParentDiceRollResult(rollEvent.result);
+        if (ev.name === "roll" && lastEvent?.name === "startMove") {
+          const rollEvent = ev as any;
+          if (rollEvent.source === matchData?.myId) {
+            setParentDiceRollResult(rollEvent.result);
+          }
         }
-      }
 
-      const next = [...prev, ev];
-      console.log(
-        "All events after adding:",
-        next.map((e) =>
-          e.name === "roll" ? `${e.name} (source: ${e.source})` : e.name
-        )
-      );
-      return next;
-    });
-  };
+        const next = [...prev, ev];
+        console.log(
+          "All events after adding:",
+          next.map((e) =>
+            e.name === "roll" ? `${e.name} (source: ${e.source})` : e.name
+          )
+        );
+        return next;
+      });
+    };
 
-  socket.on("newEvent", handleNewEvent);
-  return () => {
-    socket.off("newEvent", handleNewEvent);
-  };
-}, [socket, matchData?.myId]);
+    socket.on("newEvent", handleNewEvent);
+    return () => {
+      socket.off("newEvent", handleNewEvent);
+    };
+  }, [socket, matchData?.myId]);
 
   //listen for enemy submitting messages
   useEffect(() => {
@@ -370,7 +376,7 @@ useEffect(() => {
     // Note: dice animation will be triggered when we receive the roll event back from server
   }
 
-  function rerollNow(optionChosen: boolean):void {
+  function rerollNow(optionChosen: boolean): void {
     if (!socket) return;
     socket.emit("requestReroll", optionChosen)
     // setParentDiceRollResult(null)
@@ -437,9 +443,9 @@ useEffect(() => {
       showMessage={showMessage}
       onReroll={rerollNow}
       rerollMode={rerollMode}
-      parentDiceRollResult = {parentDiceRollResult}
-      isWaiting = {isWaiting}
-      setIsWaiting = {setIsWaiting}
+      parentDiceRollResult={parentDiceRollResult}
+      isWaiting={isWaiting}
+      setIsWaiting={setIsWaiting}
       battleInstanceKey={battleInstanceKey}
     />
   );
