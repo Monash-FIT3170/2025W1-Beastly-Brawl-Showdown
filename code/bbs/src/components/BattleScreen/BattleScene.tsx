@@ -11,40 +11,48 @@ import type {
   MoveFailedEvent,
   BlockedEvent,
   MoveEvadedEvent,
+  RerollEvent,
+  RollEvent,
 } from "../../../../simulator/core/event/core_events";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
 import { BattleMiddle } from "./BattleMiddle";
 import BattleMessage from "./BattleMessage";
+import { DiceRollAnimation } from "./DiceRollAnimation";
 
 interface BattleSceneProps {
+  battleInstanceKey: number
   events: BaseEvent[];
   turnIndex: number;
   isPlaying: boolean;
   autoAdvance?: boolean; // play subsequent turns automatically
   onAdvanceTurn?: (nextIndex: number) => void; // ask parent to move to next turn
-  myid: number;
-  showEnemySubmittedMessage: boolean;
-  showSubmittedMoveMessage: boolean;
+  myId: number;
   showMessage: boolean;
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  showRollMessage: boolean;
+  // showRollMessage: boolean;
+  rerollMode: boolean
+  parentDiceRollResult : number | null;
+  isWaiting:boolean;
 }
 
 console.log("BattleScene loaded");
 
 export const BattleScene: React.FC<BattleSceneProps> = ({
+  battleInstanceKey,
   events,
   turnIndex,
   isPlaying,
   autoAdvance,
   onAdvanceTurn,
-  myid,
-  showEnemySubmittedMessage,
-  showSubmittedMoveMessage,
+  myId,
   showMessage,
   setTurnFinishedPlaying,
-  showRollMessage,
+  // showRollMessage,
+  rerollMode,
+  parentDiceRollResult,
+  isWaiting
+
 }) => {
   // Build turns from raw events
   const turns = useMemo(() => parseTurns(events), [events]);
@@ -69,6 +77,10 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       performMoveAnimation(moveId, actor)
     );
   };
+
+  // Dice roll animation state
+  const [showDiceAnimation, setShowDiceAnimation] = useState(false);
+  const [diceRollResult, setDiceRollResult] = useState<number | null>(null);
 
   // Clamp selected index
   const selectedTurnIndex = Number.isInteger(turnIndex)
@@ -105,9 +117,36 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     return idxs;
   }, [events]);
 
+  const prevEventsRef = useRef(events);
+  useEffect(() => {
+    console.log('events identity changed:', prevEventsRef.current !== events);
+    const isNewArray = prevEventsRef.current !== events;
+    if (!isNewArray) return;
+
+    // Reset everything between battles
+    lastSnapCountRef.current = 0;
+    turnToPlayRef.current = [];
+    chainRef.current = Promise.resolve();
+
+    // Reset UI state & messages
+    setcurrentMessage("");
+    setShowAnimation(false);
+    setEnemySlash(false);
+    setPlayerSlash(false);
+    setEnemyShield(false);
+    setPlayerShield(false);
+    setEnemyAbility(false);
+    setPlayerAbility(false);
+    setRunTurnNow(false);
+
+    prevEventsRef.current = events;
+  }, [battleInstanceKey]);
+
   // useeffect to know when to play the turn
   useEffect(() => {
     let completedTurns = snapshotIdxs.length - 1;
+    console.log("EVENTS:", JSON.stringify(events))
+    console.log(turns)
 
     // If our playback counter is ahead, reset it so it never blocks turns from running
     if (lastSnapCountRef.current > completedTurns) {
@@ -208,6 +247,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     }
   };
 
+  // Keep track of the previous event
+  let previousEvent: BaseEvent | null = null;
+
   // Updates the visible state based on the event
   async function applyEventToVisible(
     state: typeof initialTurnState,
@@ -216,7 +258,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     switch (ev.name) {
       case "moveSuccess": {
         const successEvent = ev as MoveSuccessEvent;
-        const isPlayer = successEvent.source === myid;
+        const isPlayer = successEvent.source === myId;
         const moveName = getMoveDisplayName(
           successEvent.moveId,
           successEvent.source
@@ -233,7 +275,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "moveFailed": {
         const failedEvent = ev as MoveFailedEvent;
-        const isPlayer = failedEvent.source === myid;
+        const isPlayer = failedEvent.source === myId;
         const moveName = getMoveDisplayName(
           failedEvent.moveId,
           failedEvent.source
@@ -253,7 +295,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "blocked": {
         const blockedEvent = ev as BlockedEvent;
-        const isPlayerAttacking = blockedEvent.source === myid;
+        const isPlayerAttacking = blockedEvent.source === myId;
 
         const message = isPlayerAttacking
           ? "Your attack was blocked!"
@@ -265,7 +307,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "evaded": {
         const evadedEvent = ev as MoveEvadedEvent;
-        const isPlayerAttacking = evadedEvent.source === myid;
+        const isPlayerAttacking = evadedEvent.source === myId;
 
         const message = isPlayerAttacking
           ? "Your attack was evaded!"
@@ -277,7 +319,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "damage": {
         const damageEvent = ev as DamageEvent;
-        const isPlayerTakingDamage = damageEvent.target === myid;
+        const isPlayerTakingDamage = damageEvent.target === myId;
 
         const message = isPlayerTakingDamage
           ? `You took ${damageEvent.amount} damage!`
@@ -293,7 +335,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
       case "buff": {
         const buffEvent = ev as BuffEvent;
-        const isPlayer = buffEvent.source === myid;
+        const isPlayer = buffEvent.source === myId;
 
         if (buffEvent.buffs.armour && buffEvent.source === buffEvent.target) {
           const message = isPlayer
@@ -313,8 +355,39 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         break;
       }
 
+      case "reroll": {
+        const rerollEvent = ev as RerollEvent;
+        if (rerollEvent.source === myId) {
+          const message = `You would have rolled ${parentDiceRollResult} to hit but instead you rerolled and got ${rerollEvent.result}`;
+          setcurrentMessage(message);
+          // setDiceRollResult(rerollEvent.result);
+          // setShowDiceAnimation(true);
+        }
+        break;
+      }
+      
       case "roll": {
-        // (optional) show roll results here
+        const rollEvent = ev as RollEvent;
+        if (rollEvent.source === myId) {
+          let message: string;
+          switch (previousEvent?.name){
+            case ("startMove") : {
+              message = `You rolled ${rollEvent.result} to hit`;
+              break
+            }
+            case ("startMove") : {
+              message = `You rolled ${rollEvent.result} to damage`;
+              break
+            }
+            default : {
+              message = `You rolled ${rollEvent.result}`;
+              break
+            }
+          }
+          setcurrentMessage(message);
+          // setDiceRollResult(rollEvent.result);
+          // setShowDiceAnimation(true);
+        }
         break;
       }
 
@@ -330,6 +403,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       }
     }
 
+    // Update previous event after processing
+    previousEvent = ev;
     return state;
   }
 
@@ -377,7 +452,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         console.log("Rendering:", ev.name);
 
         // Small delay between events
-        await new Promise((r) => setTimeout(r, 600));
+        await new Promise((r) => setTimeout(r, 900));
         if (cancelled) return;
       }
 
@@ -409,23 +484,23 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   //have to get maxhp to pass to battlemiddle
   const template =
     COMMON_MONSTER_POOL.monsters[
-      currentSnapshot.sides[myid].monster
+      currentSnapshot.sides[myId].monster
         .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
 
   const template2 =
     COMMON_MONSTER_POOL.monsters[
-      currentSnapshot.sides[1 - myid].monster
+      currentSnapshot.sides[1 - myId].monster
         .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
   // Clear names for what the UI reads:asd
-  const visiblePlayer1 = visibleState[myid];
-  const visiblePlayer2 = visibleState[1 - myid];
-  const myMonsterImage = visibleState[myid].image;
-  const enemyMonsterImage = visibleState[1 - myid].image;
+  const visiblePlayer1 = visibleState[myId];
+  const visiblePlayer2 = visibleState[1 - myId];
+  const myMonsterImage = visibleState[myId].image;
+  const enemyMonsterImage = visibleState[1 - myId].image;
   const shouldShowMessage = showMessage || currentMessage !== "";
 
   return (
@@ -463,14 +538,21 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         enemyAbilityName={template2.abilityName}
         playerAbilityName={template.abilityName}
       />
-      {showEnemySubmittedMessage && (
-        <BattleMessage message={"Enemy Has Submitted"} />
+      {rerollMode && (
+        <BattleMessage message={`You rolled ${parentDiceRollResult} to hit. Would you like to reroll?`} />
       )}
-      {showSubmittedMoveMessage && (
-        <BattleMessage message={"Your Move Has Been Submitted"} />
+      {isWaiting && !rerollMode && !runTurnNow &&(
+        <BattleMessage message="Wating for Enemy..." />
       )}
-      {showRollMessage && <BattleMessage message={"Time To Roll!"} />}
+      {/* {showRollMessage && <BattleMessage message={"Time To Roll!"} />} */}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
+
+      {showDiceAnimation && (
+        <DiceRollAnimation
+          onComplete={() => setShowDiceAnimation(false)}
+          rollResult={diceRollResult ?? 20}
+        />
+      )}
     </div>
   );
 };
