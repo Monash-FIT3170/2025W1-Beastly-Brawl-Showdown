@@ -87,6 +87,8 @@ const PlayerContent = () => {
     player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
+    player1Name: string;
+    player2Name: string;
   } | null>(null);
 
   const [startSelection, setStartSelection] = useState(false);
@@ -140,6 +142,8 @@ const PlayerContent = () => {
 
       log_event("Received round-start data:", data);
 
+      const player1Name = data?.player1Name;
+      const player2Name = data?.player2Name;
       const player1TemplateName = data?.player1Monster;
       const player2TemplateName = data?.player2Monster;
 
@@ -182,6 +186,8 @@ const PlayerContent = () => {
           },
         },
         myId: data.sideID,
+        player1Name: data.player1Name,
+        player2Name: data.player2Name,
       });
 
       // Check if player is spectator

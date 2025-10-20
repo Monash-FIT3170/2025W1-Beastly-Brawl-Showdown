@@ -22,6 +22,8 @@ interface BattleScreenProps {
     player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
+    player1Name: string;
+    player2Name: string;
   };
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
@@ -159,6 +161,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   return (
     <>
       <div className="canvas-body" id="battle-screen-body">
+        <BattleTop
+          turnNumber={turnIndex + 1}
+          playerName={matchData.myId === 0 ? matchData.player1Name : matchData.player2Name}
+          opponentName={matchData.myId === 0 ? matchData.player2Name : matchData.player1Name}
+        />
         <BattleScene
           battleInstanceKey={battleInstanceKey}
           turns = {turns}
