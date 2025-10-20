@@ -9,7 +9,8 @@ import { io } from "socket.io-client";
 export const getBestServerUrl = async (): Promise<string> => {
   /// Fetch server
   try {
-    const response = await fetch("http://localhost:8000/game-server-url");
+    const SERVER_LOCATOR_URL = process.env.SERVER_LOCATOR_URL ?? "http://localhost:8000";
+    const response = await fetch(`${SERVER_LOCATOR_URL}/game-server-url`);
     const { url: serverUrl }: { url: string } = await response.json();
 
     // /// Check with server if join code leads to an active room if not error
