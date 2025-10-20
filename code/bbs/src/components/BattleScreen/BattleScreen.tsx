@@ -40,7 +40,7 @@ interface BattleScreenProps {
 
   onReroll: (option: boolean) => void;
   rerollMode: boolean
-  parentDiceRollResult : number | null;
+  parentDiceRollResult: number | null;
 
   isWaiting: boolean;
   setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
@@ -181,7 +181,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           setTurnFinishedPlaying={setTurnFinishedPlaying}
           // showRollMessage={showRollMessage}
           rerollMode={rerollMode}
-          parentDiceRollResult = {parentDiceRollResult}
+          parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
         />
         <BattleBottom
@@ -196,7 +196,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
             defend: myMonster.template.defendActionId,
           }}
           onReroll={onReroll}
-          rerollMode = {rerollMode}
+          rerollMode={rerollMode}
         />
       </div>
     </>
