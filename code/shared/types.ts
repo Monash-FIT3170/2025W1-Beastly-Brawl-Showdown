@@ -33,6 +33,8 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   startRound: (data: any) => void;
   sendToWaiting: () => void;
   tournamentFinished: (data: any) => void;
+  playerKicked: () => void;
+  kickPlayer: () => void;
 };
 
 export type PlayerSocketData = {};
@@ -40,6 +42,7 @@ export type PlayerSocketData = {};
 export type HostClientToServerEvents = BasicClientToServerEvents & {
   requestRoom: (data: any) => void;
   requestStartGame: (data: any) => void;
+  kickPlayer: (data: {roomId: number, playerName: string}) => void;
 };
 
 export type HostServerToClientEvents = BasicServerToClientEvents & {
