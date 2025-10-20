@@ -1267,7 +1267,22 @@ input:focus {
 .battle-top-bar {
   display: flex;
   height: auto;
-  margin-top: 5%;
+  width: 100%;
+  padding-top: 1%;
+  padding-left: 5%;
+  padding-right: 5%;
+  align-items: center;
+  justify-content: space-between;
+  
+  background-color: #8b4513;
+  color: #d4a574;
+  border: none;
+
+  box-shadow:
+    0 4px 0 #773519,
+    /* bottom edge */ 4px 0 0 #773519,
+    /* right edge */ -4px 0 0 #773519,
+    /* left edge */ 0 -4px 0 #c26130; /* top edge */
 }
 
 #battleScreenTop-btn {
@@ -1276,6 +1291,19 @@ input:focus {
   left: 0.8rem;
   z-index: 2000;
   margin: 0;
+}
+
+.surrender-btn {
+  background-color: #8b4513;
+  color: #d4a574;
+  border: none;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+  height: 20%;
 }
 
 .battle-scene {
@@ -1456,34 +1484,6 @@ progress::-moz-progress-bar {
   box-shadow: 0 8px 32px rgba(108, 92, 231, 0.3);
   animation: float 3s ease-in-out infinite;
   overflow: hidden;
-}
-
-.vs-divider {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: black;
-  transform: translateY(-50%);
-  z-index: 10;
-  animation: lineExpand 1.5s ease-out;
-}
-
-.vs-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.95);
-  font-size: 1.1rempx;
-  padding: 16px 24px;
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  border: 0.3rem solid rgba(255, 255, 255, 0.3);
-  z-index: 20;
-  animation: scaleIn 0.8s ease-out 0.5s both;
 }
 
 .loading-text {
@@ -2045,7 +2045,6 @@ input[type="range"] {
   .ability-desc {
     font-size: 0.6rem;
   }
-
 
   .battleScreenBottom {
     flex-direction: row;
