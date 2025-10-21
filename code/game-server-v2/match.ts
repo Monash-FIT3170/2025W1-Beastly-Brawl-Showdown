@@ -20,7 +20,7 @@ export class Match {
     player1: Player;
     player2?: Player;
     winner?: Player;
-    spectators: AccountId[];
+    spectators: Player[];
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
@@ -222,14 +222,23 @@ export class Match {
                     log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
                     playerChannel.to(this.player2.socketId).emit("newEvent", event);
                 }
+
+                // Broadcast to spectators
+                this.spectators.forEach(spectator => {
+                    log_event(`[EVENT] Sending event to spectator (${spectator.displayName})`);
+                    playerChannel.to(spectator.socketId).emit("newEvent", event);
+                })
             },
         });
+
+        
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
             player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
             sideID: 0,
         })
+
         if (this.player2) {
             playerChannel.to(this.player2?.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
@@ -238,6 +247,17 @@ export class Match {
             })
         };
 
+        // TODO: Emit socket for all spectators for each player
+        log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
+        this.spectators.forEach(spectator => {
+            playerChannel.to(spectator.socketId).emit("startRound", {
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 0,
+                spectator: true
+            });
+        });
+        
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
@@ -250,14 +270,15 @@ export class Match {
         const loser = winnerIndex === 0 ? this.player2 : this.player1;
 
         if (loser) {
-            if (loser.linkedAccountId) {
-                this.winner?.addSpectator(loser.linkedAccountId);
-            }
+            this.winner?.addSpectator(loser);
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
         if (this.winner && loser) {
             playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
             playerChannel.to(loser?.socketId).emit("sendToWaiting");
+            this.spectators.forEach(spectator => {
+                playerChannel.to(spectator.socketId).emit("sendToWaiting");
+            })
         }
     }
 

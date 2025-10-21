@@ -108,6 +108,7 @@ const PlayerContent = () => {
   const [waiting, setWaiting] = useState(false);
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
+  const [isSpectator, setIsSpectator] = useState(false);
 
   const [events, setEvents] = useState<any[]>([]);
   const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
@@ -192,6 +193,11 @@ const PlayerContent = () => {
         myId: data.sideID,
       });
 
+      // Check if player is spectator
+      if (data.spectator) {
+        setIsSpectator(true);
+      }
+
       // Give a key for every new battle
       setBattleInstanceKey((k) => k + 1);
 
@@ -223,7 +229,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);
+      setWinner(data);  
     });
     //#endregion
 
@@ -438,7 +444,6 @@ const PlayerContent = () => {
     );
   // if (!allReady || waiting) return <WaitingScreen />;
   if (!allReady || waiting) return <WaitingScreen />;
-  // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
 
   return (
