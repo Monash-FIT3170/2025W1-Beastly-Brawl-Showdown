@@ -5,7 +5,7 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
-import { type ChooseMove} from "../../../../simulator/core/notice/notice";
+import { type ChooseMove } from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
 interface BattleScreenProps {
@@ -37,7 +37,7 @@ interface BattleScreenProps {
   showMessage: boolean;
 
   onReroll: (option: boolean) => void;
-  rerollMode: boolean
+  rerollMode: boolean;
   parentDiceRollResult: number | null;
 
   isWaiting: boolean;
@@ -72,7 +72,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   isWaiting,
   setIsWaiting,
   battleInstanceKey,
-  isSpectator
+  isSpectator,
 }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -155,7 +155,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
     onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
-    setIsWaiting(true)
+    setIsWaiting(true);
     setTurnFinishedPlaying(false);
     setHasReceivedChooseMove(false);
     setChooseMove(null);
@@ -164,31 +164,31 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
   if (isSpectator) {
-  return (
-    <>
-      <div className="canvas-body" id="battle-screen-body">
-        <BattleScene
-          battleInstanceKey={battleInstanceKey}
-          events={events}
-          turnIndex={turnIndex}
-          isPlaying={isPlaying}
-          autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) =>
-            setTurnIndex(next)
-          }
-          myId={matchData.myId}
-          showMessage={showMessage}
-          setTurnFinishedPlaying={setTurnFinishedPlaying}
-          // showRollMessage={showRollMessage}
-          rerollMode={rerollMode}
-          parentDiceRollResult={parentDiceRollResult}
-          isWaiting={isWaiting}
-        />
-      </div>
-    </>
-  );
-}
-  
+    return (
+      <>
+        <div className="canvas-body" id="battle-screen-body">
+          <BattleScene
+            battleInstanceKey={battleInstanceKey}
+            events={events}
+            turnIndex={turnIndex}
+            isPlaying={isPlaying}
+            autoAdvance={false}
+            onAdvanceTurn={(next: React.SetStateAction<number>) =>
+              setTurnIndex(next)
+            }
+            myId={matchData.myId}
+            showMessage={showMessage}
+            setTurnFinishedPlaying={setTurnFinishedPlaying}
+            // showRollMessage={showRollMessage}
+            rerollMode={rerollMode}
+            parentDiceRollResult={parentDiceRollResult}
+            isWaiting={isWaiting}
+          />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="canvas-body" id="battle-screen-body">
