@@ -38,10 +38,19 @@ export class Room {
   }
 
   getMatchByPlayer(displayName: string) {
-    return this.tournamentManager.matches.find(match => 
-      match.player1.displayName === displayName || 
+    return this.tournamentManager.matches.find(match =>
+      match.player1.displayName === displayName ||
       (match.player2 && match.player2.displayName === displayName)
     );
   }
 
+  removePlayer(displayName: string): boolean {
+    const index = this.players.findIndex(p => p.displayName === displayName);
+    if (index === -1) return false;
+
+    // Remove from players array
+    this.players.splice(index, 1);
+
+    return true;
+  }
 }

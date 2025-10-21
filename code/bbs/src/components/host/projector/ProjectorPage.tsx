@@ -21,7 +21,7 @@ export default function ProjectorPage() {
 
   const { type } = useParams<{ type: "standard" | "random" }>();
   const tournamentType = type === "random" ? "random" : "standard";
-  
+
   function getJoinUrl() {
     return window.location.hostname + "join/" + joinCode;
   }
@@ -88,7 +88,7 @@ export default function ProjectorPage() {
     });
 
     if (!roomId) {
-      socketRef.current.emit("requestRoom", {type: tournamentType});
+      socketRef.current.emit("requestRoom", { type: tournamentType });
       return;
     }
     //#endregion
@@ -127,8 +127,13 @@ export default function ProjectorPage() {
         <h1>Beastly Brawl Showdown!</h1>
       </div>
 
-      <ParticipantDisplayBox name={playerList.toString()} />
-
+      <ParticipantDisplayBox
+        name={playerList.join(",")}
+        onKickPlayer={(playerName) => {
+          console.log("Kicking player:", playerName);
+          socketRef.current?.emit("kickPlayer", { roomId, playerName });
+        }}
+      />
       <button className="glb-btn" id="start-game-btn" onClick={handleStartGame}>
         Start Game
       </button>

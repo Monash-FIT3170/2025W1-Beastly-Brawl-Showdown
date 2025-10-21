@@ -214,6 +214,28 @@ async function main(config: ServerConfig) {
 
       log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
     });
+
+    // #region Kick Player
+    socket.on("kickPlayer", (msg: { roomId: number; playerName: string }) => {
+      const room = gameServer.rooms.get(msg.roomId);
+      if (!room) return;
+
+      const player = room.getPlayer(msg.playerName);
+      if (!player) return;
+
+      playerChannel.to(player.socketId).emit("playerKicked");
+
+      // Disconnect the player from Socket.IO
+      setTimeout(() => {
+        room.removePlayer(msg.playerName);
+        playerChannel.sockets.get(player.socketId)?.disconnect();
+      }, 50);
+
+      // Update all hosts about the new player list
+      const playerNameList = room.players.map((p) => p.displayName);
+      hostChannel.to(room.hostSocketId).emit("refreshPlayerList", playerNameList);
+    });
+    // #endregion
   });
 
   /// Pre-connection auth check
@@ -319,6 +341,20 @@ async function main(config: ServerConfig) {
 
     socket.on("disconnect", () => {
       log_event("Player disconnected.");
+
+      // Get the player attached to this socket
+      const player = socket.data.player as Player;
+      if (!player) return;
+
+      const room = gameServer.rooms.get(player.roomId);
+      if (!room) return;
+
+      // Remove player from room (if not already removed)
+      room.removePlayer(player.displayName);
+
+      // Notify the host to refresh player list
+      const playerNameList = room.players.map((p) => p.displayName);
+      hostChannel.to(room.hostSocketId).emit("refreshPlayerList", playerNameList);
     });
 
     // #region Select Monster
@@ -422,7 +458,7 @@ async function main(config: ServerConfig) {
 
     socket.on("requestRoll", handleRollNotice);
 
-    function handleRerollNotice( option : boolean) {
+    function handleRerollNotice(option: boolean) {
       log_notice("Reroll notice is being handled");
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
