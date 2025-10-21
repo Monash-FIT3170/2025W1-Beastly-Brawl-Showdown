@@ -34,12 +34,20 @@ export function useBattleEvents({
                 case "moveSuccess": {
                     const e = ev as MoveSuccessEvent;
                     const isPlayer = e.source === myId;
+                    const actor: "player1" | "player2" = isPlayer ? "player1" : "player2";
+                    
+                    const moveId =
+                        (("abilityId" in e && typeof (e as any).abilityId === "string") ? (e as any).abilityId :
+                        ("actionId"  in e && typeof (e as any).actionId  === "string") ? (e as any).actionId  :
+                        e.moveId);
+
                     const moveName = e.moveId;
                     const message = isPlayer
                         ? `You ${moveName} successfully!`
                         : `Enemy ${moveName}s successfully!`;
+                        
                     setCurrentMessage(message);
-                    enqueueAnim(e.moveId, isPlayer ? "player1" : "player2");
+                    enqueueAnim(moveId, actor);
                     break;
                 }
                 case "moveFailed": {

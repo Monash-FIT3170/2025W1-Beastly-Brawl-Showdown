@@ -86,6 +86,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "dodge",
+      abilityName: "Dodge",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -116,6 +117,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "stun",
+      abilityName: "Stun",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -147,6 +149,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "double-attack",
+      abilityName: "Double Attack",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -204,7 +207,9 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "attack-bonus-next3",
+      abilityName: "Attack Bonus",
       onSpawnActions: [
+
         {
           type: "spawnAction",
           do: async function (world: Battle, source: SideId): Promise<void> {
