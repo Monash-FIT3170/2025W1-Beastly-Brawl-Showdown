@@ -9,7 +9,7 @@ interface BattleTopProps {
 
 export const BattleTop: React.FC<BattleTopProps> = ({
   turnNumber,
-  playerName,
+  // playerName,
   opponentName,
 }) => {
   const navigate = useNavigate();
@@ -23,9 +23,7 @@ export const BattleTop: React.FC<BattleTopProps> = ({
 
       {/* Center: Player vs Opponent */}
       <div className="battle-top-center">
-        <span className="player-name">{playerName}</span>
-        &nbsp;<span className="vs-text">VS</span>&nbsp;
-        <span className="opponent-name">{opponentName}</span>
+        <span>VS {opponentName}</span>
       </div>
 
       {/* Right side: Surrender */}
