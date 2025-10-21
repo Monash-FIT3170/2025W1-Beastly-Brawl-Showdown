@@ -1273,7 +1273,7 @@ input:focus {
   height: auto;
   width: 100%;
 
-  padding: 1% 0 1% 0;
+  padding: 1% 2% 1% 2%;
 
   font-size: 0.8rem;
   color: #d4a574;
@@ -1300,9 +1300,15 @@ input:focus {
   flex-direction: column;
   justify-self: center;
 
-  overflow: hidden;
+  max-width: 70%;
 
   gap: 5px;
+}
+
+.opponent-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .battle-top-right {

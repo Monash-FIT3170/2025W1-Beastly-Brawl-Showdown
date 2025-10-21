@@ -27,7 +27,7 @@ export const BattleTop: React.FC<BattleTopProps> = ({
       {/* Center: Player vs Opponent */}
       <div className="battle-top-center">
         <span>VS</span>
-        <span>{opponentName}</span>
+        <span className="opponent-name">{opponentName}</span>
       </div>
 
       {/* <div style={{flex: 1}}></div> */}
