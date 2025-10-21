@@ -92,6 +92,7 @@ button {
 .logo {
   background-image: url("/assets/homepage/logo.png");
   background-size: 100% 100%;
+  aspect-ratio: 1 / 1;
   background-position: center;
   image-rendering: pixelated;
   height: 280px;
@@ -780,8 +781,8 @@ input:focus {
   border-radius: 1rem;
   height: 65vh;
   min-width: 300px;
-  max-width: 400px;
-  width: 100%;
+  /* max-width: 650px; */
+  width: 40vw;
   margin: 0 auto;
 
   box-shadow:
@@ -2572,12 +2573,14 @@ input[type="range"] {
   font-size: 1.25rem;
   text-align: center;
 }
+
 /* #endregion */
 
- /* #region */
+/* #region */
 @media screen and (min-width: 769px) and (max-width: 1050px) {
   .form-textbox {
     width: 40vw;
   }
 }
+
 /* #endregion */
