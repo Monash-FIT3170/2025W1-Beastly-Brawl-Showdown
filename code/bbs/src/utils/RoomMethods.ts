@@ -10,7 +10,7 @@ export const getBestServerUrl = async (): Promise<string> => {
   /// Fetch server
   try {
     const SERVER_LOCATOR_URL =
-      process.env.SERVER_LOCATOR_URL ?? "http://localhost:8000";
+      import.meta.env.VITE_SERVER_LOCATOR_URL ?? "http://localhost:8000";
     const response = await fetch(`${SERVER_LOCATOR_URL}/game-server-url`);
     const { url: serverUrl }: { url: string } = await response.json();
 
