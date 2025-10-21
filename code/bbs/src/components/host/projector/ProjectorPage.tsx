@@ -45,12 +45,10 @@ export default function ProjectorPage() {
   useEffect(() => {
     if (!serverUrl || socketRef.current) return;
 
-      const cleanServerUrl = serverUrl.replace(/^"|"$/g, "");
+    const cleanServerUrl = serverUrl.replace(/^"|"$/g, "");
 
-      const wsUrl = cleanServerUrl.replace(/^http/, "ws") + "/host";
-      socketRef.current = io(wsUrl, { transports: ["websocket", "polling"]
-
-    });
+    const wsUrl = cleanServerUrl.replace(/^http/, "ws") + "/host";
+    socketRef.current = io(wsUrl, { transports: ["websocket", "polling"] });
 
 
     // Connect to game server
@@ -65,7 +63,7 @@ export default function ProjectorPage() {
       }
       console.log("Connected to server");
       socketRef.current?.emit("requestRoom", { type: tournamentType });
-    });
+      });
 
     socketRef.current.on("connect_error", (err: Error) => {
       console.error(`Connection failed: ${err.message}`);
