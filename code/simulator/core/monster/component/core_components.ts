@@ -13,13 +13,6 @@ export class RerollChargeComponent implements BaseComponent<"reroll"> {
   }
 }
 
-export class DodgeChargeComponent implements BaseComponent<"dodgeCharges"> {
-  kind = "dodgeCharges" as const;
-  charges: number;
-  constructor(charges: number) {
-    this.charges = charges;
-  }
-}
 export class DodgeStateComponent implements BaseComponent<"dodging"> {
   kind = "dodging" as const;
   remainingDuration: number;
@@ -59,13 +52,6 @@ export class DefendComponent implements BaseComponent<"defend"> {
   }
 }
 
-export class AbilityChargeStunComponent implements BaseComponent<"abilityChargeStun"> {
-  kind = "abilityChargeStun" as const;
-  charges: number;
-  constructor(charges: number) {
-    this.charges = charges;
-  }
-}
 export class StunnedStateComponent implements BaseComponent<"stunned"> {
   kind = "stunned" as const;
   remainingDuration: number;
@@ -161,19 +147,29 @@ export class PermanentStatBuffComponent implements BaseComponent<"permanentStatB
   }
 }
 
+export class AbilityChargeComponent implements BaseComponent<"abilityCharges"> {
+  kind = "abilityCharges" as const;
+  abilityId: string; // ID of the ability this charge belongs to
+  charges: number;
+
+  constructor(abilityId: string, charges: number) {
+    this.abilityId = abilityId;
+    this.charges = charges;
+  }
+}
+
 type CommonComponentTypes =
   | typeof RerollChargeComponent
-  | typeof DodgeChargeComponent
   | typeof DodgeStateComponent
   | typeof DefendComponent
-  | typeof AbilityChargeStunComponent
   | typeof StunnedStateComponent
   | typeof SpeedModifierComponent
   | typeof NextAttacksBonusComponent
   | typeof ThornsComponent
   | typeof DamageReductionComponent
   | typeof AdvantageComponent
-  | typeof PermanentStatBuffComponent;
+  | typeof PermanentStatBuffComponent
+  | typeof AbilityChargeComponent;
 //# Map it then export
 type ComponentInstanceType = InstanceType<CommonComponentTypes>;
 export type ComponentKindMap = {

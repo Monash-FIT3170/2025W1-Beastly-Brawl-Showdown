@@ -1,7 +1,15 @@
 import React from "react";
 import { ParticipantBox } from "./ParticipantBox";
 
-export const ParticipantDisplayBox = ({ name }: { name: string }) => {
+interface ParticipantDisplayBoxProps {
+  name: string; // comma-separated player names
+  onKickPlayer?: (playerName: string) => void;
+}
+
+export const ParticipantDisplayBox: React.FC<ParticipantDisplayBoxProps> = ({
+  name,
+  onKickPlayer,
+}) => {
   const names = name
     .split(",")
     .map((n) => n.trim())
@@ -10,8 +18,9 @@ export const ParticipantDisplayBox = ({ name }: { name: string }) => {
   return (
     <div className="participants-display-box">
       <div className="participants-grid">
-        {names.length > 0 &&
-          names.map((n) => <ParticipantBox key={n} name={n} />)}
+        {names.map((n) => (
+          <ParticipantBox key={n} name={n} onKickPlayer={onKickPlayer} />
+        ))}
       </div>
     </div>
   );
