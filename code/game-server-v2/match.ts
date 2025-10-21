@@ -226,18 +226,18 @@ export class Match {
         });
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
-            player1name: this.player1.displayName,
-            player2name: this.player2?.displayName,
             player1Monster: this.player1?.selectedMonsterTemplateName,
             player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
+            player1name: this.player1.displayName,
+            player2name: this.player2?.displayName,
             sideID: 0,
         })
         if (this.player2) {
             playerChannel.to(this.player2?.socketId).emit("startRound", {
-                player1name: this.player1.displayName,
-                player2name: this.player2?.displayName,
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
+                player1name: this.player1.displayName,
+                player2name: this.player2?.displayName,
                 sideID: 1,
             })
         };

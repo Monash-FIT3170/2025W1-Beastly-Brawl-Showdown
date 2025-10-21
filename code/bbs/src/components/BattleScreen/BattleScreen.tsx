@@ -12,11 +12,9 @@ import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
 interface BattleScreenProps {
   matchData: {
-    player1Monster: { template: MonsterTemplate; currentHp: number };
-    player2Monster: { template: MonsterTemplate; currentHp: number };
+    player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
+    player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
-    player1Name: string;
-    player2Name: string;
   };
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
@@ -85,16 +83,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   // Initialize monsters when matchData changes
   useEffect(() => {
     if (!matchData) return;
+    console.log("Initializing monsters with matchData:", { matchData });
 
     const isPlayer1 = matchData.myId === 0;
 
     const myMonsterData = isPlayer1
-      ? matchData.player1Monster
-      : matchData.player2Monster;
+      ? matchData.player1.monster
+      : matchData.player2.monster;
 
     const enemyMonsterData = isPlayer1
-      ? matchData.player2Monster
-      : matchData.player1Monster;
+      ? matchData.player2.monster
+      : matchData.player1.monster;
 
     setMyMonster({
       template: myMonsterData.template,
@@ -118,10 +117,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         {
           id: 0,
           monster: {
-            baseID: matchData.player1Monster.template.templateId,
+            baseID: matchData.player1.monster.template.templateId,
             health:
-              matchData.player1Monster.currentHp ??
-              matchData.player1Monster.template.baseStats.health,
+              matchData.player1.monster.currentHp ??
+              matchData.player1.monster.template.baseStats.health,
             defendActionCharges: 0,
             components: [],
           },
@@ -130,10 +129,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         {
           id: 1,
           monster: {
-            baseID: matchData.player2Monster.template.templateId,
+            baseID: matchData.player2.monster.template.templateId,
             health:
-              matchData.player2Monster.currentHp ??
-              matchData.player2Monster.template.baseStats.health,
+              matchData.player2.monster.currentHp ??
+              matchData.player2.monster.template.baseStats.health,
             defendActionCharges: 0,
             components: [],
           },
@@ -170,8 +169,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       <div className="canvas-body" id="battle-screen-body">
         <BattleTop
           turnNumber={turnIndex + 1}
-          playerName={matchData.myId === 0 ? matchData.player1Name : matchData.player2Name}
-          opponentName={matchData.myId === 0 ? matchData.player2Name : matchData.player1Name}
+          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
+          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
         />
         <BattleScene
           battleInstanceKey={battleInstanceKey}
