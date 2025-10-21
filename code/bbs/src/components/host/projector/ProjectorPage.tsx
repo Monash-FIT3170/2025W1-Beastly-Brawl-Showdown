@@ -45,10 +45,10 @@ export default function ProjectorPage() {
   useEffect(() => {
     if (!serverUrl || socketRef.current) return;
 
-      const normalizedUrl = serverUrl.replace(/^https?:\/\//, "");
-      socketRef.current = io("wss://" + normalizedUrl + "/host", {
+      socketRef.current = io(serverUrl.replace(/^https?/, "wss") + "/host", {
       transports: ["websocket", "polling"]
     });
+
 
     // Connect to game server
     console.log(serverUrl);
