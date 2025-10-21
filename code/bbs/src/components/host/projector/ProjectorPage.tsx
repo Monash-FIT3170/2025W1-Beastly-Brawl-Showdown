@@ -105,6 +105,12 @@ export default function ProjectorPage() {
 
   function handleStartGame(e: React.MouseEvent<HTMLButtonElement>) {
     e.currentTarget.disabled = true;
+
+    const surrenderButtons = document.querySelectorAll('.kick-btn');
+    surrenderButtons.forEach((btn) => {
+      (btn as HTMLButtonElement).style.opacity = '0.5';
+      (btn as HTMLButtonElement).disabled = true;
+    })
     
     if (socketRef.current) {
       socketRef.current.emit("requestStartGame", { roomId, type: tournamentType });
