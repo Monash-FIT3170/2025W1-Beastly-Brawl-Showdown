@@ -1267,14 +1267,18 @@ input:focus {
 .battle-top-bar {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  height: auto;
-  width: 100%;
-  padding-top: 1%;
   align-items: center;
   justify-content: space-evenly;
+
+  height: auto;
+  width: 100%;
+
+  padding: 1% 0 1% 0;
+
+  font-size: 0.8rem;
+  color: #d4a574;
   
   background-color: #8b4513;
-  color: #d4a574;
   border: none;
 
   box-shadow:
@@ -1288,14 +1292,17 @@ input:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5%;
+  gap: 5px;
 }
 
 .battle-top-center {
   display: flex;
   flex-direction: column;
   justify-self: center;
+
   overflow: hidden;
+
+  gap: 5px;
 }
 
 .battle-top-right {
