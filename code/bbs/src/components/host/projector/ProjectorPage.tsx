@@ -48,7 +48,7 @@ export default function ProjectorPage() {
       const cleanServerUrl = serverUrl.replace(/^"|"$/g, "");
 
       const wsUrl = cleanServerUrl.replace(/^http/, "ws") + "/host";
-      socketRef.current = io(wsUrl, { transports: ["websocket", "polling"] });
+      socketRef.current = io(wsUrl, { transports: ["websocket", "polling"]
 
     });
 
