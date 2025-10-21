@@ -1209,6 +1209,11 @@ input:focus {
   top: 90%;
 }
 
+#start-game-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Small Box that shows participants names */
 .participants-name-box {
   display: flex;
