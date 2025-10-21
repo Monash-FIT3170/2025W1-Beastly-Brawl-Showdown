@@ -51,7 +51,9 @@ export default function ProjectorPage() {
     const cleanServerUrl = serverUrl.replace(/^"|"$/g, "").replace(/:8080/, "");
 
     // Convert to WebSocket secure protocol (wss)
-    const wsUrl = cleanServerUrl.replace(/^http/, "wss") + "/host";
+    const wsUrl = cleanServerUrl
+      .replace(/^https?:/, "wss:") // matches both http and https
+      + "/host";
 
     socketRef.current = io(wsUrl, { transports: ["websocket", "polling"] });
 
