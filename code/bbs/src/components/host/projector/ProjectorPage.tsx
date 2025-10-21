@@ -45,7 +45,8 @@ export default function ProjectorPage() {
   useEffect(() => {
     if (!serverUrl || socketRef.current) return;
 
-    socketRef.current = io(serverUrl + "/host", {
+      const normalizedUrl = serverUrl.replace(/^https?:\/\//, "");
+      socketRef.current = io("wss://" + normalizedUrl + "/host", {
       transports: ["websocket", "polling"]
     });
 
