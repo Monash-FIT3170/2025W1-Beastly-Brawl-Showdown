@@ -187,10 +187,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         await new Promise((r) => setTimeout(r, 900));
         if (cancelled) return;
       }
+      const animsAtFinish = chainRef.current;
+      await animsAtFinish;
+
       lastSnapCountRef.current += 1;
-      setTurnFinishedPlaying(true);
       setRunTurnNow(false);
       setTimeout(() => setCurrentMessage(""), 1500); // hook version
+      setTurnFinishedPlaying(true); 
     })();
     return () => {
       cancelled = true;

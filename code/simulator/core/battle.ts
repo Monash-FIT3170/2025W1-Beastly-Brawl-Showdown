@@ -22,6 +22,7 @@ export type BattleOptions = {
   movePool: MovePool;
 
   playerOptionSet: PlayerOptions[];
+  waitForBattleOver?: () => Promise<void>;
 };
 
 export class Battle {
@@ -35,10 +36,13 @@ export class Battle {
 
   readonly noticeBoard: NoticeBoard;
 
+  private waitForBattleOver?: () => Promise<void>;
+
   constructor(options: BattleOptions) {
     this.rng = new PRNG(options.seed);
     this.monsterPool = options.monsterPool;
     this.movePool = options.movePool;
+    this.waitForBattleOver = options.waitForBattleOver;
 
     this.sides = options.playerOptionSet.map((playerOptions, idx) => {
       if (!this.monsterPool.monsters[playerOptions.monsterId]) {
@@ -203,6 +207,11 @@ export class Battle {
         sides: JSON.parse(JSON.stringify(this.sides)),
       };
       this.eventHistory.addEvent(endOfTurnSnapshotEvent);
+    }
+
+    if (this.waitForBattleOver) {
+      // Wait for players to finish the last turn animations
+      await this.waitForBattleOver();
     }
 
     const battleOverEvent: BattleOverEvent = {
