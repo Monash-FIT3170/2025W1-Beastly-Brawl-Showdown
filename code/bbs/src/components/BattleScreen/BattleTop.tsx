@@ -18,13 +18,20 @@ export const BattleTop: React.FC<BattleTopProps> = ({
     <div className="battle-top-bar">
       {/* Left side: Turn number */}
       <div className="battle-top-left">
-        <span className="turn-label">Turn {turnNumber}</span>
+        <span className="turn-label">Turn</span>
+        <span className="turn-label">{turnNumber}</span>
       </div>
+
+      {/* <div style={{flex: 1}}></div> */}
 
       {/* Center: Player vs Opponent */}
       <div className="battle-top-center">
-        <span>VS {opponentName}</span>
+        {/* <span>{playerName}</span> */}
+        <span>VS</span>
+        <span>{opponentName}</span>
       </div>
+
+      {/* <div style={{flex: 1}}></div> */}
 
       {/* Right side: Surrender */}
       <div className="battle-top-right">
