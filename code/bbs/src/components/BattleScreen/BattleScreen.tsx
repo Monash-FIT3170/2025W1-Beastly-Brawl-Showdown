@@ -22,8 +22,6 @@ interface BattleScreenProps {
     player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
-    player1Name: string;
-    player2Name: string;
   };
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
