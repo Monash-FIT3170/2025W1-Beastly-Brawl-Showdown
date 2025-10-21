@@ -39,26 +39,28 @@ export default function ProjectorPage() {
   };
 
   useEffect(() => {
-    if (socketRef.current) {
-      return;
-    }
+    fetchServerUrl(); // Run once to fetch and set serverUrl
+  }, []);
 
-    //#region Startup
-    fetchServerUrl();
+  useEffect(() => {
+    if (!serverUrl || socketRef.current) return;
 
-    if (!serverUrl) {
-      console.log("Waiting for server url to load.");
-      return;
-    }
+    socketRef.current = io(serverUrl + "/host", {
+      transports: ["websocket", "polling"]
+    });
 
     // Connect to game server
-    socketRef.current = io(serverUrl + "/host");
+    console.log(serverUrl);
+    // socketRef.current = io(serverUrl + "/host");
+
+
     socketRef.current.on("connect", () => {
       if (!socketRef.current) {
         console.error("No socket open.");
         return;
       }
       console.log("Connected to server");
+      socketRef.current?.emit("requestRoom", { type: tournamentType });
     });
 
     socketRef.current.on("connect_error", (err: Error) => {
@@ -87,10 +89,10 @@ export default function ProjectorPage() {
       setPlayerList(newPlayerList);
     });
 
-    if (!roomId) {
-      socketRef.current.emit("requestRoom", {type: tournamentType});
-      return;
-    }
+    // if (!roomId) {
+    //   socketRef.current.emit("requestRoom", {type: tournamentType});
+    //   return;
+    // }
     //#endregion
 
     return () => {
