@@ -22,8 +22,6 @@ interface BattleScreenProps {
     player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
-    player1Name: string;
-    player2Name: string;
   };
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
@@ -110,6 +108,42 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         enemyMonsterData.template.baseStats.health,
       playerId: matchData.myId.toString(),
     });
+
+    // Build snapshot JSON
+    const snapshot = {
+      name: "snapshot", // Ensure 'name' property is present for BaseEvent compatibility
+      type: "snapshot",
+      sides: [
+        {
+          id: 0,
+          monster: {
+            baseID: matchData.player1.monster.template.templateId,
+            health:
+              matchData.player1.monster.currentHp ??
+              matchData.player1.monster.template.baseStats.health,
+            defendActionCharges: 0,
+            components: [],
+          },
+          pendingActions: null,
+        },
+        {
+          id: 1,
+          monster: {
+            baseID: matchData.player2.monster.template.templateId,
+            health:
+              matchData.player2.monster.currentHp ??
+              matchData.player2.monster.template.baseStats.health,
+            defendActionCharges: 0,
+            components: [],
+          },
+          pendingActions: null,
+        },
+      ],
+      index: 0,
+    };
+
+    // put snapshot into events state as the first item
+    setEvents([snapshot]);
   }, [matchData]);
     
 
@@ -163,8 +197,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       <div className="canvas-body" id="battle-screen-body">
         <BattleTop
           turnNumber={turnIndex + 1}
-          playerName={matchData.myId === 0 ? matchData.player1Name : matchData.player2Name}
-          opponentName={matchData.myId === 0 ? matchData.player2Name : matchData.player1Name}
+          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
+          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
         />
         <BattleScene
           battleInstanceKey={battleInstanceKey}
