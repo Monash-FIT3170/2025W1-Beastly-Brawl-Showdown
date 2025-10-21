@@ -70,20 +70,21 @@ echo "[launcher] Starting game server in $SERVER_LOCATOR_DIR..."
 (
   cd "$SERVER_LOCATOR_DIR"
   # Check if ts-node is installed
-  if [ ! -d "node_modules" ]; then
-    echo "[launcher] node_modules directory not found. Running 'npm install'..."
+  if [ ! -f "./node_modules/.bin/ts-node" ]; then
+    echo "ts-node not found locally. Installing..."
+    npm install --save-dev ts-node typescript
+  else
+    echo "ts-node is already installed locally."
+  fi
+  # Check for missing dependencies
+  MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
+  if [ -n "$MISSING" ]; then
+    echo "[launcher] Missing packages detected:"
+    echo "$MISSING"
+    echo "[launcher] Running 'npm install'..."
     npm install
   else
-    # Check for missing dependencies
-    MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
-    if [ -n "$MISSING" ]; then
-      echo "[launcher] Missing packages detected:"
-      echo "$MISSING"
-      echo "[launcher] Running 'npm install'..."
-      npm install
-    else
-      echo "[launcher] All packages installed in $SERVER_LOCATOR_DIR."
-    fi
+    echo "[launcher] All packages installed in $SERVER_LOCATOR_DIR."
   fi
   npx ts-node ./src/app.ts
 )&
@@ -96,21 +97,23 @@ echo "[launcher] Starting game server in $GAME_SERVER_DIR..."
 (
   cd "$GAME_SERVER_DIR"
   # Check if ts-node is installed
-  if [ ! -d "node_modules" ]; then
-    echo "[launcher] node_modules directory not found. Running 'npm install'..."
+  if [ ! -f "./node_modules/.bin/ts-node" ]; then
+    echo "ts-node not found locally. Installing..."
+    npm install --save-dev ts-node typescript
+  else
+    echo "ts-node is already installed locally."
+  fi
+  # Check for missing dependencies
+  MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
+  if [ -n "$MISSING" ]; then
+    echo "[launcher] Missing packages detected:"
+    echo "$MISSING"
+    echo "[launcher] Running 'npm install'..."
     npm install
   else
-    # Check for missing dependencies
-    MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
-    if [ -n "$MISSING" ]; then
-      echo "[launcher] Missing packages detected:"
-      echo "$MISSING"
-      echo "[launcher] Running 'npm install'..."
-      npm install
-    else
-      echo "[launcher] All packages installed in $GAME_SERVER_DIR."
-    fi
+    echo "[launcher] All packages installed in $GAME_SERVER_DIR."
   fi
+
   npx ts-node main.ts
 )&
 
