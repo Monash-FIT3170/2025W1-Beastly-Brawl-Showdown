@@ -56,6 +56,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityName: "Reroll",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -86,6 +87,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "dodge",
+      abilityName: "Dodge",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -116,6 +118,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "stun",
+      abilityName: "Stun",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -147,6 +150,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "double-attack",
+      abilityName: "Double Attack",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -176,6 +180,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityName: "Thorns",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -204,6 +209,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "attack-bonus-next3",
+      abilityName: "Enchanced Attack",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -233,6 +239,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityName: "Damage Reduction",
       onSpawnActions: [
         {
           type: "spawnAction",
