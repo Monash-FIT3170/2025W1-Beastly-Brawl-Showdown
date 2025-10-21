@@ -103,7 +103,9 @@ export default function ProjectorPage() {
 
   //#region Host App
 
-  function handleStartGame() {
+  function handleStartGame(e: React.MouseEvent<HTMLButtonElement>) {
+    e.currentTarget.disabled = true;
+    
     if (socketRef.current) {
       socketRef.current.emit("requestStartGame", { roomId, type: tournamentType });
       console.log("Start game requested!", tournamentType);
