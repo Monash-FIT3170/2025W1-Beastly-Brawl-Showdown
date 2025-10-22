@@ -26,8 +26,6 @@ export class Match {
     battle?: Battle;
 
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
-    private battleEnded: boolean = false;
-
 
     /**
      * Constructor.
@@ -145,7 +143,7 @@ export class Match {
     }
 
     // Called by main when a player submits reroll notice
-    submitReroll(player: Player, option : boolean): void {
+    submitReroll(player: Player, option: boolean): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit rerolls to.`);
         }
@@ -232,7 +230,7 @@ export class Match {
             },
         });
 
-        
+
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
@@ -258,7 +256,7 @@ export class Match {
                 spectator: true
             });
         });
-        
+
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
@@ -283,43 +281,30 @@ export class Match {
         }
     }
 
-        /**
+    /**
      * Immediately ends the battle due to a player surrendering.
      * Determines the winner and executes normal post-battle logic.
      */
     surrender(surrenderingPlayer: Player, playerChannel: PlayerNamespace): void {
-  if (!this.battle) {
-    throw new Error(`Match ${this.matchID} has no battle to force end.`);
-  }
-  if (this.battleEnded) return;
+        console.log(
+            `[MATCH] Player ${surrenderingPlayer.displayName} surrendered in MatchID: ${this.matchID}`
+        );
 
-  console.log(
-    `[MATCH] Player ${surrenderingPlayer.displayName} surrendered in MatchID: ${this.matchID}, Battle instance:`,
-    this.battle
-  );
+        // Determine winner
+        const winner = surrenderingPlayer === this.player1 ? this.player2! : this.player1;
+        const loser = surrenderingPlayer;
+        this.winner = winner;
 
-  // Kill surrendering player's monster
-  const surrenderingSide = this.getSideForPlayer(surrenderingPlayer);
-  this.battle.sides[surrenderingSide].monster.health = 0;
+        winner.addSpectator(loser);
 
-  // Determine winner
-  const winner = surrenderingPlayer === this.player1 ? this.player2! : this.player1;
-  const loser = surrenderingPlayer;
-  this.winner = winner;
+        console.log(`[MATCH] Winner is ${winner.displayName} for MatchID: ${this.matchID}`);
 
-  winner.addSpectator(loser);
-
-  console.log(`[MATCH] Winner is ${winner.displayName} for MatchID: ${this.matchID}`);
-
-  // Notify clients
-  playerChannel.to(winner.socketId).emit("sendToWaiting");
-  playerChannel.to(loser.socketId).emit("sendToWaiting");
-  this.spectators.forEach(spectator => {
-    playerChannel.to(spectator.socketId).emit("sendToWaiting");
-  });
-
-  this.battleEnded = true;
-}
-
+        // Notify clients
+        playerChannel.to(winner.socketId).emit("sendToWaiting");
+        playerChannel.to(loser.socketId).emit("sendToWaiting");
+        this.spectators.forEach(spectator => {
+            playerChannel.to(spectator.socketId).emit("sendToWaiting");
+        });
+    }
 
 }

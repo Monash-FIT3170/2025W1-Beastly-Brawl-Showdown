@@ -7,8 +7,6 @@ import { type TargetingMethod } from "../../../../simulator/core/action/targetin
 import BattleScene from "./BattleScene";
 import { type ChooseMove } from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
-import { useNavigate } from "react-router";
-
 
 interface BattleScreenProps {
   matchData: {
@@ -18,8 +16,6 @@ interface BattleScreenProps {
     roomId?: string;
     socketId?: string;
   };
-
-  onSurrender: (playerId: number, roomId: string) => void;
 
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
@@ -41,6 +37,7 @@ interface BattleScreenProps {
   setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
   battleInstanceKey: number;
   isSpectator?: boolean;
+  onSurrender: () => void;
 }
 
 type MonsterState = {
@@ -73,7 +70,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
   const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const navigate = useNavigate();
 
   //#region initializations
   useEffect(() => {
@@ -153,47 +149,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   };
 
   //#region surrender
- const handleSurrender = async () => {
-  console.log("=== [BATTLE SCREEN] SURRENDER DEBUG ===");
-  console.log("matchData:", matchData);
-  console.log("myMonster:", myMonster);
-  console.log("enemyMonster:", enemyMonster);
-  console.log("battleInstanceKey:", battleInstanceKey);
-
-  // Check Player ID
-  if (matchData?.myId !== undefined) {
-    console.log("Player ID is valid:", matchData.myId);
-  } else {
-    console.warn("Player ID is undefined!");
-  }
-
-  // Check Room ID
-  if (matchData?.roomId) {
-    console.log("Room ID is valid:", matchData.roomId);
-  } else {
-    console.warn("Room ID is missing or undefined!");
-  }
-
-  // Check socket connection
-  if ("socket" in matchData && matchData.socket) {
-    console.log("Socket connected?", matchData.socket.connected);
-  } else {
-    console.warn("Socket is missing from matchData or not connected");
-  }
-
-  console.log("Calling onSurrender...");
-
-  if (matchData?.myId !== undefined && matchData?.roomId) {
-    await onSurrender(matchData.myId, matchData.roomId); // <-- waits for server ack
-    console.log(`[BATTLE SCREEN] Surrender processed`);
-  } else {
-    console.warn("[BATTLE SCREEN] Cannot surrender: missing playerId or roomId");
-  }
-
-  console.log("Navigating back to /main");
-  navigate("/main");
-};
-
+  const handleSurrender = () => {
+    console.log("[BATTLE SCREEN] Surrender clicked");
+    onSurrender(); // delegate to parent
+  };
 
 
   //#endregion
@@ -253,5 +212,5 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     </div>
   );
 
-  
+
 };

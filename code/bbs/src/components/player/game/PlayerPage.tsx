@@ -108,7 +108,7 @@ const PlayerContent = () => {
   const [waiting, setWaiting] = useState(false);
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
-  const [isSpectator, setIsSpectator] = useState(false);
+  const [, setIsSpectator] = useState(false);
 
   const [events, setEvents] = useState<any[]>([]);
   const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
@@ -116,36 +116,13 @@ const PlayerContent = () => {
   // const [rollNotice, setRollNotice] = useState<Roll | null>(null);
   // const [showRollMessage, setShowRollMessage] = useState(false);
   const [parentDiceRollResult, setParentDiceRollResult] = useState<number | null>(null);
-  const [rerollNotice, setRerollNotice] = useState<RerollOption | null>(null);
+  const [, setRerollNotice] = useState<RerollOption | null>(null);
   const [rerollMode, setRerollMode] = useState<boolean>(false);
-  const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] =
-    useState(false);
-  const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] =
-    useState(false);
-  const [isWaiting, setIsWaiting] =
-    useState(false);
+  const [, setshowEnemySubmittedMessage] = useState(false);
+  const [, setshowSubmittedMoveMessage] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
-
-  const surrenderPlayer = async () => {
-  if (!socket || !matchData) return;
-
-  return new Promise<void>((resolve) => {
-    socket.emit(
-      "playerSurrender",
-      {
-        playerId: matchData.myId,
-        roomId: sessionStorage.getItem("joinCode")!,
-        battleInstanceKey,
-      },
-      (response) => {
-        console.log("[PLAYER CONTENT] Surrender acknowledged:", response);
-        resolve();
-      }
-    );
-  });
-};
-
 
   useEffect(() => {
     if (!socket) return;
@@ -249,7 +226,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);  
+      setWinner(data);
     });
     //#endregion
 
@@ -434,6 +411,17 @@ const PlayerContent = () => {
     });
   };
 
+  // callback passed to BattleScreen
+  const handleSurrenderClicked = async () => {
+    if (!socket || !matchData) return;
+
+    const roomId = sessionStorage.getItem("joinCode");
+    if (!roomId) return console.warn("No roomId found for surrender");
+
+    console.log("[PLAYER CONTENT] Sending surrender to server...");
+    socket.emit("playerSurrender");
+  };
+
   // Debugging useEffect
   useEffect(() => {
     console.log(
@@ -484,6 +472,7 @@ const PlayerContent = () => {
       isWaiting={isWaiting}
       setIsWaiting={setIsWaiting}
       battleInstanceKey={battleInstanceKey}
+      onSurrender={handleSurrenderClicked}
     />
   );
 };
