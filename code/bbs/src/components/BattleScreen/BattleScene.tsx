@@ -190,6 +190,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       lastSnapCountRef.current += 1;
       setTurnFinishedPlaying(true);
       setRunTurnNow(false);
+
+      if (onAdvanceTurn) {
+        onAdvanceTurn(turnIndex + 1);
+      }
+      
       setTimeout(() => setCurrentMessage(""), 1500); // hook version
     })();
     return () => {
