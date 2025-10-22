@@ -1475,6 +1475,29 @@ progress::-moz-progress-bar {
   margin-top: 1rem;
 }
 
+.btn-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+}
+
+.badge-grid {
+  grid-column: 2;
+  grid-row: 1;
+
+  border-radius: 50%;
+  border: 2px solid black;
+
+  z-index: 10;
+}
+
+.img-grid {
+  grid-column: 1 / -1;
+  grid-row: -1 / 1;
+  place-self: center;
+}
+
 /* Battle Loading Styles */
 .battle-loading-screen {
   display: flex;

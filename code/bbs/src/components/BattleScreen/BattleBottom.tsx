@@ -112,11 +112,13 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   const renderButton = (btn: MoveButton) => (
     <button
       key={btn.id}
-      className="glb-btn"
+      className="glb-btn btn-grid"
       onClick={() => onAction(btn.id, btn.targetMethod)}
       disabled={disabled}
-    >
-      <img src={btn.icon} className="battleScreenBottomButtonImage" />
+    > 
+      { btn.id == fallbackMoves.attack && (
+        <div className="badge-grid badge-number">3</div>)}
+      <img src={btn.icon} className="battleScreenBottomButtonImage img-grid" />
     </button>
   );
 
