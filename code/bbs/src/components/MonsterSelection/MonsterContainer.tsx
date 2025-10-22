@@ -1,4 +1,5 @@
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "../../../../simulator/data/common/common_move_pool";
 
 export const MonsterContainer = ({
   name,
@@ -18,6 +19,12 @@ export const MonsterContainer = ({
     (m) => m.name === name
   );
 
+  // Look up the monster’s ability move (if any)
+  const abilityMove =
+    monster?.abilityActionId
+      ? COMMON_MOVE_POOL[monster.abilityActionId as keyof typeof COMMON_MOVE_POOL]
+      : null;
+
   return (
     <div className="monster-selection-card" id={name} onClick={onClick}>
       <div className="monster-avatar">
@@ -30,7 +37,7 @@ export const MonsterContainer = ({
         <div className="monster-stats" id="AC">Armour: {monster?.baseStats.armour}</div>
         
         {monster?.abilityActionId && (
-          <div className="ability-desc">Ability: {monster.abilityActionId}</div>
+          <div className="ability-desc">Ability: {abilityMove?.name}</div>
         )}
       </div>
     </div>
