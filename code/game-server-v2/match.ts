@@ -282,4 +282,41 @@ export class Match {
         }
     }
 
+        /**
+     * Immediately ends the battle due to a player surrendering.
+     * Determines the winner and executes normal post-battle logic.
+     */
+    surrender(surrenderingPlayer: Player, playerChannel: PlayerNamespace): void {
+        if (!this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to force end.`);
+        }
+
+        // Determine winner and loser
+        const winner = surrenderingPlayer === this.player1 ? this.player2 : this.player1;
+        if (!winner) {
+            throw new Error(`Match ${this.matchID}: Cannot determine winner on surrender.`);
+        }
+        this.winner = winner;
+
+        // Set surrendering player's monster health to 0
+        const surrenderingSide = this.getSideForPlayer(surrenderingPlayer);
+        this.battle.sides[surrenderingSide].monster.health = 0;
+
+
+        log_event(`[MATCH] Player ${surrenderingPlayer.displayName} surrendered. Winner: ${winner.displayName}`);
+
+        // Post-battle logic: add loser as spectator
+        winner.addSpectator(surrenderingPlayer);
+
+        // Send events to both players as if the battle ended normally
+        playerChannel.to(winner.socketId).emit("sendToWaiting");
+        playerChannel.to(surrenderingPlayer.socketId).emit("sendToWaiting");
+
+        // Notify spectators
+        this.spectators.forEach(spectator => {
+            playerChannel.to(spectator.socketId).emit("sendToWaiting");
+        });
+    }
+
+
 }
