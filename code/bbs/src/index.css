@@ -1486,9 +1486,6 @@ progress::-moz-progress-bar {
   grid-column: 2;
   grid-row: 1;
 
-  border-radius: 50%;
-  border: 2px solid black;
-
   z-index: 10;
 }
 
