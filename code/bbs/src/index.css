@@ -1305,11 +1305,11 @@ input:focus {
   gap: 5px;
 }
 
-.opponent-name {
+/* .opponent-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
+} */
 
 .battle-top-right {
   justify-self: center;
@@ -1337,7 +1337,7 @@ input:focus {
 }
 
 .battle-scene {
-  margin-top: 15%;
+  /* margin-top: 15%; */
   width: 100%;
 }
 .battleMiddle {
@@ -2168,14 +2168,35 @@ input[type="range"] {
     transform: scale(0.95);
   }
 }
- 
-  .modal-box {
-    width: 90%;
-    max-width: 300px;
-    padding: 1.5rem;
+
+@media screen and (max-width: 375px) {
+  .battle-scene {
+    margin-top: 5%;
   }
 
-  .modal-title {
-    font-size: 1.25rem;
-    text-align: center;
+  .health-ring-container {
+    width: 170px;
+    height: 170px;
   }
+
+  .monster-img {
+    width: 150px;
+    height: 150px;
+  }
+
+  .health-ring {
+    height: 170px;
+    width: 170px;
+  }
+}
+ 
+.modal-box {
+  width: 90%;
+  max-width: 300px;
+  padding: 1.5rem;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  text-align: center;
+}
