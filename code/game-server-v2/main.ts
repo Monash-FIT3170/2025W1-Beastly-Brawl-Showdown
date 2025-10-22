@@ -471,21 +471,42 @@ async function main(config: ServerConfig) {
 
     socket.on("requestReroll", handleRerollNotice);
 
-    socket.on("playerSurrender", () => {
+    // Player surrender event
+    // Player surrender event
+    socket.on("playerSurrender", (data: { playerId: number; roomId: number; battleInstanceKey: number }) => {
+      console.log("[MAIN] playerSurrender event received:", data);
+
+      const { playerId, roomId, battleInstanceKey } = data;
+
       const player = socket.data.player as Player;
-      if (!player) return;
+      if (!player) {
+        console.log("[MAIN] No player object on socket");
+        return;
+      }
 
-      const room = gameServer.rooms.get(player.roomId);
-      if (!room) return;
+      const room = gameServer.rooms.get(roomId);
+      if (!room) {
+        console.log("[MAIN] No room found for roomId:", roomId);
+        return;
+      }
 
-      // Find the match this player is in
       const match = room.tournamentManager.matches.find(
         m => m.player1 === player || m.player2 === player
       );
-      if (!match) return;
 
+      if (!match) {
+        console.log("[MAIN] No match found for player:", player.displayName);
+        return;
+      }
+
+      console.log(`[MAIN] Calling match.surrender() for player ${player.displayName}, matchID: ${match.matchID}`);
       match.surrender(player, room.playerChannel);
-    });
+
+      log_notice(`[SERVER] Player ${player.displayName} surrendered in room ${roomId}, battle key: ${battleInstanceKey}`);
+  });
+
+
+
 
 
 

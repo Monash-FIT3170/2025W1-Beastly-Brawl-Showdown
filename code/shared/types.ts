@@ -21,6 +21,15 @@ export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   submitMove: (data: any) => void;
   requestRoll: (data: any) => void;
   requestReroll: (data: any) => void;
+
+  playerSurrender: (
+    data: {
+      playerId: number;
+      roomId: string;
+      battleInstanceKey: number;
+    },
+    callback?: (response: any) => void
+  ) => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {

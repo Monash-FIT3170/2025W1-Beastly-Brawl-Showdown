@@ -127,6 +127,26 @@ const PlayerContent = () => {
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
 
+  const surrenderPlayer = async () => {
+  if (!socket || !matchData) return;
+
+  return new Promise<void>((resolve) => {
+    socket.emit(
+      "playerSurrender",
+      {
+        playerId: matchData.myId,
+        roomId: sessionStorage.getItem("joinCode")!,
+        battleInstanceKey,
+      },
+      (response) => {
+        console.log("[PLAYER CONTENT] Surrender acknowledged:", response);
+        resolve();
+      }
+    );
+  });
+};
+
+
   useEffect(() => {
     if (!socket) return;
 

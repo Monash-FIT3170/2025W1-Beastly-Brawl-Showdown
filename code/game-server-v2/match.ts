@@ -288,38 +288,38 @@ export class Match {
      * Determines the winner and executes normal post-battle logic.
      */
     surrender(surrenderingPlayer: Player, playerChannel: PlayerNamespace): void {
-        if (!this.battle) {
-            throw new Error(`Match ${this.matchID} has no battle to force end.`);
-        }
+  if (!this.battle) {
+    throw new Error(`Match ${this.matchID} has no battle to force end.`);
+  }
+  if (this.battleEnded) return;
 
-        // Determine winner and loser
-        const winner = surrenderingPlayer === this.player1 ? this.player2 : this.player1;
-        if (!winner) {
-            throw new Error(`Match ${this.matchID}: Cannot determine winner on surrender.`);
-        }
-        this.winner = winner;
+  console.log(
+    `[MATCH] Player ${surrenderingPlayer.displayName} surrendered in MatchID: ${this.matchID}, Battle instance:`,
+    this.battle
+  );
 
-        // Set surrendering player's monster health to 0 to mark defeat
-        const surrenderingSide = this.getSideForPlayer(surrenderingPlayer);
-        this.battle.sides[surrenderingSide].monster.health = 0;
+  // Kill surrendering player's monster
+  const surrenderingSide = this.getSideForPlayer(surrenderingPlayer);
+  this.battle.sides[surrenderingSide].monster.health = 0;
 
-        log_event(`[MATCH] Player ${surrenderingPlayer.displayName} surrendered. Winner: ${winner.displayName}`);
+  // Determine winner
+  const winner = surrenderingPlayer === this.player1 ? this.player2! : this.player1;
+  const loser = surrenderingPlayer;
+  this.winner = winner;
 
-        // Add surrendering player as spectator to winner
-        winner.addSpectator(surrenderingPlayer);
+  winner.addSpectator(loser);
 
-        // Notify winner, loser, and spectators exactly as if the battle finished normally
-        playerChannel.to(winner.socketId).emit("sendToWaiting");
-        playerChannel.to(surrenderingPlayer.socketId).emit("sendToWaiting");
-        this.spectators.forEach(spectator => {
-            playerChannel.to(spectator.socketId).emit("sendToWaiting");
-        });
+  console.log(`[MATCH] Winner is ${winner.displayName} for MatchID: ${this.matchID}`);
 
-        // Optionally log a BattleOverEvent manually for clients who rely on it
-        this.battle.eventHistory.addEvent({ name: "battleOver" });
-    }
+  // Notify clients
+  playerChannel.to(winner.socketId).emit("sendToWaiting");
+  playerChannel.to(loser.socketId).emit("sendToWaiting");
+  this.spectators.forEach(spectator => {
+    playerChannel.to(spectator.socketId).emit("sendToWaiting");
+  });
 
-
+  this.battleEnded = true;
+}
 
 
 }

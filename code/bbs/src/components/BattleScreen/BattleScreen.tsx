@@ -9,36 +9,34 @@ import { type ChooseMove } from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { useNavigate } from "react-router";
 
+
 interface BattleScreenProps {
   matchData: {
     player1Monster: { template: MonsterTemplate; currentHp: number };
     player2Monster: { template: MonsterTemplate; currentHp: number };
     myId: number;
-    roomId?: string; // optional room identifier if you have one
-    socketId?: string; // optional
+    roomId?: string;
+    socketId?: string;
   };
+
+  onSurrender: (playerId: number, roomId: string) => void;
+
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
-
   chooseMove: ChooseMove | null;
   setChooseMove: React.Dispatch<React.SetStateAction<ChooseMove | null>>;
   setHasReceivedChooseMove: React.Dispatch<React.SetStateAction<boolean>>;
-
   buttonDisabled: boolean;
-
   onSubmitMove: (
     moveId: EntryID,
     targetMethod: TargetingMethod,
     myMonsterId: EntryID
   ) => void;
-
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   showMessage: boolean;
-
   onReroll: (option: boolean) => void;
   rerollMode: boolean;
   parentDiceRollResult: number | null;
-
   isWaiting: boolean;
   setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
   battleInstanceKey: number;
@@ -68,7 +66,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   isWaiting,
   setIsWaiting,
   battleInstanceKey,
-  isSpectator
+  isSpectator,
+  onSurrender,
 }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -99,8 +98,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setEnemyMonster({
       template: enemyMonsterData.template,
       currentHp:
-        enemyMonsterData.currentHp ??
-        enemyMonsterData.template.baseStats.health,
+        enemyMonsterData.currentHp ?? enemyMonsterData.template.baseStats.health,
       playerId: matchData.myId.toString(),
     });
 
@@ -154,32 +152,51 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setChooseMove(null);
   };
 
-  // --- Added Surrender feature ---
-  const handleSurrender = () => {
-    console.log("Player surrendered:", matchData.myId, "Room:", matchData.roomId);
+  //#region surrender
+ const handleSurrender = async () => {
+  console.log("=== [BATTLE SCREEN] SURRENDER DEBUG ===");
+  console.log("matchData:", matchData);
+  console.log("myMonster:", myMonster);
+  console.log("enemyMonster:", enemyMonster);
+  console.log("battleInstanceKey:", battleInstanceKey);
 
-    // Example: send to backend or socket
-    sendSurrenderEvent({
-      playerId: matchData.myId,
-      roomId: matchData.roomId,
-      socketId: matchData.socketId,
-    });
+  // Check Player ID
+  if (matchData?.myId !== undefined) {
+    console.log("Player ID is valid:", matchData.myId);
+  } else {
+    console.warn("Player ID is undefined!");
+  }
 
-    navigate("/main"); // optional navigation
-  };
+  // Check Room ID
+  if (matchData?.roomId) {
+    console.log("Room ID is valid:", matchData.roomId);
+  } else {
+    console.warn("Room ID is missing or undefined!");
+  }
 
-  const sendSurrenderEvent = ({
-    playerId,
-    roomId,
-    socketId
-  }: {
-    playerId: number;
-    roomId?: string;
-    socketId?: string;
-  }) => {
-    console.log("Sending surrender to backend:", { playerId, roomId, socketId });
-    // replace with real backend API or socket emit
-  };
+  // Check socket connection
+  if ("socket" in matchData && matchData.socket) {
+    console.log("Socket connected?", matchData.socket.connected);
+  } else {
+    console.warn("Socket is missing from matchData or not connected");
+  }
+
+  console.log("Calling onSurrender...");
+
+  if (matchData?.myId !== undefined && matchData?.roomId) {
+    await onSurrender(matchData.myId, matchData.roomId); // <-- waits for server ack
+    console.log(`[BATTLE SCREEN] Surrender processed`);
+  } else {
+    console.warn("[BATTLE SCREEN] Cannot surrender: missing playerId or roomId");
+  }
+
+  console.log("Navigating back to /main");
+  navigate("/main");
+};
+
+
+
+  //#endregion
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
@@ -192,9 +209,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) =>
-            setTurnIndex(next)
-          }
+          onAdvanceTurn={(next) => setTurnIndex(next)}
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
@@ -208,7 +223,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   return (
     <div className="canvas-body" id="battle-screen-body">
-      {/* Pass the callback to BattleTop */}
       <BattleTop onSurrender={handleSurrender} />
       <BattleScene
         battleInstanceKey={battleInstanceKey}
@@ -216,9 +230,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         turnIndex={turnIndex}
         isPlaying={isPlaying}
         autoAdvance={false}
-        onAdvanceTurn={(next: React.SetStateAction<number>) =>
-          setTurnIndex(next)
-        }
+        onAdvanceTurn={(next) => setTurnIndex(next)}
         myId={matchData.myId}
         showMessage={showMessage}
         setTurnFinishedPlaying={setTurnFinishedPlaying}
@@ -240,4 +252,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       />
     </div>
   );
+
+  
 };

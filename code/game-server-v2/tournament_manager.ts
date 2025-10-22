@@ -111,4 +111,17 @@ export class TournamentManager {
     // Check and start next round if needed
     this.checkRoundCompletion();
   }
+
+  public surrenderPlayerBySocket(socketId: string) {
+        for (const match of this.matches) {
+            const player =
+                match.player1.socketId === socketId ? match.player1 :
+                match.player2?.socketId === socketId ? match.player2 : undefined;
+
+            if (player && !match.winner) {
+                match.surrender(player, this.playerChannel);
+                break; // player can only be in one match
+            }
+        }
+    }
 }
