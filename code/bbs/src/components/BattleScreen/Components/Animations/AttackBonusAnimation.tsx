@@ -15,7 +15,7 @@ const AttackBonusAnimation: React.FC<AttackBonusAnimationProps> = ({
       onAnimationEnd={onComplete}
     >
       <img
-        src="assets/battle-icons/attack-bonus.png"
+        src="/assets/battle-icons/attack-bonus.png"
         alt="ability"
         className="attack-bonus-image"
       />
