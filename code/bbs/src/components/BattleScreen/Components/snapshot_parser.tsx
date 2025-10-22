@@ -16,7 +16,7 @@ export function parseSnapshot(snapshot: SnapshotEvent) {
       name: template.name,
       image: template.imageUrl,
       health: side.monster.health,
-      defendActionCharge: side.monster.defendActionCharges,
+      attackCharges: side.monster.attackCharges,
     };
   });
 }
