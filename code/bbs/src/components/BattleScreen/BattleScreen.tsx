@@ -5,10 +5,7 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
-import { type ChooseMove, type Roll } from "../../../../simulator/core/notice/notice";
-import {
-  type ChooseMove,
-} from "../../../../simulator/core/notice/notice";
+import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
 interface BattleScreenProps {
@@ -74,7 +71,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   parentDiceRollResult,
   isWaiting,
   setIsWaiting,
-  battleInstanceKey
+  battleInstanceKey,
+  isSpectator
 }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -175,13 +173,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) => setTurnIndex(next)}
-          myid={matchData.myid}
-          showEnemySubmittedMessage={showEnemySubmittedMessage}
-          showSubmittedMoveMessage={showSubmittedMoveMessage}
+          onAdvanceTurn={(next: React.SetStateAction<number>) =>
+            setTurnIndex(next)
+          }
+          myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
-          showRollMessage={showRollMessage}
+          // showRollMessage={showRollMessage}
+          rerollMode={rerollMode}
+          parentDiceRollResult={parentDiceRollResult}
+          isWaiting={isWaiting}
         />
       </div>
     </>
