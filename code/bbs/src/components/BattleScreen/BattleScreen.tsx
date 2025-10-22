@@ -5,9 +5,7 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
-import {
-  type ChooseMove,
-} from "../../../../simulator/core/notice/notice";
+import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
 interface BattleScreenProps {
@@ -45,6 +43,7 @@ interface BattleScreenProps {
   isWaiting: boolean;
   setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
   battleInstanceKey: number;
+  isSpectator?: boolean;
 }
 
 type MonsterState = {
@@ -72,7 +71,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   parentDiceRollResult,
   isWaiting,
   setIsWaiting,
-  battleInstanceKey
+  battleInstanceKey,
+  isSpectator
 }) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -163,6 +163,32 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
+  if (isSpectator) {
+  return (
+    <>
+      <div className="canvas-body" id="battle-screen-body">
+        <BattleScene
+          battleInstanceKey={battleInstanceKey}
+          events={events}
+          turnIndex={turnIndex}
+          isPlaying={isPlaying}
+          autoAdvance={false}
+          onAdvanceTurn={(next: React.SetStateAction<number>) =>
+            setTurnIndex(next)
+          }
+          myId={matchData.myId}
+          showMessage={showMessage}
+          setTurnFinishedPlaying={setTurnFinishedPlaying}
+          // showRollMessage={showRollMessage}
+          rerollMode={rerollMode}
+          parentDiceRollResult={parentDiceRollResult}
+          isWaiting={isWaiting}
+        />
+      </div>
+    </>
+  );
+}
+  
   return (
     <>
       <div className="canvas-body" id="battle-screen-body">

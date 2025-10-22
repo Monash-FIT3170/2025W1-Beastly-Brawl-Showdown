@@ -94,7 +94,6 @@ export class GameServer {
     socketId: string,
     roomId: RoomId,
     displayName: string,
-    linkedAcccountId: AccountId | undefined,
   ) {
     //TODO validate input
 
@@ -107,7 +106,7 @@ export class GameServer {
       throw new Error("Display name already taken.");
     }
 
-    const newPlayer = new Player(roomId, socketId, displayName, linkedAcccountId);
+    const newPlayer = new Player(roomId, socketId, displayName);
     room.players.push(newPlayer);
   }
 }

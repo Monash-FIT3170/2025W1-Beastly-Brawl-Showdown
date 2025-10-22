@@ -55,7 +55,9 @@ const PlayerSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     if ((!socketRef.current || !socketRef.current.connected) && serverUrl) {
       socketRef.current = io(serverUrl + "/player", {
         auth: { joinCode, displayName },
+        autoConnect: false,
       });
+      socketRef.current.connect();
 
       socketRef.current.on("connect", () => {
         console.log("Connected to server");
@@ -106,6 +108,7 @@ const PlayerContent = () => {
   const [waiting, setWaiting] = useState(false);
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
+  const [isSpectator, setIsSpectator] = useState(false);
 
   const [events, setEvents] = useState<any[]>([]);
   const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
@@ -167,11 +170,11 @@ const PlayerContent = () => {
       // Create Monster instances for BattleScreen
       const player1Monster =
         COMMON_MONSTER_POOL.monsters[
-          player1TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        player1TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
       const player2Monster =
         COMMON_MONSTER_POOL.monsters[
-          player2TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
+        player2TemplateName as keyof typeof COMMON_MONSTER_POOL.monsters
         ];
 
       if (typeof data?.sideID !== "number") {
@@ -190,11 +193,32 @@ const PlayerContent = () => {
         myId: data.sideID,
       });
 
+      // Check if player is spectator
+      if (data.spectator) {
+        setIsSpectator(true);
+      }
+
       // Give a key for every new battle
       setBattleInstanceKey((k) => k + 1);
 
       setAllReady(true);
     });
+
+    //#region Player Kicked
+    socket.on("playerKicked", () => {
+
+      // Disconnect socket
+      socket.disconnect();
+
+      // Clear sessionStorage to prevent auto-join
+      sessionStorage.removeItem("joinCode");
+      sessionStorage.removeItem("displayName");
+      sessionStorage.removeItem("serverUrl");
+
+      // Navigate back to home page
+      window.location.href = "/home/";
+    });
+
 
     //#region Waiting Room
     socket.on("sendToWaiting", () => {
@@ -205,7 +229,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);
+      setWinner(data);  
     });
     //#endregion
 
@@ -282,36 +306,36 @@ const PlayerContent = () => {
     };
   }, [socket]);
 
-useEffect(() => {
-  if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  const handleNewEvent = (ev: any) => {
-    setEvents((prev) => {
-      const lastEvent = prev[prev.length - 1];
+    const handleNewEvent = (ev: any) => {
+      setEvents((prev) => {
+        const lastEvent = prev[prev.length - 1];
 
-      if (ev.name === "roll" && lastEvent?.name === "startMove") {
-        const rollEvent = ev as any;
-        if (rollEvent.source === matchData?.myId) {
-          setParentDiceRollResult(rollEvent.result);
+        if (ev.name === "roll" && lastEvent?.name === "startMove") {
+          const rollEvent = ev as any;
+          if (rollEvent.source === matchData?.myId) {
+            setParentDiceRollResult(rollEvent.result);
+          }
         }
-      }
 
-      const next = [...prev, ev];
-      console.log(
-        "All events after adding:",
-        next.map((e) =>
-          e.name === "roll" ? `${e.name} (source: ${e.source})` : e.name
-        )
-      );
-      return next;
-    });
-  };
+        const next = [...prev, ev];
+        console.log(
+          "All events after adding:",
+          next.map((e) =>
+            e.name === "roll" ? `${e.name} (source: ${e.source})` : e.name
+          )
+        );
+        return next;
+      });
+    };
 
-  socket.on("newEvent", handleNewEvent);
-  return () => {
-    socket.off("newEvent", handleNewEvent);
-  };
-}, [socket, matchData?.myId]);
+    socket.on("newEvent", handleNewEvent);
+    return () => {
+      socket.off("newEvent", handleNewEvent);
+    };
+  }, [socket, matchData?.myId]);
 
   //listen for enemy submitting messages
   useEffect(() => {
@@ -370,7 +394,7 @@ useEffect(() => {
     // Note: dice animation will be triggered when we receive the roll event back from server
   }
 
-  function rerollNow(optionChosen: boolean):void {
+  function rerollNow(optionChosen: boolean): void {
     if (!socket) return;
     socket.emit("requestReroll", optionChosen)
     // setParentDiceRollResult(null)
@@ -420,7 +444,6 @@ useEffect(() => {
     );
   // if (!allReady || waiting) return <WaitingScreen />;
   if (!allReady || waiting) return <WaitingScreen />;
-  // TODO: Create a spectator page for losers/byematch to wait in
   if (winner) return <WinnerScreen winnerName={winner} />;
 
   return (
@@ -437,9 +460,9 @@ useEffect(() => {
       showMessage={showMessage}
       onReroll={rerollNow}
       rerollMode={rerollMode}
-      parentDiceRollResult = {parentDiceRollResult}
-      isWaiting = {isWaiting}
-      setIsWaiting = {setIsWaiting}
+      parentDiceRollResult={parentDiceRollResult}
+      isWaiting={isWaiting}
+      setIsWaiting={setIsWaiting}
       battleInstanceKey={battleInstanceKey}
     />
   );

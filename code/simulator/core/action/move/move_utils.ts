@@ -107,6 +107,7 @@ export async function default_attack(parentMove: MoveData, battle: Battle, sourc
     source: source,
     target: target,
     moveId: parentMove.moveId,
+    moveName: parentMove.name,
   };
   battle.eventHistory.addEvent(moveSuccessEvent);
 
@@ -180,6 +181,7 @@ export function postMoveSuccessEvent(battle: Battle, source: SideId, target: Sid
     source,
     target,
     moveId: move.moveId,
+    moveName: move.name,
   };
   battle.eventHistory.addEvent(moveSuccessEvent);
 }
