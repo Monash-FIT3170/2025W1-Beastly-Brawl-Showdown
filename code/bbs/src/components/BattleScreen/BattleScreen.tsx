@@ -5,6 +5,9 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
+import { type ChooseMove, type Notice, type Roll } from "../../../../simulator/core/notice/notice";
+import type { OrderedEvent } from "../../../../simulator/core/event/event_history";
+import type { RollEvent } from "../../../../simulator/core/event/core_events";
 import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
@@ -145,21 +148,90 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setEvents([snapshot]);
   }, [matchData]);
 
-  // Whenever there is new matchdata, reset the turn index
+  //#region battle code
+
+  //function that executes roll on server
+  function rollNow(): void {
+    if (!socket) return;
+    
+    // Execute the roll on server immediately
+    setShowMessage(false);
+    socket.emit("requestRoll");
+    setRollNotice(null);
+    setshowRollMessage(false);
+    // Note: dice animation will be triggered when we receive the roll event back from server
+  }
+
+  // Handle dice animation completion - just hide the animation
+  const handleDiceAnimationComplete = () => {
+    setShowDiceAnimation(false);
+  };
+
+  //listen for enemy submitting messages
   useEffect(() => {
     if (!matchData) return;
     setTurnIndex(0);
     setIsPlaying(true);
   }, [matchData]);
 
-  const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
-    if (!myMonster) return;
-    onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
-    setIsWaiting(true)
-    setTurnFinishedPlaying(false);
-    setHasReceivedChooseMove(false);
-    setChooseMove(null);
+  // Handle player action (submit move to server)
+  const handleAction = (
+    moveId: EntryID,
+    targetingMethod: TargetingMethod
+  ) => {
+    if (!socket || !myMonster) return;
+    console.log("Handling Action now")
+    socket.emit("submitMove", { moveId, targetingMethod });
+    setshowSubmittedMoveMessage(true)
+    setbuttonDisabled(true)
+    setChooseMove(null)
   };
+
+  // GET READY TO UNLOCK BUTTON ON NEXT TURN
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUnlock = () => {
+      setTurnFinishedPlaying(false);
+      setShowMessage(false);
+      setshowSubmittedMoveMessage(false);
+      setshowEnemySubmittedMessage(false);
+    };
+
+    socket.on("unlockButton", handleUnlock);
+    return () => {
+      socket.off("unlockButton", handleUnlock);
+    };
+  }, [socket]);
+
+  //function to pass in new events to battle scene
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewEvent = (event: OrderedEvent) => {
+      // Type narrowing to check this is a roll event.
+      if (
+        event.name === "roll" &&
+        "source" in event &&
+        "result" in event &&
+        typeof event.result === "number" &&
+        event.source === matchData.myid
+      ) {
+        setDiceRollResult(event.result);
+        setShowDiceAnimation(true);
+      }
+      
+      setEvents(prev => {
+        const next = [...prev, event];
+        return next;
+      });
+    };
+
+    socket.on("newEvent", handleNewEvent);
+    return () => {
+      socket.off("newEvent", handleNewEvent);
+    };
+  }, [socket, matchData.myid]);
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
@@ -211,8 +283,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           isWaiting={isWaiting}
         />
         <BattleBottom
-          onAction={onAction}
-          // onRoll={() => rollNotice && onRoll(rollNotice)}
+          onAction={handleAction}
+          onRoll={() => rollNotice && rollNow()}
           disabled={buttonDisabled}
           // mode={rollNotice ? "roll" : "combat"}
           chooseMove={chooseMove}

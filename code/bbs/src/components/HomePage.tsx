@@ -10,10 +10,10 @@ export const HomePage = () => {
   const [showModal, setShowModal] = React.useState(false);
   type HostSocket = Socket<HostServerToClientEvents, HostClientToServerEvents>;
 
-  const handleHost = (type: "standard" | "random") => {
+  const handleHost = (roomType: "standard" | "random") => {
     const hostSocket: HostSocket = io("/host") as HostSocket;
-    hostSocket.emit("requestRoom", { type });
-    navigate(`/host/${type}`);
+    hostSocket.emit("requestRoom", roomType);
+    navigate(`/host/${roomType}`);
   };
 
   //todo for the other type

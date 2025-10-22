@@ -205,7 +205,6 @@ export class Match {
             onRemoveNotice: (sideIndex, notice) => {
                 const player = sideIndex === 0 ? this.player1 : this.player2!;
                 log_event(`[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`);
-                playerChannel.to(player.socketId).emit("removeNotice", notice);
             }
         });
 

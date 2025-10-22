@@ -104,7 +104,7 @@ const PlayerContent = () => {
   const [startSelection, setStartSelection] = useState(false);
   const [monsterSelected, setMonsterSelected] = useState(false);
   const [allReady, setAllReady] = useState(false);
-  const [winner, setWinner] = useState();
+  const [winner, setWinner] = useState<string | undefined>();
   const [waiting, setWaiting] = useState(false);
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
@@ -131,7 +131,7 @@ const PlayerContent = () => {
     if (!socket) return;
 
     //#region Monster selection handle
-    socket.on("requestMonsterSelection", (data) => {
+    socket.on("requestMonsterSelection", (data: {monsterPool: string[]}) => {
       if (data?.monsterPool) {
         setMonsterPool(data.monsterPool); // store in state to pass to MonsterSelectionScreen
       }
@@ -227,7 +227,7 @@ const PlayerContent = () => {
     //#endregion
 
     //#region Set winner
-    socket.on("tournamentFinished", (data) => {
+    socket.on("tournamentFinished", (winner) => {
       setWaiting(false);
       setWinner(data);  
     });
@@ -256,11 +256,10 @@ const PlayerContent = () => {
       // Send the templateId instead of the name
       console.log("No of selections: ", noSelections);
       socket.emit("submitMonster", {
-        data: {
           monsterTemplate: monster.templateId,
           selections: noSelections,
         },
-      });
+      );
       setMonsterSelected(true);
       console.log("Monster selected:", monster.templateId);
     } else {
