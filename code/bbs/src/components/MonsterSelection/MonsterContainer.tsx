@@ -1,4 +1,5 @@
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
+import { COMMON_MOVE_POOL } from "../../../../simulator/data/common/common_move_pool";
 
 export const MonsterContainer = ({
   name,
@@ -28,10 +29,18 @@ export const MonsterContainer = ({
         <div className="monster-desc">{desc || "No description"}</div>
         <div className="monster-stats" id="attack">Attack bonus: {monster?.baseStats.attack}</div>
         <div className="monster-stats" id="AC">Armour: {monster?.baseStats.armour}</div>
-        
-        {monster?.abilityActionId && (
-          <div className="ability-desc">Ability: {monster.abilityActionId}</div>
-        )}
+
+        {monster?.abilityActionId && (() => {
+          const ability = COMMON_MOVE_POOL[monster.abilityActionId as keyof typeof COMMON_MOVE_POOL];
+          if (!ability) {
+            throw new Error(`Ability not found in COMMON_MOVE_POOL for id: ${monster.abilityActionId}`);
+          }
+          return (
+            <div className="ability-desc">
+              Ability: {ability.name}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

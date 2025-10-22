@@ -50,7 +50,6 @@ export interface MoveSuccessEvent extends BaseEvent {
   source: SideId;
   target: SideId;
   moveId: EntryID;
-  moveName?: string;
 }
 
 export interface MoveEvadedEvent extends BaseEvent {
@@ -64,7 +63,6 @@ export interface MoveFailedEvent extends BaseEvent {
   source: SideId;
   target: SideId;
   moveId: EntryID;
-  moveName: string;
   reason: unknown; // TODO
 }
 
