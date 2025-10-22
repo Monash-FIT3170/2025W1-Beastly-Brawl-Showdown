@@ -1653,8 +1653,10 @@ input[type="range"] {
 
 .health-ring-container {
   position: relative;
-  width: var(--ring-size, 200px);
-  height: var(--ring-size, 200px);
+  --ring-size: 200px;
+  --ring-stroke: 20px;
+  width: var(--ring-size);
+  height: var(--ring-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1664,13 +1666,16 @@ input[type="range"] {
   position: absolute;
   inset: 0;
   transform: rotate(-90deg); /* so health starts at top */
-  width: var(--ring-size, 200px);
-  height: var(--ring-size, 200px);
+  width: var(--ring-size);
+  height: var(--ring-size);
 }
 
 .health-ring circle {
   fill: none;
   stroke-width: var(--ring-stroke, 20px);
+  cx: calc(var(--ring-size) / 2);
+  cy: calc(var(--ring-size) / 2);
+  r: calc((var(--ring-size) / 2) - (var(--ring-stroke) / 2));
 }
 
 .ring-bg {
@@ -1678,7 +1683,12 @@ input[type="range"] {
 }
 
 .ring-fg {
-  transition: stroke-dashoffset 0.3s ease; /* smooth health change */
+  --radius: calc((var(--ring-size) / 2) - (var(--ring-stroke) / 2));
+  --circumference: calc(2 * 3.14159 * var(--radius));
+  
+  stroke-dasharray: var(--circumference);
+  stroke-dashoffset: calc(var(--circumference) * (1 - var(--health-percent, 1)));
+  transition: stroke-dashoffset 0.3s ease;
 }
 
 /* Health color variations based on percentage */
@@ -1691,8 +1701,8 @@ input[type="range"] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: calc(var(--ring-size, 200px) - var(--ring-stroke, 20px));
-  height: calc(var(--ring-size, 200px) - var(--ring-stroke, 20px));
+  width: calc(var(--ring-size) - var(--ring-stroke));
+  height: calc(var(--ring-size) - var(--ring-stroke));
   border-radius: 50%;
   object-fit: cover;
 }
@@ -2173,19 +2183,9 @@ input[type="range"] {
   }
 
   .health-ring-container {
-    --ring-size: 170px;
-    --ring-stroke: 17px;
+    --ring-size: 200px;
+    --ring-stroke: 20px;
   }
-
-  /* .monster-img {
-    width: 150px;
-    height: 150px;
-  }
-
-  .health-ring {
-    height: 170px;
-    width: 170px;
-  } */
 }
  
 
@@ -2198,16 +2198,6 @@ input[type="range"] {
     --ring-size: 170px;
     --ring-stroke: 17px;
   }
-
-  /* .monster-img {
-    width: 150px;
-    height: 150px;
-  }
-
-  .health-ring {
-    height: 170px;
-    width: 170px;
-  } */
 }
  
 .modal-box {
