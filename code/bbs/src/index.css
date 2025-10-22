@@ -2070,6 +2070,10 @@ input[type="range"] {
     height: 80px;
   }
 
+  .reroll-btn {
+    font-size: 3rem;
+  }
+
   /* Reduce monster image sizes */
   .battleMonsterImg {
     width: 8rem;
