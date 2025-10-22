@@ -180,7 +180,7 @@ async function main(config: ServerConfig) {
 
         socket.emit("requestRoomResponse", { roomId, joinCode });
         log_notice(
-          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${roomType}`
         );
       } catch {
         socket.emit("error", "Could not create room.");
@@ -497,7 +497,7 @@ async function main(config: ServerConfig) {
       if (player2 && player2.submittedMove && player1?.socketId)
         playerChannel.to(player1.socketId).emit("enemyMoveSubmitted")
 
-      log_event(`Player ${player.displayName} submitted move ${moveId} with targeting method ${targetMethod} from side ${sourceSide} and monster ${player.monster}`);
+      log_event(`Player ${player.displayName} submitted move ${moveId} with targeting method ${targetingMethod} from side ${sourceSide} and monster ${player.monster}`);
 
       // Handle different move types
 
