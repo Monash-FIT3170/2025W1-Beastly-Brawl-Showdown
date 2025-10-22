@@ -45,9 +45,14 @@ export default function ProjectorPage() {
   useEffect(() => {
     if (!serverUrl || socketRef.current) return;
 
-    const cleanServerUrl = serverUrl.replace(/^"|"$/g, "");
+    // const cleanServerUrl = serverUrl.replace(/^"|"$/g, "");
 
-    const wsUrl = cleanServerUrl.replace(/^http/, "ws") + "/host";
+    // Remove any :8080 if present
+    const cleanServerUrl = serverUrl.replace(/^"|"$/g, "").replace(/:8080/, "");
+
+    // Convert to WebSocket secure protocol (wss)
+    const wsUrl = cleanServerUrl.replace(/^http/, "wss") + "/host";
+
     socketRef.current = io(wsUrl, { transports: ["websocket", "polling"] });
 
 
