@@ -34,7 +34,7 @@ export function useBattleEvents({
                 case "moveSuccess": {
                     const e = ev as MoveSuccessEvent;
                     const isPlayer = e.source === myId;
-                    const moveName = e.moveId;
+                    const moveName = e.moveName ?? e.moveId;
                     const message = isPlayer
                         ? `You ${moveName} successfully!`
                         : `Enemy ${moveName}s successfully!`;
@@ -45,10 +45,10 @@ export function useBattleEvents({
                 case "moveFailed": {
                     const e = ev as MoveFailedEvent;
                     const isPlayer = e.source === myId;
+                    const moveName = e.moveId;
                     let message = isPlayer
-                        ? `Your ${e.moveId} failed!`
-                        : `Enemy ${e.moveId} failed!`;
-                    if (e.moveId === "defend") message += " No charges left!";
+                        ? `Your ${moveName} failed!`
+                        : `Enemy ${moveName} failed!`;
                     setCurrentMessage(message);
                     break;
                 }
