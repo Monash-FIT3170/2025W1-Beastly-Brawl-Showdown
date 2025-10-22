@@ -3,12 +3,12 @@ import { AccountId, PlayerNamespace } from "../shared/types";
 import { Battle, BattleOptions } from "../simulator/core/battle";
 import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
-import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
+import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 import { log_attention, log_event } from "./utils";
 import { MonsterId } from "../simulator/core/monster/monster_pool";
 import { TargetingData } from "../simulator/core/action/targeting";
 import { EntryID } from "../simulator/core/utils";
-import { ChooseMove, Roll } from "../simulator/core/notice/notice";
+import { ChooseMove, RerollOption, Roll } from "../simulator/core/notice/notice";
 import { TargetingMethod } from "../simulator/core/action/targeting";
 
 export enum MatchType {
@@ -20,7 +20,7 @@ export class Match {
     player1: Player;
     player2?: Player;
     winner?: Player;
-    spectators: AccountId[];
+    spectators: Player[];
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
@@ -104,6 +104,7 @@ export class Match {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
 
+        console.log(`[MATCH DEBUG] submitMove called for ${player.displayName} with moveId ${moveId}, targetMethod ${targetMethod}, targetSide ${targetSide}`);
         // Store move
         this.submittedMoves.set(player, { moveId, targetSide, targetMethod });
 
@@ -120,11 +121,13 @@ export class Match {
             targetingMethod: targetMethod,
             target: targetSide,
         };
-
+        console.log(`[MATCH DEBUG] Submitting move ${moveId} (${targetMethod}) for ${player.displayName}`);
+        console.log(`[MATCH DEBUG] chooseMoveNotice exists?`, !!chooseMoveNotice);
         chooseMoveNotice.callback(moveId, targetData);
+        console.log(`[MATCH DEBUG] Callback called for ${player.displayName}`);
     }
 
-    // Called by main when a player submits a move
+    // Called by main when a player submits roll notice
     submitRoll(player: Player): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit rolls to.`);
@@ -140,9 +143,36 @@ export class Match {
         rollNotice.callback();
     }
 
+    // Called by main when a player submits reroll notice
+    submitReroll(player: Player, option : boolean): void {
+        if (this.matchType === MatchType.BYE || !this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to submit rerolls to.`);
+        }
+
+        const sideIndex = this.getSideForPlayer(player);
+        const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
+        const rerollNotice = noticeMap.get("rerollOption") as RerollOption | undefined;
+
+        if (!rerollNotice) {
+            throw new Error(`Match ${this.matchID}: Player ${player.displayName} has no reroll notice.`);
+        }
+        rerollNotice.callback(option);
+    }
+
 
     getPlayerMove(player: Player) {
         return this.submittedMoves.get(player);
+    }
+
+    getMonsterAbility(player: Player): COMMON_MOVE_NAMES | null {
+        if (!this.battle) return null;
+
+        const sideId = this.getSideForPlayer(player);
+        const monster = this.battle.sides[sideId].monster;
+        if (!monster) return null;
+
+        const template = this.battle.monsterPool.monsters[monster.baseID as keyof typeof this.battle.monsterPool.monsters];
+        return (template?.abilityActionId ?? null) as COMMON_MOVE_NAMES | null;
     }
 
 
@@ -191,25 +221,45 @@ export class Match {
                     log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
                     playerChannel.to(this.player2.socketId).emit("newEvent", event);
                 }
+
+                // Broadcast to spectators
+                this.spectators.forEach(spectator => {
+                    log_event(`[EVENT] Sending event to spectator (${spectator.displayName})`);
+                    playerChannel.to(spectator.socketId).emit("newEvent", event);
+                })
             },
         });
 
+        
+
         playerChannel.to(this.player1.socketId).emit("startRound", {
-          player1Monster: this.player1?.selectedMonsterTemplateName,
-          player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
-          sideID: 0,
+            player1Monster: this.player1?.selectedMonsterTemplateName,
+            player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
+            sideID: 0,
         })
+
         if (this.player2) {
             playerChannel.to(this.player2?.socketId).emit("startRound", {
-            player1Monster: this.player1?.selectedMonsterTemplateName,
-            player2Monster: this.player2?.selectedMonsterTemplateName,
-            sideID: 1,
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 1,
             })
         };
 
+        // TODO: Emit socket for all spectators for each player
+        log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
+        this.spectators.forEach(spectator => {
+            playerChannel.to(spectator.socketId).emit("startRound", {
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 0,
+                spectator: true
+            });
+        });
+        
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
-        await this.battle.run(); 
+        await this.battle.run();
         log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
@@ -219,14 +269,15 @@ export class Match {
         const loser = winnerIndex === 0 ? this.player2 : this.player1;
 
         if (loser) {
-            if (loser.linkedAccountId) {
-                this.winner?.addSpectator(loser.linkedAccountId);
-            }
+            this.winner?.addSpectator(loser);
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
         if (this.winner && loser) {
             playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
             playerChannel.to(loser?.socketId).emit("sendToWaiting");
+            this.spectators.forEach(spectator => {
+                playerChannel.to(spectator.socketId).emit("sendToWaiting");
+            })
         }
     }
 

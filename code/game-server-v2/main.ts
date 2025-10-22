@@ -11,13 +11,14 @@ import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_poo
 import { TargetingMethod } from "../simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
 import { TournamentType } from "./tournament_manager";
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
 import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
 import { MonsterId } from "../simulator/core/monster/monster_pool";
 import { EntryID } from "../simulator/core/utils";
+import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 
 const MONGO_IP = "localhost";
 const MONGO_PORT = "27017";
@@ -140,7 +141,7 @@ async function main(config: ServerConfig) {
   type HostChannelAuth = {
     // hostName: string;
   };
-  hostChannel.use((socket, next) => {
+  hostChannel.use((socket: Socket, next: (err?: any) => void) => {
     log_event(`Host attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as HostChannelAuth;
     /// for now always accept the host name
@@ -153,7 +154,8 @@ async function main(config: ServerConfig) {
   });
 
   // TODO use a persistent ID rather than socket ID
-  hostChannel.on("connection", async (socket) => {
+
+  hostChannel.on("connection", async (socket: Socket) => {
     log_event(`Host connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
@@ -178,8 +180,9 @@ async function main(config: ServerConfig) {
 
         socket.emit("requestRoomResponse", { roomId, joinCode });
         log_notice(
-          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${roomType}`
-        );      } catch {
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+        );
+      } catch {
         socket.emit("error", "Could not create room.");
       }
     });
@@ -215,6 +218,28 @@ async function main(config: ServerConfig) {
 
       log_notice(`All players in room ${roomId} have been notified to start the game.`);
     });
+
+    // #region Kick Player
+    socket.on("kickPlayer", (msg: { roomId: number; playerName: string }) => {
+      const room = gameServer.rooms.get(msg.roomId);
+      if (!room) return;
+
+      const player = room.getPlayer(msg.playerName);
+      if (!player) return;
+
+      playerChannel.to(player.socketId).emit("playerKicked");
+
+      // Disconnect the player from Socket.IO
+      setTimeout(() => {
+        room.removePlayer(msg.playerName);
+        playerChannel.sockets.get(player.socketId)?.disconnect();
+      }, 50);
+
+      // Update all hosts about the new player list
+      const playerNameList = room.players.map((p) => p.displayName);
+      hostChannel.to(room.hostSocketId).emit("refreshPlayerList", playerNameList);
+    });
+    // #endregion
   });
 
   /// Pre-connection auth check
@@ -261,7 +286,7 @@ async function main(config: ServerConfig) {
     res.send(checkResult);
   });
 
-  playerChannel.use((socket, next) => {
+  playerChannel.use((socket: Socket, next: (err?: any) => void) => {
     log_event(`Player attempted to join with ${JSON.stringify(socket.handshake.auth)}`);
     const auth = socket.handshake.auth as PlayerChannelAuth;
 
@@ -284,7 +309,7 @@ async function main(config: ServerConfig) {
     }
 
     try {
-      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
+      gameServer.joinRoom(socket.id, roomId, auth.displayName);
 
       // Attach the actual player instance to the socket
       const room = gameServer.rooms.get(roomId);
@@ -315,11 +340,25 @@ async function main(config: ServerConfig) {
   });
 
   // #region Player Channel
-  playerChannel.on("connection", async (socket) => {
+  playerChannel.on("connection", async (socket: Socket) => {
     log_event(`Player connected: ${socket.id}`);
 
     socket.on("disconnect", () => {
       log_event("Player disconnected.");
+
+      // Get the player attached to this socket
+      const player = socket.data.player as Player;
+      if (!player) return;
+
+      const room = gameServer.rooms.get(player.roomId);
+      if (!room) return;
+
+      // Remove player from room (if not already removed)
+      room.removePlayer(player.displayName);
+
+      // Notify the host to refresh player list
+      const playerNameList = room.players.map((p) => p.displayName);
+      hostChannel.to(room.hostSocketId).emit("refreshPlayerList", playerNameList);
     });
 
     // #region Select Monster
@@ -391,21 +430,21 @@ async function main(config: ServerConfig) {
             return; //TODO HANDLE BYE
           }
 
-          // P1: send a copy/start
-          room.playerChannel.to(match.player1.socketId).emit("startRound", {
-            player1Monster: match.player1?.selectedMonsterTemplateName,
-            player2Monster: match.player2?.selectedMonsterTemplateName, // not option if bye
-            sideID: 0,
-          });
+          // // P1: send a copy/start
+          // room.playerChannel.to(match.player1.socketId).emit("startRound", {
+          //   player1Monster: match.player1?.selectedMonsterTemplateName,
+          //   player2Monster: match.player2?.selectedMonsterTemplateName, // not option if bye
+          //   sideID: 0,
+          // });
 
-          //P2: send a copy/start (invert sides?)
-          if (match.player2) {
-            room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
-              player1Monster: match.player1?.selectedMonsterTemplateName,
-              player2Monster: match.player2?.selectedMonsterTemplateName,
-              sideID: 1,
-            });
-          }
+          // //P2: send a copy/start (invert sides?)
+          // if (match.player2) {
+          //   room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
+          //     player1Monster: match.player1?.selectedMonsterTemplateName,
+          //     player2Monster: match.player2?.selectedMonsterTemplateName,
+          //     sideID: 1,
+          //   });
+          // }
         });
       }
     });
@@ -422,6 +461,20 @@ async function main(config: ServerConfig) {
     }
 
     socket.on("requestRoll", handleRollNotice);
+
+    function handleRerollNotice(option: boolean) {
+      log_notice("Reroll notice is being handled");
+      const player = socket.data.player as Player;
+      const room = gameServer.rooms.get(player.roomId!);
+      if (!room) return;
+      const match = room.tournamentManager.matches.find((m) => m.player1 === player || m.player2 === player);
+      if (!match) return;
+
+      match.submitReroll(player, option);
+    }
+
+    socket.on("requestReroll", handleRerollNotice);
+
 
     // #region Submit Move
     socket.on("submitMove", (data) => {
@@ -444,6 +497,10 @@ async function main(config: ServerConfig) {
       if (player2 && player2.submittedMove && player1?.socketId)
         playerChannel.to(player1.socketId).emit("enemyMoveSubmitted")
 
+      log_event(`Player ${player.displayName} submitted move ${moveId} with targeting method ${targetMethod} from side ${sourceSide} and monster ${player.monster}`);
+
+      // Handle different move types
+
       switch (moveId) {
         case "defend":
           match.submitMove(player, moveId, targetingMethod as TargetingMethod, sourceSide as SideId);
@@ -452,16 +509,39 @@ async function main(config: ServerConfig) {
           const targetSide = sourceSide === 1 ? 0 : 1;
           match.submitMove(player, moveId, targetingMethod as TargetingMethod, targetSide as SideId);
           break;
+        default: { // TODO: Alternate way to identify abilities other than move ID
+          const abilityMoveId = match.getMonsterAbility(player);
+          if (!abilityMoveId) return;
+
+          const moveData = COMMON_MOVE_POOL[abilityMoveId];
+          // Check if the move ID exists in the move pool
+          if (!moveData) {
+            throw new Error(`Unknown move ID: ${abilityMoveId}. Check that this ability is registered in COMMON_MOVE_POOL.`);
+          }
+
+          const opponentSide = (match.getSideForPlayer(player) === 0 ? 1 : 0) as SideId;
+
+          let targetSide: SideId;
+          switch (moveData.targetingMethod) {
+            case "self":
+              targetSide = match.getSideForPlayer(player) as SideId;
+              break;
+            case "single-enemy":
+              targetSide = opponentSide;
+              break;
+            default:
+              throw new Error(`Unknown targeting method: ${moveData.targetingMethod} for move ${abilityMoveId}`);
+          }
+          log_attention(`Ability ${abilityMoveId} being submitted by ${player} targeting ${targetSide}`);
+          match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId);
+          break;
+        }
       }
 
       const allSubmitted = player1.submittedMove && player2?.submittedMove;
 
       if (allSubmitted) {
         [player1.submittedMove, player2.submittedMove] = [false, false];
-
-        // Prepare move data for client
-        const player1Move = match.getPlayerMove(player1); // or store last submitted move somewhere
-        const player2Move = match.getPlayerMove(player2);
 
         playerChannel.to(player1.socketId).emit("unlockButton");
         playerChannel.to(player2.socketId).emit("unlockButton");

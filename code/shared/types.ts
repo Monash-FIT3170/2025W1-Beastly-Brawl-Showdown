@@ -24,7 +24,8 @@ export type BasicServerToClientEvents = {
 export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   submitMonster: (data: { monsterTemplate: MonsterId; selections: number }) => void;
   submitMove: (data: {moveId: EntryID; targetingMethod: TargetingMethod}) => void;
-  requestRoll: () => void;
+  requestRoll: (data: any) => void;
+  requestReroll: (data: any) => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
@@ -37,6 +38,8 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   startRound: (data: {player1Monster: string | undefined; player2Monster: string | undefined; sideID: number}) => void;
   sendToWaiting: () => void;
   tournamentFinished: (winner: string) => void;
+  playerKicked: () => void;
+  kickPlayer: () => void;
 };
 
 export type PlayerSocketData = {};
@@ -44,6 +47,7 @@ export type PlayerSocketData = {};
 export type HostClientToServerEvents = BasicClientToServerEvents & {
   requestRoom: (roomType: "standard" | "random") => void;
   requestStartGame: (roomId: number | undefined) => void;
+  kickPlayer: (data: {roomId: number, playerName: string}) => void;
 };
 
 export type HostServerToClientEvents = BasicServerToClientEvents & {
