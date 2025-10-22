@@ -5,7 +5,7 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
-import { type ChooseMove, type Roll } from "../../../../simulator/core/notice/notice";
+import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 
 interface BattleScreenProps {
@@ -49,28 +49,27 @@ type MonsterState = {
 };
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({
-   matchData,
-   events,
-   setEvents,
-   chooseMove,
-   setChooseMove,
-   setHasReceivedChooseMove,
-   rollNotice,
-   showRollMessage,
-   buttonDisabled,
-   showDiceAnimation,
-   diceRollResult,
-   setShowDiceAnimation ,
-   onSubmitMove,
-   onRoll,
-   setTurnFinishedPlaying,
-   showEnemySubmittedMessage,
-   setShowSubmittedMoveMessage,
-   showSubmittedMoveMessage,
-   showMessage,
-   battleInstanceKey,
-   isSpectator
-  }) => {
+  matchData,
+  events,
+  setEvents,
+  chooseMove,
+  setChooseMove,
+  setHasReceivedChooseMove,
+  // rollNotice,
+  // showRollMessage,
+  buttonDisabled,
+  onSubmitMove,
+  // onRoll,
+  setTurnFinishedPlaying,
+  showMessage,
+  onReroll,
+  rerollMode,
+  parentDiceRollResult,
+  isWaiting,
+  setIsWaiting,
+  battleInstanceKey,
+  isSpectator
+}) => {
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
   const [turnIndex, setTurnIndex] = useState(0);
@@ -134,13 +133,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) => setTurnIndex(next)}
-          myid={matchData.myid}
-          showEnemySubmittedMessage={showEnemySubmittedMessage}
-          showSubmittedMoveMessage={showSubmittedMoveMessage}
+          onAdvanceTurn={(next: React.SetStateAction<number>) =>
+            setTurnIndex(next)
+          }
+          myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
-          showRollMessage={showRollMessage}
+          // showRollMessage={showRollMessage}
+          rerollMode={rerollMode}
+          parentDiceRollResult={parentDiceRollResult}
+          isWaiting={isWaiting}
         />
       </div>
     </>
