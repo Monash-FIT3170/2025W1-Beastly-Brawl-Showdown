@@ -1,13 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router";
 
-//literally just a div, like nothing to see here
-export const BattleTop: React.FC = () => {
-  const navigate = useNavigate();
+interface BattleTopProps {
+  onSurrender: () => void; // new prop
+}
 
+export const BattleTop: React.FC<BattleTopProps> = ({ onSurrender }) => {
   return (
     <button
-      onClick={() => navigate("/main")}
+      onClick={onSurrender}
       className="glb-btn"
       id="battleScreenTop-btn"
     >

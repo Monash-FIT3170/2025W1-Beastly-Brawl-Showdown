@@ -471,6 +471,23 @@ async function main(config: ServerConfig) {
 
     socket.on("requestReroll", handleRerollNotice);
 
+    socket.on("playerSurrender", () => {
+      const player = socket.data.player as Player;
+      if (!player) return;
+
+      const room = gameServer.rooms.get(player.roomId);
+      if (!room) return;
+
+      // Find the match this player is in
+      const match = room.tournamentManager.matches.find(
+        m => m.player1 === player || m.player2 === player
+      );
+      if (!match) return;
+
+      match.surrender(player, room.playerChannel);
+    });
+
+
 
     // #region Submit Move
     socket.on("submitMove", (msg: { data: any }) => {
