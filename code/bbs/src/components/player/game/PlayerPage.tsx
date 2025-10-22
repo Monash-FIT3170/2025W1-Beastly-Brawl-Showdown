@@ -264,6 +264,49 @@ const PlayerContent = () => {
 
   //#region battleScreen props
   //notice handler
+
+  //#region initializations
+  // Initialize monsters when matchData changes
+  useEffect(() => {
+    if (!matchData) return;
+
+    // Build snapshot JSON
+    const snapshot = {
+      name: "snapshot", // Ensure 'name' property is present for BaseEvent compatibility
+      type: "snapshot",
+      sides: [
+        {
+          id: 0,
+          monster: {
+            baseID: matchData.player1Monster.template.templateId,
+            health:
+              matchData.player1Monster.currentHp ??
+              matchData.player1Monster.template.baseStats.health,
+            attackCharges: matchData.player1Monster.template.maxAttackCharges,
+            components: [],
+          },
+          pendingActions: null,
+        },
+        {
+          id: 1,
+          monster: {
+            baseID: matchData.player2Monster.template.templateId,
+            health:
+              matchData.player2Monster.currentHp ??
+              matchData.player2Monster.template.baseStats.health,
+            attackCharges: matchData.player2Monster.template.maxAttackCharges,
+            components: [],
+          },
+          pendingActions: null,
+        },
+      ],
+      index: 0,
+    };
+
+    // put snapshot into events state as the first item
+    setEvents([snapshot]);
+  }, [matchData]);
+
   useEffect(() => {
     if (!socket) return;
     const handleNewNotice = (notice: Notice) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BattleTop } from "./BattleTop";
 import { BattleBottom } from "./BattleBottom";
 import { type MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
@@ -7,6 +7,15 @@ import { type TargetingMethod } from "../../../../simulator/core/action/targetin
 import BattleScene from "./BattleScene";
 import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
+import { parseTurns } from "./Components/turns_array_maker";
+import { clamp } from "./Components/utils/clamp";
+
+
+type MonsterState = {
+  template: MonsterTemplate;
+  currentHp: number;
+  playerId: string;
+};
 
 interface BattleScreenProps {
   matchData: {
@@ -42,11 +51,7 @@ interface BattleScreenProps {
   isSpectator?: boolean;
 }
 
-type MonsterState = {
-  template: MonsterTemplate;
-  currentHp: number;
-  playerId: string;
-};
+
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   matchData,
@@ -70,13 +75,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   battleInstanceKey,
   isSpectator
 }) => {
-  const [myMonster, setMyMonster] = useState<MonsterState>();
-  const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
   const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [myMonster, setMyMonster] = useState<MonsterState>();
+  const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
 
-  //#region initializations
-  // Initialize monsters when matchData changes
   useEffect(() => {
     if (!matchData) return;
     console.log("Initializing monsters with matchData:", { matchData });
@@ -97,6 +100,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         myMonsterData.currentHp ?? myMonsterData.template.baseStats.health,
       playerId: matchData.myId.toString(),
     });
+
     setEnemyMonster({
       template: enemyMonsterData.template,
       currentHp:
@@ -105,6 +109,34 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       playerId: matchData.myId.toString(),
     });
   }, [matchData]);
+    
+
+  // === Turn parsing and state ===
+  const turns = useMemo(() => parseTurns(events), [events]);
+
+  useEffect(() => {
+    // Auto-advance to the latest turn when new turns are available
+    if (turns.length > 0) {
+      setTurnIndex(turns.length - 1);
+    }
+  }, [turns.length]);
+
+  const currentTurn = turns[turnIndex];
+  const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
+  console.log("CURRENT SNAPSHOT IS")
+  console.log(currentSnapshot)
+
+  useEffect(() => {
+    console.log("🌀 events updated. Length:", events.length);
+  }, [events]);
+
+  const currentAttackCharges = currentSnapshot ? currentSnapshot.sides[matchData.myId].monster.attackCharges : null;
+
+  useEffect(() => {
+    console.log("⚔️ currentAttackCharges", currentAttackCharges);
+  }, [currentAttackCharges]);
+
+
 
   // Whenever there is new matchdata, reset the turn index
   useEffect(() => {
@@ -129,6 +161,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       <div className="canvas-body" id="battle-screen-body">
         <BattleScene
           battleInstanceKey={battleInstanceKey}
+          turns = {turns}
+          currentSnapshot = {currentSnapshot}
           events={events}
           turnIndex={turnIndex}
           isPlaying={isPlaying}
@@ -158,8 +192,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
         />
         <BattleScene
-          battleInstanceKey={battleInstanceKey}
           events={events}
+          battleInstanceKey={battleInstanceKey}
+          turns = {turns}
+          currentSnapshot = {currentSnapshot}
           turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
@@ -174,6 +210,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           isWaiting={isWaiting}
         />
         <BattleBottom
+          currentAttackCharges = {currentAttackCharges}
           onAction={onAction}
           disabled={buttonDisabled}
           chooseMove={chooseMove}
