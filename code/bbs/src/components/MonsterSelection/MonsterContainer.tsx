@@ -19,12 +19,6 @@ export const MonsterContainer = ({
     (m) => m.name === name
   );
 
-  // Look up the monster’s ability move (if any)
-  const abilityMove =
-    monster?.abilityActionId
-      ? COMMON_MOVE_POOL[monster.abilityActionId as keyof typeof COMMON_MOVE_POOL]
-      : null;
-
   return (
     <div className="monster-selection-card" id={name} onClick={onClick}>
       <div className="monster-avatar">
@@ -35,10 +29,18 @@ export const MonsterContainer = ({
         <div className="monster-desc">{desc || "No description"}</div>
         <div className="monster-stats" id="attack">Attack bonus: {monster?.baseStats.attack}</div>
         <div className="monster-stats" id="AC">Armour: {monster?.baseStats.armour}</div>
-        
-        {monster?.abilityActionId && (
-          <div className="ability-desc">Ability: {abilityMove?.name}</div>
-        )}
+
+        {monster?.abilityActionId && (() => {
+          const ability = COMMON_MOVE_POOL[monster.abilityActionId as keyof typeof COMMON_MOVE_POOL];
+          if (!ability) {
+            throw new Error(`Ability not found in COMMON_MOVE_POOL for id: ${monster.abilityActionId}`);
+          }
+          return (
+            <div className="ability-desc">
+              Ability: {ability.name}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
