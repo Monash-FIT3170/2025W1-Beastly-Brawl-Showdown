@@ -212,7 +212,6 @@ export class Battle {
     if (this.waitForBattleOver) {
       // Wait for players to finish the last turn animations
       await this.waitForBattleOver();
-      await new Promise((resolve) => setTimeout(resolve, 9000));
     }
 
     const battleOverEvent: BattleOverEvent = {

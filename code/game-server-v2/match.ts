@@ -345,6 +345,8 @@ export class Match {
     await this.battle.run();
     log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
+    await this.waitForAnimationsAcks(playerChannel);
+
     const survivingSide = this.battle.sides.find(
       (side) => side.monster.health > 0
     );
@@ -365,5 +367,33 @@ export class Match {
       playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
       playerChannel.to(loser?.socketId).emit("sendToWaiting");
     }
+  }
+
+  private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
+    return new Promise((resolve) => {
+      const expected = this.player2 ? 2 : 1;
+      const acks = new Set<string>();
+
+      const onAck = (payload: { socketId: string }) => {
+        const id = payload?.socketId;
+        if (!id) return;
+        // only accept acks from the two players in THIS match
+        if (id === this.player1.socketId || id === this.player2?.socketId) {
+          acks.add(id);
+          if (acks.size >= expected) {
+            playerChannel.off("playerAnimationsDone", onAck);
+            resolve();
+          }
+        }
+      };
+
+      playerChannel.on("playerAnimationsDone", onAck);
+
+      // safety: fail-open after N seconds so the tournament can still progress
+      setTimeout(() => {
+        playerChannel.off("playerAnimationsDone", onAck);
+        resolve();
+      }, 10000);
+    });
   }
 }
