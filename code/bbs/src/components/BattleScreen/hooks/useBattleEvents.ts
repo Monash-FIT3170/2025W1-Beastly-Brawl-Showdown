@@ -34,7 +34,7 @@ export function useBattleEvents({
                 case "moveSuccess": {
                     const e = ev as MoveSuccessEvent;
                     const isPlayer = e.source === myId;
-                    const moveName = e.moveCat ?? e.moveId;
+                    const moveName = e.moveName ?? e.moveId;
                     const message = isPlayer
                         ? `You ${moveName} successfully!`
                         : `Enemy ${moveName}s successfully!`;

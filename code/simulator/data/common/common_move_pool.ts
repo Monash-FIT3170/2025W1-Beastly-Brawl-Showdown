@@ -53,7 +53,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
           source,
           target: source,
           moveId: this.moveId,
-          moveCat: this.moveCat,
+          moveName: this.name,
           reason: "No attack charges remaining",
         };
         battle.eventHistory.addEvent(failedEvent);
@@ -125,7 +125,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
           source: source,
           target: source,
           moveId: this.moveId,
-          moveCat: this.moveCat,
+          moveName: this.name,
           reason: "dodge has no charges left",
         };
         battle.eventHistory.addEvent(failedEvent);
@@ -170,7 +170,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
           source: source,
           target: source,
           moveId: this.moveId,
-          moveCat: this.moveCat,
+          moveName: this.name,
           reason: "stun has no charges left",
         };
         battle.eventHistory.addEvent(failedEvent);
@@ -214,7 +214,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
           source: source,
           target: source,
           moveId: this.moveId,
-          moveCat: this.moveCat,
+          moveName: this.name,
           reason: "double-attack has no charges left",
         };
         battle.eventHistory.addEvent(failedEvent);
@@ -252,7 +252,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
           source: source,
           target: source,
           moveId: this.moveId,
-          moveCat: this.moveCat,
+          moveName: this.name,
           reason: "attack-bonus-next3 has no charges left",
         };
         battle.eventHistory.addEvent(failedEvent);
@@ -287,7 +287,7 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
           source: source,
           target: source,
           moveId: this.moveId,
-          moveCat: this.moveCat,
+          moveName: this.name,
           reason: "battle-cry has no charges left",
         };
         battle.eventHistory.addEvent(failedEvent);
