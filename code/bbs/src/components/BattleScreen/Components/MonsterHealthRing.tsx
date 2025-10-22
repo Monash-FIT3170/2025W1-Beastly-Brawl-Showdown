@@ -40,8 +40,8 @@ const MonsterHealthRing: React.FC<Props> = ({
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const size = 200; // circle diameter
-  const stroke = 20; // thickness of ring (approximate 8-10% of size)
+  const size = 170; // circle diameter
+  const stroke = 17; // thickness of ring (approximate 8-10% of size)
   const radius = size / 2 - stroke / 2;
   const circumference = 2 * Math.PI * radius;
 
@@ -58,6 +58,12 @@ const MonsterHealthRing: React.FC<Props> = ({
   return (
     <div
       className="health-ring-container"
+      style={
+        {
+          "--ring-size": `${size}px`,
+          "--ring-stroke": `${stroke}px`,
+        } as React.CSSProperties
+      }
       //desktop uses hover
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}

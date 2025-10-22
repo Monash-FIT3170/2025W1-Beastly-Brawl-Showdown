@@ -1653,8 +1653,8 @@ input[type="range"] {
 
 .health-ring-container {
   position: relative;
-  width: 200px; /* same as size */
-  height: 200px; /* same as size */
+  width: var(--ring-size, 200px);
+  height: var(--ring-size, 200px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1664,11 +1664,13 @@ input[type="range"] {
   position: absolute;
   inset: 0;
   transform: rotate(-90deg); /* so health starts at top */
+  width: var(--ring-size, 200px);
+  height: var(--ring-size, 200px);
 }
 
 .health-ring circle {
   fill: none;
-  stroke-width: 20px;
+  stroke-width: var(--ring-stroke, 20px);
 }
 
 .ring-bg {
@@ -1689,8 +1691,8 @@ input[type="range"] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 180px; /* size - stroke */
-  height: 180px; /* size - stroke */
+  width: calc(var(--ring-size, 200px) - var(--ring-stroke, 20px));
+  height: calc(var(--ring-size, 200px) - var(--ring-stroke, 20px));
   border-radius: 50%;
   object-fit: cover;
 }
@@ -2171,11 +2173,11 @@ input[type="range"] {
   }
 
   .health-ring-container {
-    width: 170px;
-    height: 170px;
+    --ring-size: 170px;
+    --ring-stroke: 17px;
   }
 
-  .monster-img {
+  /* .monster-img {
     width: 150px;
     height: 150px;
   }
@@ -2183,7 +2185,7 @@ input[type="range"] {
   .health-ring {
     height: 170px;
     width: 170px;
-  }
+  } */
 }
  
 
@@ -2193,11 +2195,11 @@ input[type="range"] {
   }
 
   .health-ring-container {
-    width: 170px;
-    height: 170px;
+    --ring-size: 170px;
+    --ring-stroke: 17px;
   }
 
-  .monster-img {
+  /* .monster-img {
     width: 150px;
     height: 150px;
   }
@@ -2205,7 +2207,7 @@ input[type="range"] {
   .health-ring {
     height: 170px;
     width: 170px;
-  }
+  } */
 }
  
 .modal-box {
