@@ -25,8 +25,6 @@ interface BattleSceneProps {
   rerollMode: boolean;
   parentDiceRollResult: number | null;
   isWaiting: boolean;
-  isSpectator:boolean | undefined;
-  setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 console.log("BattleScene loaded");
@@ -44,8 +42,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   rerollMode,
   parentDiceRollResult,
   isWaiting,
-  isSpectator,
-  setIsWaiting,
 }) => {
 
   // === Animation logic handled by hook ===
@@ -137,13 +133,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     setRunTurnNow(false);
     prevEventsRef.current = events;
   }, [battleInstanceKey]);
-
-    //YOU ARE NEVER WAITING AS SPECTATOR
-    useEffect(() => {
-      if (isSpectator){
-        setIsWaiting(false)
-      }
-  }, [isWaiting]);
 
   // Determine if turn should play
   useEffect(() => {
