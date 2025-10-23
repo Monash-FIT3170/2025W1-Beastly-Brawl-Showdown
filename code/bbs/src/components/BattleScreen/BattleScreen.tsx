@@ -130,8 +130,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     console.log("⚔️ currentAttackCharges", currentAttackCharges);
   }, [currentAttackCharges]);
 
-
-
   // Whenever there is new matchdata, reset the turn index
   useEffect(() => {
     if (!events || events.length === 0) return;
