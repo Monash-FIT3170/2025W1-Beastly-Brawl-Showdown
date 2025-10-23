@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { MonsterSelectionScreen } from "../../MonsterSelection/MonsterSelectionScreen";
 import { COMMON_MONSTER_POOL } from "../../../../../simulator/data/common/common_monster_pool";
@@ -7,13 +6,10 @@ import type { MonsterTemplate } from "../../../../../simulator/core/monster/mons
 import { BattleScreen } from "../../BattleScreen/BattleScreen";
 import WinnerScreen from "../../host/projector/WinnerScreen";
 import type { ChooseMove, Notice, Roll, RerollOption } from "../../../../../simulator/core/notice/notice";
-import type { ChooseMove, Notice, Roll, RerollOption } from "../../../../../simulator/core/notice/notice";
 import type { EntryID } from "../../../../../simulator/core/utils";
 import type { TargetingMethod } from "../../../../../simulator/core/action/targeting";
 import type { PlayerClientToServerEvents, PlayerServerToClientEvents } from "../../../../../shared/types";
-import type { PlayerClientToServerEvents, PlayerServerToClientEvents } from "../../../../../shared/types";
 import WaitingScreen from "../../transitionScreens/WaitingScreen";
-import { HomePage } from "../../HomePage";
 
 type PlayerSocket = Socket<
   PlayerServerToClientEvents,
@@ -89,8 +85,6 @@ const PlayerContent = () => {
   const [matchData, setMatchData] = useState<{
     player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
-    player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
-    player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
   } | null>(null);
 
@@ -112,9 +106,6 @@ const PlayerContent = () => {
   const [parentDiceRollResult, setParentDiceRollResult] = useState<number | null>(null);
   const [rerollNotice, setRerollNotice] = useState<RerollOption | null>(null);
   const [rerollMode, setRerollMode] = useState<boolean>(false);
-  const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
-  const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
-  const [isWaiting, setIsWaiting] = useState(false);
   const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
   const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
   const [isWaiting, setIsWaiting] = useState(false);
@@ -182,19 +173,7 @@ const PlayerContent = () => {
             template: player1Monster,
             currentHp: player1Monster.baseStats.health,
           },
-        player1: {
-          name: data.player1name,
-          monster: {
-            template: player1Monster,
-            currentHp: player1Monster.baseStats.health,
-          },
         },
-        player2: {
-          name: data.player2name,
-          monster: {
-            template: player2Monster,
-            currentHp: player2Monster.baseStats.health,
-          },
         player2: {
           name: data.player2name,
           monster: {
@@ -241,7 +220,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);  
+      setWinner(data);
     });
     //#endregion
 
@@ -266,8 +245,6 @@ const PlayerContent = () => {
 
     const displayName = sessionStorage.getItem("displayName");
 
-    const displayName = sessionStorage.getItem("displayName");
-
     if (socket) {
       // Send the templateId instead of the name
       console.log("No of selections: ", noSelections);
@@ -275,7 +252,6 @@ const PlayerContent = () => {
         data: {
           monsterTemplate: monster.templateId,
           selections: noSelections,
-          displayName: displayName,
           displayName: displayName,
         },
       });
@@ -302,11 +278,11 @@ const PlayerContent = () => {
         {
           id: 0,
           monster: {
-            baseID: matchData.player1Monster.template.templateId,
+            baseID: matchData.player1.monster.template.templateId,
             health:
-              matchData.player1Monster.currentHp ??
-              matchData.player1Monster.template.baseStats.health,
-            attackCharges: matchData.player1Monster.template.maxAttackCharges,
+              matchData.player1.monster.currentHp ??
+              matchData.player1.monster.template.baseStats.health,
+            attackCharges: matchData.player1.monster.template.maxAttackCharges,
             components: [],
           },
           pendingActions: null,
@@ -314,11 +290,11 @@ const PlayerContent = () => {
         {
           id: 1,
           monster: {
-            baseID: matchData.player2Monster.template.templateId,
+            baseID: matchData.player2.monster.template.templateId,
             health:
-              matchData.player2Monster.currentHp ??
-              matchData.player2Monster.template.baseStats.health,
-            attackCharges: matchData.player2Monster.template.maxAttackCharges,
+              matchData.player2.monster.currentHp ??
+              matchData.player2.monster.template.baseStats.health,
+            attackCharges: matchData.player2.monster.template.maxAttackCharges,
             components: [],
           },
           pendingActions: null,
@@ -506,31 +482,26 @@ const PlayerContent = () => {
   // if (!allReady || waiting) return <WaitingScreen />;
   if (!allReady || waiting) return <WaitingScreen />;
   if (winner) return <WinnerScreen winnerName={winner} />;
-  
+
   console.log("Rendering BattleScreen with matchData:", matchData);
 
-  return <BattleScreen 
-    matchData={matchData!} 
+  return <BattleScreen
+    matchData={matchData!}
     events={events}
     setEvents={setEvents}
     chooseMove={chooseMove}
     setChooseMove={setChooseMove}
-    setHasReceivedChooseMove = {setHasReceivedChooseMove}
-    rollNotice={rollNotice}
-    showRollMessage={showRollMessage}
+    setHasReceivedChooseMove={setHasReceivedChooseMove}
     buttonDisabled={!isButtonEnabled}
-    showDiceAnimation={showDiceAnimation}
-    diceRollResult={diceRollResult}
-    setShowDiceAnimation={setShowDiceAnimation}
     onSubmitMove={handleSubmitMove}
-    onRoll={rollNow}
     setTurnFinishedPlaying={setTurnFinishedPlaying}
-    showEnemySubmittedMessage={showEnemySubmittedMessage}
-    showSubmittedMoveMessage={showSubmittedMoveMessage}
-    setShowSubmittedMoveMessage={setshowSubmittedMoveMessage}
     showMessage={showMessage}
+    onReroll={rerollNow}
+    rerollMode={rerollMode}
+    parentDiceRollResult={parentDiceRollResult}
+    isWaiting={isWaiting}
+    setIsWaiting={setIsWaiting}
     battleInstanceKey={battleInstanceKey}
-    isSpectator={isSpectator}
   />;
 };
 //#endregion

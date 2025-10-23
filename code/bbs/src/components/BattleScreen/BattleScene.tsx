@@ -15,7 +15,6 @@ interface BattleSceneProps {
   battleInstanceKey: number;
   events: BaseEvent[];
   turns: Turn[]
-  // I don't think this should be null or undefined but whatever
   currentSnapshot : SnapshotEvent | null | undefined
   turnIndex: number;
   isPlaying: boolean;
@@ -38,6 +37,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   isPlaying,
   autoAdvance,
   onAdvanceTurn,
+  turnIndex,
   myId,
   showMessage,
   setTurnFinishedPlaying,

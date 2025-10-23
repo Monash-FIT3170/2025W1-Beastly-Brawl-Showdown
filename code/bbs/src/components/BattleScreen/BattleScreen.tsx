@@ -8,8 +8,6 @@ import BattleScene from "./BattleScene";
 import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
-import { clamp } from "./Components/utils/clamp";
-
 
 type MonsterState = {
   template: MonsterTemplate;
