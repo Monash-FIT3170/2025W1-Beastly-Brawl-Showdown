@@ -27,6 +27,8 @@ export class Match {
 
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
+    private onMatchComplete?: () => void;
+
     /**
      * Constructor.
      * 
@@ -34,12 +36,25 @@ export class Match {
      * @param matchID Unique integer created in tournament_manager
      * @param player2 Optional second player in the match (the match is a bye if left empty)
      */
-    constructor(player1: Player, player2: Player | undefined, matchID: number) {
+    constructor(player1: Player, player2: Player | undefined, matchID: number, onMatchComplete?: () => void) {
         this.player1 = player1;
         this.player2 = player2;
         this.spectators = player1.spectators.concat(player2?.spectators ?? []);
         this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
         this.matchID = matchID;
+        this.onMatchComplete = onMatchComplete;
+    }
+
+    // Winner resolution to notify tournament manager
+    private resolveMatch(winner: Player, loser?: Player) {
+        this.winner = winner;
+
+        if (loser) {
+            winner.addSpectator(loser);
+            loser.followPlayer = winner;
+        }
+
+        this.onMatchComplete?.();
     }
 
     createBattle(): void {
@@ -268,21 +283,14 @@ export class Match {
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
 
-        this.winner = winnerIndex === 0 ? this.player1 : this.player2;
+        const winner = winnerIndex === 0 ? this.player1 : this.player2;
         const loser = winnerIndex === 0 ? this.player2 : this.player1;
+        this.resolveMatch(winner!, loser);
 
-        if (loser) {
-            this.winner?.addSpectator(loser);
-            loser.followPlayer = this.winner;
-            log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
-        }
-        if (this.winner && loser) {
-            playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
-            playerChannel.to(loser?.socketId).emit("sendToWaiting");
-            this.spectators.forEach(spectator => {
-                playerChannel.to(spectator.socketId).emit("sendToWaiting");
-            })
-        }
+        // Notify clients
+        playerChannel.to(winner!.socketId).emit("sendToWaiting");
+        playerChannel.to(loser!.socketId).emit("sendToWaiting");
+        this.spectators.forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
     }
 
     /**
@@ -297,10 +305,7 @@ export class Match {
         // Determine winner
         const winner = surrenderingPlayer === this.player1 ? this.player2! : this.player1;
         const loser = surrenderingPlayer;
-        this.winner = winner;
-
-        winner.addSpectator(loser);
-        loser.followPlayer = winner;
+        this.resolveMatch(winner, loser);
 
         console.log(`[MATCH] Winner is ${winner.displayName} for MatchID: ${this.matchID}`);
 

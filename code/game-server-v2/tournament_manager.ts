@@ -41,10 +41,12 @@ export class TournamentManager {
     this.matches = [];
     for (let i = 0; i < playerList.length; i += 2) {
       const matchID = i / 2 + 1;
-      const player2 = playerList[i + 1] ?? undefined; // keep optional
-      this.matches.push(new Match(playerList[i], player2, matchID));
+      const player2 = playerList[i + 1] ?? undefined;
+
+      // Pass checkRoundCompletion as callback
+      this.matches.push(new Match(playerList[i], player2, matchID, () => this.checkRoundCompletion()));
     }
-    console.log(`Created ${this.matches.length} matchs for this round.`);
+    console.log(`Created ${this.matches.length} matches for this round.`);
   }
 
   public async waitForMonsterSelections(players: Player[]) {
@@ -73,17 +75,18 @@ export class TournamentManager {
     if (!allCompleted) return;
 
     this.winners = this.matches.map(m => m.winner!).filter(Boolean);
+
     if (this.winners.length === 1) {
       console.log(`Tournament Winner: ${this.winners[0].displayName}`);
       // Optionally notify host:
       this.playerChannel.emit("tournamentFinished", this.winners[0].displayName);
       return;
     }
-    
+
     if (this.tournamentType == TournamentType.Random) {
       let count = 0;
       this.winners.forEach(player => {
-        count+= 1;
+        count += 1;
         player.isReady = false;
         const pool = getRandomPool(3);
         log_event("Random Pool: ");
@@ -92,7 +95,6 @@ export class TournamentManager {
         this.playerChannel.to(player.socketId).emit("requestMonsterSelection", { monsterPool: pool });
       });
       await this.waitForMonsterSelections(this.winners);
-      console.log("poopoo");
     }
 
     // Recursively run next round with winners
