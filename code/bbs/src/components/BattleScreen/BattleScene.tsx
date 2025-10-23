@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { parseSnapshot } from "./Components/snapshot_parser";
-import { parseTurns } from "./Components/turns_array_maker";
-import { clamp } from "./Components/utils/clamp";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
@@ -11,10 +9,14 @@ import { DiceRollAnimation } from "./Components/DiceRollAnimation";
 import { useBattleAnimations } from "./hooks/useBattleAnimations";
 import { useBattleEvents } from "./hooks/useBattleEvents";
 import type { SnapshotEvent } from "../../../../simulator/core/event/core_events";
+import type { Turn } from "./Components/turn";
 
 interface BattleSceneProps {
   battleInstanceKey: number;
   events: BaseEvent[];
+  turns: Turn[]
+  // I don't think this should be null or undefined but whatever
+  currentSnapshot : SnapshotEvent | null | undefined
   turnIndex: number;
   isPlaying: boolean;
   autoAdvance?: boolean;
@@ -32,7 +34,7 @@ console.log("BattleScene loaded");
 export const BattleScene: React.FC<BattleSceneProps> = ({
   battleInstanceKey,
   events,
-  turnIndex,
+  currentSnapshot,
   isPlaying,
   autoAdvance,
   onAdvanceTurn,
@@ -43,8 +45,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   parentDiceRollResult,
   isWaiting,
 }) => {
-  // === Turn parsing and state ===
-  const turns = useMemo(() => parseTurns(events), [events]);
 
   // === Animation logic handled by hook ===
   const {
@@ -86,14 +86,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   const { applyEventToVisible, currentMessage, setCurrentMessage, cloneState } =
     useBattleEvents({ myId, parentDiceRollResult, enqueueAnim, showDiceRoll: onDiceRoll });
-
-  // === Turn index handling ===
-  const selectedTurnIndex = Number.isInteger(turnIndex)
-    ? clamp(turnIndex, 0, Math.max(0, turns.length - 1))
-    : Math.max(0, turns.length - 1);
-
-  const currentTurn = turns[selectedTurnIndex];
-  const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
 
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
@@ -268,7 +260,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         />
       )}
       {isWaiting && !rerollMode && !runTurnNow && (
-        <BattleMessage message="Wating for Enemy..." />
+        <BattleMessage message="Waiting for Enemy..." />
       )}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
       {showDiceAnimation && (

@@ -1,6 +1,5 @@
 import { Player } from "./player";
-import { Match, MatchType } from "./match";
-import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
+import { Match } from "./match";
 import { getRandomPool, log_attention, log_event } from "./utils";
 import { PlayerNamespace } from "../shared/types";
 
@@ -97,7 +96,6 @@ export class TournamentManager {
     }
 
     // Recursively run next round with winners
-    // TODO: Fix wrong players being sent to battle in second round
     this.runRounds(this.winners);
   }
 

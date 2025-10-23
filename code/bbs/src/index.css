@@ -1209,29 +1209,53 @@ input:focus {
   top: 90%;
 }
 
+#start-game-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Small Box that shows participants names */
 .participants-name-box {
-  background-color: #8b4513;
-  color: #d4a574;
-  border: none;
-  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1%;
+
+  color: #d4a574; 
   font-size: 1.1rem;
   font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
   text-transform: capitalize;
+
   min-width: 12.5rem;
   min-height: 3rem;
 
+  background-color: #8b4513;
+  border: none;
+  
   box-shadow:
     0 4px 0 #773519,
     /* bottom edge */ 4px 0 0 #773519,
     /* right edge */ -4px 0 0 #773519,
     /* left edge */ 0 -4px 0 #c26130; /* top edge */
+  
+  transition: all 0.3s ease;
 }
 
 .participants-name-box:hover {
   transform: translateY(-3px);
+}
+
+.participants-name-box span {
+  width: 100%;
+
+  flex: 0;
+  text-align: center;
+}
+
+.kick-btn {
+  background-color: transparent;
+  border: none;
+  text-align: right;
 }
 
 /* ################################################## */
@@ -1397,6 +1421,26 @@ progress::-moz-progress-bar {
   align-items: center;
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.btn-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+}
+
+.badge-grid {
+  grid-column: 2;
+  grid-row: 1;
+
+  z-index: 10;
+}
+
+.img-grid {
+  grid-column: 1 / -1;
+  grid-row: -1 / 1;
+  place-self: center;
 }
 
 /* Battle Loading Styles */
@@ -2044,6 +2088,10 @@ input[type="range"] {
   .battleScreenBottomButtonImage {
     width: 80px;
     height: 80px;
+  }
+
+  .reroll-btn {
+    font-size: 3rem;
   }
 
   /* Reduce monster image sizes */

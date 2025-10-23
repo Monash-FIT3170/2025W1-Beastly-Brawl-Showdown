@@ -24,37 +24,30 @@ export enum MatchType {
 }
 
 export class Match {
-  player1: Player;
-  player2?: Player;
-  winner?: Player;
-  spectators: AccountId[];
-  matchType: MatchType;
-  matchID: number;
-  battle?: Battle;
+    player1: Player;
+    player2?: Player;
+    winner?: Player;
+    spectators: Player[];
+    matchType: MatchType;
+    matchID: number;
+    battle?: Battle;
 
-  private submittedMoves: Map<
-    Player,
-    { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }
-  > = new Map();
+    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
-  /**
-   * Constructor.
-   *
-   * @param player1 A player in the match
-   * @param matchID Unique integer created in tournament_manager
-   * @param player2 Optional second player in the match (the match is a bye if left empty)
-   */
-  constructor(player1: Player, player2: Player | undefined, matchID: number) {
-    this.player1 = player1;
-    this.player2 = player2;
-    this.spectators = player1.spectators.concat(player2?.spectators ?? []);
-    this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
-    this.matchID = matchID;
-  }
 
-  createBattle(): void {
-    if (this.matchType == MatchType.BYE) {
-      return;
+    /**
+     * Constructor.
+     * 
+     * @param player1 A player in the match
+     * @param matchID Unique integer created in tournament_manager
+     * @param player2 Optional second player in the match (the match is a bye if left empty)
+     */
+    constructor(player1: Player, player2: Player | undefined, matchID: number) {
+        this.player1 = player1;
+        this.player2 = player2;
+        this.spectators = player1.spectators.concat(player2?.spectators ?? []);
+        this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
+        this.matchID = matchID;
     }
 
     // Instantiate monsters from server-side template
@@ -317,11 +310,90 @@ export class Match {
         );
         playerChannel.to(this.player1.socketId).emit("newEvent", event);
 
+        // Attach notice callbacks to socket
+        this.battle.noticeBoard.subscribeListener({
+            onPostNotice: (sideIndex, notice) => {
+                const player = sideIndex === 0 ? this.player1 : this.player2!;
+                log_event(`[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`);
+                playerChannel.to(player.socketId).emit("newNotice", notice);
+            },
+            onRemoveNotice: (sideIndex, notice) => {
+                const player = sideIndex === 0 ? this.player1 : this.player2!;
+                log_event(`[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`);
+                playerChannel.to(player.socketId).emit("removeNotice", notice);
+            }
+        });
+
+        // Subscribe to event history (damage, heals, rolls, etc.)
+        this.battle.eventHistory.subscribeListener({
+            onNewEvent: (event) => {
+                log_event(`[EVENT] New event emitted: ${JSON.stringify(event)}`);
+
+                // Broadcast event to both players
+                log_event(`[EVENT] Sending event to player 1 (${this.player1.displayName})`);
+                playerChannel.to(this.player1.socketId).emit("newEvent", event);
+
+                if (this.player2) {
+                    log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
+                    playerChannel.to(this.player2.socketId).emit("newEvent", event);
+                }
+
+                // Broadcast to spectators
+                this.spectators.forEach(spectator => {
+                    log_event(`[EVENT] Sending event to spectator (${spectator.displayName})`);
+                    playerChannel.to(spectator.socketId).emit("newEvent", event);
+                })
+            },
+        });
+
+        
+
+        playerChannel.to(this.player1.socketId).emit("startRound", {
+            player1Monster: this.player1?.selectedMonsterTemplateName,
+            player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
+            sideID: 0,
+        })
+
         if (this.player2) {
-          log_event(
-            `[EVENT] Sending event to player 2 (${this.player2.displayName})`
-          );
-          playerChannel.to(this.player2.socketId).emit("newEvent", event);
+            playerChannel.to(this.player2?.socketId).emit("startRound", {
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 1,
+            })
+        };
+
+        // TODO: Emit socket for all spectators for each player
+        log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
+        this.spectators.forEach(spectator => {
+            playerChannel.to(spectator.socketId).emit("startRound", {
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 0,
+                spectator: true
+            });
+        });
+        
+
+        log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
+        await this.battle.run();
+        log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
+
+        const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
+        const winnerIndex = this.battle.sides.indexOf(survivingSide!);
+
+        this.winner = winnerIndex === 0 ? this.player1 : this.player2;
+        const loser = winnerIndex === 0 ? this.player2 : this.player1;
+
+        if (loser) {
+            this.winner?.addSpectator(loser);
+            log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
+        }
+        if (this.winner && loser) {
+            playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
+            playerChannel.to(loser?.socketId).emit("sendToWaiting");
+            this.spectators.forEach(spectator => {
+                playerChannel.to(spectator.socketId).emit("sendToWaiting");
+            })
         }
       },
     });

@@ -15,6 +15,7 @@ type MoveButton = Button & {
 };
 
 type BattleBottomProps = {
+  currentAttackCharges : number | null;
   onAction: (moveId: EntryID, targetMethod: TargetingMethod) => void;
   disabled?: boolean;
   chooseMove: ChooseMove | null;
@@ -28,6 +29,7 @@ type BattleBottomProps = {
 };
 
 export const BattleBottom: React.FC<BattleBottomProps> = ({
+  currentAttackCharges,
   onAction,
   disabled,
   chooseMove,
@@ -102,7 +104,7 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   }
   else {
     if (!disabled){
-      console.warn("NO CHOOOSEMOVE HAS BEEN DETECED, GOING BACK TO FALLBACK BUTTONS")
+      console.warn("NO CHOOOSEMOVE HAS BEEN DETECTED, GOING BACK TO FALLBACK BUTTONS")
       attackBtn = buildAtkButton(fallbackMoves.attack);
       defendBtn = buildDefButton(fallbackMoves.defend);
       abilityBtn = fallbackMoves.ability ? buildButton(fallbackMoves.ability, "/assets/img/ability2.png") : null;
@@ -112,17 +114,19 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   const renderButton = (btn: MoveButton) => (
     <button
       key={btn.id}
-      className="glb-btn"
+      className="glb-btn btn-grid"
       onClick={() => onAction(btn.id, btn.targetMethod)}
       disabled={disabled}
-    >
-      <img src={btn.icon} className="battleScreenBottomButtonImage" />
+    > 
+      { btn.id == fallbackMoves.attack && (
+        <div className="badge-grid badge-number">{currentAttackCharges}</div>)}
+      <img src={btn.icon} className="battleScreenBottomButtonImage img-grid" />
     </button>
   );
 
   const renderButtonForReroll = (btn: Button, option:boolean) => (
-    <button key={btn.id} className="glb-btn" onClick={() => onReroll(option)}>
-      <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
+    <button key={btn.id} className="glb-btn reroll-btn" onClick={() => onReroll(option)}>
+      {option ? '\u2713' : '\u274C'}
     </button>
   );
 
