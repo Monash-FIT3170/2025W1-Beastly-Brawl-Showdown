@@ -15,7 +15,7 @@ const DodgeAnimationProps: React.FC<DodgeAnimationProps> = ({
       onAnimationEnd={onComplete}
     >
       <img
-        src="/battle-icons/dodge_animation.png"
+        src="/assets/battle-icons/dodge_image.png"
         alt="ability"
         className="dodge-image"
       />
