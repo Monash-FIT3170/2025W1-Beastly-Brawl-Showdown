@@ -4,8 +4,7 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
-    "dev": "ts-node ./src/app",
-    "start": "npm run dev"
+    "dev": "ts-node ./src/app"
   },
   "author": "",
   "license": "ISC",

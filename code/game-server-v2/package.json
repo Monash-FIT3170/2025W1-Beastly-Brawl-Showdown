@@ -1,8 +1,4 @@
 {
-  "scripts": {
-    "start": "ts-node main.ts",
-    "dev": "npm run start"
-  },
   "dependencies": {
     "@types/cors": "^2.8.19",
     "@types/socket.io": "^3.0.1",
@@ -18,5 +14,8 @@
     "socket.io-client": "^4.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "dev": "ts-node ./main"
   }
 }

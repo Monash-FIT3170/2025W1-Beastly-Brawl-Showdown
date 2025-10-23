@@ -15,10 +15,13 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
-import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, IGameServerRegistryEntry, PlayerNamespace } from "../shared/types";
+import { BasicClientToServerEvents, BasicServerToClientEvents, HostNamespace, PlayerNamespace } from "../shared/types";
 import { COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
 
-const MONGO_URI = process.env["MONGO_URI"] ?? `mongodb://localhost:27017/RoomLocation`;
+const MONGO_IP = "localhost";
+const MONGO_PORT = "27017";
+const MONGO_NAME = "RoomLocation";
+const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
 
 async function connectToDatabase(): Promise<typeof mongoose> {
   try {
@@ -39,18 +42,7 @@ type ServerConfig = {
   overrideExistingRecordOnStartup: boolean;
 };
 
-log_notice("Loading config...");
-log_attention("Config not implemented yet. Using placeholder.");
-const config: ServerConfig = {
-  serverIp: process.env.SERVER_IP || "https://two025w1-beastly-brawl-showdown.onrender.com",
-  serverPort: parseInt(process.env.SERVER_PORT || "8080"),
-  serverNumber: 7,
-  maxCapcity: 12,
-  overrideExistingRecordOnStartup: true,
-};
-log_notice("Config loaded.");
-
-async function main() {
+async function main(config: ServerConfig) {
   //#region Startup
   log_notice("Starting server...");
   log_notice("Connect to database...");
@@ -87,56 +79,31 @@ async function main() {
   log_notice("Websockets server started.");
 
   log_notice("Register to global records...");
-  log_attention(`MONGO ENV ${MONGO_URI}`); // TODO TESTING
-  /*
-  The code fails here, inspecting the mongo collection shows that there is no documents
-  */
-
   try {
-    const db = mongoose.connection.db;
-    if (!db) throw new Error("MongoDB native database object is undefined");
+    const record = await GameServerRegistryModel.findOne();
 
-    const collectionName = GameServerRegistryModel.collection.name;
-    const collections = await db.listCollections({ name: collectionName }).toArray();
-
-    let existingRecordCount = 0;
-
-    if (collections.length > 0) {
-      existingRecordCount = await GameServerRegistryModel.countDocuments({
-        serverNumber: config.serverNumber,
-      });
-
-      if (existingRecordCount > 0) {
-        console.log(`Existing records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
-        if (!config.overrideExistingRecordOnStartup) {
-          throw new Error("A record already exists, room could not be registered.");
-        }
+    const existingRecordCount = await GameServerRegistryModel.countDocuments({
+      serverNumber: config.serverNumber,
+    });
+    if (existingRecordCount > 0) {
+      log_warning(`Exsting records found with server number <${config.serverNumber}>: ${existingRecordCount}`);
+      if (!config.overrideExistingRecordOnStartup) {
+        throw new Error("A record already exists, room could not be registered.");
       }
-    } else {
-      console.log(`Collection '${collectionName}' does not exist yet. Proceeding with registration.`);
     }
-
-    const updatedRecord = await GameServerRegistryModel.findOneAndUpdate<IGameServerRegistryEntry>(
+    const updatedRecord = await GameServerRegistryModel.findOneAndUpdate(
       { serverNumber: config.serverNumber },
       {
         serverNumber: config.serverNumber,
-        serverUrl: `${config.serverIp}:${config.serverPort}`,
+        serverUrl: config.serverIp.toString() + ":" + config.serverPort.toString(),
         lastUpdated: new Date(),
       },
       { upsert: true, new: true }
     );
-
-    log_notice("Updated Record:\n" + JSON.stringify(updatedRecord));
-  } catch (err) {
-    log_attention("Failed to find or update records (collection may be missing or query failed): " + err);
-    log_attention("Using fallback - Creating new record.");
-    const newRecord = new GameServerRegistryModel({
-      serverNumber: config.serverNumber,
-      serverUrl: `${config.serverIp}:${config.serverPort.toString()}`,
-      lastUpdated: new Date(),
-    });
-
-    await newRecord.save();
+    log_notice("New Record:\n" + JSON.stringify(updatedRecord));
+  } catch (e) {
+    log_attention("ERR: Failed to register this server. " + e);
+    process.exit(1);
   }
   log_notice("Registered to records.");
 
@@ -203,11 +170,16 @@ async function main() {
         // Set tournament type in the room
         const room = gameServer.rooms.get(roomId);
         if (room) {
-          room.tournamentManager.tournamentType = data.type === "random" ? TournamentType.Random : TournamentType.Standard;
+          room.tournamentManager.tournamentType =
+            data.type === "random"
+              ? TournamentType.Random
+              : TournamentType.Standard;
         }
 
         socket.emit("requestRoomResponse", { roomId, joinCode });
-        log_notice(`Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`);
+        log_notice(
+          `Room generated. id = ${roomId}, join code = ${joinCode}, mode = ${data.type}`
+        );
       } catch {
         socket.emit("error", "Could not create room.");
       }
@@ -231,7 +203,9 @@ async function main() {
           log_event("Random Pool: ");
           console.log(pool);
         } else {
-          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter((k) => k !== "blank"); // Standard mode, exclude BlankMon
+          pool = Object.keys(COMMON_MONSTER_POOL.monsters).filter(
+            (k) => k !== "blank"
+          ); // Standard mode, exclude BlankMon
         }
 
         player.currentMonsterPool = pool;
@@ -411,7 +385,7 @@ async function main() {
       }
 
       // Store selected monster template name directly
-      player.setMonsterTemplate(monsterKey.toString());
+      player.setMonsterTemplate(monsterKey);
       player.isReady = true;
       log_event(`Player ${player.displayName} selected ${player.selectedMonsterTemplateName}`);
 
@@ -426,11 +400,14 @@ async function main() {
       if (data.data.selections == 1) {
         // Read from all players in room
         log_notice("Reading ready from all players");
-        allReady = Array.from(room.players.values()).every((p) => p.isReady);
-      } else {
-        // Read from winners only
+        allReady = Array.from(room.players.values()).every(
+          (p) => p.isReady
+        );
+      } else { // Read from winners only
         log_notice("Reading ready from winners");
-        allReady = Array.from(room.tournamentManager.winners.values()).every((p) => p.isReady);
+        allReady = Array.from(room.tournamentManager.winners.values()).every(
+          (p) => p.isReady
+        );
       }
       if (!allReady) {
         log_notice("Waiting for all players to submit their monsters...");
@@ -458,7 +435,7 @@ async function main() {
 
           // //P2: send a copy/start (invert sides?)
           // if (match.player2) {
-          //   room.playerChannel.to(match.player2?.socketId).emit("startRound", {
+          //   room.playerChannel.to(match.player2?.socketId).emit("startRound", {  
           //     player1Monster: match.player1?.selectedMonsterTemplateName,
           //     player2Monster: match.player2?.selectedMonsterTemplateName,
           //     sideID: 1,
@@ -551,8 +528,10 @@ async function main() {
       const sourceSide = match.getSideForPlayer(player);
       player.submittedMove = true;
 
-      if (player1 && player1.submittedMove && player2?.socketId) playerChannel.to(player2.socketId).emit("enemyMoveSubmitted");
-      if (player2 && player2.submittedMove && player1?.socketId) playerChannel.to(player1.socketId).emit("enemyMoveSubmitted");
+      if (player1 && player1.submittedMove && player2?.socketId)
+        playerChannel.to(player2.socketId).emit("enemyMoveSubmitted")
+      if (player2 && player2.submittedMove && player1?.socketId)
+        playerChannel.to(player1.socketId).emit("enemyMoveSubmitted")
 
       log_event(`Player ${player.displayName} submitted move ${moveId} with targeting method ${targetMethod} from side ${sourceSide} and monster ${player.monster}`);
 
@@ -626,19 +605,33 @@ async function main() {
     fs.writeFileSync(READY_FILE_PATH, "READY");
 
     // Listen for Ctrl + C (SIGINT)
-    process.on("SIGINT", () => {
-      log_attention("Gracefully shutting down...");
+    const listenForShutdown = () => {
+      process.on("SIGINT", () => {
+        log_attention("Gracefully shutting down...");
 
-      rl.close(); // Close input interface
-      socketServer.close(); // Close Socket.IO
-      httpServer.close(() => {
-        log_attention("Server closed.");
-        process.exit(0); // Exit process
+        rl.close(); // Close input interface
+        socketServer.close(); // Close Socket.IO
+        httpServer.close(() => {
+          log_attention("Server closed.");
+          process.exit(0); // Exit process
+        });
       });
-    });
-  })
+    };
+
+    // Start listening
+    listenForShutdown();
+  });
+}
+
+log_notice("Loading config...");
+log_attention("Config not implemented yet. Using placeholder.");
+const config: ServerConfig = {
+  serverIp: "http://localhost",
+  serverPort: 8080,
+  serverNumber: 7,
+  maxCapcity: 12,
+  overrideExistingRecordOnStartup: true,
 };
+log_notice("Config loaded.");
 
-
-
-main();
+main(config);
