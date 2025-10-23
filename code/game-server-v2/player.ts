@@ -11,7 +11,6 @@ export class Player {
   isReady: boolean = false;
   submittedMove: boolean = false;
   currentMonsterPool?: string[];
-  followPlayer?: Player;
 
   constructor(roomId: RoomId, socketId: string, displayName: string) {
     this.roomId = roomId;

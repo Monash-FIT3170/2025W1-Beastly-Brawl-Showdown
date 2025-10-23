@@ -20,17 +20,16 @@ interface BattleScreenProps {
     player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
-    roomId?: string;
-    socketId?: string;
   };
-
   events: BaseEvent[];
   setEvents: React.Dispatch<React.SetStateAction<BaseEvent[]>>;
+
   chooseMove: ChooseMove | null;
   setChooseMove: React.Dispatch<React.SetStateAction<ChooseMove | null>>;
   setHasReceivedChooseMove: React.Dispatch<React.SetStateAction<boolean>>;
 
   buttonDisabled: boolean;
+
   onSubmitMove: (
     moveId: EntryID,
     targetMethod: TargetingMethod,
@@ -39,14 +38,15 @@ interface BattleScreenProps {
 
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   showMessage: boolean;
+
   onReroll: (option: boolean) => void;
   rerollMode: boolean;
   parentDiceRollResult: number | null;
+
   isWaiting: boolean;
   setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
   battleInstanceKey: number;
   isSpectator?: boolean;
-  onSurrender: () => void;
   turnIndex: number;
 }
 
@@ -69,7 +69,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   setIsWaiting,
   battleInstanceKey,
   isSpectator,
-  onSurrender,
   turnIndex
 
 }) => {
@@ -77,7 +76,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
 
-  //#region initializations
   useEffect(() => {
     if (!matchData) return;
     console.log("Initializing monsters with matchData:", { matchData });
@@ -102,7 +100,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setEnemyMonster({
       template: enemyMonsterData.template,
       currentHp:
-        enemyMonsterData.currentHp ?? enemyMonsterData.template.baseStats.health,
+        enemyMonsterData.currentHp ??
+        enemyMonsterData.template.baseStats.health,
       playerId: matchData.myId.toString(),
     });
   }, [matchData]);
@@ -133,6 +132,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     console.log("⚔️ turns is", turns);
   }, [turns]);
 
+  // Whenever there is new matchdata, reset the turn index
   useEffect(() => {
     if (!events || events.length === 0) return;
     setIsPlaying(true);
@@ -147,15 +147,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setChooseMove(null);
   };
 
-  //#region surrender
-  const handleSurrender = () => {
-    console.log("[BATTLE SCREEN] Surrender clicked");
-    onSurrender(); // delegate to parent
-  };
-
-
-  //#endregion
-
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
   if (!currentSnapshot){
@@ -163,7 +154,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   } 
 
   if (isSpectator) {
-    return (
+  return (
+    <>
       <div className="canvas-body" id="battle-screen-body">
         <BattleTop
           turnNumber={turnIndex + 1}
@@ -185,9 +177,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           isWaiting={isWaiting}
         />
       </div>
-    );
-  }
-
+    </>
+  );
+}
+  
   return (
     <>
       <div className="canvas-body" id="battle-screen-body">
@@ -195,7 +188,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           turnNumber={turnIndex + 1}
           playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
           opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
-          onSurrender={handleSurrender}
         />
         <BattleScene
           events={events}
