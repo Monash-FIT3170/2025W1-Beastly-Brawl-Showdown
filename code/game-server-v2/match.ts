@@ -32,22 +32,29 @@ export class Match {
     matchID: number;
     battle?: Battle;
 
-    private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
+  private submittedMoves: Map<
+    Player,
+    { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }
+  > = new Map();
 
+  /**
+   * Constructor.
+   *
+   * @param player1 A player in the match
+   * @param matchID Unique integer created in tournament_manager
+   * @param player2 Optional second player in the match (the match is a bye if left empty)
+   */
+  constructor(player1: Player, player2: Player | undefined, matchID: number) {
+    this.player1 = player1;
+    this.player2 = player2;
+    this.spectators = player1.spectators.concat(player2?.spectators ?? []);
+    this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
+    this.matchID = matchID;
+  }
 
-    /**
-     * Constructor.
-     * 
-     * @param player1 A player in the match
-     * @param matchID Unique integer created in tournament_manager
-     * @param player2 Optional second player in the match (the match is a bye if left empty)
-     */
-    constructor(player1: Player, player2: Player | undefined, matchID: number) {
-        this.player1 = player1;
-        this.player2 = player2;
-        this.spectators = player1.spectators.concat(player2?.spectators ?? []);
-        this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
-        this.matchID = matchID;
+  createBattle(): void {
+    if (this.matchType == MatchType.BYE) {
+      return;
     }
 
     // Instantiate monsters from server-side template
@@ -138,7 +145,7 @@ export class Match {
         // Optional: safety timeout to prevent deadlocks (e.g., client disconnect)
         setTimeout(() => {
           playerChannel.off("playerAnimationsDone", onAckFromClient);
-          resolve(); // fail-open after e.g. 6s
+          resolve();
         }, 6000);
       });
   }
@@ -269,46 +276,15 @@ export class Match {
    * @returns None
    */
   async runBattle(playerChannel: PlayerNamespace): Promise<void> {
-    if (this.matchType === MatchType.BYE) {
-      this.winner = this.player1;
-      log_attention(
-        `Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`
-      );
-      return;
-    }
+        if (this.matchType === MatchType.BYE) {
+            this.winner = this.player1;
+            log_attention(`Match ${this.matchID} is a bye. Player ${this.player1.displayName} automatically advances.`);
+            return;
+        }
 
-    if (!this.battle) {
-      throw new Error(`Match ${this.matchID} has no battle to run.`);
-    }
-
-    // Attach notice callbacks to socket
-    this.battle.noticeBoard.subscribeListener({
-      onPostNotice: (sideIndex, notice) => {
-        const player = sideIndex === 0 ? this.player1 : this.player2!;
-        log_event(
-          `[NOTICE] Sending notice '${notice.kind}' to player ${player.displayName}`
-        );
-        playerChannel.to(player.socketId).emit("newNotice", notice);
-      },
-      onRemoveNotice: (sideIndex, notice) => {
-        const player = sideIndex === 0 ? this.player1 : this.player2!;
-        log_event(
-          `[NOTICE] Removing notice '${notice.kind}' for player ${player.displayName}`
-        );
-        playerChannel.to(player.socketId).emit("removeNotice", notice);
-      },
-    });
-
-    // Subscribe to event history (damage, heals, rolls, etc.)
-    this.battle.eventHistory.subscribeListener({
-      onNewEvent: (event) => {
-        log_event(`[EVENT] New event emitted: ${JSON.stringify(event)}`);
-
-        // Broadcast event to both players
-        log_event(
-          `[EVENT] Sending event to player 1 (${this.player1.displayName})`
-        );
-        playerChannel.to(this.player1.socketId).emit("newEvent", event);
+        if (!this.battle) {
+            throw new Error(`Match ${this.matchID} has no battle to run.`);
+        }
 
         // Attach notice callbacks to socket
         this.battle.noticeBoard.subscribeListener({
@@ -346,7 +322,7 @@ export class Match {
             },
         });
 
-        
+        this.battle["waitForBattleOver"] = this.makeBattleOverWaiter(playerChannel);
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
@@ -378,6 +354,8 @@ export class Match {
         await this.battle.run();
         log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
+        await this.waitForAnimationsAcks(playerChannel);
+
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
 
@@ -395,53 +373,9 @@ export class Match {
                 playerChannel.to(spectator.socketId).emit("sendToWaiting");
             })
         }
-      },
-    });
-
-    playerChannel.to(this.player1.socketId).emit("startRound", {
-      player1Monster: this.player1?.selectedMonsterTemplateName,
-      player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
-      sideID: 0,
-    });
-    if (this.player2) {
-      playerChannel.to(this.player2?.socketId).emit("startRound", {
-        player1Monster: this.player1?.selectedMonsterTemplateName,
-        player2Monster: this.player2?.selectedMonsterTemplateName,
-        sideID: 1,
-      });
     }
-    // Assign the waiter
-    this.battle["waitForBattleOver"] = this.makeBattleOverWaiter(playerChannel);
 
-    log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
-    await this.battle.run();
-    log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
-
-    await this.waitForAnimationsAcks(playerChannel);
-
-    const survivingSide = this.battle.sides.find(
-      (side) => side.monster.health > 0
-    );
-    const winnerIndex = this.battle.sides.indexOf(survivingSide!);
-
-    this.winner = winnerIndex === 0 ? this.player1 : this.player2;
-    const loser = winnerIndex === 0 ? this.player2 : this.player1;
-
-    if (loser) {
-      if (loser.linkedAccountId) {
-        this.winner?.addSpectator(loser.linkedAccountId);
-      }
-      log_event(
-        `[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`
-      );
-    }
-    if (this.winner && loser) {
-      playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
-      playerChannel.to(loser?.socketId).emit("sendToWaiting");
-    }
-  }
-
-  private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
+    private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
     return new Promise((resolve) => {
       const expected = this.player2 ? 2 : 1;
       const acks = new Set<string>();
@@ -461,7 +395,6 @@ export class Match {
 
       playerChannel.on("playerAnimationsDone", onAck);
 
-      // safety: fail-open after N seconds so the tournament can still progress
       setTimeout(() => {
         playerChannel.off("playerAnimationsDone", onAck);
         resolve();
