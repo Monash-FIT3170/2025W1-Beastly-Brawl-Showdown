@@ -41,8 +41,9 @@ export function useBattleEvents({
                         (("abilityId" in e && typeof (e as any).abilityId === "string") ? (e as any).abilityId :
                         ("actionId"  in e && typeof (e as any).actionId  === "string") ? (e as any).actionId  :
                         e.moveId);
-
-                    const moveName = e.moveId;
+                    
+                    const moveData = COMMON_MOVE_POOL[moveId as keyof typeof COMMON_MOVE_POOL];
+                    const moveName = moveData.name;
                     const message = isPlayer
                         ? `You ${moveName} successfully!`
                         : `Enemy ${moveName}s successfully!`;
