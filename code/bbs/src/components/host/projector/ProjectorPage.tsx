@@ -30,7 +30,7 @@ export default function ProjectorPage() {
     if (!serverUrl) {
       try {
         const res = await getBestServerUrl();
-        setServerUrl(res);
+        setServerUrl(res + "/host");
         console.log("Server found at:", res);
       } catch (err) {
         console.error("Error locating server:", err);
