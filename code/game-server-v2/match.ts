@@ -296,6 +296,7 @@ export class Match {
         this.resolveMatch(winner!, loser);
 
         // Notify clients
+        log_warning("Waiting time :D");
         playerChannel.to(winner!.socketId).emit("sendToWaiting");
         playerChannel.to(loser!.socketId).emit("sendToWaiting");
         this.spectators.forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
