@@ -104,10 +104,10 @@ const PlayerContent = () => {
   // const [rollNotice, setRollNotice] = useState<Roll | null>(null);
   // const [showRollMessage, setShowRollMessage] = useState(false);
   const [parentDiceRollResult, setParentDiceRollResult] = useState<number | null>(null);
-  const [rerollNotice, setRerollNotice] = useState<RerollOption | null>(null);
+  const [, setRerollNotice] = useState<RerollOption | null>(null);
   const [rerollMode, setRerollMode] = useState<boolean>(false);
-  const [showEnemySubmittedMessage, setshowEnemySubmittedMessage] = useState(false);
-  const [showSubmittedMoveMessage, setshowSubmittedMoveMessage] = useState(false);
+  const [, setshowEnemySubmittedMessage] = useState(false);
+  const [, setshowSubmittedMoveMessage] = useState(false);
   const [isWaiting, setIsWaiting] = useState(false);
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
@@ -134,6 +134,12 @@ const PlayerContent = () => {
 
     //#region Round Start
     socket.on("startRound", (data) => {
+      
+      // Check if player is spectator
+      if (data.spectator) {
+        setIsSpectator(true);
+      }
+      
       setWaiting(false);
 
       // Reset client-side event stream for the new match
@@ -186,11 +192,6 @@ const PlayerContent = () => {
         myId: data.sideID,
       });
 
-      // Check if player is spectator
-      if (data.spectator) {
-        setIsSpectator(true);
-      }
-
       // Give a key for every new battle
       setBattleInstanceKey((k) => k + 1);
 
@@ -211,7 +212,6 @@ const PlayerContent = () => {
       // Navigate back to home page
       window.location.href = "/home/";
     });
-
 
     //#region Waiting Room
     socket.on("sendToWaiting", () => {
@@ -451,6 +451,17 @@ const PlayerContent = () => {
     });
   };
 
+  // callback passed to BattleScreen
+  const handleSurrenderClicked = async () => {
+    if (!socket || !matchData) return;
+
+    const roomId = sessionStorage.getItem("joinCode");
+    if (!roomId) return console.warn("No roomId found for surrender");
+
+    console.log("[PLAYER CONTENT] Sending surrender to server...");
+    socket.emit("playerSurrender");
+  };
+
   // Debugging useEffect
   useEffect(() => {
     console.log(
@@ -464,8 +475,8 @@ const PlayerContent = () => {
   }, [isButtonEnabled, hasReceivedChooseMove, turnFinishedPlaying]);
 
   useEffect(() => {
-    console.log("isWaiting changed:", isWaiting);
-  }, [isWaiting]);
+    console.log(`[waiting, allReady] changed: [${waiting}, ${allReady}]`);
+  }, [waiting, allReady]);
 
   //#endregion
 
@@ -482,6 +493,7 @@ const PlayerContent = () => {
   // if (!allReady || waiting) return <WaitingScreen />;
   if (!allReady || waiting) return <WaitingScreen />;
   if (winner) return <WinnerScreen winnerName={winner} />;
+  
 
   console.log("Rendering BattleScreen with matchData:", matchData);
 
@@ -503,6 +515,8 @@ const PlayerContent = () => {
     setIsWaiting={setIsWaiting}
     battleInstanceKey={battleInstanceKey}
     turnIndex={turnIndex}
+    isSpectator={isSpectator}
+    onSurrender={handleSurrenderClicked}
   />;
 };
 //#endregion
