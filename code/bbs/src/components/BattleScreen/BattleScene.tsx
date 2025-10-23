@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { parseSnapshot } from "./Components/snapshot_parser";
-import { parseTurns } from "./Components/turns_array_maker";
-import { clamp } from "./Components/utils/clamp";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
@@ -11,11 +9,13 @@ import { DiceRollAnimation } from "./Components/Animations/DiceRollAnimation";
 import { useBattleAnimations } from "./hooks/useBattleAnimations";
 import { useBattleEvents } from "./hooks/useBattleEvents";
 import type { SnapshotEvent } from "../../../../simulator/core/event/core_events";
+import type { Turn } from "./Components/turn";
 
 interface BattleSceneProps {
   battleInstanceKey: number;
   events: BaseEvent[];
-  turnIndex: number;
+  turns: Turn[]
+  currentSnapshot : SnapshotEvent | null | undefined
   isPlaying: boolean;
   autoAdvance?: boolean;
   onAdvanceTurn?: (nextIndex: number) => void;
@@ -32,7 +32,7 @@ console.log("BattleScene loaded");
 export const BattleScene: React.FC<BattleSceneProps> = ({
   battleInstanceKey,
   events,
-  turnIndex,
+  currentSnapshot,
   isPlaying,
   autoAdvance,
   onAdvanceTurn,
@@ -43,8 +43,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   parentDiceRollResult,
   isWaiting,
 }) => {
-  // === Turn parsing and state ===
-  const turns = useMemo(() => parseTurns(events), [events]);
 
   // === Animation logic handled by hook ===
   const {
@@ -101,14 +99,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       enqueueAnim,
       showDiceRoll: onDiceRoll,
     });
-
-  // === Turn index handling ===
-  const selectedTurnIndex = Number.isInteger(turnIndex)
-    ? clamp(turnIndex, 0, Math.max(0, turns.length - 1))
-    : Math.max(0, turns.length - 1);
-
-  const currentTurn = turns[selectedTurnIndex];
-  const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
 
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
@@ -235,7 +225,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   const shouldShowMessage = showMessage || currentMessage !== "";
 
   return (
-    <div className="canvas-body" id="battle-screen-body">
+    <div className="battle-scene">
       <div className="combat-arena">
         <MonsterHealthRing
           currentHealth={visiblePlayer2.health ?? 0}

@@ -499,11 +499,11 @@ async function main(config: ServerConfig) {
 
       switch (moveId) {
         case "defend":
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
+          match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId, playerChannel);
           break;
         case "attack-normal":
           const targetSide = sourceSide === 1 ? 0 : 1;
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+          match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId, playerChannel);
           break;
         default: { // TODO: Alternate way to identify abilities other than move ID
           const abilityMoveId = match.getMonsterAbility(player);
@@ -529,7 +529,7 @@ async function main(config: ServerConfig) {
               throw new Error(`Unknown targeting method: ${moveData.targetingMethod} for move ${abilityMoveId}`);
           }
           log_attention(`Ability ${abilityMoveId} being submitted by ${player} targeting ${targetSide}`);
-          match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId);
+          match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId, playerChannel);
           break;
         }
       }
