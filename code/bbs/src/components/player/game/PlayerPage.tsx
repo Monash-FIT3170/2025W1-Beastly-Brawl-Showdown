@@ -108,7 +108,7 @@ const PlayerContent = () => {
   const [waiting, setWaiting] = useState(false);
   const [noSelections, setNoSelections] = useState(0);
   const [randomMonsterPool, setMonsterPool] = useState<string[]>();
-  const [, setIsSpectator] = useState(false);
+  const [isSpectator, setIsSpectator] = useState(false);
 
   const [events, setEvents] = useState<any[]>([]);
   const [chooseMove, setChooseMove] = useState<ChooseMove | null>(null);
@@ -144,6 +144,12 @@ const PlayerContent = () => {
 
     //#region Round Start
     socket.on("startRound", (data) => {
+      
+      // Check if player is spectator
+      if (data.spectator) {
+        setIsSpectator(true);
+      }
+      
       setWaiting(false);
 
       // Reset client-side event stream for the new match
@@ -190,11 +196,6 @@ const PlayerContent = () => {
         myId: data.sideID,
       });
 
-      // Check if player is spectator
-      if (data.spectator) {
-        setIsSpectator(true);
-      }
-
       // Give a key for every new battle
       setBattleInstanceKey((k) => k + 1);
 
@@ -215,7 +216,6 @@ const PlayerContent = () => {
       // Navigate back to home page
       window.location.href = "/home/";
     });
-
 
     //#region Waiting Room
     socket.on("sendToWaiting", () => {
@@ -453,6 +453,7 @@ const PlayerContent = () => {
   // if (!allReady || waiting) return <WaitingScreen />;
   if (!allReady || waiting) return <WaitingScreen />;
   if (winner) return <WinnerScreen winnerName={winner} />;
+  
 
   return (
     <BattleScreen
@@ -472,6 +473,7 @@ const PlayerContent = () => {
       isWaiting={isWaiting}
       setIsWaiting={setIsWaiting}
       battleInstanceKey={battleInstanceKey}
+      isSpectator={isSpectator}
       onSurrender={handleSurrenderClicked}
     />
   );

@@ -249,10 +249,13 @@ export class Match {
         // TODO: Emit socket for all spectators for each player
         log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
         this.spectators.forEach(spectator => {
+            // Determine which side this spectator should follow
+            const followSide = spectator.followPlayer === this.player2 ? 1 : 0;
+
             playerChannel.to(spectator.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
-                sideID: 0,
+                sideID: followSide,
                 spectator: true
             });
         });
@@ -270,6 +273,7 @@ export class Match {
 
         if (loser) {
             this.winner?.addSpectator(loser);
+            loser.followPlayer = this.winner;
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
         if (this.winner && loser) {
@@ -296,6 +300,7 @@ export class Match {
         this.winner = winner;
 
         winner.addSpectator(loser);
+        loser.followPlayer = winner;
 
         console.log(`[MATCH] Winner is ${winner.displayName} for MatchID: ${this.matchID}`);
 
