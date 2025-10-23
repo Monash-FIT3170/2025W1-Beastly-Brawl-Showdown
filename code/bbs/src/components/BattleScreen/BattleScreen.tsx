@@ -56,15 +56,11 @@ interface BattleScreenProps {
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   matchData,
   events,
-  setEvents,
   chooseMove,
   setChooseMove,
   setHasReceivedChooseMove,
-  // rollNotice,
-  // showRollMessage,
   buttonDisabled,
   onSubmitMove,
-  // onRoll,
   setTurnFinishedPlaying,
   showMessage,
   onReroll,
@@ -108,42 +104,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         enemyMonsterData.template.baseStats.health,
       playerId: matchData.myId.toString(),
     });
-
-    // Build snapshot JSON
-    const snapshot = {
-      name: "snapshot", // Ensure 'name' property is present for BaseEvent compatibility
-      type: "snapshot",
-      sides: [
-        {
-          id: 0,
-          monster: {
-            baseID: matchData.player1.monster.template.templateId,
-            health:
-              matchData.player1.monster.currentHp ??
-              matchData.player1.monster.template.baseStats.health,
-            defendActionCharges: 0,
-            components: [],
-          },
-          pendingActions: null,
-        },
-        {
-          id: 1,
-          monster: {
-            baseID: matchData.player2.monster.template.templateId,
-            health:
-              matchData.player2.monster.currentHp ??
-              matchData.player2.monster.template.baseStats.health,
-            defendActionCharges: 0,
-            components: [],
-          },
-          pendingActions: null,
-        },
-      ],
-      index: 0,
-    };
-
-    // put snapshot into events state as the first item
-    setEvents([snapshot]);
   }, [matchData]);
     
 
@@ -214,7 +174,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
-          // showRollMessage={showRollMessage}
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
