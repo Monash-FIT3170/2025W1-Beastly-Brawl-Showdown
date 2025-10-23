@@ -170,6 +170,34 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
+          // showRollMessage={showRollMessage}
+          rerollMode={rerollMode}
+          parentDiceRollResult={parentDiceRollResult}
+          isWaiting={isWaiting}
+        />
+      </div>
+    </>
+  );
+}
+  
+  return (
+    <>
+      <div className="canvas-body" id="battle-screen-body">
+        <BattleTop />
+        <BattleScene
+          events={events}
+          battleInstanceKey={battleInstanceKey}
+          turns = {turns}
+          currentSnapshot = {currentSnapshot}
+          turnIndex={turnIndex}
+          isPlaying={isPlaying}
+          autoAdvance={false}
+          onAdvanceTurn={(next: React.SetStateAction<number>) =>
+            setTurnIndex(next)
+          }
+          myId={matchData.myId}
+          showMessage={showMessage}
+          setTurnFinishedPlaying={setTurnFinishedPlaying}
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}

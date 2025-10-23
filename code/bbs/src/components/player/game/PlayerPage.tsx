@@ -220,7 +220,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);
+      setWinner(data);  
     });
     //#endregion
 
