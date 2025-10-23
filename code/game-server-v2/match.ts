@@ -4,7 +4,7 @@ import { Battle, BattleOptions } from "../simulator/core/battle";
 import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
-import { log_attention, log_event } from "./utils";
+import { log_attention, log_event, log_notice } from "./utils";
 import { MonsterId } from "../simulator/core/monster/monster_pool";
 import { TargetingData } from "../simulator/core/action/targeting";
 import { EntryID } from "../simulator/core/utils";
@@ -20,11 +20,12 @@ export class Match {
     player1: Player;
     player2?: Player;
     winner?: Player;
-    spectators: AccountId[];
+    spectators: Player[];
     matchType: MatchType;
     matchID: number;
     battle?: Battle;
 
+    private turnCount: number = 0;
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
 
@@ -79,11 +80,51 @@ export class Match {
                     monsterId: this.player2!.monster!.templateId as MonsterId,
                 },
             ],
-        };
 
+            // No playerChannel yet so this is temp
+            waitForBattleOver: this.makeBattleOverWaiter(null as any)
+        };
 
         this.battle = new Battle(options);
     }
+
+    private makeBattleOverWaiter(playerChannel: PlayerNamespace) {
+    return () =>
+      new Promise<void>((resolve) => {
+        const expected = this.player2 ? 2 : 1;
+        const acks = new Set<string>();
+
+        const handler = (socketId: string) => {
+          acks.add(socketId);
+          if (acks.size >= expected) {
+            // cleanup listeners then resolve
+            playerChannel.off("playerAnimationsDone", onAckFromClient);
+            resolve();
+          }
+        };
+
+        // Wrap to extract socket id from payload
+        const onAckFromClient = (payload: { socketId: string }) => {
+          if (!payload?.socketId) return;
+          // Only accept acks from players in THIS match
+          if (
+            payload.socketId === this.player1.socketId ||
+            payload.socketId === this.player2?.socketId
+          ) {
+            handler(payload.socketId);
+          }
+        };
+
+        // Listen for client acks scoped to the /player namespace
+        playerChannel.on("playerAnimationsDone", onAckFromClient);
+
+        // Optional: safety timeout to prevent deadlocks (e.g., client disconnect)
+        setTimeout(() => {
+          playerChannel.off("playerAnimationsDone", onAckFromClient);
+          resolve();
+        }, 6000);
+      });
+  }
 
     getSideForPlayer(player: Player): number {
         if (this.matchType === MatchType.BYE || !this.battle) {
@@ -99,7 +140,7 @@ export class Match {
     }
 
     // Called by main when a player submits a move
-    submitMove(player: Player, moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId): void {
+    submitMove(player: Player, moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId, playerChannel: PlayerNamespace): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
@@ -107,6 +148,17 @@ export class Match {
         console.log(`[MATCH DEBUG] submitMove called for ${player.displayName} with moveId ${moveId}, targetMethod ${targetMethod}, targetSide ${targetSide}`);
         // Store move
         this.submittedMoves.set(player, { moveId, targetSide, targetMethod });
+
+        // Check if both players have submitted
+        const p1Submitted = this.submittedMoves.has(this.player1);
+        const p2Submitted = this.player2 ? this.submittedMoves.has(this.player2) : true;
+
+        if (p1Submitted && p2Submitted) {
+            this.turnCount++; // Increment turn
+            this.sendTurnUpdate(playerChannel); // Notify clients
+            this.submittedMoves.clear(); // Reset for next turn
+        }
+
 
         const sideIndex = this.getSideForPlayer(player);
         const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
@@ -127,6 +179,16 @@ export class Match {
         console.log(`[MATCH DEBUG] Callback called for ${player.displayName}`);
     }
 
+    // helper to broadcast turn updates
+    sendTurnUpdate(playerChannel: PlayerNamespace) {
+        // Emit current turn count to all players and spectators
+        const players = [this.player1, this.player2].filter(Boolean) as Player[];
+        players.forEach(player => {
+            playerChannel.to(player.socketId).emit("turnUpdated", { turnCount: this.turnCount });
+        });
+        this.spectators.forEach(s => playerChannel.to(s.socketId).emit("turnUpdated", { turnCount: this.turnCount }));
+    }
+
     // Called by main when a player submits roll notice
     submitRoll(player: Player): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
@@ -144,7 +206,7 @@ export class Match {
     }
 
     // Called by main when a player submits reroll notice
-    submitReroll(player: Player, option : boolean): void {
+    submitReroll(player: Player, option: boolean): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit rerolls to.`);
         }
@@ -222,26 +284,52 @@ export class Match {
                     log_event(`[EVENT] Sending event to player 2 (${this.player2.displayName})`);
                     playerChannel.to(this.player2.socketId).emit("newEvent", event);
                 }
+
+                // Broadcast to spectators
+                this.spectators.forEach(spectator => {
+                    log_event(`[EVENT] Sending event to spectator (${spectator.displayName})`);
+                    playerChannel.to(spectator.socketId).emit("newEvent", event);
+                })
             },
         });
+
+        this.battle["waitForBattleOver"] = this.makeBattleOverWaiter(playerChannel);
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
             player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
+            player1name: this.player1.displayName,
+            player2name: this.player2?.displayName,
             sideID: 0,
         })
+
         if (this.player2) {
             playerChannel.to(this.player2?.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
+                player1name: this.player1.displayName,
+                player2name: this.player2?.displayName,
                 sideID: 1,
             })
         };
+
+        // TODO: Emit socket for all spectators for each player
+        log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
+        this.spectators.forEach(spectator => {
+            playerChannel.to(spectator.socketId).emit("startRound", {
+                player1Monster: this.player1?.selectedMonsterTemplateName,
+                player2Monster: this.player2?.selectedMonsterTemplateName,
+                sideID: 0,
+                spectator: true
+            });
+        });
 
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();
         log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
+
+        await this.waitForAnimationsAcks(playerChannel);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
@@ -250,15 +338,49 @@ export class Match {
         const loser = winnerIndex === 0 ? this.player2 : this.player1;
 
         if (loser) {
-            if (loser.linkedAccountId) {
-                this.winner?.addSpectator(loser.linkedAccountId);
-            }
+            this.winner?.addSpectator(loser);
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
         if (this.winner && loser) {
-            playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
-            playerChannel.to(loser?.socketId).emit("sendToWaiting");
+          const activeIds = new Set([
+            this.player1.socketId,
+            this.player2?.socketId, // may be undefined for BYE
+          ]);
+
+          // Loser should wait
+          playerChannel.to(loser.socketId).emit("sendToWaiting");
+
+          // Spectators: exclude anyone who is actually playing this match
+          this.spectators
+            .filter(s => !activeIds.has(s.socketId))
+            .forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
         }
     }
 
+     private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
+      return new Promise((resolve) => {
+        const expected = this.player2 ? 2 : 1;
+        const acks = new Set<string>();
+
+        const onAck = (payload: { socketId: string }) => {
+          const id = payload?.socketId;
+          if (!id) return;
+          // only accept acks from the two players in THIS match
+          if (id === this.player1.socketId || id === this.player2?.socketId) {
+            acks.add(id);
+            if (acks.size >= expected) {
+              playerChannel.off("playerAnimationsDone", onAck);
+              resolve();
+            }
+          }
+        };
+
+        playerChannel.on("playerAnimationsDone", onAck);
+
+        setTimeout(() => {
+          playerChannel.off("playerAnimationsDone", onAck);
+          resolve();
+        }, 10000);
+      });
+    }
 }

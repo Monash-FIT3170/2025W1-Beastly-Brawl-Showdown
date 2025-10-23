@@ -11,7 +11,7 @@ import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_poo
 import { TargetingMethod } from "../simulator/core/action/targeting";
 import { Match, MatchType } from "./match";
 import { TournamentType } from "./tournament_manager";
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
@@ -240,6 +240,28 @@ async function main() {
 
       log_notice(`All players in room ${msg.roomId} have been notified to start the game.`);
     });
+
+    // #region Kick Player
+    socket.on("kickPlayer", (msg: { roomId: number; playerName: string }) => {
+      const room = gameServer.rooms.get(msg.roomId);
+      if (!room) return;
+
+      const player = room.getPlayer(msg.playerName);
+      if (!player) return;
+
+      playerChannel.to(player.socketId).emit("playerKicked");
+
+      // Disconnect the player from Socket.IO
+      setTimeout(() => {
+        room.removePlayer(msg.playerName);
+        playerChannel.sockets.get(player.socketId)?.disconnect();
+      }, 50);
+
+      // Update all hosts about the new player list
+      const playerNameList = room.players.map((p) => p.displayName);
+      hostChannel.to(room.hostSocketId).emit("refreshPlayerList", playerNameList);
+    });
+    // #endregion
   });
 
   /// Pre-connection auth check
@@ -309,7 +331,7 @@ async function main() {
     }
 
     try {
-      gameServer.joinRoom(socket.id, roomId, auth.displayName, undefined);
+      gameServer.joinRoom(socket.id, roomId, auth.displayName);
 
       // Attach the actual player instance to the socket
       const room = gameServer.rooms.get(roomId);
@@ -345,6 +367,20 @@ async function main() {
 
     socket.on("disconnect", () => {
       log_event("Player disconnected.");
+
+      // Get the player attached to this socket
+      const player = socket.data.player as Player;
+      if (!player) return;
+
+      const room = gameServer.rooms.get(player.roomId);
+      if (!room) return;
+
+      // Remove player from room (if not already removed)
+      room.removePlayer(player.displayName);
+
+      // Notify the host to refresh player list
+      const playerNameList = room.players.map((p) => p.displayName);
+      hostChannel.to(room.hostSocketId).emit("refreshPlayerList", playerNameList);
     });
 
     // #region Select Monster
@@ -445,7 +481,7 @@ async function main() {
 
     socket.on("requestRoll", handleRollNotice);
 
-    function handleRerollNotice( option : boolean) {
+    function handleRerollNotice(option: boolean) {
       log_notice("Reroll notice is being handled");
       const player = socket.data.player as Player;
       const room = gameServer.rooms.get(player.roomId!);
@@ -484,11 +520,11 @@ async function main() {
 
       switch (moveId) {
         case "defend":
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId);
+          match.submitMove(player, moveId, targetMethod as TargetingMethod, sourceSide as SideId, playerChannel);
           break;
         case "attack-normal":
           const targetSide = sourceSide === 1 ? 0 : 1;
-          match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId);
+          match.submitMove(player, moveId, targetMethod as TargetingMethod, targetSide as SideId, playerChannel);
           break;
         default: { // TODO: Alternate way to identify abilities other than move ID
           const abilityMoveId = match.getMonsterAbility(player);
@@ -514,7 +550,7 @@ async function main() {
               throw new Error(`Unknown targeting method: ${moveData.targetingMethod} for move ${abilityMoveId}`);
           }
           log_attention(`Ability ${abilityMoveId} being submitted by ${player} targeting ${targetSide}`);
-          match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId);
+          match.submitMove(player, abilityMoveId, moveData.targetingMethod as TargetingMethod, targetSide as SideId, playerChannel);
           break;
         }
       }

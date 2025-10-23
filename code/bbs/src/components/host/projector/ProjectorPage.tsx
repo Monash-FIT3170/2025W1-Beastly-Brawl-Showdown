@@ -21,7 +21,7 @@ export default function ProjectorPage() {
 
   const { type } = useParams<{ type: "standard" | "random" }>();
   const tournamentType = type === "random" ? "random" : "standard";
-  
+
   function getJoinUrl() {
     return window.location.hostname + "join/" + joinCode;
   }
@@ -91,10 +91,10 @@ export default function ProjectorPage() {
       setPlayerList(newPlayerList);
     });
 
-    // if (!roomId) {
-    //   socketRef.current.emit("requestRoom", {type: tournamentType});
-    //   return;
-    // }
+    if (!roomId) {
+      socketRef.current.emit("requestRoom", { type: tournamentType });
+      return;
+    }
     //#endregion
 
     return () => {
@@ -107,7 +107,15 @@ export default function ProjectorPage() {
 
   //#region Host App
 
-  function handleStartGame() {
+  function handleStartGame(e: React.MouseEvent<HTMLButtonElement>) {
+    e.currentTarget.disabled = true;
+
+    const surrenderButtons = document.querySelectorAll('.kick-btn');
+    surrenderButtons.forEach((btn) => {
+      (btn as HTMLButtonElement).style.opacity = '0.5';
+      (btn as HTMLButtonElement).disabled = true;
+    })
+    
     if (socketRef.current) {
       socketRef.current.emit("requestStartGame", { roomId, type: tournamentType });
       console.log("Start game requested!", tournamentType);
@@ -131,8 +139,13 @@ export default function ProjectorPage() {
         <h1>Beastly Brawl Showdown!</h1>
       </div>
 
-      <ParticipantDisplayBox name={playerList.toString()} />
-
+      <ParticipantDisplayBox
+        name={playerList.join(",")}
+        onKickPlayer={(playerName) => {
+          console.log("Kicking player:", playerName);
+          socketRef.current?.emit("kickPlayer", { roomId, playerName });
+        }}
+      />
       <button className="glb-btn" id="start-game-btn" onClick={handleStartGame}>
         Start Game
       </button>

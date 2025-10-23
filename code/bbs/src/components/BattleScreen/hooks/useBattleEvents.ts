@@ -11,6 +11,7 @@ import type {
     RerollEvent,
     RollEvent
 } from "../../../../../simulator/core/event/core_events";
+import { COMMON_MOVE_POOL } from "../../../../../simulator/data/common/common_move_pool";
 
 interface UseBattleEventsParams {
     myId: number;
@@ -34,21 +35,31 @@ export function useBattleEvents({
                 case "moveSuccess": {
                     const e = ev as MoveSuccessEvent;
                     const isPlayer = e.source === myId;
-                    const moveName = e.moveId;
+                    const actor: "player1" | "player2" = isPlayer ? "player1" : "player2";
+                    
+                    const moveId =
+                        (("abilityId" in e && typeof (e as any).abilityId === "string") ? (e as any).abilityId :
+                        ("actionId"  in e && typeof (e as any).actionId  === "string") ? (e as any).actionId  :
+                        e.moveId);
+                    
+                    const moveData = COMMON_MOVE_POOL[moveId as keyof typeof COMMON_MOVE_POOL];
+                    const moveName = moveData.name;
                     const message = isPlayer
                         ? `You ${moveName} successfully!`
                         : `Enemy ${moveName}s successfully!`;
+                        
                     setCurrentMessage(message);
-                    enqueueAnim(e.moveId, isPlayer ? "player1" : "player2");
+                    enqueueAnim(moveId, actor);
                     break;
                 }
                 case "moveFailed": {
                     const e = ev as MoveFailedEvent;
                     const isPlayer = e.source === myId;
+                    const moveData = COMMON_MOVE_POOL[e.moveId as keyof typeof COMMON_MOVE_POOL];
+                    const moveName = moveData.name;
                     let message = isPlayer
-                        ? `Your ${e.moveId} failed!`
-                        : `Enemy ${e.moveId} failed!`;
-                    if (e.moveId === "defend") message += " No charges left!";
+                        ? `Your ${moveName} failed!`
+                        : `Enemy ${moveName} failed!`;
                     setCurrentMessage(message);
                     break;
                 }

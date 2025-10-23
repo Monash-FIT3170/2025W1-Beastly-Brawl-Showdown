@@ -70,5 +70,5 @@ export interface BuffEvent extends BaseEvent {
   name: "buff";
   source: SideId;
   target: SideId;
-  buffs: {attack?: number, armour?: number };
+  buffs: { attack?: number, armour?: number };
 }

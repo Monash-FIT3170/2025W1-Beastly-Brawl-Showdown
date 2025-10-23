@@ -1209,19 +1209,88 @@ input:focus {
   top: 90%;
 }
 
+#start-game-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Small Box that shows participants names */
 .participants-name-box {
-  background-color: #8b4513;
-  color: #d4a574;
-  border: none;
-  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1%;
+
+  color: #d4a574; 
   font-size: 1.1rem;
   font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
   text-transform: capitalize;
+
   min-width: 12.5rem;
   min-height: 3rem;
+
+  background-color: #8b4513;
+  border: none;
+  
+  box-shadow:
+    0 4px 0 #773519,
+    /* bottom edge */ 4px 0 0 #773519,
+    /* right edge */ -4px 0 0 #773519,
+    /* left edge */ 0 -4px 0 #c26130; /* top edge */
+  
+  transition: all 0.3s ease;
+}
+
+.participants-name-box:hover {
+  transform: translateY(-3px);
+}
+
+.participants-name-box span {
+  width: 100%;
+
+  flex: 0;
+  text-align: center;
+}
+
+.kick-btn {
+  background-color: transparent;
+  border: none;
+  text-align: right;
+}
+
+/* ################################################## */
+/* Battle Screen styles */
+#battle-screen-body {
+  /* position: relative; */
+  /* position: relative; */
+  background-image: url("/assets/combat-bg.png");
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+}
+
+.battle-top-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  justify-content: space-evenly;
+
+  height: auto;
+  width: 100%;
+  padding-top: 1%;
+  align-items: center;
+  justify-content: space-between;
+  
+  background-color: #8b4513;
+
+  padding: 1% 2% 1% 2%;
+
+  font-size: 0.8rem;
+  color: #d4a574;
+  
+  background-color: #8b4513;
+  border: none;
 
   box-shadow:
     0 4px 0 #773519,
@@ -1230,27 +1299,31 @@ input:focus {
     /* left edge */ 0 -4px 0 #c26130; /* top edge */
 }
 
-.participants-name-box:hover {
-  transform: translateY(-3px);
-}
-
-/* ################################################## */
-/* Battle Screen styles */
-#battle-screen-body {
-  position: relative;
-  background-image: url("/assets/combat-bg.png");
+.battle-top-left {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  align-items: center;
+  gap: 5px;
 }
 
-.battleScreenTop {
-  position: relative;
-  display: block;
-  background-color: red;
-  width: 100%;
-  height: 8%;
-  top: 0px;
+.battle-top-center {
+  display: flex;
+  flex-direction: column;
+  justify-self: center;
+
+  max-width: 70%;
+
+  gap: 5px;
+}
+
+/* .opponent-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+} */
+
+.battle-top-right {
+  justify-self: center;
 }
 
 #battleScreenTop-btn {
@@ -1259,6 +1332,23 @@ input:focus {
   left: 0.8rem;
   z-index: 2000;
   margin: 0;
+}
+
+.surrender-btn {
+  background-color: #8b4513;
+  color: #d4a574;
+  border: none;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+  height: 20%;
+}
+
+.battle-scene {
+  width: 100%;
 }
 
 .battleMiddle {
@@ -1278,10 +1368,9 @@ input:focus {
 .battleScreenBottom {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 10%;
   padding: 20px;
   background: transparent;
-  position: absolute;
   bottom: 0;
   width: 100%;
 }
@@ -1290,13 +1379,6 @@ input:focus {
   width: 15rem;
   height: 15rem;
   object-fit: fill;
-}
-
-.battleScreenBottomButton {
-  width: 40%;
-  height: 8rem;
-  margin: 1rem;
-  padding: 1rem;
 }
 
 .battleScreenTopButton {
@@ -1399,6 +1481,26 @@ progress::-moz-progress-bar {
   margin-top: 1rem;
 }
 
+.btn-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+}
+
+.badge-grid {
+  grid-column: 2;
+  grid-row: 1;
+
+  z-index: 10;
+}
+
+.img-grid {
+  grid-column: 1 / -1;
+  grid-row: -1 / 1;
+  place-self: center;
+}
+
 /* Battle Loading Styles */
 .battle-loading-screen {
   display: flex;
@@ -1436,34 +1538,6 @@ progress::-moz-progress-bar {
   box-shadow: 0 8px 32px rgba(108, 92, 231, 0.3);
   animation: float 3s ease-in-out infinite;
   overflow: hidden;
-}
-
-.vs-divider {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: black;
-  transform: translateY(-50%);
-  z-index: 10;
-  animation: lineExpand 1.5s ease-out;
-}
-
-.vs-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.95);
-  font-size: 1.1rempx;
-  padding: 16px 24px;
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  border: 0.3rem solid rgba(255, 255, 255, 0.3);
-  z-index: 20;
-  animation: scaleIn 0.8s ease-out 0.5s both;
 }
 
 .loading-text {
@@ -1610,8 +1684,10 @@ input[type="range"] {
 
 .health-ring-container {
   position: relative;
-  width: 200px; /* same as size */
-  height: 200px; /* same as size */
+  --ring-size: 200px;
+  --ring-stroke: 20px;
+  width: var(--ring-size);
+  height: var(--ring-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1621,11 +1697,16 @@ input[type="range"] {
   position: absolute;
   inset: 0;
   transform: rotate(-90deg); /* so health starts at top */
+  width: var(--ring-size);
+  height: var(--ring-size);
 }
 
 .health-ring circle {
   fill: none;
-  stroke-width: 20px;
+  stroke-width: var(--ring-stroke, 20px);
+  cx: calc(var(--ring-size) / 2);
+  cy: calc(var(--ring-size) / 2);
+  r: calc((var(--ring-size) / 2) - (var(--ring-stroke) / 2));
 }
 
 .ring-bg {
@@ -1633,7 +1714,12 @@ input[type="range"] {
 }
 
 .ring-fg {
-  transition: stroke-dashoffset 0.3s ease; /* smooth health change */
+  --radius: calc((var(--ring-size) / 2) - (var(--ring-stroke) / 2));
+  --circumference: calc(2 * 3.14159 * var(--radius));
+  
+  stroke-dasharray: var(--circumference);
+  stroke-dashoffset: calc(var(--circumference) * (1 - var(--health-percent, 1)));
+  transition: stroke-dashoffset 0.3s ease;
 }
 
 /* Health color variations based on percentage */
@@ -1646,8 +1732,8 @@ input[type="range"] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 180px; /* size - stroke */
-  height: 180px; /* size - stroke */
+  width: calc(var(--ring-size) - var(--ring-stroke));
+  height: calc(var(--ring-size) - var(--ring-stroke));
   border-radius: 50%;
   object-fit: cover;
 }
@@ -1727,7 +1813,7 @@ input[type="range"] {
 
 .slash-animation.active {
   opacity: 1;
-  animation: slashAppear 0.5s ease-out forwards;
+  animation: slashAppear 0.7s ease-out forwards;
 }
 
 .slash-image {
@@ -1743,7 +1829,7 @@ input[type="range"] {
 }
 
 .slash-animation.active .slash-image {
-  animation: slashImageStrike 0.6s ease-out forwards;
+  animation: slashImageStrike 0.7s ease-out forwards;
 }
 
 @keyframes slashAppear {
@@ -1770,7 +1856,7 @@ input[type="range"] {
 
 .shield-animation.active {
   opacity: 1;
-  animation: shieldAppear 0.6s ease-out forwards;
+  animation: shieldAppear 0.8s ease-out forwards;
 }
 
 .shield-image {
@@ -1786,7 +1872,7 @@ input[type="range"] {
 }
 
 .shield-animation.active .shield-image {
-  animation: shieldPop 0.6s ease-out forwards;
+  animation: shieldPop 0.8s ease-out forwards;
 }
 
 @keyframes shieldAppear {
@@ -1802,8 +1888,114 @@ input[type="range"] {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
 }
 
-/* Ability Animation */
-.ability-animation {
+.dodge-animation,
+.stun-animation {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 12; /* slightly above shield (11) so it’s visible */
+}
+
+.dodge-animation.active {
+  opacity: 1;
+  animation: abilityFade 0.8s ease-out forwards;
+}
+
+.dodge-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  object-fit: contain;
+  filter: blur(0px);
+  pointer-events: none;
+}
+
+/* Runs only when parent has .active */
+.dodge-animation.active .dodge-image {
+  animation:
+    dodgeSide 0.8s ease-out forwards,
+    dodgeBlur 0.8s ease-out forwards;
+}
+
+/* Slide slightly to the side + subtle scale */
+@keyframes dodgeSide {
+  0%   { transform: translate(-50%, -50%) scale(0.9) translateX(0);   opacity: 0; }
+  10%  { opacity: 1; }
+  40%  { transform: translate(calc(-50% - 18px), -50%) scale(1.0);    opacity: 1; }
+  75%  { transform: translate(calc(-50% - 8px),  -50%) scale(1.0);    opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.95);                opacity: 0; }
+}
+
+/* Quick motion blur during the sidestep */
+@keyframes dodgeBlur {
+  0%   { filter: blur(0px); }
+  30%  { filter: blur(2px); }
+  60%  { filter: blur(1px); }
+  100% { filter: blur(0px); }
+}
+
+.stun-animation.active {
+  opacity: 1;
+  animation: abilityFade 0.8s ease-out forwards;
+}
+
+.stun-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+  opacity: 0;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.0));
+}
+
+.stun-animation.active .stun-image {
+  animation:
+    stunPop   1s ease-out forwards,
+    stunGlow  1s ease-out forwards;
+}
+
+/* Fast pop-in */
+@keyframes stunPop {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+}
+
+/* Short stun wobble */
+@keyframes stunShake {
+  0%   { transform: translate(-50%, -50%) rotate(0deg)   scale(1.0); }
+  20%  { transform: translate(calc(-50% - 4px), -50%) rotate(-6deg) scale(1.0); }
+  40%  { transform: translate(calc(-50% + 4px), -50%) rotate(6deg)  scale(1.0); }
+  60%  { transform: translate(calc(-50% - 2px), -50%) rotate(-4deg) scale(1.0); }
+  80%  { transform: translate(calc(-50% + 2px), -50%) rotate(3deg)  scale(1.0); }
+  100% { transform: translate(-50%, -50%) rotate(0deg)  scale(1.0); }
+}
+
+/* Golden glow that appears then fades */
+@keyframes stunGlow {
+  0%   { filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.0)); opacity: 0; }
+  20%  { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); opacity: 1; }
+  60%  { filter: drop-shadow(0 0 8px  rgba(255, 215, 0, 0.6)); }
+  100% { filter: drop-shadow(0 0 0px  rgba(255, 215, 0, 0.0)); opacity: 0; }
+}
+
+/* Shared fade for the container so overlays don’t “stick” */
+@keyframes abilityFade {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.double-attack-animation {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -1811,34 +2003,80 @@ input[type="range"] {
   z-index: 11;
 }
 
-.ability-animation.active {
+.double-attack-animation.active {
   opacity: 1;
-  animation: shieldAppear 0.7s ease-out forwards;
+  animation: doubleAttackAppear 1.2s ease-out forwards;
 }
 
-.ability-image {
+.double-attack-image {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 70%;
-  height: 70%;
-  transform: translate(-50%, -50%) scale(0.6) rotate(0deg);
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(1.5);
   opacity: 0;
   object-fit: contain;
   pointer-events: none;
 }
 
-.ability-animation.active .ability-image {
-  animation: shieldPop 0.7s ease-out forwards;
+.double-attack-animation.active .double-attack-image {
+  animation: doubleAttackPop 1.2s ease-out forwards;
 }
 
-@keyframes abilityAppear {
+/* Fade in/out timing like Shield */
+@keyframes doubleAttackAppear {
   0%   { opacity: 0; }
   20%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
-@keyframes abilityPop {
+/* Quick pop + fade effect */
+@keyframes doubleAttackPop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
+
+.attack-bonus-animation {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 11;
+}
+
+.attack-bonus-animation.active {
+  opacity: 1;
+  animation: attackBonusAppear 1.2s ease-out forwards;
+}
+
+.attack-bonus-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.attack-bonus-animation.active .attack-bonus-image {
+  animation: attackBonusPop 1.2s ease-out forwards;
+}
+
+/* Fade in/out (like shield/double-attack) */
+@keyframes attackBonusAppear {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Quick pop */
+@keyframes attackBonusPop {
   0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
   30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
   60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
@@ -2026,10 +2264,12 @@ input[type="range"] {
     font-size: 0.6rem;
   }
 
+  .battle-scene {
+    margin-top: 10%;
+  }
 
   .battleScreenBottom {
     flex-direction: row;
-    gap: 45px;
     padding: 30px;
     background: transparent;
   }
@@ -2044,6 +2284,10 @@ input[type="range"] {
   .battleScreenBottomButtonImage {
     width: 80px;
     height: 80px;
+  }
+
+  .reroll-btn {
+    font-size: 3rem;
   }
 
   /* Reduce monster image sizes */
@@ -2119,14 +2363,37 @@ input[type="range"] {
     transform: scale(0.95);
   }
 }
- 
-  .modal-box {
-    width: 90%;
-    max-width: 300px;
-    padding: 1.5rem;
+
+@media screen and (max-width: 540px) {
+  .battle-scene {
+    margin-top: 5%;
   }
 
-  .modal-title {
-    font-size: 1.25rem;
-    text-align: center;
+  .health-ring-container {
+    --ring-size: 200px;
+    --ring-stroke: 20px;
   }
+}
+ 
+
+@media screen and (max-width: 375px) {
+  .battle-scene {
+    margin-top: 5%;
+  }
+
+  .health-ring-container {
+    --ring-size: 170px;
+    --ring-stroke: 17px;
+  }
+}
+ 
+.modal-box {
+  width: 90%;
+  max-width: 300px;
+  padding: 1.5rem;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  text-align: center;
+}
