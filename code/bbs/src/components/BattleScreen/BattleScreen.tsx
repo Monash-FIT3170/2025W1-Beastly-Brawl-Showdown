@@ -163,12 +163,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   } 
 
   if (isSpectator) {
+    console.log(matchData);
     return (
       <div className="canvas-body" id="battle-screen-body">
         <BattleTop
           turnNumber={turnIndex + 1}
-          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
-          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
+          playerName={matchData.player1.name}
+          opponentName={matchData.player2.name}
         />
         <BattleScene
           battleInstanceKey={battleInstanceKey}

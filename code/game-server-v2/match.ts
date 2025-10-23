@@ -334,6 +334,8 @@ export class Match {
             playerChannel.to(spectator.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
+                player1name: this.player1.displayName,
+                player2name: this.player2?.displayName,
                 sideID: followSide,
                 spectator: true
             });

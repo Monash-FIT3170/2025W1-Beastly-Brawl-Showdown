@@ -9,7 +9,7 @@ interface BattleTopProps {
 
 export const BattleTop: React.FC<BattleTopProps> = ({
   turnNumber,
-  // playerName,
+  playerName,
   opponentName,
   onSurrender
 }) => {
@@ -25,8 +25,15 @@ export const BattleTop: React.FC<BattleTopProps> = ({
 
       {/* Center: Player vs Opponent */}
       <div className="battle-top-center">
-        <span>VS</span>
-        <span className="opponent-name">{opponentName}</span>
+        {!onSurrender ? (
+          <span className="battle-names">
+            {playerName} <span >VS</span> {opponentName}
+          </span>
+        ) : (
+          <span>
+            VS <span className="opponent-name">{opponentName}</span>
+          </span>
+        )}
       </div>
 
       {/* <div style={{flex: 1}}></div> */}
