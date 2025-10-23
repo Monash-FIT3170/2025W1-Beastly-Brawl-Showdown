@@ -1,10 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router";
 
 interface BattleTopProps {
   turnNumber: number;
   playerName: string;
   opponentName: string;
+  onSurrender: () => void;
 }
 
 export const BattleTop: React.FC<BattleTopProps> = ({
@@ -14,6 +14,7 @@ export const BattleTop: React.FC<BattleTopProps> = ({
 }) => {
   const navigate = useNavigate();
 
+export const BattleTop: React.FC<BattleTopProps> = ({ onSurrender }) => {
   return (
     <div className="battle-top-bar">
       {/* Left side: Turn number */}
@@ -35,7 +36,7 @@ export const BattleTop: React.FC<BattleTopProps> = ({
       {/* Right side: Surrender */}
       <div className="battle-top-right">
         <button
-          onClick={() => navigate("/main")}
+          onClick={onSurrender}
           className="surrender-btn"
         >
           &#x21A9;

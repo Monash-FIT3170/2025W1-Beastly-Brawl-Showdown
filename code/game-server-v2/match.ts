@@ -29,6 +29,8 @@ export class Match {
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
 
+    private _surrenderResolver?: () => void;
+
     /**
      * Constructor.
      * 
@@ -42,6 +44,17 @@ export class Match {
         this.spectators = player1.spectators.concat(player2?.spectators ?? []);
         this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
         this.matchID = matchID;
+    }
+
+    // Winner resolution to notify tournament manager
+    private resolveMatch(winner: Player, loser?: Player) {
+        this.winner = winner;
+
+        if (loser) {
+            winner.addSpectator(loser);
+            loser.followPlayer = winner;
+        }
+
     }
 
     createBattle(): void {
@@ -313,34 +326,72 @@ export class Match {
             })
         };
 
-        // TODO: Emit socket for all spectators for each player
-        log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
+        log_event(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
         this.spectators.forEach(spectator => {
+            // Determine which side this spectator should follow
+            const followSide = spectator.followPlayer === this.player2 ? 1 : 0;
+
             playerChannel.to(spectator.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
-                sideID: 0,
+                sideID: followSide,
                 spectator: true
             });
         });
 
+        let surrenderResolver: (() => void) | undefined = undefined;
+        const surrenderPromise = new Promise<void>((resolve) => {
+            surrenderResolver = resolve;
+        });
+        this._surrenderResolver = surrenderResolver;
+
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
-        await this.battle.run();
-        log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
+        await Promise.race([
+            this.battle.run(),
+            surrenderPromise,
+        ]);
+        log_event(`[BATTLE] Battle finished/surrendered for match ${this.matchID}.`);
+
+        if (this.winner) return;
 
         await this.waitForAnimationsAcks(playerChannel);
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
 
-        this.winner = winnerIndex === 0 ? this.player1 : this.player2;
+        const winner = winnerIndex === 0 ? this.player1 : this.player2;
         const loser = winnerIndex === 0 ? this.player2 : this.player1;
+        this.resolveMatch(winner!, loser);
 
-        if (loser) {
-            this.winner?.addSpectator(loser);
-            log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
+        // Notify clients
+        log_warning("Waiting time :D");
+        playerChannel.to(winner!.socketId).emit("sendToWaiting");
+        playerChannel.to(loser!.socketId).emit("sendToWaiting");
+        this.spectators.forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
+    }
+
+    /**
+     * Immediately ends the battle due to a player surrendering.
+     * Determines the winner and executes normal post-battle logic.
+     */
+    surrender(surrenderingPlayer: Player, playerChannel: PlayerNamespace): void {
+        console.log(
+            `[MATCH] Player ${surrenderingPlayer.displayName} surrendered in MatchID: ${this.matchID}`
+        );
+
+        if (this._surrenderResolver) {
+            this._surrenderResolver();  // resolves the Promise.race, allowing runBattle() to continue
+            this._surrenderResolver = undefined;
         }
+
+        // Determine winner
+        const winner = surrenderingPlayer === this.player1 ? this.player2! : this.player1;
+        const loser = surrenderingPlayer;
+        this.resolveMatch(winner, loser);
+
+        console.log(`[MATCH] Winner is ${winner.displayName} for MatchID: ${this.matchID}`);
+      
         if (this.winner && loser) {
           const activeIds = new Set([
             this.player1.socketId,
@@ -354,7 +405,6 @@ export class Match {
           this.spectators
             .filter(s => !activeIds.has(s.socketId))
             .forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
-        }
     }
 
      private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
