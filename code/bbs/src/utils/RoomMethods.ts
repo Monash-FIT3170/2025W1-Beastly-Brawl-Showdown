@@ -42,8 +42,7 @@ export const getBestServerUrl = async (): Promise<string> => {
       // if (serverUrl.trim().length > 0) {
       //   resolve(serverUrl);
       // }
-      // resolve("https://two025w1-beastly-brawl-showdown.onrender.com")
-        resolve("https://two025w1-beastly-brawl-showdown-1.onrender.com")
+      resolve("https://two025w1-beastly-brawl-showdown.onrender.com")
       reject(new Error("Room is not joinable."));
     });
   } catch (e) {
