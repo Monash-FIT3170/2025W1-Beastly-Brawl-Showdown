@@ -4,7 +4,7 @@ import { Battle, BattleOptions } from "../simulator/core/battle";
 import { SideId } from "../simulator/core/side";
 import { COMMON_MONSTER_POOL } from "../simulator/data/common/common_monster_pool";
 import { COMMON_MOVE_NAMES, COMMON_MOVE_POOL } from "../simulator/data/common/common_move_pool";
-import { log_attention, log_event } from "./utils";
+import { log_attention, log_event, log_warning } from "./utils";
 import { MonsterId } from "../simulator/core/monster/monster_pool";
 import { TargetingData } from "../simulator/core/action/targeting";
 import { EntryID } from "../simulator/core/utils";
@@ -27,7 +27,8 @@ export class Match {
 
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
-    private onMatchComplete?: () => void;
+
+    private _surrenderResolver?: () => void;
 
     /**
      * Constructor.
@@ -36,13 +37,12 @@ export class Match {
      * @param matchID Unique integer created in tournament_manager
      * @param player2 Optional second player in the match (the match is a bye if left empty)
      */
-    constructor(player1: Player, player2: Player | undefined, matchID: number, onMatchComplete?: () => void) {
+    constructor(player1: Player, player2: Player | undefined, matchID: number) {
         this.player1 = player1;
         this.player2 = player2;
         this.spectators = player1.spectators.concat(player2?.spectators ?? []);
         this.matchType = player2 ? MatchType.DUEL : MatchType.BYE;
         this.matchID = matchID;
-        this.onMatchComplete = onMatchComplete;
     }
 
     // Winner resolution to notify tournament manager
@@ -54,7 +54,6 @@ export class Match {
             loser.followPlayer = winner;
         }
 
-        this.onMatchComplete?.();
     }
 
     createBattle(): void {
@@ -246,7 +245,6 @@ export class Match {
         });
 
 
-
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
             player2Monster: this.player2?.selectedMonsterTemplateName, // not option if bye
@@ -261,8 +259,7 @@ export class Match {
             })
         };
 
-        // TODO: Emit socket for all spectators for each player
-        log_attention(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
+        log_event(`Emitting to all ${this.spectators.length} spectators in match ${this.matchID}`);
         this.spectators.forEach(spectator => {
             // Determine which side this spectator should follow
             const followSide = spectator.followPlayer === this.player2 ? 1 : 0;
@@ -275,10 +272,21 @@ export class Match {
             });
         });
 
+        let surrenderResolver: (() => void) | undefined = undefined;
+        const surrenderPromise = new Promise<void>((resolve) => {
+            surrenderResolver = resolve;
+        });
+        this._surrenderResolver = surrenderResolver;
+
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
-        await this.battle.run();
-        log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
+        await Promise.race([
+            this.battle.run(),
+            surrenderPromise,
+        ]);
+        log_event(`[BATTLE] Battle finished/surrendered for match ${this.matchID}.`);
+
+        if (this.winner) return;
 
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
@@ -301,6 +309,11 @@ export class Match {
         console.log(
             `[MATCH] Player ${surrenderingPlayer.displayName} surrendered in MatchID: ${this.matchID}`
         );
+
+        if (this._surrenderResolver) {
+            this._surrenderResolver();  // resolves the Promise.race, allowing runBattle() to continue
+            this._surrenderResolver = undefined;
+        }
 
         // Determine winner
         const winner = surrenderingPlayer === this.player1 ? this.player2! : this.player1;
