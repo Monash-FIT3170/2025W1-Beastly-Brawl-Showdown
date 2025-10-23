@@ -128,17 +128,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   console.log("CURRENT SNAPSHOT IS")
   console.log(currentSnapshot)
 
-  useEffect(() => {
-    console.log("🌀 events updated. Length:", events.length);
-  }, [events]);
-
   const currentAttackCharges = currentSnapshot ? currentSnapshot.sides[matchData.myId].monster.attackCharges : null;
-
-  useEffect(() => {
-    console.log("⚔️ currentAttackCharges", currentAttackCharges);
-  }, [currentAttackCharges]);
-
-
 
   // Whenever there is new matchdata, reset the turn index
   useEffect(() => {

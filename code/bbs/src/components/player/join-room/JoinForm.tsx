@@ -120,7 +120,7 @@ export const JoinForm = () => {
         <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
         <form className="task-form" onSubmit={handleSubmitAuth}>
           <input className="form-textbox" type="text" placeholder="Display Name" value={inputDisplayName} onChange={(e) => setInputDisplayName(e.target.value)} />
-          {showInvalidName && (<BattleMessage message="Name taken. Please try again."/>)}
+          {showInvalidName && (<BattleMessage message="Name invalid/taken. Please try again."/>)}
           <div className="buttons-container">
             <button className="glb-btn" type="submit">
               Go!
