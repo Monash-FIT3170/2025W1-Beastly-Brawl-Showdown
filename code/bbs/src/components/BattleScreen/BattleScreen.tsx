@@ -183,6 +183,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
+          setIsWaiting={setIsWaiting}
+          isSpectator = {isSpectator}
+        />
+        {/* KEEP THIS HERE OR THE MOSTERS WILL BE ON THE FLOOR */}
+        <BattleBottom
+          currentAttackCharges = {currentAttackCharges}
+          onAction={onAction}
+          disabled={true}
+          chooseMove={null}
+          fallbackMoves={{
+            attack: myMonster.template.attackActionId,
+            ability: myMonster.template.abilityActionId,
+            defend: myMonster.template.defendActionId,
+          }}
+          onReroll={onReroll}
+          rerollMode={rerollMode}
         />
       </div>
     );
@@ -210,6 +226,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
+          setIsWaiting={setIsWaiting}
+          isSpectator = {isSpectator}
         />
         <BattleBottom
           currentAttackCharges = {currentAttackCharges}
