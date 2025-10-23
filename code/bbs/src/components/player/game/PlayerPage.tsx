@@ -248,7 +248,7 @@ const PlayerContent = () => {
     if (!socket) return;
     if (isFinalSnapshot && turnFinishedPlaying) {
       Promise.resolve().then(() => {
-        socket.emit("playerAnimationsDone", { socketId: socket.id });
+        socket.emit("playerAnimationsDone", { socketId: socket.id});
       })
       // Only ACK once per battle
       setIsFinalSnapshot(false);
@@ -290,7 +290,7 @@ const PlayerContent = () => {
 
     const handleTurnUpdate = (data: { turnCount: number }) => {
       console.log("Received turn update from server:", data.turnCount);
-      setTurnIndex(data.turnCount - 1); // server might send 1-based count
+      setTurnIndex(data.turnCount);
     };
 
     socket.on("turnUpdated", handleTurnUpdate);

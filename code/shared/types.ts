@@ -22,6 +22,7 @@ export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   requestRoll: (data: any) => void;
   requestReroll: (data: any) => void;
   turnUpdated: (data: any) => void;
+  playerAnimationsDone: (data: any) => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
