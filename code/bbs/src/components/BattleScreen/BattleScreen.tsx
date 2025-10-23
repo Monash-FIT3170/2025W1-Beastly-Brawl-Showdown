@@ -109,7 +109,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   // === Turn parsing and state ===
   const turns = useMemo(() => parseTurns(events), [events]);
-  const currentTurn = turns[turnIndex];
+  const currentTurn = turns[turns.length-1];
   const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
   console.log("CURRENT SNAPSHOT IS")
   console.log(currentSnapshot)
@@ -118,11 +118,19 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     console.log("🌀 events updated. Length:", events.length);
   }, [events]);
 
+  useEffect(() => {
+    console.log("🌀 events updated is :", events);
+  }, [events]);
+
   const currentAttackCharges = currentSnapshot ? currentSnapshot.sides[matchData.myId].monster.attackCharges : null;
 
   useEffect(() => {
     console.log("⚔️ currentAttackCharges", currentAttackCharges);
   }, [currentAttackCharges]);
+
+  useEffect(() => {
+    console.log("⚔️ turns is", turns);
+  }, [turns]);
 
   // Whenever there is new matchdata, reset the turn index
   useEffect(() => {
@@ -140,6 +148,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   };
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
+
+  if (!currentSnapshot){
+    return <div>Watiing for snapshot</div>;
+  } 
 
   if (isSpectator) {
   return (
