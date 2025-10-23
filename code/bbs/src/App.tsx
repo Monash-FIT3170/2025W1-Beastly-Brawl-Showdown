@@ -9,10 +9,6 @@ export default function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    document.title = "Beastly Brawl Showdown";
-  }, []);
-
-  useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = bgmVolume / 100;
       bgmEnabled ? audioRef.current.play() : audioRef.current.pause();

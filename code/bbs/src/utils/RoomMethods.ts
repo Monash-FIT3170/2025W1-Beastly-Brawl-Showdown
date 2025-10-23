@@ -9,10 +9,7 @@ import { io } from "socket.io-client";
 export const getBestServerUrl = async (): Promise<string> => {
   /// Fetch server
   try {
-    const SERVER_LOCATOR_URL =
-      import.meta.env.VITE_SERVER_LOCATOR_URL ?? "http://localhost:8000";
-    console.log(`The server locator url ${SERVER_LOCATOR_URL}`);
-    const response = await fetch(`${SERVER_LOCATOR_URL}/game-server-url`);
+    const response = await fetch("http://localhost:3010/game-server-url");
     const { url: serverUrl }: { url: string } = await response.json();
 
     // /// Check with server if join code leads to an active room if not error
@@ -37,17 +34,14 @@ export const getBestServerUrl = async (): Promise<string> => {
       //   console.error(`Connection failed: ${err.message}`);
       //   reject(new Error("Room is not joinable."));
       // });
-      
-
-      // if (serverUrl.trim().length > 0) {
-      //   resolve(serverUrl);
-      // }
-      resolve("https://two025w1-beastly-brawl-showdown.onrender.com")
+      if (serverUrl.trim().length > 0) {
+        resolve(serverUrl);
+      }
       reject(new Error("Room is not joinable."));
     });
   } catch (e) {
     return new Promise((resolve, reject) => {
-      reject(new Error("Error while fetching server: " + e));
+      reject(new Error("Room is not joinable."));
     });
   }
 };

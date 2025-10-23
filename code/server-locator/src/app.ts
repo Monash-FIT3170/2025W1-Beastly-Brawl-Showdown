@@ -3,7 +3,11 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { GameServerRegistryModel } from "./models/game_server_register";
 
-const MONGO_URI = process.env["MONGO_URI"] ?? `mongodb://localhost:27017/RoomLocation`;
+// TODO: MOVE TO ENV
+const MONGO_IP = "localhost";
+const MONGO_PORT = "27017";
+const MONGO_NAME = "RoomLocation";
+const MONGO_URI = `mongodb://${MONGO_IP}:${MONGO_PORT}/${MONGO_NAME}`;
 
 async function connectToDatabase(): Promise<typeof mongoose> {
   try {
@@ -19,7 +23,6 @@ async function connectToDatabase(): Promise<typeof mongoose> {
 async function main() {
   console.log("--< START >--");
   //# DB
-  console.log("Connecting to DDB...");
   const db = await connectToDatabase();
   db.connection.on("disconnect", () => {
     console.error("ERROR: Mongo disconnected...");
@@ -74,7 +77,7 @@ async function main() {
   });
 
   //# Listen
-  const port: number = parseInt(process.env['PORT'] || '8000', 10);
+  const port: number = 3010;
   app.listen(port);
   console.log(`Listening @ port ${port}`);
 

@@ -6,10 +6,7 @@ import { SocketContext } from "../socket/socket_context";
 
 const PlayerConnectionPage: React.FC = () => {
   const [playerName, setPlayerName] = useState("");
-  // const [serverAddress, setServerAddress] = useState("localhost:3000");
-  const defaultServerUrl = process.env.GAME_SERVER_URL || "http://localhost:3000";
-  const [serverAddress, setServerAddress] = useState(defaultServerUrl);
-
+  const [serverAddress, setServerAddress] = useState("localhost:3000");
   const navigate = useNavigate();
   const socketContext = useContext(SocketContext);
   if (!socketContext) {
@@ -32,7 +29,7 @@ const PlayerConnectionPage: React.FC = () => {
       console.log("Replacing socket...");
     }
 
-    const newSocket = io(serverAddress, {
+    const newSocket = io(`http://${serverAddress}`, {
       auth: { name: playerName, monsterTemplate: 1 },
       transports: ["websocket"],
     });
