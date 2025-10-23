@@ -125,7 +125,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
           do: async function (world: Battle, source: SideId): Promise<void> {
             // Give Stone Hide 3 ability charges for stun
             world.sides[source].monster.components.push(
-              new AbilityChargeComponent("stun", 3)
+              new AbilityChargeComponent("stun", 1)
             );
           },
         },
