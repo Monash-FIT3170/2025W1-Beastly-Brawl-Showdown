@@ -4,17 +4,15 @@ interface BattleTopProps {
   turnNumber: number;
   playerName: string;
   opponentName: string;
-  onSurrender: () => void;
+  onSurrender?: () => void;
 }
 
 export const BattleTop: React.FC<BattleTopProps> = ({
   turnNumber,
-  // playerName,
+  playerName,
   opponentName,
+  onSurrender
 }) => {
-  const navigate = useNavigate();
-
-export const BattleTop: React.FC<BattleTopProps> = ({ onSurrender }) => {
   return (
     <div className="battle-top-bar">
       {/* Left side: Turn number */}
@@ -27,21 +25,27 @@ export const BattleTop: React.FC<BattleTopProps> = ({ onSurrender }) => {
 
       {/* Center: Player vs Opponent */}
       <div className="battle-top-center">
-        <span>VS</span>
-        <span className="opponent-name">{opponentName}</span>
+        {!onSurrender ? (
+          <span className="battle-names">
+            {playerName} <span >VS</span> {opponentName}
+          </span>
+        ) : (
+          <span>
+            VS <span className="opponent-name">{opponentName}</span>
+          </span>
+        )}
       </div>
 
       {/* <div style={{flex: 1}}></div> */}
 
       {/* Right side: Surrender */}
-      <div className="battle-top-right">
-        <button
-          onClick={onSurrender}
-          className="surrender-btn"
-        >
-          &#x21A9;
-        </button>
-      </div>
+      {onSurrender && ( // only show if defined
+        <div className="battle-top-right">
+          <button onClick={() => onSurrender?.()} className="surrender-btn">
+            &#x21A9;
+          </button>
+        </div>
+      )}
     </div>
   );
 };

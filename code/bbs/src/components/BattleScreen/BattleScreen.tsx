@@ -163,12 +163,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   } 
 
   if (isSpectator) {
+    console.log(matchData);
     return (
       <div className="canvas-body" id="battle-screen-body">
         <BattleTop
           turnNumber={turnIndex + 1}
-          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
-          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
+          playerName={matchData.player1.name}
+          opponentName={matchData.player2.name}
         />
         <BattleScene
           battleInstanceKey={battleInstanceKey}
@@ -183,6 +184,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
+          setIsWaiting={setIsWaiting}
+          isSpectator = {isSpectator}
+        />
+        {/* KEEP THIS HERE OR THE MOSTERS WILL BE ON THE FLOOR */}
+        <BattleBottom
+          currentAttackCharges = {currentAttackCharges}
+          onAction={onAction}
+          disabled={true}
+          chooseMove={null}
+          fallbackMoves={{
+            attack: myMonster.template.attackActionId,
+            ability: myMonster.template.abilityActionId,
+            defend: myMonster.template.defendActionId,
+          }}
+          onReroll={onReroll}
+          rerollMode={rerollMode}
         />
       </div>
     );
@@ -210,6 +227,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
+          setIsWaiting={setIsWaiting}
+          isSpectator = {isSpectator}
         />
         <BattleBottom
           currentAttackCharges = {currentAttackCharges}

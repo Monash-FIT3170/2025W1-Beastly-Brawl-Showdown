@@ -334,6 +334,8 @@ export class Match {
             playerChannel.to(spectator.socketId).emit("startRound", {
                 player1Monster: this.player1?.selectedMonsterTemplateName,
                 player2Monster: this.player2?.selectedMonsterTemplateName,
+                player1name: this.player1.displayName,
+                player2name: this.player2?.displayName,
                 sideID: followSide,
                 spectator: true
             });
@@ -365,7 +367,6 @@ export class Match {
         this.resolveMatch(winner!, loser);
 
         // Notify clients
-        log_warning("Waiting time :D");
         playerChannel.to(winner!.socketId).emit("sendToWaiting");
         playerChannel.to(loser!.socketId).emit("sendToWaiting");
         this.spectators.forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
@@ -405,9 +406,10 @@ export class Match {
           this.spectators
             .filter(s => !activeIds.has(s.socketId))
             .forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
+        }
     }
 
-     private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
+    private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
       return new Promise((resolve) => {
         const expected = this.player2 ? 2 : 1;
         const acks = new Set<string>();
