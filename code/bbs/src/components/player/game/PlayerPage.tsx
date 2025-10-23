@@ -435,8 +435,8 @@ const PlayerContent = () => {
   }, [isButtonEnabled, hasReceivedChooseMove, turnFinishedPlaying]);
 
   useEffect(() => {
-    console.log("isWaiting changed:", isWaiting);
-  }, [isWaiting]);
+    console.log(`[waiting, allReady] changed: [${waiting}, ${allReady}]`);
+  }, [waiting, allReady]);
 
   //#endregion
 

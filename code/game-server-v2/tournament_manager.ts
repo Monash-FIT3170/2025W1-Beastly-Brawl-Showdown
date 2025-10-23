@@ -44,7 +44,7 @@ export class TournamentManager {
       const player2 = playerList[i + 1] ?? undefined;
 
       // Pass checkRoundCompletion as callback
-      this.matches.push(new Match(playerList[i], player2, matchID, () => this.checkRoundCompletion()));
+      this.matches.push(new Match(playerList[i], player2, matchID));
     }
     console.log(`Created ${this.matches.length} matches for this round.`);
   }
