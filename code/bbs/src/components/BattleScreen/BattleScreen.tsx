@@ -8,8 +8,6 @@ import BattleScene from "./BattleScene";
 import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
-import { clamp } from "./Components/utils/clamp";
-
 
 type MonsterState = {
   template: MonsterTemplate;
@@ -19,8 +17,8 @@ type MonsterState = {
 
 interface BattleScreenProps {
   matchData: {
-    player1Monster: { template: MonsterTemplate; currentHp: number };
-    player2Monster: { template: MonsterTemplate; currentHp: number };
+    player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
+    player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
   };
   events: BaseEvent[];
@@ -30,9 +28,6 @@ interface BattleScreenProps {
   setChooseMove: React.Dispatch<React.SetStateAction<ChooseMove | null>>;
   setHasReceivedChooseMove: React.Dispatch<React.SetStateAction<boolean>>;
 
-  // rollNotice: Roll | null;
-  // showRollMessage: boolean;
-
   buttonDisabled: boolean;
 
   onSubmitMove: (
@@ -40,7 +35,6 @@ interface BattleScreenProps {
     targetMethod: TargetingMethod,
     myMonsterId: EntryID
   ) => void;
-  // onRoll: (rollNotice: Roll) => void;
 
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   showMessage: boolean;
@@ -53,6 +47,7 @@ interface BattleScreenProps {
   setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
   battleInstanceKey: number;
   isSpectator?: boolean;
+  turnIndex: number;
 }
 
 
@@ -60,15 +55,11 @@ interface BattleScreenProps {
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   matchData,
   events,
-  setEvents,
   chooseMove,
   setChooseMove,
   setHasReceivedChooseMove,
-  // rollNotice,
-  // showRollMessage,
   buttonDisabled,
   onSubmitMove,
-  // onRoll,
   setTurnFinishedPlaying,
   showMessage,
   onReroll,
@@ -77,25 +68,27 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   isWaiting,
   setIsWaiting,
   battleInstanceKey,
-  isSpectator
+  isSpectator,
+  turnIndex
+
 }) => {
-  const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
 
   useEffect(() => {
     if (!matchData) return;
+    console.log("Initializing monsters with matchData:", { matchData });
 
     const isPlayer1 = matchData.myId === 0;
 
     const myMonsterData = isPlayer1
-      ? matchData.player1Monster
-      : matchData.player2Monster;
+      ? matchData.player1.monster
+      : matchData.player2.monster;
 
     const enemyMonsterData = isPlayer1
-      ? matchData.player2Monster
-      : matchData.player1Monster;
+      ? matchData.player2.monster
+      : matchData.player1.monster;
 
     setMyMonster({
       template: myMonsterData.template,
@@ -116,14 +109,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   // === Turn parsing and state ===
   const turns = useMemo(() => parseTurns(events), [events]);
-
-  useEffect(() => {
-    // Auto-advance to the latest turn when new turns are available
-    if (turns.length > 0) {
-      setTurnIndex(turns.length - 1);
-    }
-  }, [turns.length]);
-
   const currentTurn = turns[turnIndex];
   const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
   console.log("CURRENT SNAPSHOT IS")
@@ -139,14 +124,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     console.log("⚔️ currentAttackCharges", currentAttackCharges);
   }, [currentAttackCharges]);
 
-
-
   // Whenever there is new matchdata, reset the turn index
   useEffect(() => {
-    if (!matchData) return;
-    setTurnIndex(0);
+    if (!events || events.length === 0) return;
     setIsPlaying(true);
-  }, [matchData]);
+  }, [matchData, battleInstanceKey, events]);
 
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
@@ -163,21 +145,21 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   return (
     <>
       <div className="canvas-body" id="battle-screen-body">
+        <BattleTop
+          turnNumber={turnIndex + 1}
+          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
+          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
+        />
         <BattleScene
           battleInstanceKey={battleInstanceKey}
           turns = {turns}
           currentSnapshot = {currentSnapshot}
           events={events}
-          turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) =>
-            setTurnIndex(next)
-          }
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
-          // showRollMessage={showRollMessage}
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
@@ -190,22 +172,21 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   return (
     <>
       <div className="canvas-body" id="battle-screen-body">
-        <BattleTop />
+        <BattleTop
+          turnNumber={turnIndex + 1}
+          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
+          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
+        />
         <BattleScene
           events={events}
           battleInstanceKey={battleInstanceKey}
           turns = {turns}
           currentSnapshot = {currentSnapshot}
-          turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) =>
-            setTurnIndex(next)
-          }
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
-          // showRollMessage={showRollMessage}
           rerollMode={rerollMode}
           parentDiceRollResult={parentDiceRollResult}
           isWaiting={isWaiting}
@@ -213,9 +194,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         <BattleBottom
           currentAttackCharges = {currentAttackCharges}
           onAction={onAction}
-          // onRoll={() => rollNotice && onRoll(rollNotice)}
           disabled={buttonDisabled}
-          // mode={rollNotice ? "roll" : "combat"}
           chooseMove={chooseMove}
           fallbackMoves={{
             attack: myMonster.template.attackActionId,
