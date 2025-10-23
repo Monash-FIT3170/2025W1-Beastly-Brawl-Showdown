@@ -40,7 +40,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server<PlayerToServerEvents, ServerToPlayerEvents, never, PlayerSocketData>(server, {
   cors: {
-    origin: "http://localhost:5173/",
+    origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
   },
 });
 
