@@ -23,7 +23,7 @@ export default function ProjectorPage() {
   const tournamentType = type === "random" ? "random" : "standard";
 
   function getJoinUrl() {
-    return window.location.hostname + "join/" + joinCode;
+    return window.location.hostname + "/join/" + joinCode;
   }
 
   const fetchServerUrl = async () => {
