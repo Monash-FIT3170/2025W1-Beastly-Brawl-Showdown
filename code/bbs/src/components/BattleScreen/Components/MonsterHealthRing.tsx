@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import SlashAnimation from "./SlashAnimation";
-import ShieldAnimation from "./ShieldAnimation";
-import AbilityAnimation from "./AbilityAnimation";
+import SlashAnimation from "./Animations/SlashAnimation";
+import ShieldAnimation from "./Animations/ShieldAnimation";
+import AbilityOverlay, { type AbilityKind } from "./Animations/AbilityOverlay";
 import MonsterTooltip from "../../MonsterToolTip";
 
 type BaseStats = {
@@ -19,6 +19,7 @@ type Props = {
   onShieldComplete?: () => void;
   showAbility?: boolean;
   onAbilityComplete?: () => void;
+  abilityKind?: AbilityKind | null;
   monsterName: string;
   baseStats: BaseStats;
   abilityName?: string;
@@ -34,6 +35,7 @@ const MonsterHealthRing: React.FC<Props> = ({
   onShieldComplete,
   showAbility = false,
   onAbilityComplete,
+  abilityKind = null,
   monsterName,
   baseStats,
   abilityName,
@@ -90,8 +92,9 @@ const MonsterHealthRing: React.FC<Props> = ({
         isVisible={showShield}
         onComplete={onShieldComplete ?? (() => {})}
       />
-      <AbilityAnimation
-        isVisible={showAbility}
+      <AbilityOverlay
+        kind={abilityKind}
+        visible={showAbility}
         onComplete={onAbilityComplete ?? (() => {})}
       />
     </div>

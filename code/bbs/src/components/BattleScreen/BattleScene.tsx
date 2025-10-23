@@ -5,7 +5,7 @@ import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
 import MonsterHealthRing from "./Components/MonsterHealthRing";
 import BattleMessage from "./Components/BattleMessage";
-import { DiceRollAnimation } from "./Components/DiceRollAnimation";
+import { DiceRollAnimation } from "./Components/Animations/DiceRollAnimation";
 import { useBattleAnimations } from "./hooks/useBattleAnimations";
 import { useBattleEvents } from "./hooks/useBattleEvents";
 import type { SnapshotEvent } from "../../../../simulator/core/event/core_events";
@@ -46,12 +46,20 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   // === Animation logic handled by hook ===
   const {
-    enemySlash, setEnemySlash,
-    playerSlash, setPlayerSlash,
-    enemyShield, setEnemyShield,
-    playerShield, setPlayerShield,
-    enemyAbility, setEnemyAbility,
-    playerAbility, setPlayerAbility,
+    enemySlash,
+    setEnemySlash,
+    playerSlash,
+    setPlayerSlash,
+    enemyShield,
+    setEnemyShield,
+    playerShield,
+    setPlayerShield,
+    enemyAbility,
+    setEnemyAbility,
+    playerAbility,
+    setPlayerAbility,
+    enemyAbilityKind,
+    playerAbilityKind,
     performMoveAnimation,
     resetAnimations,
   } = useBattleAnimations();
@@ -66,7 +74,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   // === Battle event handling hook ===
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [diceRollResult, setDiceRollResult] = useState<number | null>(null);
-  const [diceRollAnimationComplete, setDiceRollAnimationComplete] = useState<(() => void) | null>(null);
+  const [diceRollAnimationComplete, setDiceRollAnimationComplete] = useState<
+    (() => void) | null
+  >(null);
 
   const onDiceRoll = (roll: number) => {
     return new Promise<void>((resolve) => {
@@ -83,7 +93,12 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const { applyEventToVisible, currentMessage, setCurrentMessage, cloneState } =
-    useBattleEvents({ myId, parentDiceRollResult, enqueueAnim, showDiceRoll: onDiceRoll });
+    useBattleEvents({
+      myId,
+      parentDiceRollResult,
+      enqueueAnim,
+      showDiceRoll: onDiceRoll,
+    });
 
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
@@ -152,7 +167,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     setCurrentMessage("");
   }, [initialTurnState, isPlaying]);
 
-
   // === Turn playback ===
   useEffect(() => {
     if (!runTurnNow || !isPlaying) return;
@@ -170,8 +184,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
         const ev = turnToPlay[i];
-        const base = cloneState(latestVisibleRef.current);  // hook version
-        const next = await applyEventToVisible(base, ev);   // hook version
+        const base = cloneState(latestVisibleRef.current); // hook version
+        const next = await applyEventToVisible(base, ev); // hook version
         latestVisibleRef.current = next;
         setVisibleState(next);
         await new Promise((r) => setTimeout(r, 900));
@@ -192,15 +206,15 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   const template =
     COMMON_MONSTER_POOL.monsters[
-    currentSnapshot.sides[myId].monster
-      .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+      currentSnapshot.sides[myId].monster
+        .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
 
   const template2 =
     COMMON_MONSTER_POOL.monsters[
-    currentSnapshot.sides[1 - myId].monster
-      .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+      currentSnapshot.sides[1 - myId].monster
+        .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
@@ -222,6 +236,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           showShield={enemyShield}
           onShieldComplete={() => setEnemyShield(false)}
           showAbility={enemyAbility}
+          abilityKind={enemyAbilityKind}
           onAbilityComplete={() => setEnemyAbility(false)}
           monsterName={template2.name}
           baseStats={{
@@ -239,6 +254,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           showShield={playerShield}
           onShieldComplete={() => setPlayerShield(false)}
           showAbility={playerAbility}
+          abilityKind={playerAbilityKind}
           onAbilityComplete={() => setPlayerAbility(false)}
           monsterName={template.name}
           baseStats={{

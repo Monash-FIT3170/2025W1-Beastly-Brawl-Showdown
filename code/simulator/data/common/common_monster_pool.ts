@@ -211,6 +211,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       abilityActionId: "attack-bonus-next3",
       abilityName: "Enchanced Attack",
       onSpawnActions: [
+
         {
           type: "spawnAction",
           do: async function (world: Battle, source: SideId): Promise<void> {

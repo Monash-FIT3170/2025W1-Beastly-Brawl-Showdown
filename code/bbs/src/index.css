@@ -1813,7 +1813,7 @@ input[type="range"] {
 
 .slash-animation.active {
   opacity: 1;
-  animation: slashAppear 0.5s ease-out forwards;
+  animation: slashAppear 0.7s ease-out forwards;
 }
 
 .slash-image {
@@ -1829,7 +1829,7 @@ input[type="range"] {
 }
 
 .slash-animation.active .slash-image {
-  animation: slashImageStrike 0.6s ease-out forwards;
+  animation: slashImageStrike 0.7s ease-out forwards;
 }
 
 @keyframes slashAppear {
@@ -1856,7 +1856,7 @@ input[type="range"] {
 
 .shield-animation.active {
   opacity: 1;
-  animation: shieldAppear 0.6s ease-out forwards;
+  animation: shieldAppear 0.8s ease-out forwards;
 }
 
 .shield-image {
@@ -1872,7 +1872,7 @@ input[type="range"] {
 }
 
 .shield-animation.active .shield-image {
-  animation: shieldPop 0.6s ease-out forwards;
+  animation: shieldPop 0.8s ease-out forwards;
 }
 
 @keyframes shieldAppear {
@@ -1888,8 +1888,114 @@ input[type="range"] {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
 }
 
-/* Ability Animation */
-.ability-animation {
+.dodge-animation,
+.stun-animation {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 12; /* slightly above shield (11) so it’s visible */
+}
+
+.dodge-animation.active {
+  opacity: 1;
+  animation: abilityFade 0.8s ease-out forwards;
+}
+
+.dodge-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  object-fit: contain;
+  filter: blur(0px);
+  pointer-events: none;
+}
+
+/* Runs only when parent has .active */
+.dodge-animation.active .dodge-image {
+  animation:
+    dodgeSide 0.8s ease-out forwards,
+    dodgeBlur 0.8s ease-out forwards;
+}
+
+/* Slide slightly to the side + subtle scale */
+@keyframes dodgeSide {
+  0%   { transform: translate(-50%, -50%) scale(0.9) translateX(0);   opacity: 0; }
+  10%  { opacity: 1; }
+  40%  { transform: translate(calc(-50% - 18px), -50%) scale(1.0);    opacity: 1; }
+  75%  { transform: translate(calc(-50% - 8px),  -50%) scale(1.0);    opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.95);                opacity: 0; }
+}
+
+/* Quick motion blur during the sidestep */
+@keyframes dodgeBlur {
+  0%   { filter: blur(0px); }
+  30%  { filter: blur(2px); }
+  60%  { filter: blur(1px); }
+  100% { filter: blur(0px); }
+}
+
+.stun-animation.active {
+  opacity: 1;
+  animation: abilityFade 0.8s ease-out forwards;
+}
+
+.stun-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+  opacity: 0;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.0));
+}
+
+.stun-animation.active .stun-image {
+  animation:
+    stunPop   1s ease-out forwards,
+    stunGlow  1s ease-out forwards;
+}
+
+/* Fast pop-in */
+@keyframes stunPop {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+}
+
+/* Short stun wobble */
+@keyframes stunShake {
+  0%   { transform: translate(-50%, -50%) rotate(0deg)   scale(1.0); }
+  20%  { transform: translate(calc(-50% - 4px), -50%) rotate(-6deg) scale(1.0); }
+  40%  { transform: translate(calc(-50% + 4px), -50%) rotate(6deg)  scale(1.0); }
+  60%  { transform: translate(calc(-50% - 2px), -50%) rotate(-4deg) scale(1.0); }
+  80%  { transform: translate(calc(-50% + 2px), -50%) rotate(3deg)  scale(1.0); }
+  100% { transform: translate(-50%, -50%) rotate(0deg)  scale(1.0); }
+}
+
+/* Golden glow that appears then fades */
+@keyframes stunGlow {
+  0%   { filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.0)); opacity: 0; }
+  20%  { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); opacity: 1; }
+  60%  { filter: drop-shadow(0 0 8px  rgba(255, 215, 0, 0.6)); }
+  100% { filter: drop-shadow(0 0 0px  rgba(255, 215, 0, 0.0)); opacity: 0; }
+}
+
+/* Shared fade for the container so overlays don’t “stick” */
+@keyframes abilityFade {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.double-attack-animation {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -1897,34 +2003,80 @@ input[type="range"] {
   z-index: 11;
 }
 
-.ability-animation.active {
+.double-attack-animation.active {
   opacity: 1;
-  animation: shieldAppear 0.7s ease-out forwards;
+  animation: doubleAttackAppear 1.2s ease-out forwards;
 }
 
-.ability-image {
+.double-attack-image {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 70%;
-  height: 70%;
-  transform: translate(-50%, -50%) scale(0.6) rotate(0deg);
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(1.5);
   opacity: 0;
   object-fit: contain;
   pointer-events: none;
 }
 
-.ability-animation.active .ability-image {
-  animation: shieldPop 0.7s ease-out forwards;
+.double-attack-animation.active .double-attack-image {
+  animation: doubleAttackPop 1.2s ease-out forwards;
 }
 
-@keyframes abilityAppear {
+/* Fade in/out timing like Shield */
+@keyframes doubleAttackAppear {
   0%   { opacity: 0; }
   20%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
-@keyframes abilityPop {
+/* Quick pop + fade effect */
+@keyframes doubleAttackPop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
+
+.attack-bonus-animation {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 11;
+}
+
+.attack-bonus-animation.active {
+  opacity: 1;
+  animation: attackBonusAppear 1.2s ease-out forwards;
+}
+
+.attack-bonus-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.attack-bonus-animation.active .attack-bonus-image {
+  animation: attackBonusPop 1.2s ease-out forwards;
+}
+
+/* Fade in/out (like shield/double-attack) */
+@keyframes attackBonusAppear {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Quick pop */
+@keyframes attackBonusPop {
   0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
   30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
   60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }

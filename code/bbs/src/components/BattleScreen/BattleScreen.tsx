@@ -5,7 +5,7 @@ import { type MonsterTemplate } from "../../../../simulator/core/monster/monster
 import { type EntryID } from "../../../../simulator/core/utils";
 import { type TargetingMethod } from "../../../../simulator/core/action/targeting";
 import BattleScene from "./BattleScene";
-import { type ChooseMove} from "../../../../simulator/core/notice/notice";
+import { type ChooseMove } from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
 
@@ -40,7 +40,7 @@ interface BattleScreenProps {
   showMessage: boolean;
 
   onReroll: (option: boolean) => void;
-  rerollMode: boolean
+  rerollMode: boolean;
   parentDiceRollResult: number | null;
 
   isWaiting: boolean;
@@ -133,7 +133,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
     onSubmitMove(moveId, targetMethod, myMonster.template.templateId);
-    setIsWaiting(true)
+    setIsWaiting(true);
     setTurnFinishedPlaying(false);
     setHasReceivedChooseMove(false);
     setChooseMove(null);
