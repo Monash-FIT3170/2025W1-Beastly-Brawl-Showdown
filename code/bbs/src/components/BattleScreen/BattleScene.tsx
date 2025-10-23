@@ -15,8 +15,7 @@ interface BattleSceneProps {
   battleInstanceKey: number;
   events: BaseEvent[];
   turns: Turn[]
-  // I don't think this should be null or undefined but whatever
-  currentSnapshot : SnapshotEvent | null | undefined
+  currentSnapshot : SnapshotEvent
   turnIndex: number;
   isPlaying: boolean;
   autoAdvance?: boolean;

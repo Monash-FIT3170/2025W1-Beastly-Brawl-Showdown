@@ -8,7 +8,6 @@ import BattleScene from "./BattleScene";
 import { type ChooseMove} from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { parseTurns } from "./Components/turns_array_maker";
-import { clamp } from "./Components/utils/clamp";
 
 
 type MonsterState = {
@@ -158,6 +157,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   };
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
+
+  if (!currentSnapshot) {
+    return <div>Watiing For Snapshot</div>;
+  }
 
   if (isSpectator) {
   return (
