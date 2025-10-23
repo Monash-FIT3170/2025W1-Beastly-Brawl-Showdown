@@ -1,21 +1,21 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { parseSnapshot } from "./Components/snapshot_parser";
-import { parseTurns } from "./Components/turns_array_maker";
-import { clamp } from "./Components/utils/clamp";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
 import { getBaseStat } from "../../../../simulator/core/monster/monster";
 import { COMMON_MONSTER_POOL } from "../../../../simulator/data/common/common_monster_pool";
 import MonsterHealthRing from "./Components/MonsterHealthRing";
 import BattleMessage from "./Components/BattleMessage";
-import { DiceRollAnimation } from "./Components/DiceRollAnimation";
+import { DiceRollAnimation } from "./Components/Animations/DiceRollAnimation";
 import { useBattleAnimations } from "./hooks/useBattleAnimations";
 import { useBattleEvents } from "./hooks/useBattleEvents";
 import type { SnapshotEvent } from "../../../../simulator/core/event/core_events";
+import type { Turn } from "./Components/turn";
 
 interface BattleSceneProps {
   battleInstanceKey: number;
   events: BaseEvent[];
-  turnIndex: number;
+  turns: Turn[]
+  currentSnapshot : SnapshotEvent | null | undefined
   isPlaying: boolean;
   autoAdvance?: boolean;
   onAdvanceTurn?: (nextIndex: number) => void;
@@ -32,7 +32,7 @@ console.log("BattleScene loaded");
 export const BattleScene: React.FC<BattleSceneProps> = ({
   battleInstanceKey,
   events,
-  turnIndex,
+  currentSnapshot,
   isPlaying,
   autoAdvance,
   onAdvanceTurn,
@@ -43,17 +43,23 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   parentDiceRollResult,
   isWaiting,
 }) => {
-  // === Turn parsing and state ===
-  const turns = useMemo(() => parseTurns(events), [events]);
 
   // === Animation logic handled by hook ===
   const {
-    enemySlash, setEnemySlash,
-    playerSlash, setPlayerSlash,
-    enemyShield, setEnemyShield,
-    playerShield, setPlayerShield,
-    enemyAbility, setEnemyAbility,
-    playerAbility, setPlayerAbility,
+    enemySlash,
+    setEnemySlash,
+    playerSlash,
+    setPlayerSlash,
+    enemyShield,
+    setEnemyShield,
+    playerShield,
+    setPlayerShield,
+    enemyAbility,
+    setEnemyAbility,
+    playerAbility,
+    setPlayerAbility,
+    enemyAbilityKind,
+    playerAbilityKind,
     performMoveAnimation,
     resetAnimations,
   } = useBattleAnimations();
@@ -68,7 +74,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   // === Battle event handling hook ===
   const [showDiceAnimation, setShowDiceAnimation] = useState(false);
   const [diceRollResult, setDiceRollResult] = useState<number | null>(null);
-  const [diceRollAnimationComplete, setDiceRollAnimationComplete] = useState<(() => void) | null>(null);
+  const [diceRollAnimationComplete, setDiceRollAnimationComplete] = useState<
+    (() => void) | null
+  >(null);
 
   const onDiceRoll = (roll: number) => {
     return new Promise<void>((resolve) => {
@@ -85,15 +93,12 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   };
 
   const { applyEventToVisible, currentMessage, setCurrentMessage, cloneState } =
-    useBattleEvents({ myId, parentDiceRollResult, enqueueAnim, showDiceRoll: onDiceRoll });
-
-  // === Turn index handling ===
-  const selectedTurnIndex = Number.isInteger(turnIndex)
-    ? clamp(turnIndex, 0, Math.max(0, turns.length - 1))
-    : Math.max(0, turns.length - 1);
-
-  const currentTurn = turns[selectedTurnIndex];
-  const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
+    useBattleEvents({
+      myId,
+      parentDiceRollResult,
+      enqueueAnim,
+      showDiceRoll: onDiceRoll,
+    });
 
   const initialTurnState = useMemo(
     () => (currentSnapshot ? parseSnapshot(currentSnapshot) : []),
@@ -162,7 +167,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     setCurrentMessage("");
   }, [initialTurnState, isPlaying]);
 
-
   // === Turn playback ===
   useEffect(() => {
     if (!runTurnNow || !isPlaying) return;
@@ -180,17 +184,20 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       for (; i < turnToPlay.length; i++) {
         if (cancelled) return;
         const ev = turnToPlay[i];
-        const base = cloneState(latestVisibleRef.current);  // hook version
-        const next = await applyEventToVisible(base, ev);   // hook version
+        const base = cloneState(latestVisibleRef.current); // hook version
+        const next = await applyEventToVisible(base, ev); // hook version
         latestVisibleRef.current = next;
         setVisibleState(next);
         await new Promise((r) => setTimeout(r, 900));
         if (cancelled) return;
       }
+      const animsAtFinish = chainRef.current;
+      await animsAtFinish;
+
       lastSnapCountRef.current += 1;
-      setTurnFinishedPlaying(true);
       setRunTurnNow(false);
       setTimeout(() => setCurrentMessage(""), 1500); // hook version
+      setTurnFinishedPlaying(true); 
     })();
     return () => {
       cancelled = true;
@@ -202,15 +209,15 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
 
   const template =
     COMMON_MONSTER_POOL.monsters[
-    currentSnapshot.sides[myId].monster
-      .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+      currentSnapshot.sides[myId].monster
+        .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player1MaxHp = template ? getBaseStat("health", template) : 0;
 
   const template2 =
     COMMON_MONSTER_POOL.monsters[
-    currentSnapshot.sides[1 - myId].monster
-      .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
+      currentSnapshot.sides[1 - myId].monster
+        .baseID as keyof typeof COMMON_MONSTER_POOL.monsters
     ];
   const player2MaxHp = template2 ? getBaseStat("health", template2) : 0;
 
@@ -221,7 +228,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   const shouldShowMessage = showMessage || currentMessage !== "";
 
   return (
-    <div className="canvas-body" id="battle-screen-body">
+    <div className="battle-scene">
       <div className="combat-arena">
         <MonsterHealthRing
           currentHealth={visiblePlayer2.health ?? 0}
@@ -232,6 +239,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           showShield={enemyShield}
           onShieldComplete={() => setEnemyShield(false)}
           showAbility={enemyAbility}
+          abilityKind={enemyAbilityKind}
           onAbilityComplete={() => setEnemyAbility(false)}
           monsterName={template2.name}
           baseStats={{
@@ -249,6 +257,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           showShield={playerShield}
           onShieldComplete={() => setPlayerShield(false)}
           showAbility={playerAbility}
+          abilityKind={playerAbilityKind}
           onAbilityComplete={() => setPlayerAbility(false)}
           monsterName={template.name}
           baseStats={{
@@ -265,7 +274,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         />
       )}
       {isWaiting && !rerollMode && !runTurnNow && (
-        <BattleMessage message="Wating for Enemy..." />
+        <BattleMessage message="Waiting for Enemy..." />
       )}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
       {showDiceAnimation && (

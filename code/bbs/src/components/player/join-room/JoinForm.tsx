@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { getBestServerUrl } from "../../../utils/RoomMethods";
+import BattleMessage from "../../BattleScreen/Components/BattleMessage";
 
 export const InvalidCodeWarning = ({ enabled }: { enabled: boolean }) => {
   return enabled ? <b>Invalid room code.</b> : null;
@@ -14,6 +15,8 @@ export const JoinForm = () => {
   const [isJoinCodeValid, setJoinCodeValid] = useState(false);
   const [inputDisplayName, setInputDisplayName] = useState(sessionStorage.getItem("displayName") ?? "");
   const [isDisplayNameValid, setDisplayNameValid] = useState(false);
+  const [showInvalidName, setShowInvalidName] = useState(false)
+  const [showInvalidRoomCode, setshowInvalidRoomCode] = useState(false)
 
   const [serverUrl, setServerUrl] = useState<string>();
   const [isInvalidCodeSubmitted] = useState(false);
@@ -39,8 +42,46 @@ export const JoinForm = () => {
   //#region Auth Precheck
   const handleSubmitAuth = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    if (!inputJoinCode) return;
 
+    // Always trim to remove spaces
+    setInputDisplayName(inputDisplayName.trim());
+    setInputJoinCode(inputJoinCode.trim());
+
+    // bail and show invalid if fields are blank
+    if (!inputJoinCode) {
+      setshowInvalidRoomCode(true);
+      setJoinCodeValid(false);
+      return;
+    }
+
+    if (isJoinCodeValid && !inputDisplayName) {
+      setShowInvalidName(true);
+      setDisplayNameValid(false);
+      return;
+    }
+
+    //had to copy this twice to stop the name error message from displaying cuz we check both at once, idk if theres a cleaner way
+    //CHECK ROOM CODE
+    if (!isJoinCodeValid){
+      try {
+        const response = await fetch(serverUrl + "/player-auth-precheck", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ joinCode: inputJoinCode, displayName: inputDisplayName }),
+        });
+        const data = await response.json();
+
+        setJoinCodeValid(data.isJoinCodeValid === true);
+        setshowInvalidRoomCode(data.isJoinCodeValid === false);
+
+        console.log("Join code valid:", data.isJoinCodeValid);
+        return
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    //IF ROOM CODE VALID THEN CHECK NAME
     try {
       const response = await fetch(serverUrl + "/player-auth-precheck", {
         method: "POST",
@@ -49,15 +90,14 @@ export const JoinForm = () => {
       });
       const data = await response.json();
 
-      setJoinCodeValid(data.isJoinCodeValid === true);
       setDisplayNameValid(data.isDisplayNameValid === true);
-
-      console.log("Join code valid:", data.isJoinCodeValid);
+      setShowInvalidName(data.isDisplayNameValid === false);
+      
       console.log("Display name valid:", data.isDisplayNameValid);
     } catch (error) {
       console.error("Error:", error);
     }
-  };
+  }
   //#endregion
 
   //#region Redirect on valid input
@@ -81,6 +121,7 @@ export const JoinForm = () => {
         <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
         <form className="task-form" onSubmit={handleSubmitAuth}>
           <input className="form-textbox" type="text" placeholder="Add Room Code" value={inputJoinCode} onChange={(e) => setInputJoinCode(e.target.value)} />
+          {showInvalidRoomCode && (<BattleMessage message="Invalid room code. Please try again."/>)}
           <div className="buttons-container">
             <button className="glb-btn" type="submit">
               Continue
@@ -97,6 +138,7 @@ export const JoinForm = () => {
         <InvalidCodeWarning enabled={isInvalidCodeSubmitted} />
         <form className="task-form" onSubmit={handleSubmitAuth}>
           <input className="form-textbox" type="text" placeholder="Display Name" value={inputDisplayName} onChange={(e) => setInputDisplayName(e.target.value)} />
+          {showInvalidName && (<BattleMessage message="Name invalid/taken. Please try again."/>)}
           <div className="buttons-container">
             <button className="glb-btn" type="submit">
               Go!

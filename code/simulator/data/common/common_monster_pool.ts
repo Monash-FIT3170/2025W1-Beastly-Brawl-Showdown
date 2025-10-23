@@ -56,6 +56,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityName: "Reroll",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -86,6 +87,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "dodge",
+      abilityName: "Dodge",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -116,13 +118,14 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "stun",
+      abilityName: "Stun",
       onSpawnActions: [
         {
           type: "spawnAction",
           do: async function (world: Battle, source: SideId): Promise<void> {
             // Give Stone Hide 3 ability charges for stun
             world.sides[source].monster.components.push(
-              new AbilityChargeComponent("stun", 3)
+              new AbilityChargeComponent("stun", 1)
             );
           },
         },
@@ -147,6 +150,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "double-attack",
+      abilityName: "Double Attack",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -176,6 +180,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityName: "Thorns",
       onSpawnActions: [
         {
           type: "spawnAction",
@@ -204,7 +209,9 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       defendActionId: "defend",
       maxAttackCharges: 3,
       abilityActionId: "attack-bonus-next3",
+      abilityName: "Enchanced Attack",
       onSpawnActions: [
+
         {
           type: "spawnAction",
           do: async function (world: Battle, source: SideId): Promise<void> {
@@ -233,6 +240,7 @@ export const COMMON_MONSTER_POOL: MonsterPool<MONSTER_IDS> = {
       attackActionId: "attack-normal",
       defendActionId: "defend",
       maxAttackCharges: 3,
+      abilityName: "Damage Reduction",
       onSpawnActions: [
         {
           type: "spawnAction",

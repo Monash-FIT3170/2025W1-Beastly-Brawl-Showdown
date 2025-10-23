@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import SlashAnimation from "./SlashAnimation";
-import ShieldAnimation from "./ShieldAnimation";
-import AbilityAnimation from "./AbilityAnimation";
+import SlashAnimation from "./Animations/SlashAnimation";
+import ShieldAnimation from "./Animations/ShieldAnimation";
+import AbilityOverlay, { type AbilityKind } from "./Animations/AbilityOverlay";
 import MonsterTooltip from "../../MonsterToolTip";
 
 type BaseStats = {
@@ -19,6 +19,7 @@ type Props = {
   onShieldComplete?: () => void;
   showAbility?: boolean;
   onAbilityComplete?: () => void;
+  abilityKind?: AbilityKind | null;
   monsterName: string;
   baseStats: BaseStats;
   abilityName?: string;
@@ -34,19 +35,15 @@ const MonsterHealthRing: React.FC<Props> = ({
   onShieldComplete,
   showAbility = false,
   onAbilityComplete,
+  abilityKind = null,
   monsterName,
   baseStats,
   abilityName,
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const size = 200; // circle diameter
-  const stroke = 20; // thickness of ring (approximate 8-10% of size)
-  const radius = size / 2 - stroke / 2;
-  const circumference = 2 * Math.PI * radius;
-
   const percent = Math.max(0, Math.min(1, currentHealth / maxHealth));
-  const dashOffset = circumference * (1 - percent);
+  // const dashOffset = circumference * (1 - percent);
 
   const healthClass =
     percent >= 0.7
@@ -58,6 +55,11 @@ const MonsterHealthRing: React.FC<Props> = ({
   return (
     <div
       className="health-ring-container"
+      style={
+        {
+          "--health-percent": percent,
+        } as React.CSSProperties
+      }
       //desktop uses hover
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
@@ -66,17 +68,9 @@ const MonsterHealthRing: React.FC<Props> = ({
       onTouchEnd={() => setShowTooltip(false)}
       onTouchCancel={() => setShowTooltip(false)}
     >
-      <svg className="health-ring" width={size} height={size}>
-        <circle className="ring-bg" cx={size / 2} cy={size / 2} r={radius} />
-        <circle
-          className={`ring-fg ${healthClass}`}
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          strokeWidth={stroke}
-          strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
-        />
+      <svg className="health-ring">
+        <circle className="ring-bg" />
+        <circle className={`ring-fg ${healthClass}`} />
       </svg>
       <img src={imageSrc} alt="monster" className="monster-img" />
 
@@ -98,8 +92,9 @@ const MonsterHealthRing: React.FC<Props> = ({
         isVisible={showShield}
         onComplete={onShieldComplete ?? (() => {})}
       />
-      <AbilityAnimation
-        isVisible={showAbility}
+      <AbilityOverlay
+        kind={abilityKind}
+        visible={showAbility}
         onComplete={onAbilityComplete ?? (() => {})}
       />
     </div>

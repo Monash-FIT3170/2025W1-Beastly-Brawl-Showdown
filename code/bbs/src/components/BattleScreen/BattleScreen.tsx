@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BattleTop } from "./BattleTop";
 import { BattleBottom } from "./BattleBottom";
 import { type MonsterTemplate } from "../../../../simulator/core/monster/monster_template";
@@ -7,11 +7,18 @@ import { type TargetingMethod } from "../../../../simulator/core/action/targetin
 import BattleScene from "./BattleScene";
 import { type ChooseMove } from "../../../../simulator/core/notice/notice";
 import type { BaseEvent } from "../../../../simulator/core/event/base_event";
+import { parseTurns } from "./Components/turns_array_maker";
+
+type MonsterState = {
+  template: MonsterTemplate;
+  currentHp: number;
+  playerId: string;
+};
 
 interface BattleScreenProps {
   matchData: {
-    player1Monster: { template: MonsterTemplate; currentHp: number };
-    player2Monster: { template: MonsterTemplate; currentHp: number };
+    player1: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
+    player2: { name: string; monster: { template: MonsterTemplate; currentHp: number } };
     myId: number;
     roomId?: string;
     socketId?: string;
@@ -22,12 +29,14 @@ interface BattleScreenProps {
   chooseMove: ChooseMove | null;
   setChooseMove: React.Dispatch<React.SetStateAction<ChooseMove | null>>;
   setHasReceivedChooseMove: React.Dispatch<React.SetStateAction<boolean>>;
+
   buttonDisabled: boolean;
   onSubmitMove: (
     moveId: EntryID,
     targetMethod: TargetingMethod,
     myMonsterId: EntryID
   ) => void;
+
   setTurnFinishedPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   showMessage: boolean;
   onReroll: (option: boolean) => void;
@@ -38,18 +47,14 @@ interface BattleScreenProps {
   battleInstanceKey: number;
   isSpectator?: boolean;
   onSurrender: () => void;
+  turnIndex: number;
 }
 
-type MonsterState = {
-  template: MonsterTemplate;
-  currentHp: number;
-  playerId: string;
-};
+
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   matchData,
   events,
-  setEvents,
   chooseMove,
   setChooseMove,
   setHasReceivedChooseMove,
@@ -65,25 +70,27 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   battleInstanceKey,
   isSpectator,
   onSurrender,
+  turnIndex
+
 }) => {
+  const [isPlaying, setIsPlaying] = useState(true);
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
-  const [turnIndex, setTurnIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
 
   //#region initializations
   useEffect(() => {
     if (!matchData) return;
+    console.log("Initializing monsters with matchData:", { matchData });
 
     const isPlayer1 = matchData.myId === 0;
 
     const myMonsterData = isPlayer1
-      ? matchData.player1Monster
-      : matchData.player2Monster;
+      ? matchData.player1.monster
+      : matchData.player2.monster;
 
     const enemyMonsterData = isPlayer1
-      ? matchData.player2Monster
-      : matchData.player1Monster;
+      ? matchData.player2.monster
+      : matchData.player1.monster;
 
     setMyMonster({
       template: myMonsterData.template,
@@ -91,53 +98,45 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         myMonsterData.currentHp ?? myMonsterData.template.baseStats.health,
       playerId: matchData.myId.toString(),
     });
+
     setEnemyMonster({
       template: enemyMonsterData.template,
       currentHp:
         enemyMonsterData.currentHp ?? enemyMonsterData.template.baseStats.health,
       playerId: matchData.myId.toString(),
     });
-
-    const snapshot = {
-      name: "snapshot",
-      type: "snapshot",
-      sides: [
-        {
-          id: 0,
-          monster: {
-            baseID: matchData.player1Monster.template.templateId,
-            health:
-              matchData.player1Monster.currentHp ??
-              matchData.player1Monster.template.baseStats.health,
-            defendActionCharges: 0,
-            components: [],
-          },
-          pendingActions: null,
-        },
-        {
-          id: 1,
-          monster: {
-            baseID: matchData.player2Monster.template.templateId,
-            health:
-              matchData.player2Monster.currentHp ??
-              matchData.player2Monster.template.baseStats.health,
-            defendActionCharges: 0,
-            components: [],
-          },
-          pendingActions: null,
-        },
-      ],
-      index: 0,
-    };
-
-    setEvents([snapshot]);
   }, [matchData]);
+    
+
+  // === Turn parsing and state ===
+  const turns = useMemo(() => parseTurns(events), [events]);
+  const currentTurn = turns[turns.length-1];
+  const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
+  console.log("CURRENT SNAPSHOT IS")
+  console.log(currentSnapshot)
 
   useEffect(() => {
-    if (!matchData) return;
-    setTurnIndex(0);
+    console.log("🌀 events updated. Length:", events.length);
+  }, [events]);
+
+  useEffect(() => {
+    console.log("🌀 events updated is :", events);
+  }, [events]);
+
+  const currentAttackCharges = currentSnapshot ? currentSnapshot.sides[matchData.myId].monster.attackCharges : null;
+
+  useEffect(() => {
+    console.log("⚔️ currentAttackCharges", currentAttackCharges);
+  }, [currentAttackCharges]);
+
+  useEffect(() => {
+    console.log("⚔️ turns is", turns);
+  }, [turns]);
+
+  useEffect(() => {
+    if (!events || events.length === 0) return;
     setIsPlaying(true);
-  }, [matchData]);
+  }, [matchData, battleInstanceKey, events]);
 
   const onAction = (moveId: EntryID, targetMethod: TargetingMethod) => {
     if (!myMonster) return;
@@ -159,16 +158,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   if (!myMonster || !enemyMonster) return <div>Loading battle...</div>;
 
+  if (!currentSnapshot){
+    return <div>Watiing for snapshot</div>;
+  } 
+
   if (isSpectator) {
     return (
       <div className="canvas-body" id="battle-screen-body">
+        <BattleTop
+          turnNumber={turnIndex + 1}
+          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
+          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
+        />
         <BattleScene
           battleInstanceKey={battleInstanceKey}
+          turns = {turns}
+          currentSnapshot = {currentSnapshot}
           events={events}
-          turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next) => setTurnIndex(next)}
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
@@ -181,36 +189,42 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   }
 
   return (
-    <div className="canvas-body" id="battle-screen-body">
-      <BattleTop onSurrender={handleSurrender} />
-      <BattleScene
-        battleInstanceKey={battleInstanceKey}
-        events={events}
-        turnIndex={turnIndex}
-        isPlaying={isPlaying}
-        autoAdvance={false}
-        onAdvanceTurn={(next) => setTurnIndex(next)}
-        myId={matchData.myId}
-        showMessage={showMessage}
-        setTurnFinishedPlaying={setTurnFinishedPlaying}
-        rerollMode={rerollMode}
-        parentDiceRollResult={parentDiceRollResult}
-        isWaiting={isWaiting}
-      />
-      <BattleBottom
-        onAction={onAction}
-        disabled={buttonDisabled}
-        chooseMove={chooseMove}
-        fallbackMoves={{
-          attack: myMonster.template.attackActionId,
-          ability: myMonster.template.abilityActionId,
-          defend: myMonster.template.defendActionId,
-        }}
-        onReroll={onReroll}
-        rerollMode={rerollMode}
-      />
-    </div>
+    <>
+      <div className="canvas-body" id="battle-screen-body">
+        <BattleTop
+          turnNumber={turnIndex + 1}
+          playerName={matchData.myId === 0 ? matchData.player1.name : matchData.player2.name}
+          opponentName={matchData.myId === 0 ? matchData.player2.name : matchData.player1.name}
+          onSurrender={handleSurrender}
+        />
+        <BattleScene
+          events={events}
+          battleInstanceKey={battleInstanceKey}
+          turns = {turns}
+          currentSnapshot = {currentSnapshot}
+          isPlaying={isPlaying}
+          autoAdvance={false}
+          myId={matchData.myId}
+          showMessage={showMessage}
+          setTurnFinishedPlaying={setTurnFinishedPlaying}
+          rerollMode={rerollMode}
+          parentDiceRollResult={parentDiceRollResult}
+          isWaiting={isWaiting}
+        />
+        <BattleBottom
+          currentAttackCharges = {currentAttackCharges}
+          onAction={onAction}
+          disabled={buttonDisabled}
+          chooseMove={chooseMove}
+          fallbackMoves={{
+            attack: myMonster.template.attackActionId,
+            ability: myMonster.template.abilityActionId,
+            defend: myMonster.template.defendActionId,
+          }}
+          onReroll={onReroll}
+          rerollMode={rerollMode}
+        />
+      </div>
+    </>
   );
-
-
 };

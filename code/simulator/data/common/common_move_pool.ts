@@ -138,6 +138,9 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       } else {
         dodgeComponent.remainingDuration++;
       }
+
+      postMoveSuccessEvent(battle, source, source, this);
+
     },
 
     onFail: function (battle: Battle, source: SideId): Promise<void> {
@@ -256,6 +259,8 @@ export const COMMON_MOVE_POOL: MovePool<COMMON_MOVE_NAMES> = {
       --abilityChargeComponent.charges;
       // Add the bonus component
       sourceMonster.components.push(new NextAttacksBonusComponent(3, 3));
+
+      postMoveSuccessEvent(battle, source, source, this);
     },
 
     onFail: async function (battle: Battle, source: SideId): Promise<void> {
