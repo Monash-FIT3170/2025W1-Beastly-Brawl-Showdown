@@ -30,7 +30,7 @@ export default function ProjectorPage() {
     if (!serverUrl) {
       try {
         const res = await getBestServerUrl();
-        setServerUrl(res);
+        setServerUrl(res + "/host");
         console.log("Server found at:", res);
       } catch (err) {
         console.error("Error locating server:", err);
@@ -39,27 +39,31 @@ export default function ProjectorPage() {
   };
 
   useEffect(() => {
-    if (socketRef.current) {
-      return;
-    }
+    fetchServerUrl(); // Run once to fetch and set serverUrl
+  }, []);
 
-    //#region Startup
-    fetchServerUrl();
+  useEffect(() => {
+    if (!serverUrl || socketRef.current) return;
 
-    if (!serverUrl) {
-      console.log("Waiting for server url to load.");
-      return;
-    }
+    // const cleanServerUrl = serverUrl.replace(/^"|"$/g, "");
+
+    // const wsUrl = cleanServerUrl.replace(/^http/, "ws") + "/host";
+    socketRef.current = io(serverUrl, { transports: ["websocket", "polling"] });
+
 
     // Connect to game server
-    socketRef.current = io(serverUrl + "/host");
+    console.log(serverUrl);
+    // socketRef.current = io(serverUrl + "/host");
+
+
     socketRef.current.on("connect", () => {
       if (!socketRef.current) {
         console.error("No socket open.");
         return;
       }
       console.log("Connected to server");
-    });
+      socketRef.current?.emit("requestRoom", { type: tournamentType });
+      });
 
     socketRef.current.on("connect_error", (err: Error) => {
       console.error(`Connection failed: ${err.message}`);
