@@ -15,6 +15,7 @@ export const getBestServerUrl = async (): Promise<string> => {
     const response = await fetch(`${SERVER_LOCATOR_URL}/game-server-url`);
     const { url: serverUrl }: { url: string } = await response.json();
 
+    
     // /// Check with server if join code leads to an active room if not error
     // console.log(`Testing connection to game server @ <${serverUrl}>.`);
     return new Promise((resolve, reject) => {
