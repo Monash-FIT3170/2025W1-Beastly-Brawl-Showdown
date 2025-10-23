@@ -256,7 +256,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         />
       )}
       {isWaiting && !rerollMode && !runTurnNow && (
-        <BattleMessage message="Wating for Enemy..." />
+        <BattleMessage message="Waiting for Enemy..." />
       )}
       {shouldShowMessage && <BattleMessage message={currentMessage} />}
       {showDiceAnimation && (

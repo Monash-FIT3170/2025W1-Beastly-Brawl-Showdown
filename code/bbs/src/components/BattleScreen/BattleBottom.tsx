@@ -125,8 +125,8 @@ export const BattleBottom: React.FC<BattleBottomProps> = ({
   );
 
   const renderButtonForReroll = (btn: Button, option:boolean) => (
-    <button key={btn.id} className="glb-btn" onClick={() => onReroll(option)}>
-      <img src={btn.icon} alt={btn.id} className="battleScreenBottomButtonImage" />
+    <button key={btn.id} className="glb-btn reroll-btn" onClick={() => onReroll(option)}>
+      {option ? '\u2713' : '\u274C'}
     </button>
   );
 
