@@ -111,6 +111,7 @@ const PlayerContent = () => {
   const [isWaiting, setIsWaiting] = useState(false);
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
+  const [isFinalSnapshot, setIsFinalSnapshot] = useState(false);
   const [turnIndex, setTurnIndex] = useState(0);
 
   useEffect(() => {
@@ -232,6 +233,27 @@ const PlayerContent = () => {
       socket.off("tournamentFinished");
     };
   }, [socket]);
+
+  //#region Wait for animations
+  useEffect(() => {
+    // Watch the stream for a snapshot with dead HP
+    const last = events[events.length - 1];
+    if (last?.name === "snapshot" && Array.isArray(last.sides)) {
+      const someoneDead = last.sides.some((s: any) => s?.monster?.health <= 0);
+      if (someoneDead) setIsFinalSnapshot(true);
+    }
+  }, [events]);
+
+  useEffect(() => {
+    if (!socket) return;
+    if (isFinalSnapshot && turnFinishedPlaying) {
+      Promise.resolve().then(() => {
+        socket.emit("playerAnimationsDone", { socketId: socket.id });
+      })
+      // Only ACK once per battle
+      setIsFinalSnapshot(false);
+    }
+  }, [socket, turnFinishedPlaying]);
 
   const handleMonsterSelection = (monsterName: string) => {
     // Find the monster in COMMON_MONSTER_POOL by name

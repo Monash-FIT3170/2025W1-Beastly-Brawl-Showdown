@@ -80,11 +80,51 @@ export class Match {
                     monsterId: this.player2!.monster!.templateId as MonsterId,
                 },
             ],
-        };
 
+            // No playerChannel yet so this is temp
+            waitForBattleOver: this.makeBattleOverWaiter(null as any)
+        };
 
         this.battle = new Battle(options);
     }
+
+    private makeBattleOverWaiter(playerChannel: PlayerNamespace) {
+    return () =>
+      new Promise<void>((resolve) => {
+        const expected = this.player2 ? 2 : 1;
+        const acks = new Set<string>();
+
+        const handler = (socketId: string) => {
+          acks.add(socketId);
+          if (acks.size >= expected) {
+            // cleanup listeners then resolve
+            playerChannel.off("playerAnimationsDone", onAckFromClient);
+            resolve();
+          }
+        };
+
+        // Wrap to extract socket id from payload
+        const onAckFromClient = (payload: { socketId: string }) => {
+          if (!payload?.socketId) return;
+          // Only accept acks from players in THIS match
+          if (
+            payload.socketId === this.player1.socketId ||
+            payload.socketId === this.player2?.socketId
+          ) {
+            handler(payload.socketId);
+          }
+        };
+
+        // Listen for client acks scoped to the /player namespace
+        playerChannel.on("playerAnimationsDone", onAckFromClient);
+
+        // Optional: safety timeout to prevent deadlocks (e.g., client disconnect)
+        setTimeout(() => {
+          playerChannel.off("playerAnimationsDone", onAckFromClient);
+          resolve();
+        }, 6000);
+      });
+  }
 
     getSideForPlayer(player: Player): number {
         if (this.matchType === MatchType.BYE || !this.battle) {
@@ -253,7 +293,7 @@ export class Match {
             },
         });
 
-
+        this.battle["waitForBattleOver"] = this.makeBattleOverWaiter(playerChannel);
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
@@ -289,6 +329,8 @@ export class Match {
         await this.battle.run();
         log_event(`[BATTLE] Battle finished for match ${this.matchID}.`);
 
+        await this.waitForAnimationsAcks(playerChannel);
+
         const survivingSide = this.battle.sides.find(side => side.monster.health > 0);
         const winnerIndex = this.battle.sides.indexOf(survivingSide!);
 
@@ -300,12 +342,45 @@ export class Match {
             log_event(`[MATCH RESULT] Player ${loser.displayName} defeated, winner: ${this.winner?.displayName}`);
         }
         if (this.winner && loser) {
-            playerChannel.to(this.winner?.socketId).emit("sendToWaiting");
-            playerChannel.to(loser?.socketId).emit("sendToWaiting");
-            this.spectators.forEach(spectator => {
-                playerChannel.to(spectator.socketId).emit("sendToWaiting");
-            })
+          const activeIds = new Set([
+            this.player1.socketId,
+            this.player2?.socketId, // may be undefined for BYE
+          ]);
+
+          // Loser should wait
+          playerChannel.to(loser.socketId).emit("sendToWaiting");
+
+          // Spectators: exclude anyone who is actually playing this match
+          this.spectators
+            .filter(s => !activeIds.has(s.socketId))
+            .forEach(s => playerChannel.to(s.socketId).emit("sendToWaiting"));
         }
     }
 
+     private waitForAnimationsAcks(playerChannel: PlayerNamespace): Promise<void> {
+      return new Promise((resolve) => {
+        const expected = this.player2 ? 2 : 1;
+        const acks = new Set<string>();
+
+        const onAck = (payload: { socketId: string }) => {
+          const id = payload?.socketId;
+          if (!id) return;
+          // only accept acks from the two players in THIS match
+          if (id === this.player1.socketId || id === this.player2?.socketId) {
+            acks.add(id);
+            if (acks.size >= expected) {
+              playerChannel.off("playerAnimationsDone", onAck);
+              resolve();
+            }
+          }
+        };
+
+        playerChannel.on("playerAnimationsDone", onAck);
+
+        setTimeout(() => {
+          playerChannel.off("playerAnimationsDone", onAck);
+          resolve();
+        }, 10000);
+      });
+    }
 }
