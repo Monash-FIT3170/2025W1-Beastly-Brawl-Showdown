@@ -25,6 +25,7 @@ export class Match {
     matchID: number;
     battle?: Battle;
 
+    private turnCount: number = 0;
     private submittedMoves: Map<Player, { moveId: EntryID; targetSide: SideId; targetMethod: TargetingMethod }> = new Map();
 
 
@@ -99,7 +100,7 @@ export class Match {
     }
 
     // Called by main when a player submits a move
-    submitMove(player: Player, moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId): void {
+    submitMove(player: Player, moveId: EntryID, targetMethod: TargetingMethod, targetSide: SideId, playerChannel: PlayerNamespace): void {
         if (this.matchType === MatchType.BYE || !this.battle) {
             throw new Error(`Match ${this.matchID} has no battle to submit moves to.`);
         }
@@ -107,6 +108,17 @@ export class Match {
         console.log(`[MATCH DEBUG] submitMove called for ${player.displayName} with moveId ${moveId}, targetMethod ${targetMethod}, targetSide ${targetSide}`);
         // Store move
         this.submittedMoves.set(player, { moveId, targetSide, targetMethod });
+
+        // Check if both players have submitted
+        const p1Submitted = this.submittedMoves.has(this.player1);
+        const p2Submitted = this.player2 ? this.submittedMoves.has(this.player2) : true;
+
+        if (p1Submitted && p2Submitted) {
+            this.turnCount++; // Increment turn
+            this.sendTurnUpdate(playerChannel); // Notify clients
+            this.submittedMoves.clear(); // Reset for next turn
+        }
+
 
         const sideIndex = this.getSideForPlayer(player);
         const noticeMap = this.battle!.noticeBoard.noticeMaps[sideIndex];
@@ -125,6 +137,16 @@ export class Match {
         console.log(`[MATCH DEBUG] chooseMoveNotice exists?`, !!chooseMoveNotice);
         chooseMoveNotice.callback(moveId, targetData);
         console.log(`[MATCH DEBUG] Callback called for ${player.displayName}`);
+    }
+
+    // helper to broadcast turn updates
+    sendTurnUpdate(playerChannel: PlayerNamespace) {
+        // Emit current turn count to all players and spectators
+        const players = [this.player1, this.player2].filter(Boolean) as Player[];
+        players.forEach(player => {
+            playerChannel.to(player.socketId).emit("turnUpdated", { turnCount: this.turnCount });
+        });
+        this.spectators.forEach(s => playerChannel.to(s.socketId).emit("turnUpdated", { turnCount: this.turnCount }));
     }
 
     // Called by main when a player submits roll notice
@@ -231,7 +253,7 @@ export class Match {
             },
         });
 
-        
+
 
         playerChannel.to(this.player1.socketId).emit("startRound", {
             player1Monster: this.player1?.selectedMonsterTemplateName,
@@ -261,7 +283,7 @@ export class Match {
                 spectator: true
             });
         });
-        
+
 
         log_event(`[BATTLE] Running battle for match ${this.matchID}...`);
         await this.battle.run();

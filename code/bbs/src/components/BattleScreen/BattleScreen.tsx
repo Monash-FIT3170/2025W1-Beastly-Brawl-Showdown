@@ -47,6 +47,7 @@ interface BattleScreenProps {
   setIsWaiting: React.Dispatch<React.SetStateAction<boolean>>;
   battleInstanceKey: number;
   isSpectator?: boolean;
+  turnIndex: number;
 }
 
 
@@ -67,9 +68,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   isWaiting,
   setIsWaiting,
   battleInstanceKey,
-  isSpectator
+  isSpectator,
+  turnIndex
+
 }) => {
-  const [turnIndex, setTurnIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [myMonster, setMyMonster] = useState<MonsterState>();
   const [enemyMonster, setEnemyMonster] = useState<MonsterState>();
@@ -107,14 +109,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   // === Turn parsing and state ===
   const turns = useMemo(() => parseTurns(events), [events]);
-
-  useEffect(() => {
-    // Auto-advance to the latest turn when new turns are available
-    if (turns.length > 0) {
-      setTurnIndex(turns.length - 1);
-    }
-  }, [turns.length]);
-
   const currentTurn = turns[turnIndex];
   const currentSnapshot = currentTurn ? currentTurn.getSnapshotEvent() : null;
   console.log("CURRENT SNAPSHOT IS")
@@ -161,12 +155,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           turns = {turns}
           currentSnapshot = {currentSnapshot}
           events={events}
-          turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) =>
-            setTurnIndex(next)
-          }
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}
@@ -192,12 +182,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           battleInstanceKey={battleInstanceKey}
           turns = {turns}
           currentSnapshot = {currentSnapshot}
-          turnIndex={turnIndex}
           isPlaying={isPlaying}
           autoAdvance={false}
-          onAdvanceTurn={(next: React.SetStateAction<number>) =>
-            setTurnIndex(next)
-          }
           myId={matchData.myId}
           showMessage={showMessage}
           setTurnFinishedPlaying={setTurnFinishedPlaying}

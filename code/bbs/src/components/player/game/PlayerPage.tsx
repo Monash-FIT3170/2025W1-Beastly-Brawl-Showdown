@@ -111,6 +111,7 @@ const PlayerContent = () => {
   const [isWaiting, setIsWaiting] = useState(false);
   const [turnFinishedPlaying, setTurnFinishedPlaying] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
+  const [turnIndex, setTurnIndex] = useState(0);
 
   useEffect(() => {
     if (!socket) return;
@@ -220,7 +221,7 @@ const PlayerContent = () => {
     //#region Set winner
     socket.on("tournamentFinished", (data) => {
       setWaiting(false);
-      setWinner(data);  
+      setWinner(data);
     });
     //#endregion
 
@@ -261,6 +262,21 @@ const PlayerContent = () => {
       console.warn("No socket connection available");
     }
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleTurnUpdate = (data: { turnCount: number }) => {
+      console.log("Received turn update from server:", data.turnCount);
+      setTurnIndex(data.turnCount - 1); // server might send 1-based count
+    };
+
+    socket.on("turnUpdated", handleTurnUpdate);
+
+    return () => {
+      socket.off("turnUpdated", handleTurnUpdate);
+    };
+  }, [socket]);
 
   //#region battleScreen props
   //notice handler
@@ -502,6 +518,7 @@ const PlayerContent = () => {
     isWaiting={isWaiting}
     setIsWaiting={setIsWaiting}
     battleInstanceKey={battleInstanceKey}
+    turnIndex={turnIndex}
   />;
 };
 //#endregion

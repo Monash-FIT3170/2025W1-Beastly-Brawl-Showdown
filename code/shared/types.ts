@@ -21,6 +21,7 @@ export type PlayerClientToServerEvents = BasicClientToServerEvents & {
   submitMove: (data: any) => void;
   requestRoll: (data: any) => void;
   requestReroll: (data: any) => void;
+  turnUpdated: (data: any) => void;
 };
 
 export type PlayerServerToClientEvents = BasicServerToClientEvents & {
@@ -35,6 +36,7 @@ export type PlayerServerToClientEvents = BasicServerToClientEvents & {
   tournamentFinished: (data: any) => void;
   playerKicked: () => void;
   kickPlayer: () => void;
+  turnUpdated: (data: any) => void;
 };
 
 export type PlayerSocketData = {};

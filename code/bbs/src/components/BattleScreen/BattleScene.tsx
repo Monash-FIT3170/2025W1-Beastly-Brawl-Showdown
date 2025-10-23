@@ -16,7 +16,6 @@ interface BattleSceneProps {
   events: BaseEvent[];
   turns: Turn[]
   currentSnapshot : SnapshotEvent | null | undefined
-  turnIndex: number;
   isPlaying: boolean;
   autoAdvance?: boolean;
   onAdvanceTurn?: (nextIndex: number) => void;
