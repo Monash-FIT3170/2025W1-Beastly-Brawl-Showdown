@@ -24,3 +24,17 @@ Rohan Kannan - rkan0017@student.monash.edu
 Jonathan Foo - jfoo0023@student.monash.edu
 
 Ryan Tan - rtan0062@student.monash.edu
+
+## Quick Start
+### Local Deployment
+In the root folder:
+```
+docker compose up
+```
+This will start all processes needed in their own containers, access at `http://localhost:3000/home/`
+### `render.com` Deployment
+The project is deployed and hosted from `render.com`, which will handle `nginx` duties performed in the local deployment.
+
+> Test it out at: **[https://two025w1-beastly-brawl-showdown-frontend.onrender.com/](https://two025w1-beastly-brawl-showdown-frontend.onrender.com/)**
+> 
+> Note: it may take upwards on 5-10 mins to provision the servers
