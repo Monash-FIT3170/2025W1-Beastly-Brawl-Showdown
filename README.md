@@ -45,3 +45,53 @@ The project is deployed and hosted from `render.com`, which will handle `nginx` 
 > 
 > Note: it may take upwards on 5-10 mins to provision the servers
 
+## Features
+### EPIC 1: Core Gameplay System
+
+- Character Types & Stats System
+
+- Combat Engine (d20 System)
+
+- Defense Mechanic
+
+- Special Abilities
+
+- Health & Status Tracking
+
+- Action Selection Interface
+
+### EPIC 2: Multiplayer & Networking
+
+- Room Creation System (unique 6-digit room codes)
+
+- Player Joining Mechanism (join via mobile browser)
+
+- Matchmaking System (random 1v1 pairings)
+
+- Real-time Communication (Socket.io / MeteorJS)
+
+- Spectator Mode
+
+### EPIC 3: User Interface & Experience (UI/UX)
+
+- Mobile Interface (player dashboard, action buttons)
+
+- Main Display / Projector View (lobby, battles, results)
+
+- Dice Roll Visualization (animated d20 rolls)
+
+- Character Selection Screen
+
+- Result Announcements (round outcomes, rankings)
+
+### EPIC 4: Tournament System
+
+- Tournament Mode Selection (Battle Royale / Set Matches)
+
+- Match Progression Logic (winners advance, losers observe)
+
+- Scoring System (wins, losses, bonus points)
+
+- Leaderboard Display (ranked results)
+
+- End-of-Tournament Summary (final rankings, winner display)
