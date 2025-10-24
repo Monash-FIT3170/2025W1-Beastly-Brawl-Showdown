@@ -100,5 +100,6 @@ The project is deployed and hosted from `render.com`, which will handle `nginx` 
 To setup the development environment refer to https://github.com/Monash-FIT3170/2025W1-Beastly-Brawl-Showdown/wiki/Development-Environment-Setup
 
 Architecture and internal systems can also be found in the wiki, namely:
-The overall architecture: https://github.com/Monash-FIT3170/2025W1-Beastly-Brawl-Showdown/wiki/Architecture-Overview
-The battle processing system: https://github.com/Monash-FIT3170/2025W1-Beastly-Brawl-Showdown/wiki/Simulator-Overview
+- The overall architecture: https://github.com/Monash-FIT3170/2025W1-Beastly-Brawl-Showdown/wiki/Architecture-Overview
+
+- The battle processing system: https://github.com/Monash-FIT3170/2025W1-Beastly-Brawl-Showdown/wiki/Simulator-Overview
