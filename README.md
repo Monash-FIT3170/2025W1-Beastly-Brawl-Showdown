@@ -97,6 +97,11 @@ The project is deployed and hosted from `render.com`, which will handle `nginx` 
 - End-of-Tournament Summary (final rankings, winner display)
 
 ## Contributing
+> This project is provided as is
+
+This project will enter archive, further contributions should be made in forks and PRs should be directed towards the forked repositories.
+
+## Development Quickstart
 To setup the development environment refer to https://github.com/Monash-FIT3170/2025W1-Beastly-Brawl-Showdown/wiki/Development-Environment-Setup
 
 Architecture and internal systems can also be found in the wiki, namely:
