@@ -38,6 +38,31 @@ done
 echo "[launcher] MongoDB is up."
 
 # ----------------------------
+# Start Shared
+# ----------------------------
+SHARED_DIR="$BASE_DIR/shared"
+echo "[launcher] Installing dependencies in $SHARED_DIR..."
+(
+  cd "$SHARED_DIR"
+
+  if [ ! -d "node_modules" ]; then
+      echo "[launcher] node_modules directory not found. Running 'npm install'..."
+      npm install
+  else
+    # Check for missing dependencies
+    MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
+    if [ -n "$MISSING" ]; then
+      echo "[launcher] Missing packages detected:"
+      echo "$MISSING"
+      echo "[launcher] Running 'npm install'..."
+      npm install
+    else
+      echo "[launcher] All packages installed."
+    fi
+  fi
+)&
+
+# ----------------------------
 # Start Server Locator
 # ----------------------------
 SERVER_LOCATOR_DIR="$BASE_DIR/server-locator"
@@ -48,11 +73,21 @@ echo "[launcher] Starting game server in $SERVER_LOCATOR_DIR..."
   if [ ! -f "./node_modules/.bin/ts-node" ]; then
     echo "ts-node not found locally. Installing..."
     npm install --save-dev ts-node typescript
-else
+  else
     echo "ts-node is already installed locally."
-fi
+  fi
+  # Check for missing dependencies
+  MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
+  if [ -n "$MISSING" ]; then
+    echo "[launcher] Missing packages detected:"
+    echo "$MISSING"
+    echo "[launcher] Running 'npm install'..."
+    npm install
+  else
+    echo "[launcher] All packages installed in $SERVER_LOCATOR_DIR."
+  fi
   npx ts-node ./src/app.ts
-) &
+)&
 
 # ----------------------------
 # Start Game Server
@@ -65,11 +100,22 @@ echo "[launcher] Starting game server in $GAME_SERVER_DIR..."
   if [ ! -f "./node_modules/.bin/ts-node" ]; then
     echo "ts-node not found locally. Installing..."
     npm install --save-dev ts-node typescript
-else
+  else
     echo "ts-node is already installed locally."
-fi
+  fi
+  # Check for missing dependencies
+  MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
+  if [ -n "$MISSING" ]; then
+    echo "[launcher] Missing packages detected:"
+    echo "$MISSING"
+    echo "[launcher] Running 'npm install'..."
+    npm install
+  else
+    echo "[launcher] All packages installed in $GAME_SERVER_DIR."
+  fi
+
   npx ts-node main.ts
-) &
+)&
 
 # Wait for server readiness signal
 READY_FILE="$GAME_SERVER_DIR/server_ready.flag"
@@ -88,18 +134,24 @@ echo "[launcher] Starting React app in $REACT_DIR..."
 (
   cd "$REACT_DIR"
   
-  # Check for missing npm packages
-  missing=$(meteor npm ls --depth=0 2>&1 | grep "missing:" || true)
-  if [ -n "$missing" ]; then
-    echo "[launcher] Missing packages detected:"
-    echo "$missing"
-    echo "[launcher] Running 'npm install'..."
+  # Check for node_modules; install if missing
+  if [ ! -d "node_modules" ]; then
+    echo "[launcher] node_modules directory not found. Running 'npm install'..."
     npm install
   else
-    echo "[launcher] All packages installed."
+    # Check for missing dependencies
+    MISSING=$(npm ls --depth=0 2>&1 | grep "missing" || true)
+    if [ -n "$MISSING" ]; then
+      echo "[launcher] Missing packages detected:"
+      echo "$MISSING"
+      echo "[launcher] Running 'npm install'..."
+      npm install
+    else
+      echo "[launcher] All packages installed."
+    fi
   fi
 
-  # Launch Meteor
+  # Launch Game
   npm run dev
 ) &
 
